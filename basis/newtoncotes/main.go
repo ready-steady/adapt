@@ -7,26 +7,26 @@ func New() Instance {
 	return Instance{}
 }
 
-func (instance Instance) ComputeOrders(level uint8) []uint16 {
+func (instance Instance) ComputeOrders(level uint8) []uint32 {
 	switch level {
 	case 0:
-		return []uint16{0}
+		return []uint32{0}
 	case 1:
-		return []uint16{0, 2}
+		return []uint32{0, 2}
 	}
 
-	count := uint16(2) << (level - 1 - 1)
-	orders := make([]uint16, count)
+	count := uint32(2) << (level - 1 - 1)
+	orders := make([]uint32, count)
 
 	for i := range orders {
-		orders[i] = uint16(2 * (i + 1) - 1)
+		orders[i] = uint32(2 * (i + 1) - 1)
 	}
 
 	return orders
 }
 
 func (instance Instance) ComputeNodes(levels []uint8,
-	orders []uint16) []float64 {
+	orders []uint32) []float64 {
 
 	count := len(levels)
 
@@ -45,12 +45,12 @@ func (instance Instance) ComputeNodes(levels []uint8,
 }
 
 func (instance Instance) ComputeChildren(parentLevels []uint8,
-	parentOrders []uint16) ([]uint8, []uint16) {
+	parentOrders []uint32) ([]uint8, []uint32) {
 
 	parentCount := len(parentLevels)
 
 	levels := make([]uint8, 2 * parentCount)
-	orders := make([]uint16, 2 * parentCount)
+	orders := make([]uint32, 2 * parentCount)
 
 	k := 0
 

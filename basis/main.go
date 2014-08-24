@@ -1,7 +1,7 @@
 package basis
 
 type Interface interface {
-	ComputeOrders(uint8) []uint16
-	ComputeNodes([]uint8, []uint16) []float64
-	ComputeChildren([]uint8, []uint16) ([]uint8, []uint16)
+	ComputeOrders(uint8) []uint32
+	ComputeNodes([]uint8, []uint32) []float64
+	ComputeChildren([]uint8, []uint32) ([]uint8, []uint32)
 }
