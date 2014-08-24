@@ -1,6 +1,13 @@
-package newton_cotes
+package newtoncotes
 
-func ComputeOrders(level uint8) []uint16 {
+type Instance struct {
+}
+
+func New() Instance {
+	return Instance{}
+}
+
+func (instance Instance) ComputeOrders(level uint8) []uint16 {
 	switch level {
 	case 0:
 		return []uint16{0}
@@ -18,8 +25,11 @@ func ComputeOrders(level uint8) []uint16 {
 	return orders
 }
 
-func ComputeNodes(levels []uint8, orders []uint16) []float64 {
+func (instance Instance) ComputeNodes(levels []uint8,
+	orders []uint16) []float64 {
+
 	count := len(levels)
+
 	nodes := make([]float64, count)
 
 	for i := 0; i < count; i++ {
@@ -34,7 +44,9 @@ func ComputeNodes(levels []uint8, orders []uint16) []float64 {
 	return nodes
 }
 
-func ComputeChildren(parentLevels []uint8, parentOrders []uint16) ([]uint8, []uint16) {
+func (instance Instance) ComputeChildren(parentLevels []uint8,
+	parentOrders []uint16) ([]uint8, []uint16) {
+
 	parentCount := len(parentLevels)
 
 	levels := make([]uint8, 2 * parentCount)
