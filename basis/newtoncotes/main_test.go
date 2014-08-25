@@ -48,3 +48,19 @@ func TestComputeChildren(t *testing.T) {
 	assertEqual(expectedLevels, actualLevels, t)
 	assertEqual(expectedOrders, actualOrders, t)
 }
+
+func TestEvaluate(t *testing.T) {
+	points := []float64{-1, 0, 0.5, 1, 2}
+	levels := []uint8{0, 1, 1, 2, 2}
+	orders := []uint32{0, 0, 2, 1, 3}
+	surpluses := []float64{1, 2, 3, 4, 5}
+
+	expectedValues := []float64{0, 3, 1, 4, 0}
+
+	basis := New()
+
+	for i := range points {
+		actualValue := basis.Evaluate(points[i], levels, orders, surpluses)
+		assertEqual(expectedValues[i], actualValue, t)
+	}
+}
