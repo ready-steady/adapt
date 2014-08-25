@@ -1,6 +1,7 @@
 package local
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/gomath/numerical/basis"
@@ -30,16 +31,32 @@ func New(basis basis.Interface) *Instance {
 }
 
 type Surrogate struct {
+	level     uint8
+	nodeCount uint32
+
 	levels    []uint8
 	orders    []uint32
 	surpluses []float64
-	nodeCount uint32
 }
 
 func (instance *Surrogate) initialize() {
 	instance.levels = make([]uint8, initialBufferSize)
 	instance.orders = make([]uint32, initialBufferSize)
 	instance.surpluses = make([]float64, initialBufferSize)
+}
+
+func (instance *Surrogate) finalize(level uint8, nodeCount uint32) {
+	instance.level = level
+	instance.nodeCount = nodeCount
+
+	instance.levels = instance.levels[0:nodeCount]
+	instance.orders = instance.orders[0:nodeCount]
+	instance.surpluses = instance.surpluses[0:nodeCount]
+}
+
+func (instance *Surrogate) String() string {
+	return fmt.Sprintf("Surrogate{ levels: %d, nodes: %d }",
+		instance.level + 1, instance.nodeCount)
 }
 
 func (instance *Surrogate) resize(size uint32) {
@@ -66,17 +83,12 @@ func (instance *Surrogate) resize(size uint32) {
 	instance.surpluses = surpluses
 }
 
-func (instance *Surrogate) finalize() {
-	instance.levels = instance.levels[0:instance.nodeCount]
-	instance.orders = instance.orders[0:instance.nodeCount]
-	instance.surpluses = instance.surpluses[0:instance.nodeCount]
-}
-
 func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate {
 	surrogate := new(Surrogate)
 	surrogate.initialize()
 
 	level := uint8(0)
+	nodeCount := uint32(0)
 
 	minimalValue := math.Inf(1)
 	maximalValue := math.Inf(-1)
@@ -103,7 +115,7 @@ func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate
 					surrogate.orders[0:oldCount], surrogate.surpluses[0:oldCount])
 		}
 
-		surrogate.nodeCount += newCount
+		nodeCount += newCount
 
 		if level >= instance.maximalLevel {
 			break
@@ -153,6 +165,6 @@ func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate
 		level++
 	}
 
-	surrogate.finalize()
+	surrogate.finalize(level, nodeCount)
 	return surrogate
 }
