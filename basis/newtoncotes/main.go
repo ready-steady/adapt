@@ -7,8 +7,8 @@ import (
 type Instance struct {
 }
 
-func New() Instance {
-	return Instance{}
+func New() *Instance {
+	return new(Instance)
 }
 
 func (instance *Instance) ComputeOrders(level uint8) []uint32 {

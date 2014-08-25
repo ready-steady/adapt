@@ -26,7 +26,7 @@ func TestCompute(t *testing.T) {
 
 	basis := newtoncotes.New()
 
-	algorithm := New(&basis)
+	algorithm := New(basis)
 	algorithm.maximalLevel = 4
 
 	surrogate := algorithm.Construct(target)
