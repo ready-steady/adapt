@@ -17,7 +17,7 @@ func TestCompute(t *testing.T) {
 	target := func(x []float64) []float64 {
 		y := make([]float64, len(x))
 		for i := range x {
-			if x[i] > 0.5 {
+			if x[i] <= 0.5 {
 				y[i] = 1
 			}
 		}
@@ -26,13 +26,17 @@ func TestCompute(t *testing.T) {
 
 	basis := newtoncotes.New()
 
-	algorithm := New(basis)
-	algorithm.maximalLevel = 3
+	algorithm := New(&basis)
+	algorithm.maximalLevel = 4
 
 	surrogate := algorithm.Construct(target)
 
-	assertEqual(surrogate.nodeCount, uint32(9), t)
-	assertEqual(surrogate.levels, []uint8{0, 1, 1, 2, 2, 3, 3, 3, 3}, t)
-	assertEqual(surrogate.orders, []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}, t)
-	assertEqual(surrogate.surpluses, []float64{0, 0, 1, 0, 1, 0, 0, 1, 1}, t)
+	expectedLevels := []uint8{0, 1, 1, 2, 3, 3, 4, 4}
+	expectedOrders := []uint32{0, 0, 2, 3, 5, 7, 9, 11}
+	expectedSurpluses := []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0}
+
+	assertEqual(uint32(len(expectedLevels)), surrogate.nodeCount, t)
+	assertEqual(expectedLevels, surrogate.levels, t)
+	assertEqual(expectedOrders, surrogate.orders, t)
+	assertEqual(expectedSurpluses, surrogate.surpluses, t)
 }
