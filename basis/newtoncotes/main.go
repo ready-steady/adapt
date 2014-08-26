@@ -105,19 +105,12 @@ func computeWeight(point float64, level uint8, order uint32) float64 {
 	}
 }
 
-func (_ *Instance) Evaluate(points []float64, levels []uint8, orders []uint32,
-	surpluses []float64) []float64 {
+func (_ *Instance) Evaluate(point float64, levels []uint8, orders []uint32,
+	surpluses []float64) (value float64) {
 
-	count := len(points)
-
-	values := make([]float64, count)
-
-	for i := 0; i < count; i++ {
-		for j := range surpluses {
-			values[i] += surpluses[j] * computeWeight(points[i], levels[j],
-				orders[j])
-		}
+	for i := range surpluses {
+		value += surpluses[i] * computeWeight(point, levels[i], orders[i])
 	}
 
-	return values
+	return value
 }

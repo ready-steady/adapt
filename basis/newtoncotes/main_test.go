@@ -54,5 +54,8 @@ func TestEvaluate(t *testing.T) {
 	surpluses := []float64{1, 2, 3, 4, 5}
 	values := []float64{0, 3, 1, 4, 0}
 
-	assertEqual(basis.Evaluate(points, levels, orders, surpluses), values, t)
+	for i := range points {
+		value := basis.Evaluate(points[i], levels, orders, surpluses)
+		assertEqual(value, values[i], t)
+	}
 }
