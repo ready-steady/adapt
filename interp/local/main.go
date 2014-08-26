@@ -13,20 +13,20 @@ const (
 )
 
 type Instance struct {
-	basis             basis.Interface
-	minimalLevel      uint8
-	maximalLevel      uint8
-	absoluteTolerance float64
-	relativeTolerance float64
+	basis        basis.Interface
+	minLevel     uint8
+	maxLevel     uint8
+	absTolerance float64
+	relTolerance float64
 }
 
 func New(basis basis.Interface) *Instance {
 	return &Instance {
 		basis: basis,
-		minimalLevel: 2 - 1,
-		maximalLevel: 10 - 1,
-		absoluteTolerance: 1e-4,
-		relativeTolerance: 1e-2,
+		minLevel: 2 - 1,
+		maxLevel: 10 - 1,
+		absTolerance: 1e-4,
+		relTolerance: 1e-2,
 	}
 }
 
@@ -62,9 +62,7 @@ func (s *Surrogate) String() string {
 func (s *Surrogate) resize(size uint32) {
 	currentSize := uint32(len(s.levels))
 
-	if size <= currentSize {
-		return
-	}
+	if size <= currentSize { return }
 	
 	if grownSize := bufferGrowFactor * currentSize; grownSize > size {
 		size = grownSize
@@ -90,8 +88,8 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 	level := uint8(0)
 	nodeCount := uint32(0)
 
-	minimalValue := math.Inf(1)
-	maximalValue := math.Inf(-1)
+	minValue := math.Inf(1)
+	maxValue := math.Inf(-1)
 
 	orders := self.basis.ComputeOrders(level)
 
@@ -117,31 +115,22 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 
 		nodeCount += newCount
 
-		if level >= self.maximalLevel {
-			break
-		}
+		if level >= self.maxLevel { break }
 
 		for i := range values {
-			if values[i] < minimalValue {
-				minimalValue = values[i]
-			}
-			if values[i] > maximalValue {
-				maximalValue = values[i]
-			}
+			if values[i] < minValue { minValue = values[i] }
+			if values[i] > maxValue { maxValue = values[i] }
 		}
 
-		if level >= self.minimalLevel {
+		if level >= self.minLevel {
 			k := 0
 
 			for i := uint32(0); i < newCount; i++ {
-				absoluteError := math.Abs(surrogate.surpluses[oldCount + i])
-				relativeError := absoluteError / (maximalValue - minimalValue)
+				absError := math.Abs(surrogate.surpluses[oldCount + i])
+				relError := absError / (maxValue - minValue)
 
-				if absoluteError <= self.absoluteTolerance &&
-					relativeError <= self.relativeTolerance {
-
-					continue;
-				}
+				if absError <= self.absTolerance &&
+					relError <= self.relTolerance { continue }
 
 				levels[k] = levels[i]
 				orders[k] = orders[i]
@@ -158,9 +147,7 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 		oldCount += newCount
 		newCount = uint32(len(levels))
 
-		if newCount == 0 {
-			break
-		}
+		if newCount == 0 { break }
 
 		level++
 	}

@@ -16,7 +16,7 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 
 func TestConstruct(t *testing.T) {
 	algorithm := New(newtoncotes.New())
-	algorithm.maximalLevel = 4
+	algorithm.maxLevel = 4
 
 	surrogate := algorithm.Construct(step)
 
@@ -33,7 +33,7 @@ func TestConstruct(t *testing.T) {
 }
 
 func ExampleStep() { algorithm := New(newtoncotes.New())
-	algorithm.maximalLevel = 20 - 1
+	algorithm.maxLevel = 20 - 1
 	surrogate := algorithm.Construct(step)
 
 	fmt.Println(surrogate)
@@ -43,7 +43,7 @@ func ExampleStep() { algorithm := New(newtoncotes.New())
 
 func ExampleHat() {
 	algorithm := New(newtoncotes.New())
-	algorithm.maximalLevel = 10 - 1
+	algorithm.maxLevel = 10 - 1
 	surrogate := algorithm.Construct(hat)
 
 	fmt.Println(surrogate)
