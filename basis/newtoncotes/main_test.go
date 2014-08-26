@@ -5,62 +5,54 @@ import (
 	"testing"
 )
 
-func assertEqual(expected, actual interface{}, t *testing.T) {
-	if !reflect.DeepEqual(expected, actual) {
+func assertEqual(actual, expected interface{}, t *testing.T) {
+	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("got '%v' instead of '%v'", actual, expected)
 	}
 }
 
 func TestComputeOrders(t *testing.T) {
-	expectedOrders := [][]uint32{{0}, {0, 2}, {1, 3}, {1, 3, 5, 7}}
-
 	basis := New()
 
-	for level := range expectedOrders {
-		actualOrders := basis.ComputeOrders(uint8(level))
+	orders := [][]uint32{{0}, {0, 2}, {1, 3}, {1, 3, 5, 7}}
 
-		assertEqual(expectedOrders[level], actualOrders, t)
+	for level := range orders {
+		assertEqual(basis.ComputeOrders(uint8(level)), orders[level], t)
 	}
 }
 
 func TestComputeNodes(t *testing.T) {
+	basis := New()
+
 	levels := []uint8{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
+	nodes := []float64{0.5, 0, 1, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
 
-	expectedNodes := []float64{0.5, 0, 1, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
-
-	basis := New()
-	actualNodes := basis.ComputeNodes(levels, orders)
-
-	assertEqual(expectedNodes, actualNodes, t)
+	assertEqual(basis.ComputeNodes(levels, orders), nodes, t)
 }
 
 func TestComputeChildren(t *testing.T) {
+	basis := New()
+
 	levels := []uint8{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
+	childLevels := []uint8{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
+	childOrders := []uint32{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
 
-	expectedLevels := []uint8{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
-	expectedOrders := []uint32{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
+	levels, orders = basis.ComputeChildren(levels, orders)
 
-	basis := New()
-	actualLevels, actualOrders := basis.ComputeChildren(levels, orders)
-
-	assertEqual(expectedLevels, actualLevels, t)
-	assertEqual(expectedOrders, actualOrders, t)
+	assertEqual(levels, childLevels, t)
+	assertEqual(orders, childOrders, t)
 }
 
 func TestEvaluate(t *testing.T) {
+	basis := New()
+
 	points := []float64{-1, 0, 0.5, 1, 2}
 	levels := []uint8{0, 1, 1, 2, 2}
 	orders := []uint32{0, 0, 2, 1, 3}
 	surpluses := []float64{1, 2, 3, 4, 5}
+	values := []float64{0, 3, 1, 4, 0}
 
-	expectedValues := []float64{0, 3, 1, 4, 0}
-
-	basis := New()
-
-	for i := range points {
-		actualValue := basis.Evaluate(points[i], levels, orders, surpluses)
-		assertEqual(expectedValues[i], actualValue, t)
-	}
+	assertEqual(basis.Evaluate(points, levels, orders, surpluses), values, t)
 }
