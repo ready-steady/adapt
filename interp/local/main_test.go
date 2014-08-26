@@ -36,11 +36,11 @@ func TestConstruct(t *testing.T) {
 func TestEvaluate(t *testing.T) {
 	algorithm := New(newtoncotes.New())
 
-	surrogate := &Surrogate {
-		level: 4,
+	surrogate := &Surrogate{
+		level:     4,
 		nodeCount: 8,
-		levels: []uint8{0, 1, 1, 2, 3, 3, 4, 4},
-		orders: []uint32{0, 0, 2, 3, 5, 7, 9, 11},
+		levels:    []uint8{0, 1, 1, 2, 3, 3, 4, 4},
+		orders:    []uint32{0, 0, 2, 3, 5, 7, 9, 11},
 		surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
 	}
 
@@ -56,6 +56,7 @@ func ExampleStep() {
 	surrogate := algorithm.Construct(step)
 
 	fmt.Println(surrogate)
+
 	// Output:
 	// Surrogate{ levels: 20, nodes: 38 }
 }
@@ -67,10 +68,14 @@ func ExampleHat() {
 
 	fmt.Println(surrogate)
 
-	if !testing.Verbose() { return }
+	if !testing.Verbose() {
+		return
+	}
 
 	points := make([]float64, 101)
-	for i := range points { points[i] = 0.01 * float64(i) }
+	for i := range points {
+		points[i] = 0.01 * float64(i)
+	}
 	values := algorithm.Evaluate(surrogate, points)
 
 	file, _ := mat.Open("hat.mat", "w7.3")
@@ -96,11 +101,14 @@ func step(x []float64) []float64 {
 func hat(x []float64) []float64 {
 	y := make([]float64, len(x))
 	for i, z := range x {
-		z = 5 * z - 1
+		z = 5*z - 1
 		switch {
-		case 0 <= z && z < 1: y[i] = 0.5 * z * z
-		case 1 <= z && z < 2: y[i] = 0.5 * (-2 * z * z + 6 * z - 3)
-		case 2 <= z && z < 3: y[i] = 0.5 * (3 - z) * (3 - z)
+		case 0 <= z && z < 1:
+			y[i] = 0.5 * z * z
+		case 1 <= z && z < 2:
+			y[i] = 0.5 * (-2*z*z + 6*z - 3)
+		case 2 <= z && z < 3:
+			y[i] = 0.5 * (3 - z) * (3 - z)
 		}
 	}
 	return y

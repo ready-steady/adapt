@@ -9,7 +9,7 @@ import (
 
 const (
 	initialBufferSize = 200
-	bufferGrowFactor = 2
+	bufferGrowFactor  = 2
 )
 
 type Instance struct {
@@ -21,10 +21,10 @@ type Instance struct {
 }
 
 func New(basis basis.Interface) *Instance {
-	return &Instance {
-		basis: basis,
-		minLevel: 2 - 1,
-		maxLevel: 10 - 1,
+	return &Instance{
+		basis:        basis,
+		minLevel:     2 - 1,
+		maxLevel:     10 - 1,
 		absTolerance: 1e-4,
 		relTolerance: 1e-2,
 	}
@@ -55,15 +55,16 @@ func (s *Surrogate) finalize(level uint8, nodeCount uint32) {
 }
 
 func (s *Surrogate) String() string {
-	return fmt.Sprintf("Surrogate{ levels: %d, nodes: %d }", s.level + 1,
-		s.nodeCount)
+	return fmt.Sprintf("Surrogate{ levels: %d, nodes: %d }", s.level+1, s.nodeCount)
 }
 
 func (s *Surrogate) resize(size uint32) {
 	currentSize := uint32(len(s.levels))
 
-	if size <= currentSize { return }
-	
+	if size <= currentSize {
+		return
+	}
+
 	if grownSize := bufferGrowFactor * currentSize; grownSize > size {
 		size = grownSize
 	}
@@ -108,29 +109,38 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 		values := target(nodes)
 
 		for i := uint32(0); i < newCount; i++ {
-			surrogate.surpluses[oldCount + i] = values[i] -
+			surrogate.surpluses[oldCount+i] = values[i] -
 				self.basis.Evaluate(nodes[i], surrogate.levels[0:oldCount],
 					surrogate.orders[0:oldCount], surrogate.surpluses[0:oldCount])
 		}
 
 		nodeCount += newCount
 
-		if level >= self.maxLevel { break }
+		if level >= self.maxLevel {
+			break
+		}
 
 		for i := range values {
-			if values[i] < minValue { minValue = values[i] }
-			if values[i] > maxValue { maxValue = values[i] }
+			if values[i] < minValue {
+				minValue = values[i]
+			}
+			if values[i] > maxValue {
+				maxValue = values[i]
+			}
 		}
 
 		if level >= self.minLevel {
 			k := 0
 
 			for i := uint32(0); i < newCount; i++ {
-				absError := math.Abs(surrogate.surpluses[oldCount + i])
+				absError := math.Abs(surrogate.surpluses[oldCount+i])
 				relError := absError / (maxValue - minValue)
 
 				if absError <= self.absTolerance &&
-					relError <= self.relTolerance { continue }
+					relError <= self.relTolerance {
+
+					continue
+				}
 
 				levels[k] = levels[i]
 				orders[k] = orders[i]
@@ -147,7 +157,9 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 		oldCount += newCount
 		newCount = uint32(len(levels))
 
-		if newCount == 0 { break }
+		if newCount == 0 {
+			break
+		}
 
 		level++
 	}
@@ -156,9 +168,7 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 	return surrogate
 }
 
-func (self *Instance) Evaluate(surrogate *Surrogate,
-	points []float64) []float64 {
-
+func (self *Instance) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	values := make([]float64, len(points))
 
 	for i := range values {
