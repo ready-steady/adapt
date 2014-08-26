@@ -8,8 +8,8 @@ import (
 	"github.com/gomath/numan/basis/newtoncotes"
 )
 
-func assertEqual(expected, actual interface{}, t *testing.T) {
-	if !reflect.DeepEqual(expected, actual) {
+func assertEqual(actual, expected interface{}, t *testing.T) {
+	if !reflect.DeepEqual(actual, expected) {
 		t.Fatal("got '%v' instead of '%v'", actual, expected)
 	}
 }
@@ -20,20 +20,19 @@ func TestConstruct(t *testing.T) {
 
 	surrogate := algorithm.Construct(step)
 
-	expectedLevels := []uint8{0, 1, 1, 2, 3, 3, 4, 4}
-	expectedOrders := []uint32{0, 0, 2, 3, 5, 7, 9, 11}
-	expectedSurpluses := []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0}
+	levels := []uint8{0, 1, 1, 2, 3, 3, 4, 4}
+	orders := []uint32{0, 0, 2, 3, 5, 7, 9, 11}
+	surpluses := []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0}
 
-	assertEqual(uint8(4), surrogate.level, t)
-	assertEqual(uint32(8), surrogate.nodeCount, t)
+	assertEqual(surrogate.level, uint8(4), t)
+	assertEqual(surrogate.nodeCount, uint32(8), t)
 
-	assertEqual(expectedLevels, surrogate.levels, t)
-	assertEqual(expectedOrders, surrogate.orders, t)
-	assertEqual(expectedSurpluses, surrogate.surpluses, t)
+	assertEqual(surrogate.levels, levels, t)
+	assertEqual(surrogate.orders, orders, t)
+	assertEqual(surrogate.surpluses, surpluses, t)
 }
 
-func ExampleStep() {
-	algorithm := New(newtoncotes.New())
+func ExampleStep() { algorithm := New(newtoncotes.New())
 	algorithm.maximalLevel = 20 - 1
 	surrogate := algorithm.Construct(step)
 
