@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gomath/numerical/basis/newtoncotes"
+	"github.com/gomath/numan/basis/newtoncotes"
 )
 
 func assertEqual(expected, actual interface{}, t *testing.T) {
