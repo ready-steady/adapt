@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/gomath/numerical/basis"
+	"github.com/gomath/numal/basis"
 )
 
 const (
