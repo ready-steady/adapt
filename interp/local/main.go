@@ -39,28 +39,28 @@ type Surrogate struct {
 	surpluses []float64
 }
 
-func (instance *Surrogate) initialize() {
-	instance.levels = make([]uint8, initialBufferSize)
-	instance.orders = make([]uint32, initialBufferSize)
-	instance.surpluses = make([]float64, initialBufferSize)
+func (s *Surrogate) initialize() {
+	s.levels = make([]uint8, initialBufferSize)
+	s.orders = make([]uint32, initialBufferSize)
+	s.surpluses = make([]float64, initialBufferSize)
 }
 
-func (instance *Surrogate) finalize(level uint8, nodeCount uint32) {
-	instance.level = level
-	instance.nodeCount = nodeCount
+func (s *Surrogate) finalize(level uint8, nodeCount uint32) {
+	s.level = level
+	s.nodeCount = nodeCount
 
-	instance.levels = instance.levels[0:nodeCount]
-	instance.orders = instance.orders[0:nodeCount]
-	instance.surpluses = instance.surpluses[0:nodeCount]
+	s.levels = s.levels[0:nodeCount]
+	s.orders = s.orders[0:nodeCount]
+	s.surpluses = s.surpluses[0:nodeCount]
 }
 
-func (instance *Surrogate) String() string {
-	return fmt.Sprintf("Surrogate{ levels: %d, nodes: %d }",
-		instance.level + 1, instance.nodeCount)
+func (s *Surrogate) String() string {
+	return fmt.Sprintf("Surrogate{ levels: %d, nodes: %d }", s.level + 1,
+		s.nodeCount)
 }
 
-func (instance *Surrogate) resize(size uint32) {
-	currentSize := uint32(len(instance.levels))
+func (s *Surrogate) resize(size uint32) {
+	currentSize := uint32(len(s.levels))
 
 	if size <= currentSize {
 		return
@@ -74,16 +74,16 @@ func (instance *Surrogate) resize(size uint32) {
 	orders := make([]uint32, size)
 	surpluses := make([]float64, size)
 
-	copy(levels, instance.levels[0:currentSize])
-	copy(orders, instance.orders[0:currentSize])
-	copy(surpluses, instance.surpluses[0:currentSize])
+	copy(levels, s.levels[0:currentSize])
+	copy(orders, s.orders[0:currentSize])
+	copy(surpluses, s.surpluses[0:currentSize])
 
-	instance.levels = levels
-	instance.orders = orders
-	instance.surpluses = surpluses
+	s.levels = levels
+	s.orders = orders
+	s.surpluses = surpluses
 }
 
-func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate {
+func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 	surrogate := new(Surrogate)
 	surrogate.initialize()
 
@@ -93,7 +93,7 @@ func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate
 	minimalValue := math.Inf(1)
 	maximalValue := math.Inf(-1)
 
-	orders := instance.basis.ComputeOrders(level)
+	orders := self.basis.ComputeOrders(level)
 
 	newCount := uint32(len(orders))
 	oldCount := uint32(0)
@@ -106,18 +106,18 @@ func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate
 		copy(surrogate.levels[oldCount:], levels)
 		copy(surrogate.orders[oldCount:], orders)
 
-		nodes := instance.basis.ComputeNodes(levels, orders)
+		nodes := self.basis.ComputeNodes(levels, orders)
 		values := target(nodes)
 
 		for i := uint32(0); i < newCount; i++ {
 			surrogate.surpluses[oldCount + i] = values[i] -
-				instance.basis.Evaluate(nodes[i], surrogate.levels[0:oldCount],
+				self.basis.Evaluate(nodes[i], surrogate.levels[0:oldCount],
 					surrogate.orders[0:oldCount], surrogate.surpluses[0:oldCount])
 		}
 
 		nodeCount += newCount
 
-		if level >= instance.maximalLevel {
+		if level >= self.maximalLevel {
 			break
 		}
 
@@ -130,15 +130,15 @@ func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate
 			}
 		}
 
-		if level >= instance.minimalLevel {
+		if level >= self.minimalLevel {
 			k := 0
 
 			for i := uint32(0); i < newCount; i++ {
 				absoluteError := math.Abs(surrogate.surpluses[oldCount + i])
 				relativeError := absoluteError / (maximalValue - minimalValue)
 
-				if absoluteError <= instance.absoluteTolerance &&
-					relativeError <= instance.relativeTolerance {
+				if absoluteError <= self.absoluteTolerance &&
+					relativeError <= self.relativeTolerance {
 
 					continue;
 				}
@@ -153,7 +153,7 @@ func (instance *Instance) Construct(target func([]float64) []float64) *Surrogate
 			orders = orders[0:k]
 		}
 
-		levels, orders = instance.basis.ComputeChildren(levels, orders)
+		levels, orders = self.basis.ComputeChildren(levels, orders)
 
 		oldCount += newCount
 		newCount = uint32(len(levels))

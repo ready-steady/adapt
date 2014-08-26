@@ -11,7 +11,7 @@ func New() *Instance {
 	return new(Instance)
 }
 
-func (instance *Instance) ComputeOrders(level uint8) []uint32 {
+func (_ *Instance) ComputeOrders(level uint8) []uint32 {
 	switch level {
 	case 0:
 		return []uint32{0}
@@ -36,9 +36,7 @@ func computeNode(level uint8, order uint32) float64 {
 	}
 }
 
-func (instance *Instance) ComputeNodes(levels []uint8,
-	orders []uint32) []float64 {
-
+func (_ *Instance) ComputeNodes(levels []uint8, orders []uint32) []float64 {
 	nodes := make([]float64, len(levels))
 
 	for i := range nodes {
@@ -48,7 +46,7 @@ func (instance *Instance) ComputeNodes(levels []uint8,
 	return nodes
 }
 
-func (instance *Instance) ComputeChildren(levels []uint8,
+func (_ *Instance) ComputeChildren(levels []uint8,
 	orders []uint32) ([]uint8, []uint32) {
 
 	count := len(levels)
@@ -107,8 +105,8 @@ func computeWeight(point float64, level uint8, order uint32) float64 {
 	}
 }
 
-func (instance *Instance) Evaluate(point float64, levels []uint8,
-	orders []uint32, surpluses []float64) (value float64) {
+func (_ *Instance) Evaluate(point float64, levels []uint8, orders []uint32,
+	surpluses []float64) (value float64) {
 
 	for i := range levels {
 		value += computeWeight(point, levels[i], orders[i]) * surpluses[i]
