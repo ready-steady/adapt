@@ -10,7 +10,7 @@ import (
 
 func assertEqual(actual, expected interface{}, t *testing.T) {
 	if !reflect.DeepEqual(actual, expected) {
-		t.Fatal("got '%v' instead of '%v'", actual, expected)
+		t.Fatalf("got '%v' instead of '%v'", actual, expected)
 	}
 }
 
@@ -32,7 +32,25 @@ func TestConstruct(t *testing.T) {
 	assertEqual(surrogate.surpluses, surpluses, t)
 }
 
-func ExampleStep() { algorithm := New(newtoncotes.New())
+func TestEvaluate(t *testing.T) {
+	algorithm := New(newtoncotes.New())
+
+	surrogate := &Surrogate {
+		level: 4,
+		nodeCount: 8,
+		levels: []uint8{0, 1, 1, 2, 3, 3, 4, 4},
+		orders: []uint32{0, 0, 2, 3, 5, 7, 9, 11},
+		surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
+	}
+
+	points := []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1}
+	values := []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0}
+
+	assertEqual(algorithm.Evaluate(surrogate, points), values, t)
+}
+
+func ExampleStep() {
+	algorithm := New(newtoncotes.New())
 	algorithm.maxLevel = 20 - 1
 	surrogate := algorithm.Construct(step)
 

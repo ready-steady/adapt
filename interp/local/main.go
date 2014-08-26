@@ -155,3 +155,16 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 	surrogate.finalize(level, nodeCount)
 	return surrogate
 }
+
+func (self *Instance) Evaluate(surrogate *Surrogate,
+	points []float64) []float64 {
+
+	values := make([]float64, len(points))
+
+	for i := range values {
+		values[i] = self.basis.Evaluate(points[i], surrogate.levels,
+			surrogate.orders, surrogate.surpluses)
+	}
+
+	return values
+}
