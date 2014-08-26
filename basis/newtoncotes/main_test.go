@@ -7,7 +7,7 @@ import (
 
 func assertEqual(expected, actual interface{}, t *testing.T) {
 	if !reflect.DeepEqual(expected, actual) {
-		t.Error("Got", actual, "instead of", expected)
+		t.Fatalf("got '%v' instead of '%v'", actual, expected)
 	}
 }
 
