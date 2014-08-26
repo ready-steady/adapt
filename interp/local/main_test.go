@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/gomath/format/mat"
 	"github.com/gomath/numan/basis/newtoncotes"
 )
 
@@ -65,6 +66,19 @@ func ExampleHat() {
 	surrogate := algorithm.Construct(hat)
 
 	fmt.Println(surrogate)
+
+	if !testing.Verbose() { return }
+
+	points := make([]float64, 101)
+	for i := range points { points[i] = 0.01 * float64(i) }
+	values := algorithm.Evaluate(surrogate, points)
+
+	file, _ := mat.Open("hat.mat", "w7.3")
+	defer file.Close()
+
+	file.PutMatrix("x", 101, 1, points)
+	file.PutMatrix("y", 101, 1, values)
+
 	// Output:
 	// Surrogate{ levels: 10, nodes: 305 }
 }
