@@ -11,18 +11,8 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 	}
 }
 
-func TestComputeOrders(t *testing.T) {
-	basis := New()
-
-	orders := [][]uint32{{0}, {0, 2}, {1, 3}, {1, 3, 5, 7}}
-
-	for level := range orders {
-		assertEqual(basis.ComputeOrders(uint8(level)), orders[level], t)
-	}
-}
-
-func TestComputeNodes(t *testing.T) {
-	basis := New()
+func TestComputeNodes1D(t *testing.T) {
+	basis := New(1)
 
 	levels := []uint8{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
@@ -31,8 +21,27 @@ func TestComputeNodes(t *testing.T) {
 	assertEqual(basis.ComputeNodes(levels, orders), nodes, t)
 }
 
+func TestComputeNodes2D(t *testing.T) {
+	basis := New(2)
+
+	levels := []uint8{
+		/* 0 */ 1, 1, 1, 2, 2, 1, 1, 2, 2, 2, 2, 3, 3,
+		/* 1 */ 1, 2, 2, 1, 1, 3, 3, 2, 2, 2, 2, 1, 1,
+	}
+	orders := []uint32{
+		/* 0 */ 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 1, 3,
+		/* 1 */ 0, 0, 2, 0, 0, 1, 3, 0, 2, 0, 2, 0, 0,
+	}
+	nodes := []float64{
+		/* 0 */ 0.5, 0.5, 0.5, 0.0, 1.0, 0.50, 0.50, 0.0, 0.0, 1.0, 1.0, 0.25, 0.75,
+		/* 1 */ 0.5, 0.0, 1.0, 0.5, 0.5, 0.25, 0.75, 0.0, 1.0, 0.0, 1.0, 0.50, 0.50,
+	}
+
+	assertEqual(basis.ComputeNodes(levels, orders), nodes, t)
+}
+
 func TestComputeChildren(t *testing.T) {
-	basis := New()
+	basis := New(1)
 
 	levels := []uint8{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
@@ -46,7 +55,7 @@ func TestComputeChildren(t *testing.T) {
 }
 
 func TestEvaluate(t *testing.T) {
-	basis := New()
+	basis := New(1)
 
 	points := []float64{-1, 0, 0.5, 1, 2}
 	levels := []uint8{0, 1, 1, 2, 2}
