@@ -1,4 +1,4 @@
-package local
+package hadapt
 
 import (
 	"fmt"
@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	"github.com/gomath/format/mat"
-	"github.com/gomath/numan/basis/newtoncotes"
+	"github.com/gomath/numan/basis/linhat"
+	"github.com/gomath/numan/grid/newcot"
 )
 
 func assertEqual(actual, expected interface{}, t *testing.T) {
@@ -16,7 +17,7 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 }
 
 func TestConstruct(t *testing.T) {
-	algorithm := New(newtoncotes.New())
+	algorithm := New(newcot.New(1), linhat.New())
 	algorithm.maxLevel = 4
 
 	surrogate := algorithm.Construct(step)
@@ -34,7 +35,7 @@ func TestConstruct(t *testing.T) {
 }
 
 func TestEvaluate(t *testing.T) {
-	algorithm := New(newtoncotes.New())
+	algorithm := New(newcot.New(1), linhat.New())
 
 	surrogate := &Surrogate{
 		level:     4,
@@ -51,7 +52,7 @@ func TestEvaluate(t *testing.T) {
 }
 
 func ExampleStep() {
-	algorithm := New(newtoncotes.New())
+	algorithm := New(newcot.New(1), linhat.New())
 	algorithm.maxLevel = 20 - 1
 	surrogate := algorithm.Construct(step)
 
@@ -62,7 +63,7 @@ func ExampleStep() {
 }
 
 func ExampleHat() {
-	algorithm := New(newtoncotes.New())
+	algorithm := New(newcot.New(1), linhat.New())
 	algorithm.maxLevel = 10 - 1
 	surrogate := algorithm.Construct(hat)
 

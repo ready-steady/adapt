@@ -1,18 +1,13 @@
-// Package newtoncotes provides functions for working with the Newton–Cotes
-// hierarchical basis on a unit hypercube including boundaries.
-package newtoncotes
+// Package newcot provides means for working with the Newton–Cotes grid on a
+// unit hypercube including boundaries.
+package newcot
 
-import (
-	"math"
-)
-
-// Self contains the configuration of a particular instantiation of the basis
-// and provides an access point for the accompanying functions.
+// Self represents a particular instantiation of the grid.
 type Self struct {
 	dimensionCount uint16
 }
 
-// New creates an instance of the basis for the given dimensionality.
+// New creates an instance of the grid for the given dimensionality.
 func New(dimensionCount uint16) *Self {
 	return &Self{dimensionCount}
 }
@@ -70,31 +65,4 @@ func (self *Self) ComputeChildren(levels []uint8, orders []uint32) ([]uint8, []u
 	}
 
 	return childLevels[0:k], childOrders[0:k]
-}
-
-func computeWeight(point float64, level uint8, order uint32) float64 {
-	if level == 0 {
-		if math.Abs(point-0.5) > 0.5 {
-			return 0
-		} else {
-			return 1
-		}
-	}
-
-	limit := float64(uint32(2) << (level - 1))
-	delta := math.Abs(point - float64(order)/limit)
-
-	if delta >= 1/limit {
-		return 0
-	} else {
-		return 1 - limit*delta
-	}
-}
-
-func (_ *Self) Evaluate(point float64, levels []uint8, orders []uint32, surpluses []float64) (value float64) {
-	for i := range surpluses {
-		value += surpluses[i] * computeWeight(point, levels[i], orders[i])
-	}
-
-	return value
 }

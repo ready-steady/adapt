@@ -1,10 +1,10 @@
-package local
+// Package hadapt provides an algorithm for adaptive hierarchical interpolation
+// with local refinements.
+package hadapt
 
 import (
 	"fmt"
 	"math"
-
-	"github.com/gomath/numan/basis"
 )
 
 const (
@@ -12,16 +12,34 @@ const (
 	bufferGrowFactor  = 2
 )
 
-type Instance struct {
-	basis        basis.Interface
+// Grid is the interface that an sparse grid should satisfy in order to be used
+// in the algorithm.
+type Grid interface {
+	ComputeNodes(levels []uint8, orders []uint32) []float64
+	ComputeChildren(levels []uint8, orders []uint32) ([]uint8, []uint32)
+}
+
+// Basis is the interface that a functional basis should satisfy in order to be
+// used in the algorithm.
+type Basis interface {
+	Evaluate(point float64, level uint8, order uint32) float64
+}
+
+// Self represents a particular instantiation of the algorithm.
+type Self struct {
+	grid         Grid
+	basis        Basis
 	minLevel     uint8
 	maxLevel     uint8
 	absTolerance float64
 	relTolerance float64
 }
 
-func New(basis basis.Interface) *Instance {
-	return &Instance{
+// New creates an instance of the algorithm for the given sparse grid and
+// functional basis.
+func New(grid Grid, basis Basis) *Self {
+	return &Self{
+		grid:         grid,
 		basis:        basis,
 		minLevel:     2 - 1,
 		maxLevel:     10 - 1,
@@ -30,6 +48,8 @@ func New(basis basis.Interface) *Instance {
 	}
 }
 
+// Surrogate is the result of Construct, which represents an interpolant for a
+// function.
 type Surrogate struct {
 	level     uint8
 	nodeCount uint32
@@ -54,6 +74,8 @@ func (s *Surrogate) finalize(level uint8, nodeCount uint32) {
 	s.surpluses = s.surpluses[0:nodeCount]
 }
 
+// String returns a string containing human-friendly information about the
+// surrogate.
 func (s *Surrogate) String() string {
 	return fmt.Sprintf("Surrogate{ levels: %d, nodes: %d }", s.level+1, s.nodeCount)
 }
@@ -82,7 +104,9 @@ func (s *Surrogate) resize(size uint32) {
 	s.surpluses = surpluses
 }
 
-func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
+// Construct takes a function and yields a surrogate/interpolant for it, which
+// can be further fed to Evaluate for the actual interpolation.
+func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	surrogate := new(Surrogate)
 	surrogate.initialize()
 
@@ -104,12 +128,12 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 		copy(surrogate.levels[oldCount:], levels)
 		copy(surrogate.orders[oldCount:], orders)
 
-		nodes := self.basis.ComputeNodes(levels, orders)
+		nodes := self.grid.ComputeNodes(levels, orders)
 		values := target(nodes)
 
 		for i := uint32(0); i < newCount; i++ {
 			surrogate.surpluses[oldCount+i] = values[i] -
-				self.basis.Evaluate(nodes[i], surrogate.levels[0:oldCount],
+				self.evaluate(nodes[i], surrogate.levels[0:oldCount],
 					surrogate.orders[0:oldCount], surrogate.surpluses[0:oldCount])
 		}
 
@@ -151,7 +175,7 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 			orders = orders[0:k]
 		}
 
-		levels, orders = self.basis.ComputeChildren(levels, orders)
+		levels, orders = self.grid.ComputeChildren(levels, orders)
 
 		oldCount += newCount
 		newCount = uint32(len(levels))
@@ -167,11 +191,21 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 	return surrogate
 }
 
-func (self *Instance) Evaluate(surrogate *Surrogate, points []float64) []float64 {
+func (self *Self) evaluate(point float64, levels []uint8, orders []uint32, surpluses []float64) (value float64) {
+	for i := range surpluses {
+		value += surpluses[i] * self.basis.Evaluate(point, levels[i], orders[i])
+	}
+
+	return value
+}
+
+// Evaluate takes a surrogate produced by Construct and evaluates it at the
+// given points.
+func (self *Self) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	values := make([]float64, len(points))
 
 	for i := range values {
-		values[i] = self.basis.Evaluate(points[i], surrogate.levels,
+		values[i] = self.evaluate(points[i], surrogate.levels,
 			surrogate.orders, surrogate.surpluses)
 	}
 
