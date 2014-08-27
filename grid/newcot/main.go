@@ -41,11 +41,11 @@ func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) (
 	push := func(p, d uint16, level uint8, order uint32) {
 		for i := uint16(0); i < dc; i++ {
 			if i == d {
-				levels[cc*dc + i] = level
-				orders[cc*dc + i] = order
+				levels[cc*dc+i] = level
+				orders[cc*dc+i] = order
 			} else {
-				levels[cc*dc + i] = parentLevels[p*dc + i]
-				orders[cc*dc + i] = parentOrders[p*dc + i]
+				levels[cc*dc+i] = parentLevels[p*dc+i]
+				orders[cc*dc+i] = parentOrders[p*dc+i]
 			}
 		}
 
@@ -54,8 +54,8 @@ func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) (
 			found := true
 
 			for j := uint16(0); j < dc; j++ {
-				if levels[i*dc + j] != levels[cc*dc + j] ||
-					orders[i*dc + j] != orders[cc*dc + j] {
+				if levels[i*dc+j] != levels[cc*dc+j] ||
+					orders[i*dc+j] != orders[cc*dc+j] {
 
 					found = false
 					break
@@ -73,21 +73,21 @@ func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) (
 
 	for i := uint16(0); i < pc; i++ {
 		for j := uint16(0); j < dc; j++ {
-			level := parentLevels[i*dc + j]
-			order := parentOrders[i*dc + j]
+			level := parentLevels[i*dc+j]
+			order := parentOrders[i*dc+j]
 
 			switch level {
 			case 0:
 				push(i, j, 1, 0)
 				push(i, j, 1, 2)
 			case 1:
-				push(i, j, 2, order + 1)
+				push(i, j, 2, order+1)
 			default:
-				push(i, j, level + 1, 2*order - 1)
-				push(i, j, level + 1, 2*order + 1)
+				push(i, j, level+1, 2*order-1)
+				push(i, j, level+1, 2*order+1)
 			}
 		}
 	}
 
-	return levels[0:cc*dc], orders[0:cc*dc]
+	return levels[0 : cc*dc], orders[0 : cc*dc]
 }
