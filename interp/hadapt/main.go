@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	initialBufferSize = 200
-	bufferGrowFactor  = 2
+	bufferInitSize   = 200
+	bufferGrowFactor = 2
 )
 
 // Grid is the interface that an sparse grid should satisfy in order to be used
@@ -23,7 +23,7 @@ type Grid interface {
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	Evaluate(point float64, level uint8, order uint32) float64
+	Evaluate(point []float64, levels []uint8, orders []uint32) float64
 }
 
 // Self represents a particular instantiation of the algorithm.
@@ -63,19 +63,43 @@ type Surrogate struct {
 
 func (s *Surrogate) initialize(inCount uint16) {
 	s.inCount = inCount
+	s.nodeCount = bufferInitSize
 
-	s.levels = make([]uint8, initialBufferSize)
-	s.orders = make([]uint32, initialBufferSize)
-	s.surpluses = make([]float64, initialBufferSize)
+	s.levels = make([]uint8, bufferInitSize*inCount)
+	s.orders = make([]uint32, bufferInitSize*inCount)
+	s.surpluses = make([]float64, bufferInitSize)
 }
 
 func (s *Surrogate) finalize(level uint8, nodeCount uint32) {
 	s.level = level
 	s.nodeCount = nodeCount
 
-	s.levels = s.levels[0:nodeCount]
-	s.orders = s.orders[0:nodeCount]
+	s.levels = s.levels[0 : nodeCount*uint32(s.inCount)]
+	s.orders = s.orders[0 : nodeCount*uint32(s.inCount)]
 	s.surpluses = s.surpluses[0:nodeCount]
+}
+
+func (s *Surrogate) resize(nodeCount uint32) {
+	if nodeCount <= s.nodeCount {
+		return
+	}
+
+	if count := bufferGrowFactor * s.nodeCount; count > nodeCount {
+		nodeCount = count
+	}
+
+	levels := make([]uint8, nodeCount*uint32(s.inCount))
+	orders := make([]uint32, nodeCount*uint32(s.inCount))
+	surpluses := make([]float64, nodeCount)
+
+	copy(levels, s.levels[0:s.nodeCount*uint32(s.inCount)])
+	copy(orders, s.orders[0:s.nodeCount*uint32(s.inCount)])
+	copy(surpluses, s.surpluses[0:s.nodeCount])
+
+	s.nodeCount = nodeCount
+	s.levels = levels
+	s.orders = orders
+	s.surpluses = surpluses
 }
 
 // String returns a string containing human-friendly information about the
@@ -85,37 +109,13 @@ func (s *Surrogate) String() string {
 		s.inCount, s.level, s.nodeCount)
 }
 
-func (s *Surrogate) resize(size uint32) {
-	currentSize := uint32(len(s.levels))
-
-	if size <= currentSize {
-		return
-	}
-
-	if grownSize := bufferGrowFactor * currentSize; grownSize > size {
-		size = grownSize
-	}
-
-	levels := make([]uint8, size)
-	orders := make([]uint32, size)
-	surpluses := make([]float64, size)
-
-	copy(levels, s.levels[0:currentSize])
-	copy(orders, s.orders[0:currentSize])
-	copy(surpluses, s.surpluses[0:currentSize])
-
-	s.levels = levels
-	s.orders = orders
-	s.surpluses = surpluses
-}
-
 // Construct takes a function and yields a surrogate/interpolant for it, which
 // can be further fed to Evaluate for the actual interpolation.
 func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
-	inCount := self.grid.Dimensionality()
+	inc := uint32(self.grid.Dimensionality())
 
 	surrogate := new(Surrogate)
-	surrogate.initialize(inCount)
+	surrogate.initialize(uint16(inc))
 
 	level := uint8(0)
 	nodeCount := uint32(0)
@@ -123,28 +123,31 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	minValue := math.Inf(1)
 	maxValue := math.Inf(-1)
 
-	newCount := uint32(1)
-	oldCount := uint32(0)
+	newc := uint32(1)
+	oldc := uint32(0)
 
-	levels := make([]uint8, newCount)
-	orders := make([]uint32, newCount)
+	levels := make([]uint8, newc*inc)
+	orders := make([]uint32, newc*inc)
 
 	for {
-		surrogate.resize(oldCount + newCount)
+		surrogate.resize(oldc + newc)
 
-		copy(surrogate.levels[oldCount:], levels)
-		copy(surrogate.orders[oldCount:], orders)
+		copy(surrogate.levels[oldc*inc:], levels)
+		copy(surrogate.orders[oldc*inc:], orders)
 
 		nodes := self.grid.ComputeNodes(levels, orders)
 		values := target(nodes)
 
-		for i := uint32(0); i < newCount; i++ {
-			surrogate.surpluses[oldCount+i] = values[i] -
-				self.evaluate(nodes[i], surrogate.levels[0:oldCount],
-					surrogate.orders[0:oldCount], surrogate.surpluses[0:oldCount])
+		for i := uint32(0); i < newc; i++ {
+			surrogate.surpluses[oldc+i] = values[i] -
+				self.evaluate(inc, oldc,
+					nodes[i*inc:(i+1)*inc],
+					surrogate.levels[0:oldc*inc],
+					surrogate.orders[0:oldc*inc],
+					surrogate.surpluses[0:oldc])
 		}
 
-		nodeCount += newCount
+		nodeCount += newc
 
 		if level >= self.maxLevel {
 			break
@@ -162,8 +165,8 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 		if level >= self.minLevel {
 			k := 0
 
-			for i := uint32(0); i < newCount; i++ {
-				absError := math.Abs(surrogate.surpluses[oldCount+i])
+			for i := uint32(0); i < newc; i++ {
+				absError := math.Abs(surrogate.surpluses[oldc+i])
 				relError := absError / (maxValue - minValue)
 
 				if absError <= self.absTolerance &&
@@ -172,10 +175,11 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 					continue
 				}
 
-				levels[k] = levels[i]
-				orders[k] = orders[i]
-
-				k++
+				for j := uint32(0); j < inc; j++ {
+					levels[k] = levels[i*inc+j]
+					orders[k] = orders[i*inc+j]
+					k++
+				}
 			}
 
 			levels = levels[0:k]
@@ -184,10 +188,10 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 
 		levels, orders = self.grid.ComputeChildren(levels, orders)
 
-		oldCount += newCount
-		newCount = uint32(len(levels))
+		oldc += newc
+		newc = uint32(len(levels)) / inc
 
-		if newCount == 0 {
+		if newc == 0 {
 			break
 		}
 
@@ -198,9 +202,12 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	return surrogate
 }
 
-func (self *Self) evaluate(point float64, levels []uint8, orders []uint32, surpluses []float64) (value float64) {
-	for i := range surpluses {
-		value += surpluses[i] * self.basis.Evaluate(point, levels[i], orders[i])
+func (self *Self) evaluate(inc uint32, sc uint32, point []float64,
+	levels []uint8, orders []uint32, surpluses []float64) (value float64) {
+
+	for i := uint32(0); i < sc; i++ {
+		value += surpluses[i] * self.basis.Evaluate(point,
+			levels[i*inc:(i+1)*inc], orders[i*inc:(i+1)*inc])
 	}
 
 	return value
@@ -209,11 +216,14 @@ func (self *Self) evaluate(point float64, levels []uint8, orders []uint32, surpl
 // Evaluate takes a surrogate produced by Construct and evaluates it at the
 // given points.
 func (self *Self) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	values := make([]float64, len(points))
+	inc := uint32(self.grid.Dimensionality())
+	pc := uint32(len(points)) / inc
 
-	for i := range values {
-		values[i] = self.evaluate(points[i], surrogate.levels,
-			surrogate.orders, surrogate.surpluses)
+	values := make([]float64, pc)
+
+	for i := uint32(0); i < pc; i++ {
+		values[i] = self.evaluate(inc, surrogate.nodeCount, points[i*inc:(i+1)*inc],
+			surrogate.levels, surrogate.orders, surrogate.surpluses)
 	}
 
 	return values

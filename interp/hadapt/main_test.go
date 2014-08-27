@@ -18,7 +18,7 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 }
 
 func TestConstruct1D(t *testing.T) {
-	algorithm := New(newcot.New(1), linhat.New())
+	algorithm := New(newcot.New(1), linhat.New(1))
 	algorithm.maxLevel = 4
 
 	surrogate := algorithm.Construct(step)
@@ -37,107 +37,105 @@ func TestConstruct1D(t *testing.T) {
 }
 
 func TestConstruct2D(t *testing.T) {
-	t.Skip()
-
-	algorithm := New(newcot.New(2), linhat.New())
+	algorithm := New(newcot.New(2), linhat.New(2))
 	algorithm.maxLevel = 3
 
 	surrogate := algorithm.Construct(cube)
 
 	levels := []uint8{
 		0, 0,
-		0, 1,
-		0, 1,
 		1, 0,
 		1, 0,
-		0, 2,
-		0, 2,
-		1, 1,
-		1, 1,
+		0, 1,
+		0, 1,
+		2, 0,
 		1, 1,
 		1, 1,
 		2, 0,
-		2, 0,
+		1, 1,
+		1, 1,
+		0, 2,
+		0, 2,
+		3, 0,
+		3, 0,
+		2, 1,
+		2, 1,
+		1, 2,
+		1, 2,
+		3, 0,
+		3, 0,
+		2, 1,
+		2, 1,
+		1, 2,
+		1, 2,
 		0, 3,
 		0, 3,
 		0, 3,
 		0, 3,
-		1, 2,
-		1, 2,
-		1, 2,
-		1, 2,
-		2, 1,
-		2, 1,
-		2, 1,
-		2, 1,
-		3, 0,
-		3, 0,
-		3, 0,
-		3, 0,
 	}
 
 	orders := []uint32{
 		0, 0,
 		0, 0,
-		0, 2,
-		0, 0,
 		2, 0,
-		0, 1,
-		0, 3,
 		0, 0,
 		0, 2,
+		1, 0,
+		0, 0,
+		0, 2,
+		3, 0,
 		2, 0,
 		2, 2,
+		0, 1,
+		0, 3,
 		1, 0,
 		3, 0,
+		1, 0,
+		1, 2,
+		0, 1,
+		0, 3,
+		5, 0,
+		7, 0,
+		3, 0,
+		3, 2,
+		2, 1,
+		2, 3,
 		0, 1,
 		0, 3,
 		0, 5,
 		0, 7,
-		0, 1,
-		0, 3,
-		2, 1,
-		2, 3,
-		1, 0,
-		1, 2,
-		3, 0,
-		3, 2,
-		1, 0,
-		3, 0,
-		5, 0,
-		7, 0,
 	}
 
 	surpluses := []float64{
-		 1.0,
+		1.0,
 		-1.0,
 		-1.0,
 		-1.0,
 		-1.0,
 		-0.5,
+		1.0,
+		1.0,
 		-0.5,
-		 1.0,
-		 1.0,
-		 1.0,
-		 1.0,
+		1.0,
+		1.0,
 		-0.5,
 		-0.5,
-		 0.0,
-		 0.5,
-		 0.5,
-		 0.0,
-		 0.5,
-		 0.5,
-		 0.5,
-		 0.5,
-		 0.5,
-		 0.5,
-		 0.5,
-		 0.5,
-		 0.0,
-		 0.5,
-		 0.5,
-		 0.0,
+		0.0,
+		0.5,
+		0.5,
+		0.5,
+		0.5,
+		0.5,
+		0.5,
+		0.0,
+		0.5,
+		0.5,
+		0.5,
+		0.5,
+		0.0,
+		0.5,
+		0.5,
+		0.0,
 	}
 
 	assertEqual(surrogate.level, uint8(3), t)
@@ -150,7 +148,7 @@ func TestConstruct2D(t *testing.T) {
 }
 
 func TestEvaluate1D(t *testing.T) {
-	algorithm := New(newcot.New(1), linhat.New())
+	algorithm := New(newcot.New(1), linhat.New(1))
 
 	surrogate := &Surrogate{
 		level:     4,
@@ -168,7 +166,7 @@ func TestEvaluate1D(t *testing.T) {
 }
 
 func ExampleStep() {
-	algorithm := New(newcot.New(1), linhat.New())
+	algorithm := New(newcot.New(1), linhat.New(1))
 	algorithm.maxLevel = 19
 	surrogate := algorithm.Construct(step)
 
@@ -179,7 +177,7 @@ func ExampleStep() {
 }
 
 func ExampleHat() {
-	algorithm := New(newcot.New(1), linhat.New())
+	algorithm := New(newcot.New(1), linhat.New(1))
 	algorithm.maxLevel = 9
 	surrogate := algorithm.Construct(hat)
 
