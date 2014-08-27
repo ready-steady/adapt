@@ -12,13 +12,13 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 }
 
 func TestEvaluate(t *testing.T) {
-	basis := New()
+	basis := New(1)
 
 	points := []float64{-1, 0, 0.25, 0.5, 0.75, 1, 2}
 
 	cases := []struct {
-		level uint8
-		order uint32
+		level  uint8
+		order  uint32
 		values []float64
 	}{
 		{0, 0, []float64{0, 1, 1.0, 1, 1.0, 1, 0}},
@@ -32,7 +32,8 @@ func TestEvaluate(t *testing.T) {
 
 	for i := range cases {
 		for j := range values {
-			values[j] = basis.Evaluate(points[j], cases[i].level, cases[i].order)
+			values[j] = basis.Evaluate([]float64{points[j]},
+				[]uint8{cases[i].level}, []uint32{cases[i].order})
 		}
 		assertEqual(values, cases[i].values, t)
 	}
