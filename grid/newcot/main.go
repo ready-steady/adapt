@@ -29,40 +29,65 @@ func (_ *Self) ComputeNodes(levels []uint8, orders []uint32) []float64 {
 
 // ComputeChildren returns the levels and orders of the child nodes
 // corresponding to the parent nodes given by their levels and orders.
-func (self *Self) ComputeChildren(levels []uint8, orders []uint32) ([]uint8, []uint32) {
-	count := len(levels)
+func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) ([]uint8, []uint32) {
+	dc := self.dimensionCount
+	pc := uint16(len(parentLevels)) / dc
 
-	childLevels := make([]uint8, 2*count)
-	childOrders := make([]uint32, 2*count)
+	levels := make([]uint8, 2*pc*dc*dc)
+	orders := make([]uint32, 2*pc*dc*dc)
 
-	k := 0
+	cc := uint16(0)
 
-	for i := 0; i < count; i++ {
-		switch levels[i] {
-		case 0:
-			childLevels[k] = 1
-			childOrders[k] = 0
-			k++
+	push := func(p, d uint16, level uint8, order uint32) {
+		for i := uint16(0); i < dc; i++ {
+			if i == d {
+				levels[cc*dc + i] = level
+				orders[cc*dc + i] = order
+			} else {
+				levels[cc*dc + i] = parentLevels[p*dc + i]
+				orders[cc*dc + i] = parentOrders[p*dc + i]
+			}
+		}
 
-			childLevels[k] = 1
-			childOrders[k] = 2
-			k++
+		// Check uniqueness
+		for i := uint16(0); i < cc; i++ {
+			found := true
 
-		case 1:
-			childLevels[k] = 2
-			childOrders[k] = orders[i] + 1
-			k++
+			for j := uint16(0); j < dc; j++ {
+				if levels[i*dc + j] != levels[cc*dc + j] ||
+					orders[i*dc + j] != orders[cc*dc + j] {
 
-		default:
-			childLevels[k] = levels[i] + 1
-			childOrders[k] = 2*orders[i] - 1
-			k++
+					found = false
+					break
+				}
+			}
 
-			childLevels[k] = levels[i] + 1
-			childOrders[k] = 2*orders[i] + 1
-			k++
+			if found {
+				// Discard since a duplicate
+				return
+			}
+		}
+
+		cc++
+	}
+
+	for i := uint16(0); i < pc; i++ {
+		for j := uint16(0); j < dc; j++ {
+			level := parentLevels[i*dc + j]
+			order := parentOrders[i*dc + j]
+
+			switch level {
+			case 0:
+				push(i, j, 1, 0)
+				push(i, j, 1, 2)
+			case 1:
+				push(i, j, 2, order + 1)
+			default:
+				push(i, j, level + 1, 2*order - 1)
+				push(i, j, level + 1, 2*order + 1)
+			}
 		}
 	}
 
-	return childLevels[0:k], childOrders[0:k]
+	return levels[0:cc*dc], orders[0:cc*dc]
 }
