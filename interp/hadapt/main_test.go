@@ -2,6 +2,7 @@ package hadapt
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"testing"
 
@@ -16,7 +17,7 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 	}
 }
 
-func TestConstruct(t *testing.T) {
+func TestConstruct1D(t *testing.T) {
 	algorithm := New(newcot.New(1), linhat.New())
 	algorithm.maxLevel = 4
 
@@ -27,6 +28,7 @@ func TestConstruct(t *testing.T) {
 	surpluses := []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0}
 
 	assertEqual(surrogate.level, uint8(4), t)
+	assertEqual(surrogate.inCount, uint16(1), t)
 	assertEqual(surrogate.nodeCount, uint32(8), t)
 
 	assertEqual(surrogate.levels, levels, t)
@@ -34,11 +36,125 @@ func TestConstruct(t *testing.T) {
 	assertEqual(surrogate.surpluses, surpluses, t)
 }
 
-func TestEvaluate(t *testing.T) {
+func TestConstruct2D(t *testing.T) {
+	t.Skip()
+
+	algorithm := New(newcot.New(2), linhat.New())
+	algorithm.maxLevel = 3
+
+	surrogate := algorithm.Construct(cube)
+
+	levels := []uint8{
+		0, 0,
+		0, 1,
+		0, 1,
+		1, 0,
+		1, 0,
+		0, 2,
+		0, 2,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		2, 0,
+		2, 0,
+		0, 3,
+		0, 3,
+		0, 3,
+		0, 3,
+		1, 2,
+		1, 2,
+		1, 2,
+		1, 2,
+		2, 1,
+		2, 1,
+		2, 1,
+		2, 1,
+		3, 0,
+		3, 0,
+		3, 0,
+		3, 0,
+	}
+
+	orders := []uint32{
+		0, 0,
+		0, 0,
+		0, 2,
+		0, 0,
+		2, 0,
+		0, 1,
+		0, 3,
+		0, 0,
+		0, 2,
+		2, 0,
+		2, 2,
+		1, 0,
+		3, 0,
+		0, 1,
+		0, 3,
+		0, 5,
+		0, 7,
+		0, 1,
+		0, 3,
+		2, 1,
+		2, 3,
+		1, 0,
+		1, 2,
+		3, 0,
+		3, 2,
+		1, 0,
+		3, 0,
+		5, 0,
+		7, 0,
+	}
+
+	surpluses := []float64{
+		 1.0,
+		-1.0,
+		-1.0,
+		-1.0,
+		-1.0,
+		-0.5,
+		-0.5,
+		 1.0,
+		 1.0,
+		 1.0,
+		 1.0,
+		-0.5,
+		-0.5,
+		 0.0,
+		 0.5,
+		 0.5,
+		 0.0,
+		 0.5,
+		 0.5,
+		 0.5,
+		 0.5,
+		 0.5,
+		 0.5,
+		 0.5,
+		 0.5,
+		 0.0,
+		 0.5,
+		 0.5,
+		 0.0,
+	}
+
+	assertEqual(surrogate.level, uint8(3), t)
+	assertEqual(surrogate.inCount, uint16(2), t)
+	assertEqual(surrogate.nodeCount, uint32(29), t)
+
+	assertEqual(surrogate.levels, levels, t)
+	assertEqual(surrogate.orders, orders, t)
+	assertEqual(surrogate.surpluses, surpluses, t)
+}
+
+func TestEvaluate1D(t *testing.T) {
 	algorithm := New(newcot.New(1), linhat.New())
 
 	surrogate := &Surrogate{
 		level:     4,
+		inCount:   1,
 		nodeCount: 8,
 		levels:    []uint8{0, 1, 1, 2, 3, 3, 4, 4},
 		orders:    []uint32{0, 0, 2, 3, 5, 7, 9, 11},
@@ -53,18 +169,18 @@ func TestEvaluate(t *testing.T) {
 
 func ExampleStep() {
 	algorithm := New(newcot.New(1), linhat.New())
-	algorithm.maxLevel = 20 - 1
+	algorithm.maxLevel = 19
 	surrogate := algorithm.Construct(step)
 
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{ levels: 20, nodes: 38 }
+	// Surrogate{ inputs: 1, levels: 19, nodes: 38 }
 }
 
 func ExampleHat() {
 	algorithm := New(newcot.New(1), linhat.New())
-	algorithm.maxLevel = 10 - 1
+	algorithm.maxLevel = 9
 	surrogate := algorithm.Construct(hat)
 
 	fmt.Println(surrogate)
@@ -86,7 +202,7 @@ func ExampleHat() {
 	file.PutMatrix("y", 101, 1, values)
 
 	// Output:
-	// Surrogate{ levels: 10, nodes: 305 }
+	// Surrogate{ inputs: 1, levels: 9, nodes: 305 }
 }
 
 func step(x []float64) []float64 {
@@ -112,5 +228,18 @@ func hat(x []float64) []float64 {
 			y[i] = 0.5 * (3 - z) * (3 - z)
 		}
 	}
+	return y
+}
+
+func cube(x []float64) []float64 {
+	count := uint16(len(x)) / 2
+	y := make([]float64, count)
+
+	for i := uint16(0); i < count; i++ {
+		if math.Abs(2*x[2*i]-1) < 0.45 && math.Abs(2*x[2*i+1]-1) < 0.45 {
+			y[i] = 1
+		}
+	}
+
 	return y
 }

@@ -15,6 +15,7 @@ const (
 // Grid is the interface that an sparse grid should satisfy in order to be used
 // in the algorithm.
 type Grid interface {
+	Dimensionality() uint16
 	ComputeNodes(levels []uint8, orders []uint32) []float64
 	ComputeChildren(levels []uint8, orders []uint32) ([]uint8, []uint32)
 }
@@ -41,8 +42,8 @@ func New(grid Grid, basis Basis) *Self {
 	return &Self{
 		grid:         grid,
 		basis:        basis,
-		minLevel:     2 - 1,
-		maxLevel:     10 - 1,
+		minLevel:     1,
+		maxLevel:     9,
 		absTolerance: 1e-4,
 		relTolerance: 1e-2,
 	}
@@ -52,6 +53,7 @@ func New(grid Grid, basis Basis) *Self {
 // function.
 type Surrogate struct {
 	level     uint8
+	inCount   uint16
 	nodeCount uint32
 
 	levels    []uint8
@@ -59,7 +61,9 @@ type Surrogate struct {
 	surpluses []float64
 }
 
-func (s *Surrogate) initialize() {
+func (s *Surrogate) initialize(inCount uint16) {
+	s.inCount = inCount
+
 	s.levels = make([]uint8, initialBufferSize)
 	s.orders = make([]uint32, initialBufferSize)
 	s.surpluses = make([]float64, initialBufferSize)
@@ -77,7 +81,8 @@ func (s *Surrogate) finalize(level uint8, nodeCount uint32) {
 // String returns a string containing human-friendly information about the
 // surrogate.
 func (s *Surrogate) String() string {
-	return fmt.Sprintf("Surrogate{ levels: %d, nodes: %d }", s.level+1, s.nodeCount)
+	return fmt.Sprintf("Surrogate{ inputs: %d, levels: %d, nodes: %d }",
+		s.inCount, s.level, s.nodeCount)
 }
 
 func (s *Surrogate) resize(size uint32) {
@@ -107,8 +112,10 @@ func (s *Surrogate) resize(size uint32) {
 // Construct takes a function and yields a surrogate/interpolant for it, which
 // can be further fed to Evaluate for the actual interpolation.
 func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
+	inCount := self.grid.Dimensionality()
+
 	surrogate := new(Surrogate)
-	surrogate.initialize()
+	surrogate.initialize(inCount)
 
 	level := uint8(0)
 	nodeCount := uint32(0)

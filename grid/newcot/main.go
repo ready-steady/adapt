@@ -12,6 +12,11 @@ func New(dimensionCount uint16) *Self {
 	return &Self{dimensionCount}
 }
 
+// Dimensionality returns the number of dimensions of the grid.
+func (self *Self) Dimensionality() uint16 {
+	return self.dimensionCount
+}
+
 // ComputeNodes returns the nodes corresponding to the given levels and orders.
 func (_ *Self) ComputeNodes(levels []uint8, orders []uint32) []float64 {
 	nodes := make([]float64, len(levels))
