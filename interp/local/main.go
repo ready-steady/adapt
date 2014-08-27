@@ -92,12 +92,11 @@ func (self *Instance) Construct(target func([]float64) []float64) *Surrogate {
 	minValue := math.Inf(1)
 	maxValue := math.Inf(-1)
 
-	orders := self.basis.ComputeOrders(level)
-
-	newCount := uint32(len(orders))
+	newCount := uint32(1)
 	oldCount := uint32(0)
 
 	levels := make([]uint8, newCount)
+	orders := make([]uint32, newCount)
 
 	for {
 		surrogate.resize(oldCount + newCount)

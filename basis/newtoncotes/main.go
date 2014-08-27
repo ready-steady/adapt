@@ -11,23 +11,6 @@ func New() *Instance {
 	return new(Instance)
 }
 
-func (_ *Instance) ComputeOrders(level uint8) []uint32 {
-	switch level {
-	case 0:
-		return []uint32{0}
-	case 1:
-		return []uint32{0, 2}
-	}
-
-	orders := make([]uint32, uint32(2)<<(level-1-1))
-
-	for i := range orders {
-		orders[i] = uint32(2*(i+1) - 1)
-	}
-
-	return orders
-}
-
 func computeNode(level uint8, order uint32) float64 {
 	if level == 0 {
 		return 0.5
