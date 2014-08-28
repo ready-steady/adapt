@@ -2,7 +2,6 @@ package adhier
 
 import (
 	"fmt"
-	"math"
 	"reflect"
 	"testing"
 
@@ -17,127 +16,37 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 	}
 }
 
-func TestConstruct1D(t *testing.T) {
+// TestConstructStep deals with a one-input-one-output scenario.
+func TestConstructStep(t *testing.T) {
 	algorithm := New(newcot.New(1), linhat.New(1))
-	algorithm.maxLevel = 4
+	algorithm.maxLevel = stepFixture.surrogate.level
 
 	surrogate := algorithm.Construct(step)
 
-	levels := []uint8{0, 1, 1, 2, 3, 3, 4, 4}
-	orders := []uint32{0, 0, 2, 3, 5, 7, 9, 11}
-	surpluses := []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0}
-
-	assertEqual(surrogate.level, uint8(4), t)
-	assertEqual(surrogate.inCount, uint16(1), t)
-	assertEqual(surrogate.nodeCount, uint32(8), t)
-
-	assertEqual(surrogate.levels, levels, t)
-	assertEqual(surrogate.orders, orders, t)
-	assertEqual(surrogate.surpluses, surpluses, t)
+	assertEqual(surrogate, stepFixture.surrogate, t)
 }
 
-func TestConstruct2D(t *testing.T) {
+// TestEvaluateStep deals with a one-input-one-output scenario.
+func TestEvaluateStep(t *testing.T) {
+	algorithm := New(newcot.New(1), linhat.New(1))
+
+	values := algorithm.Evaluate(stepFixture.surrogate, stepFixture.points)
+
+	assertEqual(values, stepFixture.values, t)
+}
+
+// TestEvaluateCube deals with a multiple-input-one-output scenario.
+func TestConstructCube(t *testing.T) {
 	algorithm := New(newcot.New(2), linhat.New(2))
-	algorithm.maxLevel = 3
+	algorithm.maxLevel = cubeFixture.surrogate.level
 
 	surrogate := algorithm.Construct(cube)
 
-	levels := []uint8{
-		0, 0,
-		1, 0,
-		1, 0,
-		0, 1,
-		0, 1,
-		2, 0,
-		1, 1,
-		1, 1,
-		2, 0,
-		1, 1,
-		1, 1,
-		0, 2,
-		0, 2,
-		3, 0,
-		3, 0,
-		2, 1,
-		2, 1,
-		1, 2,
-		1, 2,
-		3, 0,
-		3, 0,
-		2, 1,
-		2, 1,
-		1, 2,
-		1, 2,
-		0, 3,
-		0, 3,
-		0, 3,
-		0, 3,
-	}
-
-	orders := []uint32{
-		0, 0,
-		0, 0,
-		2, 0,
-		0, 0,
-		0, 2,
-		1, 0,
-		0, 0,
-		0, 2,
-		3, 0,
-		2, 0,
-		2, 2,
-		0, 1,
-		0, 3,
-		1, 0,
-		3, 0,
-		1, 0,
-		1, 2,
-		0, 1,
-		0, 3,
-		5, 0,
-		7, 0,
-		3, 0,
-		3, 2,
-		2, 1,
-		2, 3,
-		0, 1,
-		0, 3,
-		0, 5,
-		0, 7,
-	}
-
-	surpluses := []float64{
-		1.0, -1.0, -1.0, -1.0, -1.0, -0.5, 1.0, 1.0, -0.5, 1.0,
-		1.0, -0.5, -0.5,  0.0,  0.5,  0.5, 0.5, 0.5,  0.5, 0.5,
-		0.0,  0.5,  0.5,  0.5,  0.5,  0.0, 0.5, 0.5,  0.0}
-
-	assertEqual(surrogate.level, uint8(3), t)
-	assertEqual(surrogate.inCount, uint16(2), t)
-	assertEqual(surrogate.nodeCount, uint32(29), t)
-
-	assertEqual(surrogate.levels, levels, t)
-	assertEqual(surrogate.orders, orders, t)
-	assertEqual(surrogate.surpluses, surpluses, t)
+	assertEqual(surrogate, cubeFixture.surrogate, t)
 }
 
-func TestEvaluate1D(t *testing.T) {
-	algorithm := New(newcot.New(1), linhat.New(1))
-
-	surrogate := &Surrogate{
-		level:     4,
-		inCount:   1,
-		nodeCount: 8,
-		levels:    []uint8{0, 1, 1, 2, 3, 3, 4, 4},
-		orders:    []uint32{0, 0, 2, 3, 5, 7, 9, 11},
-		surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
-	}
-
-	points := []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1}
-	values := []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0}
-
-	assertEqual(algorithm.Evaluate(surrogate, points), values, t)
-}
-
+// ExampleStep demonstrates a one-input-one-output scenario with a smooth
+// function.
 func ExampleStep() {
 	algorithm := New(newcot.New(1), linhat.New(1))
 	algorithm.maxLevel = 19
@@ -149,6 +58,8 @@ func ExampleStep() {
 	// Surrogate{ inputs: 1, levels: 19, nodes: 38 }
 }
 
+// ExampleHat demonstrates a one-input-one-output scenario with a non-smooth
+// function.
 func ExampleHat() {
 	algorithm := New(newcot.New(1), linhat.New(1))
 	algorithm.maxLevel = 9
@@ -173,6 +84,8 @@ func ExampleHat() {
 	// Surrogate{ inputs: 1, levels: 9, nodes: 305 }
 }
 
+// ExampleHat demonstrates a multiple-input-one-output scenario with a
+// non-smooth function.
 func ExampleCube() {
 	algorithm := New(newcot.New(2), linhat.New(2))
 	algorithm.maxLevel = 9
@@ -195,66 +108,4 @@ func ExampleCube() {
 
 	// Output:
 	// Surrogate{ inputs: 2, levels: 9, nodes: 377 }
-}
-
-func step(x []float64) []float64 {
-	y := make([]float64, len(x))
-	for i := range x {
-		if x[i] <= 0.5 {
-			y[i] = 1
-		}
-	}
-	return y
-}
-
-func hat(x []float64) []float64 {
-	y := make([]float64, len(x))
-	for i, z := range x {
-		z = 5*z - 1
-		switch {
-		case 0 <= z && z < 1:
-			y[i] = 0.5 * z * z
-		case 1 <= z && z < 2:
-			y[i] = 0.5 * (-2*z*z + 6*z - 3)
-		case 2 <= z && z < 3:
-			y[i] = 0.5 * (3 - z) * (3 - z)
-		}
-	}
-	return y
-}
-
-func cube(x []float64) []float64 {
-	count := uint16(len(x)) / 2
-	y := make([]float64, count)
-
-	for i := uint16(0); i < count; i++ {
-		if math.Abs(2*x[2*i]-1) < 0.45 && math.Abs(2*x[2*i+1]-1) < 0.45 {
-			y[i] = 1
-		}
-	}
-
-	return y
-}
-
-func makeGrid1D(size uint32) []float64 {
-	step := 1 / float64(size - 1)
-	points := make([]float64, size)
-	for i := uint32(0); i < size; i++ {
-		points[i] = step * float64(i)
-	}
-	return points
-}
-
-func makeGrid2D(size uint32) []float64 {
-	step := 1 / float64(size - 1)
-	points := make([]float64, 2*size*size)
-	for k, i := uint32(0), uint32(0); i < size; i++ {
-		for j := uint32(0); j < size; j++ {
-			points[k] = step * float64(i)
-			k++
-			points[k] = step * float64(j)
-			k++
-		}
-	}
-	return points
 }
