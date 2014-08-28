@@ -18,7 +18,7 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 
 // TestConstructStep deals with a one-input-one-output scenario.
 func TestConstructStep(t *testing.T) {
-	algorithm := New(newcot.New(1), linhat.New(1))
+	algorithm := New(newcot.New(1), linhat.New(1), 1)
 	algorithm.maxLevel = stepFixture.surrogate.level
 
 	surrogate := algorithm.Construct(step)
@@ -28,7 +28,7 @@ func TestConstructStep(t *testing.T) {
 
 // TestEvaluateStep deals with a one-input-one-output scenario.
 func TestEvaluateStep(t *testing.T) {
-	algorithm := New(newcot.New(1), linhat.New(1))
+	algorithm := New(newcot.New(1), linhat.New(1), 1)
 
 	values := algorithm.Evaluate(stepFixture.surrogate, stepFixture.points)
 
@@ -37,7 +37,7 @@ func TestEvaluateStep(t *testing.T) {
 
 // TestConstructCube deals with a multiple-input-one-output scenario.
 func TestConstructCube(t *testing.T) {
-	algorithm := New(newcot.New(2), linhat.New(2))
+	algorithm := New(newcot.New(2), linhat.New(2), 1)
 	algorithm.maxLevel = cubeFixture.surrogate.level
 
 	surrogate := algorithm.Construct(cube)
@@ -47,12 +47,13 @@ func TestConstructCube(t *testing.T) {
 
 // TestConstructBox deals with a multiple-input-multiple-output scenario.
 func TestConstructBox(t *testing.T) {
-	t.Skip()
-
-	algorithm := New(newcot.New(2), linhat.New(2))
+	algorithm := New(newcot.New(2), linhat.New(2), 3)
 	algorithm.maxLevel = boxFixture.surrogate.level
 
 	surrogate := algorithm.Construct(box)
+
+	t.Log(surrogate.levels)
+	t.Log(boxFixture.surrogate.levels)
 
 	assertEqual(surrogate, boxFixture.surrogate, t)
 }
@@ -60,7 +61,7 @@ func TestConstructBox(t *testing.T) {
 // ExampleStep demonstrates a one-input-one-output scenario with a smooth
 // function.
 func ExampleStep() {
-	algorithm := New(newcot.New(1), linhat.New(1))
+	algorithm := New(newcot.New(1), linhat.New(1), 1)
 	algorithm.maxLevel = 19
 	surrogate := algorithm.Construct(step)
 
@@ -73,7 +74,7 @@ func ExampleStep() {
 // ExampleHat demonstrates a one-input-one-output scenario with a non-smooth
 // function.
 func ExampleHat() {
-	algorithm := New(newcot.New(1), linhat.New(1))
+	algorithm := New(newcot.New(1), linhat.New(1), 1)
 	algorithm.maxLevel = 9
 	surrogate := algorithm.Construct(hat)
 
@@ -99,7 +100,7 @@ func ExampleHat() {
 // ExampleHat demonstrates a multiple-input-one-output scenario with a
 // non-smooth function.
 func ExampleCube() {
-	algorithm := New(newcot.New(2), linhat.New(2))
+	algorithm := New(newcot.New(2), linhat.New(2), 1)
 	algorithm.maxLevel = 9
 	surrogate := algorithm.Construct(cube)
 
