@@ -28,24 +28,24 @@ type Basis interface {
 
 // Self represents a particular instantiation of the algorithm.
 type Self struct {
-	grid         Grid
-	basis        Basis
-	minLevel     uint8
-	maxLevel     uint8
-	absTolerance float64
-	relTolerance float64
+	grid     Grid
+	basis    Basis
+	minLevel uint8
+	maxLevel uint8
+	absError float64
+	relError float64
 }
 
 // New creates an instance of the algorithm for the given sparse grid and
 // functional basis.
 func New(grid Grid, basis Basis) *Self {
 	return &Self{
-		grid:         grid,
-		basis:        basis,
-		minLevel:     1,
-		maxLevel:     9,
-		absTolerance: 1e-4,
-		relTolerance: 1e-2,
+		grid:     grid,
+		basis:    basis,
+		minLevel: 1,
+		maxLevel: 9,
+		absError: 1e-4,
+		relError: 1e-2,
 	}
 }
 
@@ -169,9 +169,7 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 				absError := math.Abs(surrogate.surpluses[oldc+i])
 				relError := absError / (maxValue - minValue)
 
-				if absError <= self.absTolerance &&
-					relError <= self.relTolerance {
-
+				if absError <= self.absError && relError <= self.relError {
 					continue
 				}
 
