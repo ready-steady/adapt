@@ -160,7 +160,7 @@ func ExampleHat() {
 		return
 	}
 
-	points := makeGrid1D(101, 0.01)
+	points := makeGrid1D(101)
 	values := algorithm.Evaluate(surrogate, points)
 
 	file, _ := mat.Open("hat.mat", "w7.3")
@@ -184,7 +184,7 @@ func ExampleCube() {
 		return
 	}
 
-	points := makeGrid2D(21, 0.05)
+	points := makeGrid2D(21)
 	values := algorithm.Evaluate(surrogate, points)
 
 	file, _ := mat.Open("cube.mat", "w7.3")
@@ -236,7 +236,8 @@ func cube(x []float64) []float64 {
 	return y
 }
 
-func makeGrid1D(size uint32, step float64) []float64 {
+func makeGrid1D(size uint32) []float64 {
+	step := 1 / float64(size - 1)
 	points := make([]float64, size)
 	for i := uint32(0); i < size; i++ {
 		points[i] = step * float64(i)
@@ -244,7 +245,8 @@ func makeGrid1D(size uint32, step float64) []float64 {
 	return points
 }
 
-func makeGrid2D(size uint32, step float64) []float64 {
+func makeGrid2D(size uint32) []float64 {
+	step := 1 / float64(size - 1)
 	points := make([]float64, 2*size*size)
 	for k, i := uint32(0), uint32(0); i < size; i++ {
 		for j := uint32(0); j < size; j++ {
