@@ -160,20 +160,41 @@ func ExampleHat() {
 		return
 	}
 
-	points := make([]float64, 101)
-	for i := range points {
-		points[i] = 0.01 * float64(i)
-	}
+	points := makeGrid1D(101, 0.01)
 	values := algorithm.Evaluate(surrogate, points)
 
 	file, _ := mat.Open("hat.mat", "w7.3")
 	defer file.Close()
 
-	file.PutMatrix("x", 101, 1, points)
-	file.PutMatrix("y", 101, 1, values)
+	file.PutMatrix("x", 1, 101, points)
+	file.PutMatrix("y", 1, 101, values)
 
 	// Output:
 	// Surrogate{ inputs: 1, levels: 9, nodes: 305 }
+}
+
+func ExampleCube() {
+	algorithm := New(newcot.New(2), linhat.New(2))
+	algorithm.maxLevel = 9
+	surrogate := algorithm.Construct(cube)
+
+	fmt.Println(surrogate)
+
+	if !testing.Verbose() {
+		return
+	}
+
+	points := makeGrid2D(21, 0.05)
+	values := algorithm.Evaluate(surrogate, points)
+
+	file, _ := mat.Open("cube.mat", "w7.3")
+	defer file.Close()
+
+	file.PutMatrix("x", 2, 21*21, points)
+	file.PutMatrix("y", 1, 21*21, values)
+
+	// Output:
+	// Surrogate{ inputs: 2, levels: 9, nodes: 377 }
 }
 
 func step(x []float64) []float64 {
@@ -213,4 +234,25 @@ func cube(x []float64) []float64 {
 	}
 
 	return y
+}
+
+func makeGrid1D(size uint32, step float64) []float64 {
+	points := make([]float64, size)
+	for i := uint32(0); i < size; i++ {
+		points[i] = step * float64(i)
+	}
+	return points
+}
+
+func makeGrid2D(size uint32, step float64) []float64 {
+	points := make([]float64, 2*size*size)
+	for k, i := uint32(0), uint32(0); i < size; i++ {
+		for j := uint32(0); j < size; j++ {
+			points[k] = step * float64(i)
+			k++
+			points[k] = step * float64(j)
+			k++
+		}
+	}
+	return points
 }
