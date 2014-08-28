@@ -35,7 +35,7 @@ func TestEvaluateStep(t *testing.T) {
 	assertEqual(values, stepFixture.values, t)
 }
 
-// TestEvaluateCube deals with a multiple-input-one-output scenario.
+// TestConstructCube deals with a multiple-input-one-output scenario.
 func TestConstructCube(t *testing.T) {
 	algorithm := New(newcot.New(2), linhat.New(2))
 	algorithm.maxLevel = cubeFixture.surrogate.level
@@ -43,6 +43,18 @@ func TestConstructCube(t *testing.T) {
 	surrogate := algorithm.Construct(cube)
 
 	assertEqual(surrogate, cubeFixture.surrogate, t)
+}
+
+// TestConstructBox deals with a multiple-input-multiple-output scenario.
+func TestConstructBox(t *testing.T) {
+	t.Skip()
+
+	algorithm := New(newcot.New(2), linhat.New(2))
+	algorithm.maxLevel = boxFixture.surrogate.level
+
+	surrogate := algorithm.Construct(box)
+
+	assertEqual(surrogate, boxFixture.surrogate, t)
 }
 
 // ExampleStep demonstrates a one-input-one-output scenario with a smooth
@@ -55,7 +67,7 @@ func ExampleStep() {
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{ inputs: 1, levels: 19, nodes: 38 }
+	// Surrogate{ inputs: 1, outputs: 1, levels: 19, nodes: 38 }
 }
 
 // ExampleHat demonstrates a one-input-one-output scenario with a non-smooth
@@ -81,7 +93,7 @@ func ExampleHat() {
 	file.PutMatrix("y", 1, 101, values)
 
 	// Output:
-	// Surrogate{ inputs: 1, levels: 9, nodes: 305 }
+	// Surrogate{ inputs: 1, outputs: 1, levels: 9, nodes: 305 }
 }
 
 // ExampleHat demonstrates a multiple-input-one-output scenario with a
@@ -107,5 +119,5 @@ func ExampleCube() {
 	file.PutMatrix("y", 1, 21*21, values)
 
 	// Output:
-	// Surrogate{ inputs: 2, levels: 9, nodes: 377 }
+	// Surrogate{ inputs: 2, outputs: 1, levels: 9, nodes: 377 }
 }

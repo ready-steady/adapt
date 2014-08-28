@@ -24,6 +24,7 @@ var stepFixture = fixture{
 	surrogate: &Surrogate{
 		level:     4,
 		inCount:   1,
+		outCount:  1,
 		nodeCount: 8,
 
 		levels:    []uint8{0, 1, 1, 2, 3, 3, 4, 4},
@@ -51,6 +52,7 @@ var cubeFixture = fixture{
 	surrogate: &Surrogate{
 		level:     3,
 		inCount:   2,
+		outCount:  1,
 		nodeCount: 29,
 
 		levels: []uint8{
@@ -139,4 +141,36 @@ func hat(x []float64) []float64 {
 		}
 	}
 	return y
+}
+
+func box(x []float64) []float64 {
+	count := len(x) / 2
+	y := make([]float64, 3*count)
+
+	for i := 0; i < count; i++ {
+		x1, x2 := x[2*i+0], x[2*i+1]
+
+		if x1 + x2 > 0.5 {
+			y[3*i+0] = 1
+		}
+
+		if x1 - x2 > 0.5 {
+			y[3*i+1] = 1
+		}
+
+		if x2 - x1 > 0.5 {
+			y[3*i+2] = 1
+		}
+	}
+
+	return y
+}
+
+var boxFixture = fixture{
+	surrogate: &Surrogate{
+		level:     3,
+		inCount:   2,
+		outCount:  3,
+		nodeCount: 20,
+	},
 }

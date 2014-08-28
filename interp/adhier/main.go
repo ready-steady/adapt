@@ -54,6 +54,7 @@ func New(grid Grid, basis Basis) *Self {
 type Surrogate struct {
 	level     uint8
 	inCount   uint16
+	outCount  uint16
 	nodeCount uint32
 
 	levels    []uint8
@@ -61,8 +62,9 @@ type Surrogate struct {
 	surpluses []float64
 }
 
-func (s *Surrogate) initialize(inCount uint16) {
+func (s *Surrogate) initialize(inCount, outCount uint16) {
 	s.inCount = inCount
+	s.outCount = outCount
 	s.nodeCount = bufferInitSize
 
 	s.levels = make([]uint8, bufferInitSize*inCount)
@@ -105,8 +107,8 @@ func (s *Surrogate) resize(nodeCount uint32) {
 // String returns a string containing human-friendly information about the
 // surrogate.
 func (s *Surrogate) String() string {
-	return fmt.Sprintf("Surrogate{ inputs: %d, levels: %d, nodes: %d }",
-		s.inCount, s.level, s.nodeCount)
+	return fmt.Sprintf("Surrogate{ inputs: %d, outputs: %d, levels: %d, nodes: %d }",
+		s.inCount, s.outCount, s.level, s.nodeCount)
 }
 
 // Construct takes a function and yields a surrogate/interpolant for it, which
@@ -115,7 +117,7 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	inc := uint32(self.grid.Dimensionality())
 
 	surrogate := new(Surrogate)
-	surrogate.initialize(uint16(inc))
+	surrogate.initialize(uint16(inc), 1)
 
 	level := uint8(0)
 	nodeCount := uint32(0)
