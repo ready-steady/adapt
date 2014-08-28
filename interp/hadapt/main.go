@@ -140,7 +140,7 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 
 		for i := uint32(0); i < newc; i++ {
 			surrogate.surpluses[oldc+i] = values[i] -
-				self.evaluate(inc, oldc,
+				evaluate(self.basis, inc, oldc,
 					nodes[i*inc:(i+1)*inc],
 					surrogate.levels[0:oldc*inc],
 					surrogate.orders[0:oldc*inc],
@@ -202,29 +202,29 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	return surrogate
 }
 
-func (self *Self) evaluate(inc uint32, sc uint32, point []float64,
-	levels []uint8, orders []uint32, surpluses []float64) (value float64) {
-
-	for i := uint32(0); i < sc; i++ {
-		value += surpluses[i] * self.basis.Evaluate(point,
-			levels[i*inc:(i+1)*inc], orders[i*inc:(i+1)*inc])
-	}
-
-	return value
-}
-
 // Evaluate takes a surrogate produced by Construct and evaluates it at the
 // given points.
 func (self *Self) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	inc := uint32(self.grid.Dimensionality())
-	pc := uint32(len(points)) / inc
+	pointCount := uint32(len(points)) / inc
 
-	values := make([]float64, pc)
+	values := make([]float64, pointCount)
 
-	for i := uint32(0); i < pc; i++ {
-		values[i] = self.evaluate(inc, surrogate.nodeCount, points[i*inc:(i+1)*inc],
+	for i := uint32(0); i < pointCount; i++ {
+		values[i] = evaluate(self.basis, inc, surrogate.nodeCount, points[i*inc:(i+1)*inc],
 			surrogate.levels, surrogate.orders, surrogate.surpluses)
 	}
 
 	return values
+}
+
+func evaluate(basis Basis, inc uint32, sc uint32, point []float64,
+	levels []uint8, orders []uint32, surpluses []float64) (value float64) {
+
+	for i := uint32(0); i < sc; i++ {
+		value += surpluses[i] * basis.Evaluate(point,
+			levels[i*inc:(i+1)*inc], orders[i*inc:(i+1)*inc])
+	}
+
+	return value
 }
