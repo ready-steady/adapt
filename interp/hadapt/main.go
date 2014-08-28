@@ -218,10 +218,10 @@ func (self *Self) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return values
 }
 
-func evaluate(basis Basis, inc uint32, sc uint32, point []float64,
+func evaluate(basis Basis, inc uint32, surplusCount uint32, point []float64,
 	levels []uint8, orders []uint32, surpluses []float64) (value float64) {
 
-	for i := uint32(0); i < sc; i++ {
+	for i := uint32(0); i < surplusCount; i++ {
 		value += surpluses[i] * basis.Evaluate(point,
 			levels[i*inc:(i+1)*inc], orders[i*inc:(i+1)*inc])
 	}
