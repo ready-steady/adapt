@@ -1,6 +1,6 @@
-// Package hadapt provides an algorithm for adaptive hierarchical interpolation
+// Package adhier provides an algorithm for adaptive hierarchical interpolation
 // with local refinements.
-package hadapt
+package adhier
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package hadapt
+package adhier
 
 import (
 	"fmt"
