@@ -32,8 +32,8 @@ func TestEvaluate(t *testing.T) {
 
 	for i := range cases {
 		for j := range values {
-			values[j] = basis.Evaluate([]float64{points[j]},
-				[]uint8{cases[i].level}, []uint32{cases[i].order})
+			values[j] = basis.Evaluate([]uint8{cases[i].level},
+				[]uint32{cases[i].order}, []float64{points[j]})
 		}
 		assertEqual(values, cases[i].values, t)
 	}

@@ -18,7 +18,7 @@ func New(dimensionCount uint16) *Self {
 
 // Evaluate computes the value of a multi-dimensional basis function,
 // identified by the given levels and orders, at the given point.
-func (self *Self) Evaluate(point []float64, levels []uint8, orders []uint32) float64 {
+func (self *Self) Evaluate(levels []uint8, orders []uint32, point []float64) float64 {
 	var value, limit, delta float64 = 1, 0, 0
 
 	for i := uint16(0); i < self.dimensionCount; i++ {
