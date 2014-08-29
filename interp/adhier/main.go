@@ -65,8 +65,8 @@ type Surrogate struct {
 }
 
 func (s *Surrogate) initialize(inCount, outCount uint16) {
-	ins := bufferInitCount * inCount
-	outs := bufferInitCount * outCount
+	ins := bufferInitCount * uint32(inCount)
+	outs := bufferInitCount * uint32(outCount)
 
 	s.inCount = inCount
 	s.outCount = outCount
