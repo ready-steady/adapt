@@ -2,6 +2,7 @@ package adhier
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"testing"
 
@@ -14,6 +15,25 @@ func assertEqual(actual, expected interface{}, t *testing.T) {
 	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("got '%v' instead of '%v'", actual, expected)
 	}
+}
+
+const epsilon = 1e-8
+
+func assertAlmostEqual(actual, expected []float64, t *testing.T) {
+	if len(actual) != len(expected) {
+		goto error
+	}
+
+	for i := range actual {
+		if math.Abs(actual[i] - expected[i]) > epsilon {
+			goto error
+		}
+	}
+
+	return
+
+error:
+	t.Fatalf("got '%v' instead of '%v'", actual, expected)
 }
 
 // TestConstructStep deals with a one-input-one-output scenario.
@@ -53,6 +73,15 @@ func TestConstructBox(t *testing.T) {
 	surrogate := algorithm.Construct(box)
 
 	assertEqual(surrogate, boxFixture.surrogate, t)
+}
+
+// TestEvaluateBox deals with a multiple-input-multiple-output scenario.
+func TestEvaluateBox(t *testing.T) {
+	algorithm := New(newcot.New(2), linhat.New(2), 3)
+
+	values := algorithm.Evaluate(boxFixture.surrogate, boxFixture.points)
+
+	assertAlmostEqual(values, boxFixture.values, t)
 }
 
 // ExampleStep demonstrates a one-input-one-output scenario with a smooth
