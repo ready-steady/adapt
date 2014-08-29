@@ -146,7 +146,7 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	oldc := uint32(0)
 	nodeCount := uint32(0)
 
-	var i, j, k uint32
+	var i, j, k, l uint32
 
 	value := make([]float64, outc)
 
@@ -200,7 +200,7 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 		}
 
 		if level >= self.minLevel {
-			k = 0
+			k, l = 0, 0
 
 			for i = 0; i < newc; i++ {
 				refine := false
@@ -222,20 +222,19 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 				}
 
 				if !refine {
+					l += inc
 					continue
 				}
 
-				// Prevent copying over itself.
-				if k == i*inc {
-					k += inc
-					continue
+				if k != l {
+					// Shift everything, assuming a lot of refinements.
+					copy(levels[k:], levels[l:])
+					copy(orders[k:], orders[l:])
+					l = k
 				}
 
-				for j = 0; j < inc; j++ {
-					levels[k] = levels[i*inc+j]
-					orders[k] = orders[i*inc+j]
-					k++
-				}
+				k += inc
+				l += inc
 			}
 
 			levels = levels[0:k]
