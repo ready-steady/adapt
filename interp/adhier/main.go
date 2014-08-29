@@ -23,7 +23,7 @@ type Grid interface {
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	Evaluate(point []float64, levels []uint8, orders []uint32) float64
+	Evaluate(levels []uint8, orders []uint32, point []float64) float64
 }
 
 // Self represents a particular instantiation of the algorithm.
@@ -125,6 +125,7 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	level := uint8(0)
 	nodeCount := uint32(0)
 
+	value := make([]float64, outc)
 	minValue := make([]float64, outc)
 	maxValue := make([]float64, outc)
 	for i := uint32(0); i < outc; i++ {
@@ -149,8 +150,8 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 
 		// Compute the surpluses corresponding to the active nodes.
 		for i, k := uint32(0), oldc*outc; i < newc; i++ {
-			value := evaluate(inc, self.basis, outc, nodes[i*inc:(i+1)*inc],
-				oldc, surrogate.levels, surrogate.orders, surrogate.surpluses)
+			evaluate(self.basis, surrogate, inc, outc, oldc,
+				nodes[i*inc:(i+1)*inc], value)
 
 			for j := uint32(0); j < outc; j++ {
 				surrogate.surpluses[k] = values[i*outc+j] - value[j]
@@ -233,38 +234,37 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 // Evaluate takes a surrogate produced by Construct and evaluates it at the
 // given points.
 func (self *Self) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	inc := uint32(self.grid.Dimensionality())
-	outc := uint32(self.outCount)
+	inc := uint32(surrogate.inCount)
+	outc := uint32(surrogate.outCount)
 
 	pointCount := uint32(len(points)) / inc
 
 	values := make([]float64, pointCount*outc)
 
-	for i, k := uint32(0), uint32(0); i < pointCount; i++ {
-		value := evaluate(inc, self.basis, outc, points[i*inc:(i+1)*inc],
-			surrogate.nodeCount, surrogate.levels, surrogate.orders,
-			surrogate.surpluses)
-
-		for j := uint32(0); j < outc; j++ {
-			values[k] = value[j]
-			k++
-		}
+	for i := uint32(0); i < pointCount; i++ {
+		evaluate(self.basis, surrogate, inc, outc, surrogate.nodeCount,
+			points[i*inc:], values[i*outc:])
 	}
 
 	return values
 }
 
-func evaluate(inc uint32, basis Basis, outc uint32, point []float64, nodec uint32,
-	levels []uint8, orders []uint32, surpluses []float64) []float64 {
+func evaluate(basis Basis, surrogate *Surrogate, inc, outc, nodec uint32,
+	point []float64, value []float64) {
 
-	value := make([]float64, outc)
-
-	for i := uint32(0); i < nodec; i++ {
-		weight := basis.Evaluate(point, levels[i*inc:(i+1)*inc], orders[i*inc:(i+1)*inc])
-		for j := uint32(0); j < outc; j++ {
-			value[j] += surpluses[i*outc+j] * weight
-		}
+	if nodec == 0 {
+		return
 	}
 
-	return value
+	weight := basis.Evaluate(surrogate.levels, surrogate.orders, point)
+	for j := uint32(0); j < outc; j++ {
+		value[j] = surrogate.surpluses[j] * weight
+	}
+
+	for i := uint32(1); i < nodec; i++ {
+		weight := basis.Evaluate(surrogate.levels[i*inc:], surrogate.orders[i*inc:], point)
+		for j := uint32(0); j < outc; j++ {
+			value[j] += surrogate.surpluses[i*outc+j] * weight
+		}
+	}
 }

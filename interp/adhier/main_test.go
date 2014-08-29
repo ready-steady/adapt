@@ -52,9 +52,6 @@ func TestConstructBox(t *testing.T) {
 
 	surrogate := algorithm.Construct(box)
 
-	t.Log(surrogate.levels)
-	t.Log(boxFixture.surrogate.levels)
-
 	assertEqual(surrogate, boxFixture.surrogate, t)
 }
 
