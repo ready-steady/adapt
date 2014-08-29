@@ -25,7 +25,7 @@ func assertAlmostEqual(actual, expected []float64, t *testing.T) {
 	}
 
 	for i := range actual {
-		if math.Abs(actual[i] - expected[i]) > epsilon {
+		if math.Abs(actual[i]-expected[i]) > epsilon {
 			goto error
 		}
 	}

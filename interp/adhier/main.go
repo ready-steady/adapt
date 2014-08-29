@@ -65,8 +65,8 @@ type Surrogate struct {
 }
 
 func (s *Surrogate) initialize(inCount, outCount uint16) {
-	ins := bufferInitCount*inCount
-	outs := bufferInitCount*outCount
+	ins := bufferInitCount * inCount
+	outs := bufferInitCount * outCount
 
 	s.inCount = inCount
 	s.outCount = outCount
@@ -78,8 +78,8 @@ func (s *Surrogate) initialize(inCount, outCount uint16) {
 }
 
 func (s *Surrogate) finalize(level uint8, nodeCount uint32) {
-	ins := nodeCount*uint32(s.inCount)
-	outs := nodeCount*uint32(s.outCount)
+	ins := nodeCount * uint32(s.inCount)
+	outs := nodeCount * uint32(s.outCount)
 
 	s.level = level
 	s.nodeCount = nodeCount
@@ -99,16 +99,16 @@ func (s *Surrogate) resize(nodeCount uint32) {
 	}
 
 	// New sizes
-	ins := nodeCount*uint32(s.inCount)
-	outs := nodeCount*uint32(s.outCount)
+	ins := nodeCount * uint32(s.inCount)
+	outs := nodeCount * uint32(s.outCount)
 
 	levels := make([]uint8, ins)
 	orders := make([]uint32, ins)
 	surpluses := make([]float64, outs)
 
 	// Old sizes
-	ins = s.nodeCount*uint32(s.inCount)
-	outs = s.nodeCount*uint32(s.outCount)
+	ins = s.nodeCount * uint32(s.inCount)
+	outs = s.nodeCount * uint32(s.outCount)
 
 	copy(levels, s.levels[0:ins])
 	copy(orders, s.orders[0:ins])
