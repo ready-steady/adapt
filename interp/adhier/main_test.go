@@ -94,7 +94,7 @@ func ExampleHat() {
 	// Surrogate{ inputs: 1, outputs: 1, levels: 9, nodes: 305 }
 }
 
-// ExampleHat demonstrates a multiple-input-one-output scenario with a
+// ExampleCube demonstrates a multiple-input-one-output scenario with a
 // non-smooth function.
 func ExampleCube() {
 	algorithm := New(newcot.New(2), linhat.New(2), 1)
@@ -118,4 +118,28 @@ func ExampleCube() {
 
 	// Output:
 	// Surrogate{ inputs: 2, outputs: 1, levels: 9, nodes: 377 }
+}
+
+func BenchmarkConstructHat(b *testing.B) {
+	algorithm := New(newcot.New(1), linhat.New(1), 1)
+
+	for i := 0; i < b.N; i++ {
+		_ = algorithm.Construct(hat)
+	}
+}
+
+func BenchmarkConstructCube(b *testing.B) {
+	algorithm := New(newcot.New(2), linhat.New(2), 1)
+
+	for i := 0; i < b.N; i++ {
+		_ = algorithm.Construct(cube)
+	}
+}
+
+func BenchmarkConstructBox(b *testing.B) {
+	algorithm := New(newcot.New(2), linhat.New(2), 3)
+
+	for i := 0; i < b.N; i++ {
+		_ = algorithm.Construct(box)
+	}
 }
