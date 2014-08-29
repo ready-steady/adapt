@@ -491,3 +491,29 @@ var boxFixture = fixture{
 		1.00, 0.00, 0.00,
 	},
 }
+
+func many(inc, outc int) func([]float64) []float64 {
+	return func(x []float64) []float64 {
+		count := len(x) / inc
+		y := make([]float64, count*outc)
+
+		for i, k := 0, 0; i < count; i++ {
+			sum, value := float64(0), float64(0)
+
+			for j := 0; j < inc; j++ {
+				sum += x[i*inc+j]
+			}
+
+			if sum > float64(inc)/4 {
+				value = 1
+			}
+
+			for j := 0; j < outc; j++ {
+				y[k] = value
+				k++
+			}
+		}
+
+		return y
+	}
+}

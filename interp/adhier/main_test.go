@@ -149,7 +149,26 @@ func ExampleCube() {
 	// Surrogate{ inputs: 2, outputs: 1, levels: 9, nodes: 377 }
 }
 
-func BenchmarkConstructHat(b *testing.B) {
+// ExampleMany demonstrates a multiple-input-many-output scenario.
+func ExampleMany() {
+	const (
+		inc  = 2
+		outc = 1000
+	)
+
+	algorithm := New(newcot.New(inc), linhat.New(inc), outc)
+	function := many(inc, outc)
+
+	surrogate := algorithm.Construct(function)
+
+	fmt.Println(surrogate)
+
+	// Output:
+	// Surrogate{ inputs: 2, outputs: 1000, levels: 9, nodes: 362 }
+}
+
+// BenchmarkHat deals with a one-input-one-output scenario.
+func BenchmarkHat(b *testing.B) {
 	algorithm := New(newcot.New(1), linhat.New(1), 1)
 
 	for i := 0; i < b.N; i++ {
@@ -157,7 +176,8 @@ func BenchmarkConstructHat(b *testing.B) {
 	}
 }
 
-func BenchmarkConstructCube(b *testing.B) {
+// BenchmarkCube deals with a multiple-input-one-output scenario.
+func BenchmarkCube(b *testing.B) {
 	algorithm := New(newcot.New(2), linhat.New(2), 1)
 
 	for i := 0; i < b.N; i++ {
@@ -165,10 +185,26 @@ func BenchmarkConstructCube(b *testing.B) {
 	}
 }
 
-func BenchmarkConstructBox(b *testing.B) {
+// BenchmarkBox deals with a multiple-input-multiple-output scenario.
+func BenchmarkBox(b *testing.B) {
 	algorithm := New(newcot.New(2), linhat.New(2), 3)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Construct(box)
+	}
+}
+
+// BenchmarkMany deals with a multiple-input-many-output scenario.
+func BenchmarkMany(b *testing.B) {
+	const (
+		inc  = 2
+		outc = 1000
+	)
+
+	algorithm := New(newcot.New(inc), linhat.New(inc), outc)
+	function := many(inc, outc)
+
+	for i := 0; i < b.N; i++ {
+		_ = algorithm.Construct(function)
 	}
 }
