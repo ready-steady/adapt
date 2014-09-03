@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gomath/format/mat"
 	"github.com/gomath/numan/basis/linhat"
 	"github.com/gomath/numan/grid/newcot"
 )
@@ -153,19 +152,6 @@ func ExampleSelf_hat() {
 	surrogate := algorithm.Construct(hat)
 	fmt.Println(surrogate)
 
-	if !testing.Verbose() {
-		return
-	}
-
-	points := makeGrid1D(101)
-	values := algorithm.Evaluate(surrogate, points)
-
-	file, _ := mat.Open("hat.mat", "w7.3")
-	defer file.Close()
-
-	file.PutMatrix("x", 1, 101, points)
-	file.PutMatrix("y", 1, 101, values)
-
 	// Output:
 	// Surrogate{ inputs: 1, outputs: 1, levels: 9, nodes: 305 }
 }
@@ -185,19 +171,6 @@ func ExampleSelf_cube() {
 
 	surrogate := algorithm.Construct(cube)
 	fmt.Println(surrogate)
-
-	if !testing.Verbose() {
-		return
-	}
-
-	points := makeGrid2D(21)
-	values := algorithm.Evaluate(surrogate, points)
-
-	file, _ := mat.Open("cube.mat", "w7.3")
-	defer file.Close()
-
-	file.PutMatrix("x", 2, 21*21, points)
-	file.PutMatrix("y", 1, 21*21, values)
 
 	// Output:
 	// Surrogate{ inputs: 2, outputs: 1, levels: 9, nodes: 377 }
