@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gomath/numan/basis/linhat"
-	"github.com/gomath/numan/grid/newcot"
+	"github.com/go-math/numan/basis/linhat"
+	"github.com/go-math/numan/grid/newcot"
 )
 
 func assertEqual(actual, expected interface{}, t *testing.T) {
