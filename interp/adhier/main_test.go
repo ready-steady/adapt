@@ -37,45 +37,45 @@ error:
 
 func TestConstructStep(t *testing.T) {
 	algorithm := New(newcot.New(1), linhat.New(1), 1)
-	algorithm.maxLevel = stepFixture.surrogate.level
+	algorithm.maxLevel = fixtureStep.surrogate.level
 
 	surrogate := algorithm.Construct(step)
 
-	assertEqual(surrogate, stepFixture.surrogate, t)
+	assertEqual(surrogate, fixtureStep.surrogate, t)
 }
 
 func TestEvaluateStep(t *testing.T) {
 	algorithm := New(newcot.New(1), linhat.New(1), 1)
 
-	values := algorithm.Evaluate(stepFixture.surrogate, stepFixture.points)
+	values := algorithm.Evaluate(fixtureStep.surrogate, fixtureStep.points)
 
-	assertEqual(values, stepFixture.values, t)
+	assertEqual(values, fixtureStep.values, t)
 }
 
 func TestConstructCube(t *testing.T) {
 	algorithm := New(newcot.New(2), linhat.New(2), 1)
-	algorithm.maxLevel = cubeFixture.surrogate.level
+	algorithm.maxLevel = fixtureCube.surrogate.level
 
 	surrogate := algorithm.Construct(cube)
 
-	assertEqual(surrogate, cubeFixture.surrogate, t)
+	assertEqual(surrogate, fixtureCube.surrogate, t)
 }
 
 func TestConstructBox(t *testing.T) {
 	algorithm := New(newcot.New(2), linhat.New(2), 3)
-	algorithm.maxLevel = boxFixture.surrogate.level
+	algorithm.maxLevel = fixtureBox.surrogate.level
 
 	surrogate := algorithm.Construct(box)
 
-	assertEqual(surrogate, boxFixture.surrogate, t)
+	assertEqual(surrogate, fixtureBox.surrogate, t)
 }
 
 func TestEvaluateBox(t *testing.T) {
 	algorithm := New(newcot.New(2), linhat.New(2), 3)
 
-	values := algorithm.Evaluate(boxFixture.surrogate, boxFixture.points)
+	values := algorithm.Evaluate(fixtureBox.surrogate, fixtureBox.points)
 
-	assertAlmostEqual(values, boxFixture.values, t)
+	assertAlmostEqual(values, fixtureBox.values, t)
 }
 
 func BenchmarkHat(b *testing.B) {

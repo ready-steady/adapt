@@ -20,7 +20,7 @@ func step(x []float64) []float64 {
 	return y
 }
 
-var stepFixture = fixture{
+var fixtureStep = fixture{
 	surrogate: &Surrogate{
 		level:     4,
 		inCount:   1,
@@ -48,7 +48,7 @@ func cube(x []float64) []float64 {
 	return y
 }
 
-var cubeFixture = fixture{
+var fixtureCube = fixture{
 	surrogate: &Surrogate{
 		level:     3,
 		inCount:   2,
@@ -165,7 +165,7 @@ func box(x []float64) []float64 {
 	return y
 }
 
-var boxFixture = fixture{
+var fixtureBox = fixture{
 	surrogate: &Surrogate{
 		level:     3,
 		inCount:   2,
