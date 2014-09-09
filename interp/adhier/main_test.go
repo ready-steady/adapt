@@ -2,38 +2,12 @@ package adhier
 
 import (
 	"fmt"
-	"math"
-	"reflect"
 	"testing"
 
 	"github.com/go-math/numan/basis/linhat"
 	"github.com/go-math/numan/grid/newcot"
+	"github.com/go-math/support/assert"
 )
-
-func assertEqual(actual, expected interface{}, t *testing.T) {
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("got '%v' instead of '%v'", actual, expected)
-	}
-}
-
-const epsilon = 1e-8
-
-func assertAlmostEqual(actual, expected []float64, t *testing.T) {
-	if len(actual) != len(expected) {
-		goto error
-	}
-
-	for i := range actual {
-		if math.Abs(actual[i]-expected[i]) > epsilon {
-			goto error
-		}
-	}
-
-	return
-
-error:
-	t.Fatalf("got '%v' instead of '%v'", actual, expected)
-}
 
 func TestConstructStep(t *testing.T) {
 	algorithm := New(newcot.New(1), linhat.New(1), 1)
@@ -41,7 +15,7 @@ func TestConstructStep(t *testing.T) {
 
 	surrogate := algorithm.Construct(step)
 
-	assertEqual(surrogate, fixtureStep.surrogate, t)
+	assert.Equal(surrogate, fixtureStep.surrogate, t)
 }
 
 func TestEvaluateStep(t *testing.T) {
@@ -49,7 +23,7 @@ func TestEvaluateStep(t *testing.T) {
 
 	values := algorithm.Evaluate(fixtureStep.surrogate, fixtureStep.points)
 
-	assertEqual(values, fixtureStep.values, t)
+	assert.Equal(values, fixtureStep.values, t)
 }
 
 func TestConstructCube(t *testing.T) {
@@ -58,7 +32,7 @@ func TestConstructCube(t *testing.T) {
 
 	surrogate := algorithm.Construct(cube)
 
-	assertEqual(surrogate, fixtureCube.surrogate, t)
+	assert.Equal(surrogate, fixtureCube.surrogate, t)
 }
 
 func TestConstructBox(t *testing.T) {
@@ -67,7 +41,7 @@ func TestConstructBox(t *testing.T) {
 
 	surrogate := algorithm.Construct(box)
 
-	assertEqual(surrogate, fixtureBox.surrogate, t)
+	assert.Equal(surrogate, fixtureBox.surrogate, t)
 }
 
 func TestEvaluateBox(t *testing.T) {
@@ -75,7 +49,7 @@ func TestEvaluateBox(t *testing.T) {
 
 	values := algorithm.Evaluate(fixtureBox.surrogate, fixtureBox.points)
 
-	assertAlmostEqual(values, fixtureBox.values, t)
+	assert.AlmostEqual(values, fixtureBox.values, t)
 }
 
 func BenchmarkHat(b *testing.B) {
