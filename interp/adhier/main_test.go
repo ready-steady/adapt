@@ -13,7 +13,7 @@ func TestConstructStep(t *testing.T) {
 	algorithm := New(newcot.New(1), linhat.New(1), 1)
 	algorithm.maxLevel = fixtureStep.surrogate.level
 
-	surrogate := algorithm.Construct(step)
+	surrogate := algorithm.Compute(step)
 
 	assert.Equal(surrogate, fixtureStep.surrogate, t)
 }
@@ -30,7 +30,7 @@ func TestConstructCube(t *testing.T) {
 	algorithm := New(newcot.New(2), linhat.New(2), 1)
 	algorithm.maxLevel = fixtureCube.surrogate.level
 
-	surrogate := algorithm.Construct(cube)
+	surrogate := algorithm.Compute(cube)
 
 	assert.Equal(surrogate, fixtureCube.surrogate, t)
 }
@@ -39,7 +39,7 @@ func TestConstructBox(t *testing.T) {
 	algorithm := New(newcot.New(2), linhat.New(2), 3)
 	algorithm.maxLevel = fixtureBox.surrogate.level
 
-	surrogate := algorithm.Construct(box)
+	surrogate := algorithm.Compute(box)
 
 	assert.Equal(surrogate, fixtureBox.surrogate, t)
 }
@@ -56,7 +56,7 @@ func BenchmarkHat(b *testing.B) {
 	algorithm := New(newcot.New(1), linhat.New(1), 1)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Construct(hat)
+		_ = algorithm.Compute(hat)
 	}
 }
 
@@ -64,7 +64,7 @@ func BenchmarkCube(b *testing.B) {
 	algorithm := New(newcot.New(2), linhat.New(2), 1)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Construct(cube)
+		_ = algorithm.Compute(cube)
 	}
 }
 
@@ -72,7 +72,7 @@ func BenchmarkBox(b *testing.B) {
 	algorithm := New(newcot.New(2), linhat.New(2), 3)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Construct(box)
+		_ = algorithm.Compute(box)
 	}
 }
 
@@ -86,7 +86,7 @@ func BenchmarkMany(b *testing.B) {
 	function := many(inCount, outCount)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Construct(function)
+		_ = algorithm.Compute(function)
 	}
 }
 
@@ -103,7 +103,7 @@ func ExampleSelf_step() {
 	algorithm := New(grid, basis, outCount)
 	algorithm.maxLevel = 19
 
-	surrogate := algorithm.Construct(step)
+	surrogate := algorithm.Compute(step)
 	fmt.Println(surrogate)
 
 	// Output:
@@ -123,7 +123,7 @@ func ExampleSelf_hat() {
 	algorithm := New(grid, basis, outCount)
 	algorithm.maxLevel = 9
 
-	surrogate := algorithm.Construct(hat)
+	surrogate := algorithm.Compute(hat)
 	fmt.Println(surrogate)
 
 	// Output:
@@ -143,7 +143,7 @@ func ExampleSelf_cube() {
 	algorithm := New(grid, basis, outCount)
 	algorithm.maxLevel = 9
 
-	surrogate := algorithm.Construct(cube)
+	surrogate := algorithm.Compute(cube)
 	fmt.Println(surrogate)
 
 	// Output:
@@ -162,7 +162,7 @@ func ExampleSelf_many() {
 
 	algorithm := New(grid, basis, outCount)
 
-	surrogate := algorithm.Construct(many(inCount, outCount))
+	surrogate := algorithm.Compute(many(inCount, outCount))
 	fmt.Println(surrogate)
 
 	// Output:

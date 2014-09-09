@@ -51,7 +51,7 @@ func New(grid Grid, basis Basis, outCount uint16) *Self {
 	}
 }
 
-// Surrogate is the result of Construct, which represents an interpolant for a
+// Surrogate is the result of Compute, which represents an interpolant for a
 // function.
 type Surrogate struct {
 	level     uint8
@@ -128,9 +128,9 @@ func (s *Surrogate) String() string {
 		s.inCount, s.outCount, s.level, s.nodeCount)
 }
 
-// Construct takes a function and yields a surrogate/interpolant for it, which
+// Compute takes a function and yields a surrogate/interpolant for it, which
 // can be further fed to Evaluate for the actual interpolation.
-func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
+func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 	inc := uint32(self.grid.Dimensionality())
 	outc := uint32(self.outCount)
 
@@ -257,7 +257,7 @@ func (self *Self) Construct(target func([]float64) []float64) *Surrogate {
 	return surrogate
 }
 
-// Evaluate takes a surrogate produced by Construct and evaluates it at the
+// Evaluate takes a surrogate produced by Compute and evaluates it at the
 // given points.
 func (self *Self) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	inc := uint32(surrogate.inCount)
