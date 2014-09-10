@@ -22,10 +22,11 @@ func step(x []float64) []float64 {
 
 var fixtureStep = fixture{
 	surrogate: &Surrogate{
-		level:     4,
-		inCount:   1,
-		outCount:  1,
-		nodeCount: 8,
+		level: 4,
+
+		ic: 1,
+		oc: 1,
+		nc: 8,
 
 		levels:    []uint8{0, 1, 1, 2, 3, 3, 4, 4},
 		orders:    []uint32{0, 0, 2, 3, 5, 7, 9, 11},
@@ -36,10 +37,10 @@ var fixtureStep = fixture{
 }
 
 func cube(x []float64) []float64 {
-	count := uint16(len(x)) / 2
-	y := make([]float64, count)
+	nc := uint16(len(x)) / 2
+	y := make([]float64, nc)
 
-	for i := uint16(0); i < count; i++ {
+	for i := uint16(0); i < nc; i++ {
 		if math.Abs(2*x[2*i]-1) < 0.45 && math.Abs(2*x[2*i+1]-1) < 0.45 {
 			y[i] = 1
 		}
@@ -50,10 +51,10 @@ func cube(x []float64) []float64 {
 
 var fixtureCube = fixture{
 	surrogate: &Surrogate{
-		level:     3,
-		inCount:   2,
-		outCount:  1,
-		nodeCount: 29,
+		level: 3,
+		ic:    2,
+		oc:    1,
+		nc:    29,
 
 		levels: []uint8{
 			0, 0,
@@ -143,10 +144,10 @@ func hat(x []float64) []float64 {
 }
 
 func box(x []float64) []float64 {
-	count := len(x) / 2
-	y := make([]float64, 3*count)
+	nc := len(x) / 2
+	y := make([]float64, 3*nc)
 
-	for i := 0; i < count; i++ {
+	for i := 0; i < nc; i++ {
 		x1, x2 := x[2*i+0], x[2*i+1]
 
 		if x1+x2 > 0.5 {
@@ -167,10 +168,10 @@ func box(x []float64) []float64 {
 
 var fixtureBox = fixture{
 	surrogate: &Surrogate{
-		level:     3,
-		inCount:   2,
-		outCount:  3,
-		nodeCount: 20,
+		level: 3,
+		ic:    2,
+		oc:    3,
+		nc:    20,
 
 		levels: []uint8{
 			0, 0,
@@ -492,23 +493,23 @@ var fixtureBox = fixture{
 	},
 }
 
-func many(inc, outc int) func([]float64) []float64 {
+func many(ic, oc int) func([]float64) []float64 {
 	return func(x []float64) []float64 {
-		count := len(x) / inc
-		y := make([]float64, count*outc)
+		nc := len(x) / ic
+		y := make([]float64, nc*oc)
 
-		for i, k := 0, 0; i < count; i++ {
+		for i, k := 0, 0; i < nc; i++ {
 			sum, value := float64(0), float64(0)
 
-			for j := 0; j < inc; j++ {
-				sum += x[i*inc+j]
+			for j := 0; j < ic; j++ {
+				sum += x[i*ic+j]
 			}
 
-			if sum > float64(inc)/4 {
+			if sum > float64(ic)/4 {
 				value = 1
 			}
 
-			for j := 0; j < outc; j++ {
+			for j := 0; j < oc; j++ {
 				y[k] = value
 				k++
 			}

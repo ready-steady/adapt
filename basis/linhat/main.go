@@ -8,12 +8,12 @@ import (
 
 // Self represents a particular instantiation of the basis.
 type Self struct {
-	dimensionCount uint16
+	dc uint16
 }
 
 // New creates an instance of the basis.
-func New(dimensionCount uint16) *Self {
-	return &Self{dimensionCount}
+func New(dimensions uint16) *Self {
+	return &Self{dimensions}
 }
 
 // Evaluate computes the value of a multi-dimensional basis function,
@@ -21,7 +21,7 @@ func New(dimensionCount uint16) *Self {
 func (self *Self) Evaluate(levels []uint8, orders []uint32, point []float64) float64 {
 	var value, limit, delta float64 = 1, 0, 0
 
-	for i := uint16(0); i < self.dimensionCount; i++ {
+	for i := uint16(0); i < self.dc; i++ {
 		if levels[i] == 0 {
 			if math.Abs(point[i]-0.5) > 0.5 {
 				return 0

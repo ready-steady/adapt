@@ -4,17 +4,17 @@ package newcot
 
 // Self represents a particular instantiation of the grid.
 type Self struct {
-	dimensionCount uint16
+	dc uint16
 }
 
 // New creates an instance of the grid for the given dimensionality.
-func New(dimensionCount uint16) *Self {
-	return &Self{dimensionCount}
+func New(dimensions uint16) *Self {
+	return &Self{dimensions}
 }
 
 // Dimensionality returns the number of dimensions of the grid.
 func (self *Self) Dimensionality() uint16 {
-	return self.dimensionCount
+	return self.dc
 }
 
 // ComputeNodes returns the nodes corresponding to the given levels and orders.
@@ -35,7 +35,7 @@ func (_ *Self) ComputeNodes(levels []uint8, orders []uint32) []float64 {
 // ComputeChildren returns the levels and orders of the child nodes
 // corresponding to the parent nodes given by their levels and orders.
 func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) ([]uint8, []uint32) {
-	dc := self.dimensionCount
+	dc := self.dc
 	pc := uint16(len(parentLevels)) / dc
 
 	levels := make([]uint8, 2*pc*dc*dc)
