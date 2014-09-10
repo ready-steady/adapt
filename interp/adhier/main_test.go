@@ -10,8 +10,7 @@ import (
 )
 
 func TestConstructStep(t *testing.T) {
-	algorithm := New(newcot.New(1), linhat.New(1), 1)
-	algorithm.maxLevel = fixtureStep.surrogate.level
+	algorithm := makeSelf(1, 1, fixtureStep.surrogate.level)
 
 	surrogate := algorithm.Compute(step)
 
@@ -19,7 +18,7 @@ func TestConstructStep(t *testing.T) {
 }
 
 func TestEvaluateStep(t *testing.T) {
-	algorithm := New(newcot.New(1), linhat.New(1), 1)
+	algorithm := makeSelf(1, 1, 0)
 
 	values := algorithm.Evaluate(fixtureStep.surrogate, fixtureStep.points)
 
@@ -27,8 +26,7 @@ func TestEvaluateStep(t *testing.T) {
 }
 
 func TestConstructCube(t *testing.T) {
-	algorithm := New(newcot.New(2), linhat.New(2), 1)
-	algorithm.maxLevel = fixtureCube.surrogate.level
+	algorithm := makeSelf(2, 1, fixtureCube.surrogate.level)
 
 	surrogate := algorithm.Compute(cube)
 
@@ -36,8 +34,7 @@ func TestConstructCube(t *testing.T) {
 }
 
 func TestConstructBox(t *testing.T) {
-	algorithm := New(newcot.New(2), linhat.New(2), 3)
-	algorithm.maxLevel = fixtureBox.surrogate.level
+	algorithm := makeSelf(2, 3, fixtureBox.surrogate.level)
 
 	surrogate := algorithm.Compute(box)
 
@@ -45,7 +42,7 @@ func TestConstructBox(t *testing.T) {
 }
 
 func TestEvaluateBox(t *testing.T) {
-	algorithm := New(newcot.New(2), linhat.New(2), 3)
+	algorithm := makeSelf(2, 3, 0)
 
 	values := algorithm.Evaluate(fixtureBox.surrogate, fixtureBox.points)
 
@@ -53,7 +50,7 @@ func TestEvaluateBox(t *testing.T) {
 }
 
 func BenchmarkHat(b *testing.B) {
-	algorithm := New(newcot.New(1), linhat.New(1), 1)
+	algorithm := makeSelf(1, 1, 0)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Compute(hat)
@@ -61,7 +58,7 @@ func BenchmarkHat(b *testing.B) {
 }
 
 func BenchmarkCube(b *testing.B) {
-	algorithm := New(newcot.New(2), linhat.New(2), 1)
+	algorithm := makeSelf(2, 1, 0)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Compute(cube)
@@ -69,7 +66,7 @@ func BenchmarkCube(b *testing.B) {
 }
 
 func BenchmarkBox(b *testing.B) {
-	algorithm := New(newcot.New(2), linhat.New(2), 3)
+	algorithm := makeSelf(2, 3, 0)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Compute(box)
@@ -77,13 +74,8 @@ func BenchmarkBox(b *testing.B) {
 }
 
 func BenchmarkMany(b *testing.B) {
-	const (
-		inCount  = 2
-		outCount = 1000
-	)
-
-	algorithm := New(newcot.New(inCount), linhat.New(inCount), outCount)
-	function := many(inCount, outCount)
+	algorithm := makeSelf(2, 1000, 0)
+	function := many(2, 1000)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Compute(function)
@@ -93,15 +85,16 @@ func BenchmarkMany(b *testing.B) {
 // A one-input-one-output scenario with a non-smooth function.
 func ExampleSelf_step() {
 	const (
-		inCount  = 1
-		outCount = 1
+		inputs  = 1
+		outputs = 1
 	)
 
-	grid := newcot.New(inCount)
-	basis := linhat.New(inCount)
+	grid := newcot.New(inputs)
+	basis := linhat.New(inputs)
 
-	algorithm := New(grid, basis, outCount)
-	algorithm.maxLevel = 19
+	config := DefaultConfig
+	config.MaxLevel = 19
+	algorithm := New(grid, basis, config)
 
 	surrogate := algorithm.Compute(step)
 	fmt.Println(surrogate)
@@ -113,15 +106,16 @@ func ExampleSelf_step() {
 // A one-input-one-output scenario with a smooth function.
 func ExampleSelf_hat() {
 	const (
-		inCount  = 1
-		outCount = 1
+		inputs  = 1
+		outputs = 1
 	)
 
-	grid := newcot.New(inCount)
-	basis := linhat.New(inCount)
+	grid := newcot.New(inputs)
+	basis := linhat.New(inputs)
 
-	algorithm := New(grid, basis, outCount)
-	algorithm.maxLevel = 9
+	config := DefaultConfig
+	config.MaxLevel = 9
+	algorithm := New(grid, basis, config)
 
 	surrogate := algorithm.Compute(hat)
 	fmt.Println(surrogate)
@@ -133,15 +127,16 @@ func ExampleSelf_hat() {
 // A multiple-input-one-output scenario with a non-smooth function.
 func ExampleSelf_cube() {
 	const (
-		inCount  = 2
-		outCount = 1
+		inputs  = 2
+		outputs = 1
 	)
 
-	grid := newcot.New(inCount)
-	basis := linhat.New(inCount)
+	grid := newcot.New(inputs)
+	basis := linhat.New(inputs)
 
-	algorithm := New(grid, basis, outCount)
-	algorithm.maxLevel = 9
+	config := DefaultConfig
+	config.MaxLevel = 9
+	algorithm := New(grid, basis, config)
 
 	surrogate := algorithm.Compute(cube)
 	fmt.Println(surrogate)
@@ -153,18 +148,31 @@ func ExampleSelf_cube() {
 // A multiple-input-many-output scenario with a non-smooth function.
 func ExampleSelf_many() {
 	const (
-		inCount  = 2
-		outCount = 1000
+		inputs  = 2
+		outputs = 1000
 	)
 
-	grid := newcot.New(inCount)
-	basis := linhat.New(inCount)
+	grid := newcot.New(inputs)
+	basis := linhat.New(inputs)
 
-	algorithm := New(grid, basis, outCount)
+	config := DefaultConfig
+	config.Outputs = outputs
+	algorithm := New(grid, basis, config)
 
-	surrogate := algorithm.Compute(many(inCount, outCount))
+	surrogate := algorithm.Compute(many(inputs, outputs))
 	fmt.Println(surrogate)
 
 	// Output:
 	// Surrogate{ inputs: 2, outputs: 1000, levels: 9, nodes: 362 }
+}
+
+func makeSelf(ic, oc uint16, ml uint8) *Self {
+	config := DefaultConfig
+
+	config.Outputs = oc
+	if ml > 0 {
+		config.MaxLevel = ml
+	}
+
+	return New(newcot.New(ic), linhat.New(ic), config)
 }

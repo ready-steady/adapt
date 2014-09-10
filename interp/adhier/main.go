@@ -22,32 +22,18 @@ type Basis interface {
 
 // Self represents a particular instantiation of the algorithm.
 type Self struct {
-	grid  Grid
-	basis Basis
-
-	oc uint16
-
-	minLevel uint8
-	maxLevel uint8
-
-	absError float64
-	relError float64
+	grid   Grid
+	basis  Basis
+	config Config
 }
 
 // New creates an instance of the algorithm for the given sparse grid and
 // functional basis.
-func New(grid Grid, basis Basis, outputs uint16) *Self {
+func New(grid Grid, basis Basis, config Config) *Self {
 	return &Self{
-		grid:  grid,
-		basis: basis,
-
-		oc: outputs,
-
-		minLevel: 1,
-		maxLevel: 9,
-
-		absError: 1e-4,
-		relError: 1e-2,
+		grid:   grid,
+		basis:  basis,
+		config: config,
 	}
 }
 
@@ -55,7 +41,7 @@ func New(grid Grid, basis Basis, outputs uint16) *Self {
 // can be further fed to Evaluate for the actual interpolation.
 func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 	ic := uint32(self.grid.Dimensionality())
-	oc := uint32(self.oc)
+	oc := uint32(self.config.Outputs)
 
 	surrogate := new(Surrogate)
 	surrogate.initialize(uint16(ic), uint16(oc))
@@ -105,7 +91,7 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 
 		nc += newc
 
-		if level >= self.maxLevel {
+		if level >= self.config.MaxLevel {
 			break
 		}
 
@@ -122,7 +108,7 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 			}
 		}
 
-		if level >= self.minLevel {
+		if level >= self.config.MinLevel {
 			k, l = 0, 0
 
 			for i = 0; i < newc; i++ {
@@ -131,14 +117,14 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 				for j = 0; j < oc; j++ {
 					absError := math.Abs(surrogate.surpluses[(oldc+i)*oc+j])
 
-					if absError > self.absError {
+					if absError > self.config.AbsError {
 						refine = true
 						break
 					}
 
 					relError := absError / (maxValue[j] - minValue[j])
 
-					if relError > self.relError {
+					if relError > self.config.RelError {
 						refine = true
 						break
 					}
