@@ -94,7 +94,7 @@ func ExampleSelf_step() {
 
 	config := DefaultConfig
 	config.MaxLevel = 19
-	algorithm := New(grid, basis, config)
+	algorithm := New(grid, basis, config, outputs)
 
 	surrogate := algorithm.Compute(step)
 	fmt.Println(surrogate)
@@ -115,7 +115,7 @@ func ExampleSelf_hat() {
 
 	config := DefaultConfig
 	config.MaxLevel = 9
-	algorithm := New(grid, basis, config)
+	algorithm := New(grid, basis, config, outputs)
 
 	surrogate := algorithm.Compute(hat)
 	fmt.Println(surrogate)
@@ -136,7 +136,7 @@ func ExampleSelf_cube() {
 
 	config := DefaultConfig
 	config.MaxLevel = 9
-	algorithm := New(grid, basis, config)
+	algorithm := New(grid, basis, config, outputs)
 
 	surrogate := algorithm.Compute(cube)
 	fmt.Println(surrogate)
@@ -155,9 +155,7 @@ func ExampleSelf_many() {
 	grid := newcot.New(inputs)
 	basis := linhat.New(inputs)
 
-	config := DefaultConfig
-	config.Outputs = outputs
-	algorithm := New(grid, basis, config)
+	algorithm := New(grid, basis, DefaultConfig, outputs)
 
 	surrogate := algorithm.Compute(many(inputs, outputs))
 	fmt.Println(surrogate)
@@ -169,10 +167,9 @@ func ExampleSelf_many() {
 func makeSelf(ic, oc uint16, ml uint8) *Self {
 	config := DefaultConfig
 
-	config.Outputs = oc
 	if ml > 0 {
 		config.MaxLevel = ml
 	}
 
-	return New(newcot.New(ic), linhat.New(ic), config)
+	return New(newcot.New(ic), linhat.New(ic), config, oc)
 }

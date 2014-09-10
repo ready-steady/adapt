@@ -9,7 +9,7 @@ import (
 // Grid is the interface that an sparse grid should satisfy in order to be used
 // in the algorithm.
 type Grid interface {
-	Dimensionality() uint16
+	Dimensions() uint16
 	ComputeNodes(levels []uint8, orders []uint32) []float64
 	ComputeChildren(levels []uint8, orders []uint32) ([]uint8, []uint32)
 }
@@ -25,23 +25,28 @@ type Self struct {
 	grid   Grid
 	basis  Basis
 	config Config
+
+	ic uint16
+	oc uint16
 }
 
-// New creates an instance of the algorithm for the given sparse grid and
-// functional basis.
-func New(grid Grid, basis Basis, config Config) *Self {
+// New creates an instance of the algorithm for the given configuration.
+func New(grid Grid, basis Basis, config Config, outputs uint16) *Self {
 	return &Self{
 		grid:   grid,
 		basis:  basis,
 		config: config,
+
+		ic: grid.Dimensions(),
+		oc: outputs,
 	}
 }
 
-// Compute takes a function and yields a surrogate/interpolant for it, which
-// can be further fed to Evaluate for the actual interpolation.
+// Compute takes a function and yields a surrogate for it, which can be further
+// fed to Evaluate for the actual interpolation.
 func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
-	ic := uint32(self.grid.Dimensionality())
-	oc := uint32(self.config.Outputs)
+	ic := uint32(self.ic)
+	oc := uint32(self.oc)
 
 	surrogate := new(Surrogate)
 	surrogate.initialize(uint16(ic), uint16(oc))

@@ -12,8 +12,8 @@ func New(dimensions uint16) *Self {
 	return &Self{dimensions}
 }
 
-// Dimensionality returns the number of dimensions of the grid.
-func (self *Self) Dimensionality() uint16 {
+// Dimensions returns the number of dimensions of the grid.
+func (self *Self) Dimensions() uint16 {
 	return self.dc
 }
 
