@@ -173,37 +173,32 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 
 // Evaluate takes a surrogate produced by Compute and evaluates it at the
 // given points.
-func (self *Self) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	ic := uint32(surrogate.ic)
-	oc := uint32(surrogate.oc)
+func (self *Self) Evaluate(s *Surrogate, points []float64) []float64 {
+	ic := uint32(s.ic)
+	oc := uint32(s.oc)
+	pc := uint32(len(points)) / ic
 
-	pointCount := uint32(len(points)) / ic
-
-	values := make([]float64, pointCount*oc)
-
-	for i := uint32(0); i < pointCount; i++ {
-		evaluate(self.basis, surrogate, ic, oc, surrogate.nc,
-			points[i*ic:], values[i*oc:])
+	values := make([]float64, pc*oc)
+	for i := uint32(0); i < pc; i++ {
+		evaluate(self.basis, s, ic, oc, s.nc, points[i*ic:], values[i*oc:])
 	}
 
 	return values
 }
 
-func evaluate(basis Basis, surrogate *Surrogate, ic, oc, nc uint32,
-	point []float64, value []float64) {
-
+func evaluate(b Basis, s *Surrogate, ic, oc, nc uint32, point []float64, value []float64) {
 	var i, j uint32 = 1, 0
 
 	// Rewrite value in case it is dirty (not zeroed).
-	weight := basis.Evaluate(surrogate.levels, surrogate.orders, point)
+	weight := b.Evaluate(s.levels, s.orders, point)
 	for ; j < oc; j++ {
-		value[j] = surrogate.surpluses[j] * weight
+		value[j] = s.surpluses[j] * weight
 	}
 
 	for ; i < nc; i++ {
-		weight = basis.Evaluate(surrogate.levels[i*ic:], surrogate.orders[i*ic:], point)
+		weight = b.Evaluate(s.levels[i*ic:], s.orders[i*ic:], point)
 		for j = 0; j < oc; j++ {
-			value[j] += surrogate.surpluses[i*oc+j] * weight
+			value[j] += s.surpluses[i*oc+j] * weight
 		}
 	}
 }
