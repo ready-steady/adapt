@@ -35,16 +35,16 @@ func (_ *Self) ComputeNodes(levels []uint8, orders []uint32) []float64 {
 // ComputeChildren returns the levels and orders of the child nodes
 // corresponding to the parent nodes given by their levels and orders.
 func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) ([]uint8, []uint32) {
-	dc := self.dc
-	pc := uint16(len(parentLevels)) / dc
+	dc := uint32(self.dc)
+	pc := uint32(len(parentLevels)) / dc
 
 	levels := make([]uint8, 2*pc*dc*dc)
 	orders := make([]uint32, 2*pc*dc*dc)
 
-	cc := uint16(0)
+	cc := uint32(0)
 
-	push := func(p, d uint16, level uint8, order uint32) {
-		for i := uint16(0); i < dc; i++ {
+	push := func(p, d uint32, level uint8, order uint32) {
+		for i := uint32(0); i < dc; i++ {
 			if i == d {
 				levels[cc*dc+i] = level
 				orders[cc*dc+i] = order
@@ -55,10 +55,10 @@ func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) (
 		}
 
 		// Check uniqueness
-		for i := uint16(0); i < cc; i++ {
+		for i := uint32(0); i < cc; i++ {
 			found := true
 
-			for j := uint16(0); j < dc; j++ {
+			for j := uint32(0); j < dc; j++ {
 				if levels[i*dc+j] != levels[cc*dc+j] ||
 					orders[i*dc+j] != orders[cc*dc+j] {
 
@@ -76,8 +76,8 @@ func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) (
 		cc++
 	}
 
-	for i := uint16(0); i < pc; i++ {
-		for j := uint16(0); j < dc; j++ {
+	for i := uint32(0); i < pc; i++ {
+		for j := uint32(0); j < dc; j++ {
 			level := parentLevels[i*dc+j]
 			order := parentOrders[i*dc+j]
 
