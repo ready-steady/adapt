@@ -1,7 +1,6 @@
 package newcot
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/go-math/support/assert"
@@ -14,7 +13,7 @@ func TestComputeNodes1D(t *testing.T) {
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
 	nodes := []float64{0.5, 0, 1, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
 
-	assert.Equal(grid.ComputeNodes(levels, orders), nodes, t)
+	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
 }
 
 func TestComputeNodes2D(t *testing.T) {
@@ -68,7 +67,7 @@ func TestComputeNodes2D(t *testing.T) {
 		0.75, 0.50,
 	}
 
-	assert.Equal(grid.ComputeNodes(levels, orders), nodes, t)
+	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
 }
 
 func TestComputeChildren1D(t *testing.T) {
@@ -79,10 +78,9 @@ func TestComputeChildren1D(t *testing.T) {
 	childLevels := []uint8{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
 	childOrders := []uint32{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
 
-	levels, orders = grid.ComputeChildren(levels, orders)
+	index := grid.ComputeChildren(compose(levels, orders))
 
-	assert.Equal(levels, childLevels, t)
-	assert.Equal(orders, childOrders, t)
+	assert.Equal(index, compose(childLevels, childOrders), t)
 }
 
 func TestComputeChildren2D(t *testing.T) {
@@ -182,10 +180,9 @@ func TestComputeChildren2D(t *testing.T) {
 		7, 0,
 	}
 
-	levels, orders = grid.ComputeChildren(levels, orders)
+	index := grid.ComputeChildren(compose(levels, orders))
 
-	assert.Equal(levels, childLevels, t)
-	assert.Equal(orders, childOrders, t)
+	assert.Equal(index, compose(childLevels, childOrders), t)
 }
 
 func BenchmarkComputeChildren(b *testing.B) {
@@ -197,18 +194,27 @@ func BenchmarkComputeChildren(b *testing.B) {
 	grid := New(inputs)
 
 	// Level 0
-	levels := make([]uint8, inputs)
-	orders := make([]uint32, inputs)
+	index := make([]uint64, inputs)
 
 	// Level 1, 2, …, (targetLevel - 1)
 	for i := 1; i < targetLevel; i++ {
-		levels, orders = grid.ComputeChildren(levels, orders)
+		index = grid.ComputeChildren(index)
 	}
 
 	b.ResetTimer()
 
 	// Level targetLevel
 	for i := 0; i < b.N; i++ {
-		grid.ComputeChildren(levels, orders)
+		grid.ComputeChildren(index)
 	}
+}
+
+func compose(levels []uint8, orders []uint32) []uint64 {
+	index := make([]uint64, len(levels))
+
+	for i := range levels {
+		index[i] = uint64(levels[i])<<32 | uint64(orders[i])
+	}
+
+	return index
 }

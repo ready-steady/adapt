@@ -17,51 +17,43 @@ func (self *Self) Dimensions() uint16 {
 	return self.dc
 }
 
-// ComputeNodes returns the nodes corresponding to the given levels and orders.
-func (_ *Self) ComputeNodes(levels []uint8, orders []uint32) []float64 {
-	nodes := make([]float64, len(levels))
+// ComputeNodes returns the nodes corresponding to the given index, which is
+// a compact representation of a sequence of pairs (level, order).
+func (_ *Self) ComputeNodes(index []uint64) []float64 {
+	nodes := make([]float64, len(index))
 
 	for i := range nodes {
-		if levels[i] == 0 {
+		level := uint8(index[i] >> 32)
+		if level == 0 {
 			nodes[i] = 0.5
 		} else {
-			nodes[i] = float64(orders[i]) / float64(uint32(2)<<(levels[i]-1))
+			nodes[i] = float64(uint32(index[i])) / float64(uint32(2)<<(level-1))
 		}
 	}
 
 	return nodes
 }
 
-// ComputeChildren returns the levels and orders of the child nodes
-// corresponding to the parent nodes given by their levels and orders.
-func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) ([]uint8, []uint32) {
+// ComputeChildren returns the index of the child nodes corresponding to the
+// parent nodes given by their index.
+func (self *Self) ComputeChildren(parentIndex []uint64) []uint64 {
 	dc := uint32(self.dc)
-	pc := uint32(len(parentLevels)) / dc
+	pc := uint32(len(parentIndex)) / dc
 
-	levels := make([]uint8, 2*pc*dc*dc)
-	orders := make([]uint32, 2*pc*dc*dc)
+	index := make([]uint64, 2*pc*dc*dc)
 
 	cc := uint32(0)
 
-	push := func(p, d uint32, level uint8, order uint32) {
-		for i := uint32(0); i < dc; i++ {
-			if i == d {
-				levels[cc*dc+i] = level
-				orders[cc*dc+i] = order
-			} else {
-				levels[cc*dc+i] = parentLevels[p*dc+i]
-				orders[cc*dc+i] = parentOrders[p*dc+i]
-			}
-		}
+	push := func(p, d uint32, pair uint64) {
+		copy(index[cc*dc:], parentIndex[p*dc:(p+1)*dc])
+		index[cc*dc+d] = pair
 
 		// Check uniqueness
 		for i := uint32(0); i < cc; i++ {
 			found := true
 
 			for j := uint32(0); j < dc; j++ {
-				if levels[i*dc+j] != levels[cc*dc+j] ||
-					orders[i*dc+j] != orders[cc*dc+j] {
-
+				if index[i*dc+j] != index[cc*dc+j] {
 					found = false
 					break
 				}
@@ -78,21 +70,24 @@ func (self *Self) ComputeChildren(parentLevels []uint8, parentOrders []uint32) (
 
 	for i := uint32(0); i < pc; i++ {
 		for j := uint32(0); j < dc; j++ {
-			level := parentLevels[i*dc+j]
-			order := parentOrders[i*dc+j]
+			level := uint8(parentIndex[i*dc+j] >> 32)
 
-			switch level {
-			case 0:
-				push(i, j, 1, 0)
-				push(i, j, 1, 2)
-			case 1:
-				push(i, j, 2, order+1)
-			default:
-				push(i, j, level+1, 2*order-1)
-				push(i, j, level+1, 2*order+1)
+			if level == 0 {
+				push(i, j, 1<<32|0)
+				push(i, j, 1<<32|2)
+				continue
+			}
+
+			order := uint32(parentIndex[i*dc+j])
+
+			if level == 1 {
+				push(i, j, 2<<32|uint64(order+1))
+			} else {
+				push(i, j, uint64(level+1)<<32|uint64(2*order-1))
+				push(i, j, uint64(level+1)<<32|uint64(2*order+1))
 			}
 		}
 	}
 
-	return levels[0 : cc*dc], orders[0 : cc*dc]
+	return index[0 : cc*dc]
 }
