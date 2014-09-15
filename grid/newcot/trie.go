@@ -1,9 +1,9 @@
 package newcot
 
 type trie struct {
-	ic     uint16
-	spread uint32
-	root   *node
+	ic   uint16
+	ml   uint8
+	root *node
 }
 
 type node struct {
@@ -34,8 +34,8 @@ overLevels:
 
 		for ; i < t.ic; i++ {
 			c = &node{
-				value: uint32(levels[i]),
-				children: make([]*node, 0, t.spread),
+				value:    uint32(levels[i]),
+				children: make([]*node, 0, t.ml+1),
 			}
 			n.children = append(n.children, c)
 			n = c
@@ -55,8 +55,8 @@ overOrders:
 
 		for ; i < t.ic; i++ {
 			c = &node{
-				value: orders[i],
-				children: make([]*node, 0, t.spread),
+				value:    orders[i],
+				children: make([]*node, 0, 1<<t.ml+1),
 			}
 			n.children = append(n.children, c)
 			n = c
@@ -68,12 +68,12 @@ overOrders:
 	return true
 }
 
-func newTrie(dimensions uint16, spread uint32) *trie {
+func newTrie(ic uint16, ml uint8) *trie {
 	return &trie{
-		ic:     dimensions,
-		spread: spread,
-		root:   &node{
-			children: make([]*node, 0, spread),
+		ic: ic,
+		ml: ml,
+		root: &node{
+			children: make([]*node, 0, ml+1),
 		},
 	}
 }

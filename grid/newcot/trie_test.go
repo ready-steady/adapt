@@ -9,10 +9,10 @@ import (
 func TestTrieTap(t *testing.T) {
 	const (
 		dimensions = 3
-		spread     = 3
+		maxLevel   = 1
 	)
 
-	trie := newTrie(dimensions, spread)
+	trie := newTrie(dimensions, maxLevel)
 
 	assert.Equal(trie.tap([]uint8{0, 0, 0}, []uint32{0, 1, 2}), false, t)
 	assert.Equal(trie.tap([]uint8{0, 0, 0}, []uint32{0, 1, 2}), true, t)
