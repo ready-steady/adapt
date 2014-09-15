@@ -1,15 +1,10 @@
 package linhat
 
 import (
-	"reflect"
 	"testing"
-)
 
-func assertEqual(actual, expected interface{}, t *testing.T) {
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("got '%v' instead of '%v'", actual, expected)
-	}
-}
+	"github.com/go-math/support/assert"
+)
 
 func TestEvaluate(t *testing.T) {
 	basis := New(1)
@@ -32,9 +27,9 @@ func TestEvaluate(t *testing.T) {
 
 	for i := range cases {
 		for j := range values {
-			values[j] = basis.Evaluate([]uint8{cases[i].level},
-				[]uint32{cases[i].order}, []float64{points[j]})
+			pair := uint64(cases[i].level)<<32 | uint64(cases[i].order)
+			values[j] = basis.Evaluate([]uint64{pair}, []float64{points[j]})
 		}
-		assertEqual(values, cases[i].values, t)
+		assert.Equal(values, cases[i].values, t)
 	}
 }
