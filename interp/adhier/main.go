@@ -10,14 +10,14 @@ import (
 // in the algorithm.
 type Grid interface {
 	Dimensions() uint16
-	ComputeNodes(levels []uint8, orders []uint32) []float64
-	ComputeChildren(levels []uint8, orders []uint32) ([]uint8, []uint32)
+	ComputeNodes(index []uint64) []float64
+	ComputeChildren(index []uint64) []uint64
 }
 
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	Evaluate(levels []uint8, orders []uint32, point []float64) float64
+	Evaluate(index []uint64, point []float64) float64
 }
 
 // Self represents a particular instantiation of the algorithm.
@@ -54,8 +54,7 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 	// Assume level 0 has only one node, and its order is 0.
 	level := uint8(0)
 	newc := uint32(1)
-	levels := make([]uint8, newc*ic)
-	orders := make([]uint32, newc*ic)
+	index := make([]uint64, newc*ic)
 
 	oldc := uint32(0)
 	nc := uint32(0)
@@ -77,10 +76,9 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 	for {
 		surrogate.resize(oldc + newc)
 
-		copy(surrogate.levels[oldc*ic:], levels)
-		copy(surrogate.orders[oldc*ic:], orders)
+		copy(surrogate.index[oldc*ic:], index)
 
-		nodes := self.grid.ComputeNodes(levels, orders)
+		nodes := self.grid.ComputeNodes(index)
 		values := target(nodes)
 
 		// Compute the surpluses corresponding to the active nodes.
@@ -142,8 +140,7 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 
 				if k != l {
 					// Shift everything, assuming a lot of refinements.
-					copy(levels[k:], levels[l:])
-					copy(orders[k:], orders[l:])
+					copy(index[k:], index[l:])
 					l = k
 				}
 
@@ -151,14 +148,13 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 				l += ic
 			}
 
-			levels = levels[0:k]
-			orders = orders[0:k]
+			index = index[0:k]
 		}
 
-		levels, orders = self.grid.ComputeChildren(levels, orders)
+		index = self.grid.ComputeChildren(index)
 
 		oldc += newc
-		newc = uint32(len(levels)) / ic
+		newc = uint32(len(index)) / ic
 
 		if newc == 0 {
 			break
@@ -190,13 +186,13 @@ func evaluate(b Basis, s *Surrogate, ic, oc, nc uint32, point []float64, value [
 	var i, j uint32 = 1, 0
 
 	// Rewrite value in case it is dirty (not zeroed).
-	weight := b.Evaluate(s.levels, s.orders, point)
+	weight := b.Evaluate(s.index, point)
 	for ; j < oc; j++ {
 		value[j] = s.surpluses[j] * weight
 	}
 
 	for ; i < nc; i++ {
-		weight = b.Evaluate(s.levels[i*ic:], s.orders[i*ic:], point)
+		weight = b.Evaluate(s.index[i*ic:], point)
 		for j = 0; j < oc; j++ {
 			value[j] += s.surpluses[i*oc+j] * weight
 		}

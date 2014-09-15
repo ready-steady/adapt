@@ -10,6 +10,7 @@ import (
 )
 
 func TestConstructStep(t *testing.T) {
+	fixtureStep.prepare()
 	algorithm := makeSelf(1, 1, fixtureStep.surrogate.level)
 
 	surrogate := algorithm.Compute(step)
@@ -18,6 +19,7 @@ func TestConstructStep(t *testing.T) {
 }
 
 func TestEvaluateStep(t *testing.T) {
+	fixtureStep.prepare()
 	algorithm := makeSelf(1, 1, 0)
 
 	values := algorithm.Evaluate(fixtureStep.surrogate, fixtureStep.points)
@@ -26,6 +28,7 @@ func TestEvaluateStep(t *testing.T) {
 }
 
 func TestConstructCube(t *testing.T) {
+	fixtureCube.prepare()
 	algorithm := makeSelf(2, 1, fixtureCube.surrogate.level)
 
 	surrogate := algorithm.Compute(cube)
@@ -34,6 +37,7 @@ func TestConstructCube(t *testing.T) {
 }
 
 func TestConstructBox(t *testing.T) {
+	fixtureBox.prepare()
 	algorithm := makeSelf(2, 3, fixtureBox.surrogate.level)
 
 	surrogate := algorithm.Compute(box)
@@ -42,6 +46,7 @@ func TestConstructBox(t *testing.T) {
 }
 
 func TestEvaluateBox(t *testing.T) {
+	fixtureBox.prepare()
 	algorithm := makeSelf(2, 3, 0)
 
 	values := algorithm.Evaluate(fixtureBox.surrogate, fixtureBox.points)
