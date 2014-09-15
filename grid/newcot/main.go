@@ -42,30 +42,29 @@ func (self *Self) ComputeChildren(parentIndex []uint64) []uint64 {
 
 	index := make([]uint64, 2*pc*dc*dc)
 
+	// Create a trie for keeping track of duplicate nodes. The second argument
+	// of newTrie is the maximal number of branches at any node, which is
+	// computed based on the maximal level ml.
+	ml := uint8(0)
+	for i := range parentIndex {
+		l := uint8(parentIndex[i] >> 32)
+		if l > ml {
+			ml = l
+		}
+	}
+	// One +1 since going one level up; another +1 since counting from zero;
+	// the second multiplier is the number of orders on the maximal level.
+	trie := newTrie(dc, uint32(ml+1+1)*(1<<uint32(ml)+1))
+
 	cc := uint32(0)
 
 	push := func(p, d uint32, pair uint64) {
 		copy(index[cc*dc:], parentIndex[p*dc:(p+1)*dc])
 		index[cc*dc+d] = pair
 
-		// Check uniqueness
-		for i := uint32(0); i < cc; i++ {
-			found := true
-
-			for j := uint32(0); j < dc; j++ {
-				if index[i*dc+j] != index[cc*dc+j] {
-					found = false
-					break
-				}
-			}
-
-			if found {
-				// Discard since a duplicate
-				return
-			}
+		if !trie.tap(index[cc*dc:]) {
+			cc++
 		}
-
-		cc++
 	}
 
 	for i := uint32(0); i < pc; i++ {

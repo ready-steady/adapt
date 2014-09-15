@@ -15,7 +15,7 @@ func newTrie(depth uint32, spread uint32) *trie {
 	return &trie{
 		depth:  depth,
 		spread: spread,
-		root:   &node{
+		root: &node{
 			children: make([]*node, 0, spread),
 		},
 	}
@@ -44,7 +44,7 @@ outer:
 			}
 		}
 
-		if i == t.depth - 1 {
+		if i == t.depth-1 {
 			// Create the missing node, which is a leaf.
 			c = &node{
 				value: trace[i],
@@ -52,7 +52,7 @@ outer:
 		} else {
 			// Create a leaf.
 			c = &node{
-				value: trace[t.depth - 1],
+				value: trace[t.depth-1],
 			}
 
 			// Create the rest of the tail.
