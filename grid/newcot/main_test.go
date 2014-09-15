@@ -191,3 +191,28 @@ func TestComputeChildren2D(t *testing.T) {
 	assertEqual(levels, childLevels, t)
 	assertEqual(orders, childOrders, t)
 }
+
+func BenchmarkComputeChildren(b *testing.B) {
+	const (
+		inputs = 20
+		targetLevel = 3
+	)
+
+	grid := New(inputs)
+
+	// Level 0
+	levels := make([]uint8, inputs)
+	orders := make([]uint32, inputs)
+
+	// Level 1, 2, …, (targetLevel - 1)
+	for i := 1; i < targetLevel; i++ {
+		levels, orders = grid.ComputeChildren(levels, orders)
+	}
+
+	b.ResetTimer()
+
+	// Level targetLevel
+	for i := 0; i < b.N; i++ {
+		grid.ComputeChildren(levels, orders)
+	}
+}
