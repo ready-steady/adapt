@@ -194,7 +194,7 @@ func TestComputeChildren2D(t *testing.T) {
 
 func BenchmarkComputeChildren(b *testing.B) {
 	const (
-		inputs = 20
+		inputs      = 20
 		targetLevel = 3
 	)
 
