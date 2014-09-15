@@ -3,13 +3,9 @@ package newcot
 import (
 	"reflect"
 	"testing"
-)
 
-func assertEqual(actual, expected interface{}, t *testing.T) {
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("got '%v' instead of '%v'", actual, expected)
-	}
-}
+	"github.com/go-math/support/assert"
+)
 
 func TestComputeNodes1D(t *testing.T) {
 	grid := New(1)
@@ -18,7 +14,7 @@ func TestComputeNodes1D(t *testing.T) {
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
 	nodes := []float64{0.5, 0, 1, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
 
-	assertEqual(grid.ComputeNodes(levels, orders), nodes, t)
+	assert.Equal(grid.ComputeNodes(levels, orders), nodes, t)
 }
 
 func TestComputeNodes2D(t *testing.T) {
@@ -72,7 +68,7 @@ func TestComputeNodes2D(t *testing.T) {
 		0.75, 0.50,
 	}
 
-	assertEqual(grid.ComputeNodes(levels, orders), nodes, t)
+	assert.Equal(grid.ComputeNodes(levels, orders), nodes, t)
 }
 
 func TestComputeChildren1D(t *testing.T) {
@@ -85,8 +81,8 @@ func TestComputeChildren1D(t *testing.T) {
 
 	levels, orders = grid.ComputeChildren(levels, orders)
 
-	assertEqual(levels, childLevels, t)
-	assertEqual(orders, childOrders, t)
+	assert.Equal(levels, childLevels, t)
+	assert.Equal(orders, childOrders, t)
 }
 
 func TestComputeChildren2D(t *testing.T) {
@@ -188,8 +184,8 @@ func TestComputeChildren2D(t *testing.T) {
 
 	levels, orders = grid.ComputeChildren(levels, orders)
 
-	assertEqual(levels, childLevels, t)
-	assertEqual(orders, childOrders, t)
+	assert.Equal(levels, childLevels, t)
+	assert.Equal(orders, childOrders, t)
 }
 
 func BenchmarkComputeChildren(b *testing.B) {
