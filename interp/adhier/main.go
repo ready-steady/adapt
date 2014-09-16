@@ -51,39 +51,41 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 	surrogate := new(Surrogate)
 	surrogate.initialize(uint16(ic), uint16(oc))
 
-	// Assume level 0 has only one node, and its order is 0.
+	// Level 0 is assumed to have only one node, and the order of that node is
+	// assumed to be zero.
 	level := uint8(0)
-	newc := uint32(1)
-	index := make([]uint64, newc*ic)
 
-	oldc := uint32(0)
-	nc := uint32(0)
+	ac := uint32(1) // active
+	pc := uint32(0) // passive
+	nc := uint32(0) // total
+
+	index := make([]uint64, ac*ic)
 
 	var i, j, k, l uint32
 
 	value := make([]float64, oc)
 
-	minValue := make([]float64, oc)
-	maxValue := make([]float64, oc)
+	min := make([]float64, oc)
+	max := make([]float64, oc)
 
-	minValue[0] = math.Inf(1)
-	maxValue[0] = math.Inf(-1)
+	min[0] = math.Inf(1)
+	max[0] = math.Inf(-1)
 	for i = 1; i < oc; i++ {
-		minValue[i] = minValue[i-1]
-		maxValue[i] = maxValue[i-1]
+		min[i] = min[i-1]
+		max[i] = max[i-1]
 	}
 
 	for {
-		surrogate.resize(oldc + newc)
+		surrogate.resize(pc + ac)
 
-		copy(surrogate.index[oldc*ic:], index)
+		copy(surrogate.index[pc*ic:], index)
 
 		nodes := self.grid.ComputeNodes(index)
 		values := target(nodes)
 
 		// Compute the surpluses corresponding to the active nodes.
-		for i, k = 0, oldc*oc; i < newc; i++ {
-			evaluate(self.basis, surrogate, ic, oc, oldc,
+		for i, k = 0, pc*oc; i < ac; i++ {
+			evaluate(self.basis, surrogate, ic, oc, pc,
 				nodes[i*ic:(i+1)*ic], value)
 
 			for j = 0; j < oc; j++ {
@@ -92,20 +94,20 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 			}
 		}
 
-		nc += newc
+		nc += ac
 
 		if level >= self.config.MaxLevel {
 			break
 		}
 
 		// Keep track of the maximal and minimal values of the function.
-		for i, k = 0, 0; i < newc; i++ {
+		for i, k = 0, 0; i < ac; i++ {
 			for j = 0; j < oc; j++ {
-				if values[k] < minValue[j] {
-					minValue[j] = values[k]
+				if values[k] < min[j] {
+					min[j] = values[k]
 				}
-				if values[k] > maxValue[j] {
-					maxValue[j] = values[k]
+				if values[k] > max[j] {
+					max[j] = values[k]
 				}
 				k++
 			}
@@ -114,18 +116,18 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 		if level >= self.config.MinLevel {
 			k, l = 0, 0
 
-			for i = 0; i < newc; i++ {
+			for i = 0; i < ac; i++ {
 				refine := false
 
 				for j = 0; j < oc; j++ {
-					absError := math.Abs(surrogate.surpluses[(oldc+i)*oc+j])
+					absError := math.Abs(surrogate.surpluses[(pc+i)*oc+j])
 
 					if absError > self.config.AbsError {
 						refine = true
 						break
 					}
 
-					relError := absError / (maxValue[j] - minValue[j])
+					relError := absError / (max[j] - min[j])
 
 					if relError > self.config.RelError {
 						refine = true
@@ -153,10 +155,10 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 
 		index = self.grid.ComputeChildren(index)
 
-		oldc += newc
-		newc = uint32(len(index)) / ic
+		pc += ac
+		ac = uint32(len(index)) / ic
 
-		if newc == 0 {
+		if ac == 0 {
 			break
 		}
 
@@ -185,7 +187,7 @@ func (self *Self) Evaluate(s *Surrogate, points []float64) []float64 {
 func evaluate(b Basis, s *Surrogate, ic, oc, nc uint32, point []float64, value []float64) {
 	var i, j uint32 = 1, 0
 
-	// Rewrite value in case it is dirty (not zeroed).
+	// Treat the first separately in case value is not zeroed.
 	weight := b.Evaluate(s.index, point)
 	for ; j < oc; j++ {
 		value[j] = s.surpluses[j] * weight
