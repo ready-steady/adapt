@@ -25,15 +25,14 @@ func newTrie(depth uint32, spread uint32) *trie {
 // returns false if not found, in which case the sequence is appended to the
 // internal structure.
 func (t *trie) tap(trace []uint64) bool {
-	var i, j, count uint32
-	var k int32
-	var n, c *node
+	var c *node
 
 outer:
-	for n, i = t.root, 0; i < t.depth; i++ {
-		count = uint32(len(n.children))
+	for n, i := t.root, uint32(0); i < t.depth; i++ {
+		j := uint32(0)
+		count := uint32(len(n.children))
 
-		for j = 0; j < count; j++ {
+		for ; j < count; j++ {
 			c = n.children[j]
 			if c.value == trace[i] {
 				n = c
@@ -56,7 +55,7 @@ outer:
 			}
 
 			// Create the rest of the tail.
-			for k = int32(t.depth) - 2; k >= int32(i); k-- {
+			for k := int32(t.depth) - 2; k >= int32(i); k-- {
 				children := make([]*node, 1, t.spread)
 				children[0] = c
 				c = &node{
