@@ -14,35 +14,27 @@ const (
 type Surrogate struct {
 	level uint8
 
-	ic uint16
-	oc uint16
+	ic uint32
+	oc uint32
 	nc uint32
 
 	index     []uint64
 	surpluses []float64
 }
 
-func (s *Surrogate) initialize(ic, oc uint16) {
-	is := bufferInitCount * uint32(ic)
-	os := bufferInitCount * uint32(oc)
+func (s *Surrogate) initialize(ic, oc uint32) {
+	s.ic, s.oc, s.nc = ic, oc, bufferInitCount
 
-	s.ic = ic
-	s.oc = oc
-	s.nc = bufferInitCount
-
-	s.index = make([]uint64, is)
-	s.surpluses = make([]float64, os)
+	s.index = make([]uint64, bufferInitCount*ic)
+	s.surpluses = make([]float64, bufferInitCount*oc)
 }
 
 func (s *Surrogate) finalize(level uint8, nc uint32) {
-	is := nc * uint32(s.ic)
-	os := nc * uint32(s.oc)
-
 	s.level = level
 	s.nc = nc
 
-	s.index = s.index[0:is]
-	s.surpluses = s.surpluses[0:os]
+	s.index = s.index[0 : nc*s.ic]
+	s.surpluses = s.surpluses[0 : nc*s.oc]
 }
 
 func (s *Surrogate) resize(nc uint32) {
@@ -54,19 +46,11 @@ func (s *Surrogate) resize(nc uint32) {
 		nc = count
 	}
 
-	// New sizes
-	is := nc * uint32(s.ic)
-	os := nc * uint32(s.oc)
+	index := make([]uint64, nc*s.ic)
+	surpluses := make([]float64, nc*s.oc)
 
-	index := make([]uint64, is)
-	surpluses := make([]float64, os)
-
-	// Old sizes
-	is = s.nc * uint32(s.ic)
-	os = s.nc * uint32(s.oc)
-
-	copy(index, s.index[0:is])
-	copy(surpluses, s.surpluses[0:os])
+	copy(index, s.index[0:s.nc*s.ic])
+	copy(surpluses, s.surpluses[0:s.nc*s.oc])
 
 	s.nc = nc
 

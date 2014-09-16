@@ -26,8 +26,8 @@ type Self struct {
 	basis  Basis
 	config Config
 
-	ic uint16
-	oc uint16
+	ic uint32
+	oc uint32
 }
 
 // New creates an instance of the algorithm for the given configuration.
@@ -37,19 +37,18 @@ func New(grid Grid, basis Basis, config Config, outputs uint16) *Self {
 		basis:  basis,
 		config: config,
 
-		ic: grid.Dimensions(),
-		oc: outputs,
+		ic: uint32(grid.Dimensions()),
+		oc: uint32(outputs),
 	}
 }
 
 // Compute takes a function and yields a surrogate for it, which can be further
 // fed to Evaluate for the actual interpolation.
 func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
-	ic := uint32(self.ic)
-	oc := uint32(self.oc)
+	ic, oc := self.ic, self.oc
 
 	surrogate := new(Surrogate)
-	surrogate.initialize(uint16(ic), uint16(oc))
+	surrogate.initialize(ic, oc)
 
 	// Level 0 is assumed to have only one node, and the order of that node is
 	// assumed to be zero.
@@ -68,16 +67,13 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 	min := make([]float64, oc)
 	max := make([]float64, oc)
 
-	min[0] = math.Inf(1)
-	max[0] = math.Inf(-1)
+	min[0], max[0] = math.Inf(1), math.Inf(-1)
 	for i = 1; i < oc; i++ {
-		min[i] = min[i-1]
-		max[i] = max[i-1]
+		min[i], max[i] = min[0], max[0]
 	}
 
 	for {
 		surrogate.resize(pc + ac)
-
 		copy(surrogate.index[pc*ic:], index)
 
 		nodes := self.grid.ComputeNodes(index)
@@ -85,9 +81,7 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 
 		// Compute the surpluses corresponding to the active nodes.
 		for i, k = 0, pc*oc; i < ac; i++ {
-			evaluate(self.basis, surrogate, ic, oc, pc,
-				nodes[i*ic:(i+1)*ic], value)
-
+			evaluate(self.basis, surrogate, pc, nodes[i*ic:(i+1)*ic], value)
 			for j = 0; j < oc; j++ {
 				surrogate.surpluses[k] = values[i*oc+j] - value[j]
 				k++
@@ -172,30 +166,29 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 // Evaluate takes a surrogate produced by Compute and evaluates it at the
 // given points.
 func (self *Self) Evaluate(s *Surrogate, points []float64) []float64 {
-	ic := uint32(s.ic)
-	oc := uint32(s.oc)
+	ic, oc, nc := s.ic, s.oc, s.nc
 	pc := uint32(len(points)) / ic
 
 	values := make([]float64, pc*oc)
 	for i := uint32(0); i < pc; i++ {
-		evaluate(self.basis, s, ic, oc, s.nc, points[i*ic:], values[i*oc:])
+		evaluate(self.basis, s, nc, points[i*ic:], values[i*oc:])
 	}
 
 	return values
 }
 
-func evaluate(b Basis, s *Surrogate, ic, oc, nc uint32, point []float64, value []float64) {
-	var i, j uint32 = 1, 0
+func evaluate(b Basis, s *Surrogate, nc uint32, point []float64, value []float64) {
+	ic, oc := s.ic, s.oc
 
 	// Treat the first separately in case value is not zeroed.
 	weight := b.Evaluate(s.index, point)
-	for ; j < oc; j++ {
+	for j := uint32(0); j < oc; j++ {
 		value[j] = s.surpluses[j] * weight
 	}
 
-	for ; i < nc; i++ {
+	for i := uint32(1); i < nc; i++ {
 		weight = b.Evaluate(s.index[i*ic:], point)
-		for j = 0; j < oc; j++ {
+		for j := uint32(0); j < oc; j++ {
 			value[j] += s.surpluses[i*oc+j] * weight
 		}
 	}
