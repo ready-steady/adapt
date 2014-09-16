@@ -1,5 +1,9 @@
 // Package newcot provides means for working with the Newton–Cotes grid on a
 // unit hypercube including boundaries.
+//
+// Each node in the grid is identified by a sequence of levels and orders.
+// Throughout the package, such a sequence is encoded as a sequence of uint64s,
+// referred to as an index, where each uint64 is (level|order<<32).
 package newcot
 
 // Self represents a particular instantiation of the grid.
@@ -17,17 +21,15 @@ func (self *Self) Dimensions() uint16 {
 	return self.dc
 }
 
-// ComputeNodes returns the nodes corresponding to the given index, which is
-// a compact representation of a sequence of pairs (level, order).
+// ComputeNodes returns the nodes corresponding to the given index.
 func (_ *Self) ComputeNodes(index []uint64) []float64 {
 	nodes := make([]float64, len(index))
 
 	for i := range nodes {
-		level := uint8(index[i] >> 32)
-		if level == 0 {
+		if uint32(index[i]) == 0 {
 			nodes[i] = 0.5
 		} else {
-			nodes[i] = float64(uint32(index[i])) / float64(uint32(2)<<(level-1))
+			nodes[i] = float64(index[i]>>32) / float64(uint32(2)<<(uint32(index[i])-1))
 		}
 	}
 
@@ -45,16 +47,15 @@ func (self *Self) ComputeChildren(parentIndex []uint64) []uint64 {
 	// Create a trie for keeping track of duplicate nodes. The second argument
 	// of newTrie is the maximal number of branches at any node, which is
 	// computed based on the maximal level ml.
-	ml := uint8(0)
+	ml := uint32(0)
 	for i := range parentIndex {
-		l := uint8(parentIndex[i] >> 32)
-		if l > ml {
-			ml = l
+		if uint32(parentIndex[i]) > ml {
+			ml = uint32(parentIndex[i])
 		}
 	}
 	// One +1 since going one level up; another +1 since counting from zero;
 	// the second multiplier is the number of orders on the maximal level.
-	trie := newTrie(dc, uint32(ml+1+1)*(1<<uint32(ml)+1))
+	trie := newTrie(dc, uint32(ml+1+1)*(1<<ml+1))
 
 	cc := uint32(0)
 
@@ -67,23 +68,25 @@ func (self *Self) ComputeChildren(parentIndex []uint64) []uint64 {
 		}
 	}
 
-	for i := uint32(0); i < pc; i++ {
-		for j := uint32(0); j < dc; j++ {
-			level := uint8(parentIndex[i*dc+j] >> 32)
+	var i, j, level, order uint32
+
+	for i = 0; i < pc; i++ {
+		for j = 0; j < dc; j++ {
+			level = uint32(parentIndex[i*dc+j])
 
 			if level == 0 {
-				push(i, j, 1<<32|0)
-				push(i, j, 1<<32|2)
+				push(i, j, 1|0<<32)
+				push(i, j, 1|2<<32)
 				continue
 			}
 
-			order := uint32(parentIndex[i*dc+j])
+			order = uint32(parentIndex[i*dc+j] >> 32)
 
 			if level == 1 {
-				push(i, j, 2<<32|uint64(order+1))
+				push(i, j, 2|uint64(order+1)<<32)
 			} else {
-				push(i, j, uint64(level+1)<<32|uint64(2*order-1))
-				push(i, j, uint64(level+1)<<32|uint64(2*order+1))
+				push(i, j, uint64(level+1)|uint64(2*order-1)<<32)
+				push(i, j, uint64(level+1)|uint64(2*order+1)<<32)
 			}
 		}
 	}

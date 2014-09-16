@@ -6,7 +6,7 @@ import (
 
 type fixture struct {
 	surrogate *Surrogate
-	levels    []uint8
+	levels    []uint32
 	orders    []uint32
 	points    []float64
 	values    []float64
@@ -19,7 +19,7 @@ func (f *fixture) prepare() {
 
 	f.surrogate.index = make([]uint64, len(f.levels))
 	for i := range f.levels {
-		f.surrogate.index[i] = uint64(f.levels[i])<<32 | uint64(f.orders[i])
+		f.surrogate.index[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
 	}
 }
 
@@ -43,7 +43,7 @@ var fixtureStep = fixture{
 
 		surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
 	},
-	levels: []uint8{0, 1, 1, 2, 3, 3, 4, 4},
+	levels: []uint32{0, 1, 1, 2, 3, 3, 4, 4},
 	orders: []uint32{0, 0, 2, 3, 5, 7, 9, 11},
 	points: []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1},
 	values: []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
@@ -76,7 +76,7 @@ var fixtureCube = fixture{
 		},
 	},
 
-	levels: []uint8{
+	levels: []uint32{
 		0, 0,
 		1, 0,
 		1, 0,
@@ -213,7 +213,7 @@ var fixtureBox = fixture{
 		},
 	},
 
-	levels: []uint8{
+	levels: []uint32{
 		0, 0,
 		1, 0,
 		1, 0,

@@ -12,7 +12,7 @@ func TestEvaluate(t *testing.T) {
 	points := []float64{-1, 0, 0.25, 0.5, 0.75, 1, 2}
 
 	cases := []struct {
-		level  uint8
+		level  uint32
 		order  uint32
 		values []float64
 	}{
@@ -27,7 +27,7 @@ func TestEvaluate(t *testing.T) {
 
 	for i := range cases {
 		for j := range values {
-			pair := uint64(cases[i].level)<<32 | uint64(cases[i].order)
+			pair := uint64(cases[i].level) | uint64(cases[i].order)<<32
 			values[j] = basis.Evaluate([]uint64{pair}, []float64{points[j]})
 		}
 		assert.Equal(values, cases[i].values, t)

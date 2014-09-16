@@ -9,7 +9,7 @@ import (
 func TestComputeNodes1D(t *testing.T) {
 	grid := New(1)
 
-	levels := []uint8{0, 1, 1, 2, 2, 3, 3, 3, 3}
+	levels := []uint32{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
 	nodes := []float64{0.5, 0, 1, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
 
@@ -19,7 +19,7 @@ func TestComputeNodes1D(t *testing.T) {
 func TestComputeNodes2D(t *testing.T) {
 	grid := New(2)
 
-	levels := []uint8{
+	levels := []uint32{
 		0, 0,
 		0, 1,
 		0, 1,
@@ -73,9 +73,9 @@ func TestComputeNodes2D(t *testing.T) {
 func TestComputeChildren1D(t *testing.T) {
 	grid := New(1)
 
-	levels := []uint8{0, 1, 1, 2, 2, 3, 3, 3, 3}
+	levels := []uint32{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
-	childLevels := []uint8{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
+	childLevels := []uint32{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
 	childOrders := []uint32{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
 
 	index := grid.ComputeChildren(compose(levels, orders))
@@ -86,7 +86,7 @@ func TestComputeChildren1D(t *testing.T) {
 func TestComputeChildren2D(t *testing.T) {
 	grid := New(2)
 
-	levels := []uint8{
+	levels := []uint32{
 		0, 0,
 		0, 1,
 		0, 1,
@@ -118,7 +118,7 @@ func TestComputeChildren2D(t *testing.T) {
 		3, 0,
 	}
 
-	childLevels := []uint8{
+	childLevels := []uint32{
 		1, 0,
 		1, 0,
 		0, 1,
@@ -209,11 +209,11 @@ func BenchmarkComputeChildren(b *testing.B) {
 	}
 }
 
-func compose(levels []uint8, orders []uint32) []uint64 {
+func compose(levels []uint32, orders []uint32) []uint64 {
 	index := make([]uint64, len(levels))
 
 	for i := range levels {
-		index[i] = uint64(levels[i])<<32 | uint64(orders[i])
+		index[i] = uint64(levels[i]) | uint64(orders[i])<<32
 	}
 
 	return index
