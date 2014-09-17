@@ -44,7 +44,7 @@ func New(grid Grid, basis Basis, config Config, outputs uint16) *Self {
 
 // Compute takes a function and yields a surrogate for it, which can be further
 // fed to Evaluate for the actual interpolation.
-func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
+func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate {
 	ic, oc := self.ic, self.oc
 
 	surrogate := new(Surrogate)
@@ -77,7 +77,7 @@ func (self *Self) Compute(target func([]float64) []float64) *Surrogate {
 		copy(surrogate.index[pc*ic:], index)
 
 		nodes := self.grid.ComputeNodes(index)
-		values := target(nodes)
+		values := target(nodes, index)
 
 		// Compute the surpluses corresponding to the active nodes.
 		for i, k = 0, pc*oc; i < ac; i++ {

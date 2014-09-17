@@ -23,7 +23,7 @@ func (f *fixture) prepare() {
 	}
 }
 
-func step(x []float64) []float64 {
+func step(x []float64, _ []uint64) []float64 {
 	y := make([]float64, len(x))
 	for i := range x {
 		if x[i] <= 0.5 {
@@ -49,7 +49,7 @@ var fixtureStep = fixture{
 	values: []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
 }
 
-func cube(x []float64) []float64 {
+func cube(x []float64, _ []uint64) []float64 {
 	nc := uint16(len(x)) / 2
 	y := make([]float64, nc)
 
@@ -141,7 +141,7 @@ var fixtureCube = fixture{
 	},
 }
 
-func hat(x []float64) []float64 {
+func hat(x []float64, _ []uint64) []float64 {
 	y := make([]float64, len(x))
 	for i, z := range x {
 		z = 5*z - 1
@@ -157,7 +157,7 @@ func hat(x []float64) []float64 {
 	return y
 }
 
-func box(x []float64) []float64 {
+func box(x []float64, _ []uint64) []float64 {
 	nc := len(x) / 2
 	y := make([]float64, 3*nc)
 
@@ -508,8 +508,8 @@ var fixtureBox = fixture{
 	},
 }
 
-func many(ic, oc int) func([]float64) []float64 {
-	return func(x []float64) []float64 {
+func many(ic, oc int) func([]float64, []uint64) []float64 {
+	return func(x []float64, _ []uint64) []float64 {
 		nc := len(x) / ic
 		y := make([]float64, nc*oc)
 
