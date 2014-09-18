@@ -44,18 +44,9 @@ func (self *Self) ComputeChildren(parentIndex []uint64) []uint64 {
 
 	index := make([]uint64, 2*pc*dc*dc)
 
-	// Create a trie for keeping track of duplicate nodes. The second argument
-	// of newTrie is the maximal number of branches at any node, which is
-	// computed based on the maximal level ml.
-	ml := uint32(0)
-	for i := range parentIndex {
-		if uint32(parentIndex[i]) > ml {
-			ml = uint32(parentIndex[i])
-		}
-	}
-	// One +1 since going one level up; another +1 since counting from zero;
-	// the second multiplier is the number of orders on the maximal level.
-	trie := newTrie(dc, uint32(ml+1+1)*(1<<ml+1))
+	// The algorithm needs to keep track and eliminate duplicate nodes. To this
+	// end, a trie (https://en.wikipedia.org/wiki/Trie) is utilized.
+	trie := newTrie(dc, 2*pc*dc)
 
 	cc := uint32(0)
 
