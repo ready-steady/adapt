@@ -61,6 +61,6 @@ func (s *Surrogate) resize(nc uint32) {
 // String returns a string containing human-friendly information about the
 // surrogate.
 func (s *Surrogate) String() string {
-	return fmt.Sprintf("Surrogate{ inputs: %d, outputs: %d, levels: %d, nodes: %d }",
+	return fmt.Sprintf("Surrogate{inputs: %d, outputs: %d, levels: %d, nodes: %d}",
 		s.ic, s.oc, s.level, s.nc)
 }
