@@ -6,8 +6,8 @@ import (
 	"github.com/go-math/support/assert"
 )
 
-func TestComputeNodes1D(t *testing.T) {
-	grid := New(1)
+func TestClosedComputeNodes1D(t *testing.T) {
+	grid := NewClosed(1)
 
 	levels := []uint32{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
@@ -17,7 +17,7 @@ func TestComputeNodes1D(t *testing.T) {
 }
 
 func TestComputeNodes2D(t *testing.T) {
-	grid := New(2)
+	grid := NewClosed(2)
 
 	levels := []uint32{
 		0, 0,
@@ -70,8 +70,8 @@ func TestComputeNodes2D(t *testing.T) {
 	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
 }
 
-func TestComputeChildren1D(t *testing.T) {
-	grid := New(1)
+func TestClosedComputeChildren1D(t *testing.T) {
+	grid := NewClosed(1)
 
 	levels := []uint32{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
@@ -83,8 +83,8 @@ func TestComputeChildren1D(t *testing.T) {
 	assert.Equal(index, compose(childLevels, childOrders), t)
 }
 
-func TestComputeChildren2D(t *testing.T) {
-	grid := New(2)
+func TestClosedComputeChildren2D(t *testing.T) {
+	grid := NewClosed(2)
 
 	levels := []uint32{
 		0, 0,
@@ -185,13 +185,13 @@ func TestComputeChildren2D(t *testing.T) {
 	assert.Equal(index, compose(childLevels, childOrders), t)
 }
 
-func BenchmarkComputeChildren(b *testing.B) {
+func BenchmarkClosedComputeChildren(b *testing.B) {
 	const (
 		inputs      = 20
 		targetLevel = 3
 	)
 
-	grid := New(inputs)
+	grid := NewClosed(inputs)
 
 	// Level 0
 	index := make([]uint64, inputs)

@@ -94,7 +94,7 @@ func ExampleSelf_step() {
 		outputs = 1
 	)
 
-	grid := newcot.New(inputs)
+	grid := newcot.NewClosed(inputs)
 	basis := linhat.NewClosed(inputs)
 
 	config := DefaultConfig
@@ -115,7 +115,7 @@ func ExampleSelf_hat() {
 		outputs = 1
 	)
 
-	grid := newcot.New(inputs)
+	grid := newcot.NewClosed(inputs)
 	basis := linhat.NewClosed(inputs)
 
 	config := DefaultConfig
@@ -136,7 +136,7 @@ func ExampleSelf_cube() {
 		outputs = 1
 	)
 
-	grid := newcot.New(inputs)
+	grid := newcot.NewClosed(inputs)
 	basis := linhat.NewClosed(inputs)
 
 	config := DefaultConfig
@@ -157,7 +157,7 @@ func ExampleSelf_many() {
 		outputs = 1000
 	)
 
-	grid := newcot.New(inputs)
+	grid := newcot.NewClosed(inputs)
 	basis := linhat.NewClosed(inputs)
 
 	algorithm := New(grid, basis, DefaultConfig, outputs)
@@ -176,5 +176,5 @@ func makeSelf(ic, oc uint16, ml uint8) *Self {
 		config.MaxLevel = ml
 	}
 
-	return New(newcot.New(ic), linhat.NewClosed(ic), config, oc)
+	return New(newcot.NewClosed(ic), linhat.NewClosed(ic), config, oc)
 }
