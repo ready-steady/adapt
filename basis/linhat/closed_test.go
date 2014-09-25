@@ -6,8 +6,8 @@ import (
 	"github.com/go-math/support/assert"
 )
 
-func TestEvaluate(t *testing.T) {
-	basis := New(1)
+func TestClosedEvaluate(t *testing.T) {
+	basis := NewClosed(1)
 
 	points := []float64{-1, 0, 0.25, 0.5, 0.75, 1, 2}
 
