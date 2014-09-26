@@ -1,4 +1,4 @@
-// Package linhat provides means for working with the basis formed by the
+// Package linhat provides functions for working with the basis formed by the
 // linear hat function on the unit hypercube.
 //
 // Each function in the basis is identified by a sequence of levels and orders.

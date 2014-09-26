@@ -1,4 +1,4 @@
-# Linear Hat Function
+# Linear Hat Basis
 
-The package provides means for working with the basis formed by the linear hat
+The package provides functions for working with the basis formed by the linear hat
 function on the unit hypercube.
