@@ -16,7 +16,7 @@ func TestClosedComputeNodes1D(t *testing.T) {
 	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
 }
 
-func TestComputeNodes2D(t *testing.T) {
+func TestClosedComputeNodes2D(t *testing.T) {
 	grid := NewClosed(2)
 
 	levels := []uint32{
