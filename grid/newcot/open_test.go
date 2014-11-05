@@ -3,7 +3,7 @@ package newcot
 import (
 	"testing"
 
-	"github.com/go-math/support/assert"
+	"github.com/ready-steady/support/assert"
 )
 
 func TestOpenComputeNodes1D(t *testing.T) {

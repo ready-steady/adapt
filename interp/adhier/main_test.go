@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-math/numan/basis/linhat"
-	"github.com/go-math/numan/grid/newcot"
-	"github.com/go-math/support/assert"
+	"github.com/ready-steady/numan/basis/linhat"
+	"github.com/ready-steady/numan/grid/newcot"
+	"github.com/ready-steady/support/assert"
 )
 
 func TestConstructStep(t *testing.T) {
