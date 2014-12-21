@@ -188,6 +188,9 @@ func evaluate(b Basis, s *Surrogate, nc uint32, point []float64, value []float64
 
 	for i := uint32(1); i < nc; i++ {
 		weight = b.Evaluate(s.indices[i*ic:], point)
+		if weight == 0 {
+			continue
+		}
 		for j := uint32(0); j < oc; j++ {
 			value[j] += s.surpluses[i*oc+j] * weight
 		}
