@@ -15,28 +15,28 @@ func (c *Closed) Dimensions() uint16 {
 	return c.dc
 }
 
-// ComputeNodes returns the nodes corresponding to the given index.
-func (_ *Closed) ComputeNodes(index []uint64) []float64 {
-	nodes := make([]float64, len(index))
+// ComputeNodes returns the nodes corresponding to the given indices.
+func (_ *Closed) ComputeNodes(indices []uint64) []float64 {
+	nodes := make([]float64, len(indices))
 
 	for i := range nodes {
-		if uint32(index[i]) == 0 {
+		if uint32(indices[i]) == 0 {
 			nodes[i] = 0.5
 		} else {
-			nodes[i] = float64(index[i]>>32) / float64(uint32(2)<<(uint32(index[i])-1))
+			nodes[i] = float64(indices[i]>>32) / float64(uint32(2)<<(uint32(indices[i])-1))
 		}
 	}
 
 	return nodes
 }
 
-// ComputeChildren returns the index of the child nodes corresponding to the
-// parent nodes given by their index.
-func (c *Closed) ComputeChildren(parentIndex []uint64) []uint64 {
+// ComputeChildren returns the indices of the child nodes corresponding to the
+// parent nodes given by their indices.
+func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 	dc := uint32(c.dc)
-	pc := uint32(len(parentIndex)) / dc
+	pc := uint32(len(parentIndices)) / dc
 
-	index := make([]uint64, 2*pc*dc*dc)
+	indices := make([]uint64, 2*pc*dc*dc)
 
 	// The algorithm needs to keep track and eliminate duplicate nodes. To this
 	// end, a trie (https://en.wikipedia.org/wiki/Trie) is utilized.
@@ -45,10 +45,10 @@ func (c *Closed) ComputeChildren(parentIndex []uint64) []uint64 {
 	cc := uint32(0)
 
 	push := func(p, d uint32, pair uint64) {
-		copy(index[cc*dc:], parentIndex[p*dc:(p+1)*dc])
-		index[cc*dc+d] = pair
+		copy(indices[cc*dc:], parentIndices[p*dc:(p+1)*dc])
+		indices[cc*dc+d] = pair
 
-		if !trie.tap(index[cc*dc:]) {
+		if !trie.tap(indices[cc*dc:]) {
 			cc++
 		}
 	}
@@ -57,7 +57,7 @@ func (c *Closed) ComputeChildren(parentIndex []uint64) []uint64 {
 
 	for i = 0; i < pc; i++ {
 		for j = 0; j < dc; j++ {
-			level = uint32(parentIndex[i*dc+j])
+			level = uint32(parentIndices[i*dc+j])
 
 			if level == 0 {
 				push(i, j, 1|0<<32)
@@ -65,7 +65,7 @@ func (c *Closed) ComputeChildren(parentIndex []uint64) []uint64 {
 				continue
 			}
 
-			order = uint32(parentIndex[i*dc+j] >> 32)
+			order = uint32(parentIndices[i*dc+j] >> 32)
 
 			if level == 1 {
 				push(i, j, 2|uint64(order+1)<<32)
@@ -76,5 +76,5 @@ func (c *Closed) ComputeChildren(parentIndex []uint64) []uint64 {
 		}
 	}
 
-	return index[0 : cc*dc]
+	return indices[0 : cc*dc]
 }

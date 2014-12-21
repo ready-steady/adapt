@@ -15,24 +15,24 @@ func (o *Open) Dimensions() uint16 {
 	return o.dc
 }
 
-// ComputeNodes returns the nodes corresponding to the given index.
-func (_ *Open) ComputeNodes(index []uint64) []float64 {
-	nodes := make([]float64, len(index))
+// ComputeNodes returns the nodes corresponding to the given indices.
+func (_ *Open) ComputeNodes(indices []uint64) []float64 {
+	nodes := make([]float64, len(indices))
 
 	for i := range nodes {
-		nodes[i] = float64(index[i]>>32+1) / float64(uint32(2)<<uint32(index[i]))
+		nodes[i] = float64(indices[i]>>32+1) / float64(uint32(2)<<uint32(indices[i]))
 	}
 
 	return nodes
 }
 
-// ComputeChildren returns the index of the child nodes corresponding to the
-// parent nodes given by their index.
-func (o *Open) ComputeChildren(parentIndex []uint64) []uint64 {
+// ComputeChildren returns the indices of the child nodes corresponding to the
+// parent nodes given by their indices.
+func (o *Open) ComputeChildren(parentIndices []uint64) []uint64 {
 	dc := uint32(o.dc)
-	pc := uint32(len(parentIndex)) / dc
+	pc := uint32(len(parentIndices)) / dc
 
-	index := make([]uint64, 2*pc*dc*dc)
+	indices := make([]uint64, 2*pc*dc*dc)
 
 	// The algorithm needs to keep track and eliminate duplicate nodes. To this
 	// end, a trie (https://en.wikipedia.org/wiki/Trie) is utilized.
@@ -41,10 +41,10 @@ func (o *Open) ComputeChildren(parentIndex []uint64) []uint64 {
 	cc := uint32(0)
 
 	push := func(p, d uint32, pair uint64) {
-		copy(index[cc*dc:], parentIndex[p*dc:(p+1)*dc])
-		index[cc*dc+d] = pair
+		copy(indices[cc*dc:], parentIndices[p*dc:(p+1)*dc])
+		indices[cc*dc+d] = pair
 
-		if !trie.tap(index[cc*dc:]) {
+		if !trie.tap(indices[cc*dc:]) {
 			cc++
 		}
 	}
@@ -53,13 +53,13 @@ func (o *Open) ComputeChildren(parentIndex []uint64) []uint64 {
 
 	for i = 0; i < pc; i++ {
 		for j = 0; j < dc; j++ {
-			level = uint32(parentIndex[i*dc+j])
-			order = uint32(parentIndex[i*dc+j] >> 32)
+			level = uint32(parentIndices[i*dc+j])
+			order = uint32(parentIndices[i*dc+j] >> 32)
 
 			push(i, j, uint64(level+1)|uint64(2*order)<<32)
 			push(i, j, uint64(level+1)|uint64(2*order+2)<<32)
 		}
 	}
 
-	return index[0 : cc*dc]
+	return indices[0 : cc*dc]
 }

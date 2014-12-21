@@ -10,14 +10,14 @@ import (
 // in the algorithm.
 type Grid interface {
 	Dimensions() uint16
-	ComputeNodes(index []uint64) []float64
-	ComputeChildren(index []uint64) []uint64
+	ComputeNodes(indices []uint64) []float64
+	ComputeChildren(indices []uint64) []uint64
 }
 
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	Evaluate(index []uint64, point []float64) float64
+	Evaluate(indices []uint64, point []float64) float64
 }
 
 // Self represents a particular instantiation of the algorithm.
@@ -58,7 +58,7 @@ func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate
 	pc := uint32(0) // passive
 	nc := uint32(0) // total
 
-	index := make([]uint64, ac*ic)
+	indices := make([]uint64, ac*ic)
 
 	var i, j, k, l uint32
 
@@ -74,10 +74,10 @@ func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate
 
 	for {
 		surrogate.resize(pc + ac)
-		copy(surrogate.index[pc*ic:], index)
+		copy(surrogate.indices[pc*ic:], indices)
 
-		nodes := self.grid.ComputeNodes(index)
-		values := target(nodes, index)
+		nodes := self.grid.ComputeNodes(indices)
+		values := target(nodes, indices)
 
 		// Compute the surpluses corresponding to the active nodes.
 		for i, k = 0, pc*oc; i < ac; i++ {
@@ -136,7 +136,7 @@ func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate
 
 				if k != l {
 					// Shift everything, assuming a lot of refinements.
-					copy(index[k:], index[l:])
+					copy(indices[k:], indices[l:])
 					l = k
 				}
 
@@ -144,13 +144,13 @@ func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate
 				l += ic
 			}
 
-			index = index[0:k]
+			indices = indices[0:k]
 		}
 
-		index = self.grid.ComputeChildren(index)
+		indices = self.grid.ComputeChildren(indices)
 
 		pc += ac
-		ac = uint32(len(index)) / ic
+		ac = uint32(len(indices)) / ic
 
 		if ac == 0 {
 			break
@@ -181,13 +181,13 @@ func evaluate(b Basis, s *Surrogate, nc uint32, point []float64, value []float64
 	ic, oc := s.ic, s.oc
 
 	// Treat the first separately in case value is not zeroed.
-	weight := b.Evaluate(s.index, point)
+	weight := b.Evaluate(s.indices, point)
 	for j := uint32(0); j < oc; j++ {
 		value[j] = s.surpluses[j] * weight
 	}
 
 	for i := uint32(1); i < nc; i++ {
-		weight = b.Evaluate(s.index[i*ic:], point)
+		weight = b.Evaluate(s.indices[i*ic:], point)
 		for j := uint32(0); j < oc; j++ {
 			value[j] += s.surpluses[i*oc+j] * weight
 		}

@@ -13,13 +13,13 @@ type fixture struct {
 }
 
 func (f *fixture) prepare() {
-	if len(f.surrogate.index) > 0 {
+	if len(f.surrogate.indices) > 0 {
 		return
 	}
 
-	f.surrogate.index = make([]uint64, len(f.levels))
+	f.surrogate.indices = make([]uint64, len(f.levels))
 	for i := range f.levels {
-		f.surrogate.index[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
+		f.surrogate.indices[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
 	}
 }
 
