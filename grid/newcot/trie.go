@@ -43,13 +43,15 @@ outer:
 			}
 		}
 
+		k := int32(t.depth - 1)
+
 		// Create a leaf.
 		c = &node{
-			value: trace[t.depth-1],
+			value: trace[k],
 		}
 
 		// Create the rest of the tail.
-		for k := int32(t.depth) - 2; k >= int32(i); k-- {
+		for k--; k >= int32(i); k-- {
 			children := make([]*node, 1, t.spread)
 			children[0] = c
 			c = &node{
