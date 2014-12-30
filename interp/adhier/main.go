@@ -107,46 +107,49 @@ func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate
 			}
 		}
 
-		if level >= self.config.MinLevel {
-			k, l = 0, 0
-
-			for i = 0; i < ac; i++ {
-				refine := false
-
-				for j = 0; j < oc; j++ {
-					absError := math.Abs(surrogate.surpluses[(pc+i)*oc+j])
-
-					if absError > self.config.AbsError {
-						refine = true
-						break
-					}
-
-					relError := absError / (max[j] - min[j])
-
-					if relError > self.config.RelError {
-						refine = true
-						break
-					}
-				}
-
-				if !refine {
-					l += ic
-					continue
-				}
-
-				if k != l {
-					// Shift everything, assuming a lot of refinements.
-					copy(indices[k:], indices[l:])
-					l = k
-				}
-
-				k += ic
-				l += ic
-			}
-
-			indices = indices[0:k]
+		if level < self.config.MinLevel {
+			goto next
 		}
 
+		k, l = 0, 0
+
+		for i = 0; i < ac; i++ {
+			refine := false
+
+			for j = 0; j < oc; j++ {
+				absError := math.Abs(surrogate.surpluses[(pc+i)*oc+j])
+
+				if absError > self.config.AbsError {
+					refine = true
+					break
+				}
+
+				relError := absError / (max[j] - min[j])
+
+				if relError > self.config.RelError {
+					refine = true
+					break
+				}
+			}
+
+			if !refine {
+				l += ic
+				continue
+			}
+
+			if k != l {
+				// Shift everything, assuming a lot of refinements.
+				copy(indices[k:], indices[l:])
+				l = k
+			}
+
+			k += ic
+			l += ic
+		}
+
+		indices = indices[0:k]
+
+	next:
 		indices = self.grid.ComputeChildren(indices)
 
 		pc += ac
