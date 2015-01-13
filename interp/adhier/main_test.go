@@ -88,7 +88,7 @@ func BenchmarkMany(b *testing.B) {
 }
 
 // A one-input-one-output scenario with a non-smooth function.
-func ExampleSelf_step() {
+func ExampleInterpolator_step() {
 	const (
 		inputs  = 1
 		outputs = 1
@@ -109,7 +109,7 @@ func ExampleSelf_step() {
 }
 
 // A one-input-one-output scenario with a smooth function.
-func ExampleSelf_hat() {
+func ExampleInterpolator_hat() {
 	const (
 		inputs  = 1
 		outputs = 1
@@ -130,7 +130,7 @@ func ExampleSelf_hat() {
 }
 
 // A multiple-input-one-output scenario with a non-smooth function.
-func ExampleSelf_cube() {
+func ExampleInterpolator_cube() {
 	const (
 		inputs  = 2
 		outputs = 1
@@ -151,7 +151,7 @@ func ExampleSelf_cube() {
 }
 
 // A multiple-input-many-output scenario with a non-smooth function.
-func ExampleSelf_many() {
+func ExampleInterpolator_many() {
 	const (
 		inputs  = 2
 		outputs = 1000
