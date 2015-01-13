@@ -11,7 +11,7 @@ import (
 
 func TestConstructStep(t *testing.T) {
 	fixtureStep.prepare()
-	algorithm := makeSelf(1, 1, fixtureStep.surrogate.level)
+	algorithm := makeInterpolator(1, 1, fixtureStep.surrogate.level)
 
 	surrogate := algorithm.Compute(step)
 
@@ -20,7 +20,7 @@ func TestConstructStep(t *testing.T) {
 
 func TestEvaluateStep(t *testing.T) {
 	fixtureStep.prepare()
-	algorithm := makeSelf(1, 1, 0)
+	algorithm := makeInterpolator(1, 1, 0)
 
 	values := algorithm.Evaluate(fixtureStep.surrogate, fixtureStep.points)
 
@@ -29,7 +29,7 @@ func TestEvaluateStep(t *testing.T) {
 
 func TestConstructCube(t *testing.T) {
 	fixtureCube.prepare()
-	algorithm := makeSelf(2, 1, fixtureCube.surrogate.level)
+	algorithm := makeInterpolator(2, 1, fixtureCube.surrogate.level)
 
 	surrogate := algorithm.Compute(cube)
 
@@ -38,7 +38,7 @@ func TestConstructCube(t *testing.T) {
 
 func TestConstructBox(t *testing.T) {
 	fixtureBox.prepare()
-	algorithm := makeSelf(2, 3, fixtureBox.surrogate.level)
+	algorithm := makeInterpolator(2, 3, fixtureBox.surrogate.level)
 
 	surrogate := algorithm.Compute(box)
 
@@ -47,7 +47,7 @@ func TestConstructBox(t *testing.T) {
 
 func TestEvaluateBox(t *testing.T) {
 	fixtureBox.prepare()
-	algorithm := makeSelf(2, 3, 0)
+	algorithm := makeInterpolator(2, 3, 0)
 
 	values := algorithm.Evaluate(fixtureBox.surrogate, fixtureBox.points)
 
@@ -55,7 +55,7 @@ func TestEvaluateBox(t *testing.T) {
 }
 
 func BenchmarkHat(b *testing.B) {
-	algorithm := makeSelf(1, 1, 0)
+	algorithm := makeInterpolator(1, 1, 0)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Compute(hat)
@@ -63,7 +63,7 @@ func BenchmarkHat(b *testing.B) {
 }
 
 func BenchmarkCube(b *testing.B) {
-	algorithm := makeSelf(2, 1, 0)
+	algorithm := makeInterpolator(2, 1, 0)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Compute(cube)
@@ -71,7 +71,7 @@ func BenchmarkCube(b *testing.B) {
 }
 
 func BenchmarkBox(b *testing.B) {
-	algorithm := makeSelf(2, 3, 0)
+	algorithm := makeInterpolator(2, 3, 0)
 
 	for i := 0; i < b.N; i++ {
 		_ = algorithm.Compute(box)
@@ -79,7 +79,7 @@ func BenchmarkBox(b *testing.B) {
 }
 
 func BenchmarkMany(b *testing.B) {
-	algorithm := makeSelf(2, 1000, 0)
+	algorithm := makeInterpolator(2, 1000, 0)
 	function := many(2, 1000)
 
 	for i := 0; i < b.N; i++ {
@@ -169,7 +169,7 @@ func ExampleSelf_many() {
 	// Surrogate{inputs: 2, outputs: 1000, levels: 9, nodes: 362}
 }
 
-func makeSelf(ic, oc uint16, ml uint8) *Self {
+func makeInterpolator(ic, oc uint16, ml uint8) *Interpolator {
 	config := DefaultConfig
 
 	if ml > 0 {

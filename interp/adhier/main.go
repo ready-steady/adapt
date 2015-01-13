@@ -20,8 +20,8 @@ type Basis interface {
 	Evaluate(indices []uint64, point []float64) float64
 }
 
-// Self represents a particular instantiation of the algorithm.
-type Self struct {
+// Interpolator represents a particular instantiation of the algorithm.
+type Interpolator struct {
 	grid   Grid
 	basis  Basis
 	config Config
@@ -31,8 +31,8 @@ type Self struct {
 }
 
 // New creates an instance of the algorithm for the given configuration.
-func New(grid Grid, basis Basis, config Config, outputs uint16) *Self {
-	return &Self{
+func New(grid Grid, basis Basis, config Config, outputs uint16) *Interpolator {
+	return &Interpolator{
 		grid:   grid,
 		basis:  basis,
 		config: config,
@@ -44,7 +44,7 @@ func New(grid Grid, basis Basis, config Config, outputs uint16) *Self {
 
 // Compute takes a function and yields a surrogate for it, which can be further
 // fed to Evaluate for the actual interpolation.
-func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate {
+func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *Surrogate {
 	ic, oc := self.ic, self.oc
 
 	surrogate := new(Surrogate)
@@ -168,7 +168,7 @@ func (self *Self) Compute(target func([]float64, []uint64) []float64) *Surrogate
 
 // Evaluate takes a surrogate produced by Compute and evaluates it at the
 // given points.
-func (self *Self) Evaluate(s *Surrogate, points []float64) []float64 {
+func (self *Interpolator) Evaluate(s *Surrogate, points []float64) []float64 {
 	ic, oc, nc := s.ic, s.oc, s.nc
 	pc := uint32(len(points)) / ic
 
