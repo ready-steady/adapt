@@ -3,6 +3,7 @@
 package adhier
 
 import (
+	"errors"
 	"math"
 )
 
@@ -31,8 +32,15 @@ type Interpolator struct {
 }
 
 // New creates an instance of the algorithm for the given configuration.
-func New(grid Grid, basis Basis, config Config, outputs uint16) *Interpolator {
-	return &Interpolator{
+func New(grid Grid, basis Basis, config Config, outputs uint16) (*Interpolator, error) {
+	if config.AbsError <= 0 {
+		return nil, errors.New("the absolute-error tolerance is invalid")
+	}
+	if config.RelError <= 0 {
+		return nil, errors.New("the relative-error tolerance is invalid")
+	}
+
+	interpolator := &Interpolator{
 		grid:   grid,
 		basis:  basis,
 		config: config,
@@ -40,6 +48,8 @@ func New(grid Grid, basis Basis, config Config, outputs uint16) *Interpolator {
 		ic: uint32(grid.Dimensions()),
 		oc: uint32(outputs),
 	}
+
+	return interpolator, nil
 }
 
 // Compute takes a function and yields a surrogate for it, which can be further

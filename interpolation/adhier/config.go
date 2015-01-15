@@ -12,10 +12,12 @@ type Config struct {
 	RelError float64
 }
 
-// DefaultConfig is the default configuration of the algorithm.
-var DefaultConfig = Config{
-	MinLevel: 1,
-	MaxLevel: 9,
-	AbsError: 1e-4,
-	RelError: 1e-2,
+// DefaultConfig returns the default configuration of the algorithm.
+func DefaultConfig() Config {
+	return Config{
+		MinLevel: 1,
+		MaxLevel: 9,
+		AbsError: 1e-4,
+		RelError: 1e-2,
+	}
 }
