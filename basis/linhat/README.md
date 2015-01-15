@@ -1,8 +1,8 @@
 # Linear Hat Basis
 
-The package provides functions for working with the basis formed by the linear hat
-function on the unit hypercube.
+The package provides functions for working with the basis formed by the linear
+hat function on the unit hypercube.
 
 ## [Documentation][doc]
 
-[doc]: http://godoc.org/github.com/ready-steady/numan/basis/linhat
+[doc]: http://godoc.org/github.com/ready-steady/numeric/basis/linhat

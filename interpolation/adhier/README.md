@@ -5,4 +5,4 @@ local refinements.
 
 ## [Documentation][doc]
 
-[doc]: http://godoc.org/github.com/ready-steady/numan/interp/adhier
+[doc]: http://godoc.org/github.com/ready-steady/numeric/interpolation/adhier
