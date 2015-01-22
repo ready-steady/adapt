@@ -105,7 +105,7 @@ func ExampleInterpolator_step() {
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 1, outputs: 1, levels: 19, nodes: 38}
+	// Surrogate{inputs: 1, outputs: 1, level: 19, nodes: 38}
 }
 
 // A one-input-one-output scenario with a smooth function.
@@ -126,7 +126,7 @@ func ExampleInterpolator_hat() {
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 1, outputs: 1, levels: 9, nodes: 305}
+	// Surrogate{inputs: 1, outputs: 1, level: 9, nodes: 305}
 }
 
 // A multiple-input-one-output scenario with a non-smooth function.
@@ -147,7 +147,7 @@ func ExampleInterpolator_cube() {
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 2, outputs: 1, levels: 9, nodes: 377}
+	// Surrogate{inputs: 2, outputs: 1, level: 9, nodes: 377}
 }
 
 // A multiple-input-many-output scenario with a non-smooth function.
@@ -166,7 +166,7 @@ func ExampleInterpolator_many() {
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 2, outputs: 1000, levels: 9, nodes: 362}
+	// Surrogate{inputs: 2, outputs: 1000, level: 9, nodes: 362}
 }
 
 func makeInterpolator(ic, oc uint16, ml uint8) *Interpolator {
