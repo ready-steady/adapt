@@ -100,7 +100,7 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 		nc += ac
 
-		if level >= self.config.MaxLevel {
+		if level >= self.config.MaxLevel || nc >= self.config.MaxNodes {
 			break
 		}
 
@@ -165,6 +165,10 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 		pc += ac
 		ac = uint32(len(indices)) / ic
 
+		if δ := int32(nc+ac) - int32(self.config.MaxNodes); δ > 0 {
+			ac -= uint32(δ)
+			indices = indices[0 : ac*ic]
+		}
 		if ac == 0 {
 			break
 		}

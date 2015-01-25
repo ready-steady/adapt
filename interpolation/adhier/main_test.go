@@ -159,14 +159,16 @@ func ExampleInterpolator_many() {
 
 	grid := newcot.NewClosed(inputs)
 	basis := linhat.NewClosed(inputs)
+	config := DefaultConfig()
+	config.MaxNodes = 300
 
-	algorithm, _ := New(grid, basis, DefaultConfig(), outputs)
+	algorithm, _ := New(grid, basis, config, outputs)
 
 	surrogate := algorithm.Compute(many(inputs, outputs))
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 2, outputs: 1000, level: 9, nodes: 362}
+	// Surrogate{inputs: 2, outputs: 1000, level: 9, nodes: 300}
 }
 
 func makeInterpolator(ic, oc uint16, ml uint8) *Interpolator {
