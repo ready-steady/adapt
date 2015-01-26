@@ -34,10 +34,10 @@ type Interpolator struct {
 // New creates an instance of the algorithm for the given configuration.
 func New(grid Grid, basis Basis, config Config, outputs uint16) (*Interpolator, error) {
 	if config.AbsError <= 0 {
-		return nil, errors.New("the absolute-error tolerance is invalid")
+		return nil, errors.New("the absolute error is invalid")
 	}
 	if config.RelError <= 0 {
-		return nil, errors.New("the relative-error tolerance is invalid")
+		return nil, errors.New("the relative error is invalid")
 	}
 
 	interpolator := &Interpolator{
