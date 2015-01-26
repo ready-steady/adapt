@@ -34,9 +34,7 @@ func (o *Open) ComputeChildren(parentIndices []uint64) []uint64 {
 
 	indices := make([]uint64, 2*pc*dc*dc)
 
-	// The algorithm needs to keep track and eliminate duplicate nodes. To this
-	// end, a trie (https://en.wikipedia.org/wiki/Trie) is utilized.
-	trie := newTrie(dc, 2*pc*dc)
+	hash := newHash(dc, 2*pc*dc)
 
 	cc := uint32(0)
 
@@ -44,7 +42,7 @@ func (o *Open) ComputeChildren(parentIndices []uint64) []uint64 {
 		copy(indices[cc*dc:], parentIndices[p*dc:(p+1)*dc])
 		indices[cc*dc+d] = pair
 
-		if !trie.tap(indices[cc*dc:]) {
+		if !hash.tap(indices[cc*dc:]) {
 			cc++
 		}
 	}
