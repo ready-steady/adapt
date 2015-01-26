@@ -49,7 +49,7 @@ func BenchmarkHashTap(b *testing.B) {
 	)
 
 	generator := rand.New(rand.NewSource(0))
-	data := make([]uint64, parentCount*depth)
+	data := make([]uint64, 2*parentCount*dimensionCount)
 	for _, i := range data {
 		data[i] = uint64(generator.Int63())
 	}
@@ -59,7 +59,7 @@ func BenchmarkHashTap(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		hash := newHash(depth, capacity)
 		for j := 0; j < parentCount; j++ {
-			hash.tap(data[j*depth : (j+1)*depth])
+			hash.tap(data[2*j*depth : (2*j+1)*depth])
 		}
 	}
 }
