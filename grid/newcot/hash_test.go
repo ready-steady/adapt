@@ -59,7 +59,8 @@ func BenchmarkHashTap(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		hash := newHash(depth, capacity)
 		for j := 0; j < parentCount; j++ {
-			hash.tap(data[2*j*depth : (2*j+1)*depth])
+			hash.tap(data[(2*j+0)*depth : (2*j+1)*depth])
+			hash.tap(data[(2*j+1)*depth : (2*j+2)*depth])
 		}
 	}
 }
