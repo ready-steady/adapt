@@ -1,14 +1,12 @@
 package linhat
 
 import (
-	"math/rand"
 	"testing"
 
-	"github.com/ready-steady/numeric/grid/newcot"
 	"github.com/ready-steady/support/assert"
 )
 
-func TestOpenEvaluate(t *testing.T) {
+func TestOpenEvaluateComposite(t *testing.T) {
 	basis := NewOpen(1)
 
 	points := []float64{
@@ -120,41 +118,9 @@ func TestOpenEvaluate(t *testing.T) {
 	for i := range cases {
 		for j := range values {
 			pair := uint64(cases[i].level) | uint64(cases[i].order)<<32
-			values[j] = basis.Evaluate([]uint64{pair}, []float64{points[j]})
+			basis.EvaluateComposite([]uint64{pair}, []float64{1},
+				[]float64{points[j]}, values[j:j+1])
 		}
 		assert.AlmostEqual(values, cases[i].values, t)
-	}
-}
-
-func BenchmarkOpenEvaluate(b *testing.B) {
-	const (
-		inputs = 20
-		level  = 5
-	)
-
-	grid := newcot.NewOpen(inputs)
-	basis := NewOpen(inputs)
-
-	indices := make([]uint64, inputs)
-	levelIndices := make([]uint64, inputs)
-	for i := 1; i <= level; i++ {
-		levelIndices = grid.ComputeChildren(levelIndices)
-		indices = append(indices, levelIndices...)
-	}
-
-	count := len(indices) / inputs
-
-	generator := rand.New(rand.NewSource(0))
-	points := make([]float64, count*inputs)
-	for i := range points {
-		points[i] = generator.Float64()
-	}
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		for j := 0; j < count; j++ {
-			basis.Evaluate(indices[j*inputs:], points[j*inputs:])
-		}
 	}
 }

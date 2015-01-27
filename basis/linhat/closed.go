@@ -14,17 +14,9 @@ func NewClosed(dimensions uint16) *Closed {
 	return &Closed{dimensions}
 }
 
-// Evaluate computes the value of the multi-dimensional basis function
-// corresponding to the given index at the given point.
-func (c *Closed) Evaluate(index []uint64, point []float64) float64 {
-	result := []float64{0}
-	c.EvaluateComposite(index, []float64{1}, point, result)
-	return result[0]
-}
-
-// EvaluateCoposite computes a vector-valued weighted sum wherein each term is a
-// vector of weights multiplied by a multi-dimensional basis function evaluated
-// at a point.
+// EvaluateComposite computes a vector-valued weighted sum wherein each term is
+// a vector of weights multiplied by a multi-dimensional basis function
+// evaluated at a point.
 func (c *Closed) EvaluateComposite(indices []uint64, weights, point, result []float64) {
 	dc := int(c.dc)
 	oc := len(result)

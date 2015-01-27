@@ -6,7 +6,7 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestClosedEvaluate(t *testing.T) {
+func TestClosedEvaluateComposite(t *testing.T) {
 	basis := NewClosed(1)
 
 	points := []float64{-1, 0, 0.25, 0.5, 0.75, 1, 2}
@@ -28,7 +28,8 @@ func TestClosedEvaluate(t *testing.T) {
 	for i := range cases {
 		for j := range values {
 			pair := uint64(cases[i].level) | uint64(cases[i].order)<<32
-			values[j] = basis.Evaluate([]uint64{pair}, []float64{points[j]})
+			basis.EvaluateComposite([]uint64{pair}, []float64{1},
+				[]float64{points[j]}, values[j:j+1])
 		}
 		assert.Equal(values, cases[i].values, t)
 	}
