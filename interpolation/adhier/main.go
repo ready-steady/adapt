@@ -18,7 +18,7 @@ type Grid interface {
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	Evaluate(indices []uint64, point []float64) float64
+	EvaluateComposite(indices []uint64, weights, point, result []float64)
 }
 
 // Interpolator represents a particular instantiation of the algorithm.
@@ -57,6 +57,8 @@ func New(grid Grid, basis Basis, config Config, outputs uint16) (*Interpolator, 
 func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *Surrogate {
 	ic, oc := self.ic, self.oc
 
+	basis := self.basis
+
 	surrogate := new(Surrogate)
 	surrogate.initialize(ic, oc)
 
@@ -90,8 +92,10 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 		values := target(nodes, indices)
 
 		// Compute the surpluses corresponding to the active nodes.
+		pindices := surrogate.indices[0 : pc*ic]
+		psurpluses := surrogate.surpluses[0 : pc*oc]
 		for i, k = 0, pc*oc; i < ac; i++ {
-			evaluate(self.basis, surrogate, pc, nodes[i*ic:(i+1)*ic], value)
+			basis.EvaluateComposite(pindices, psurpluses, nodes[i*ic:(i+1)*ic], value)
 			for j = 0; j < oc; j++ {
 				surrogate.surpluses[k] = values[i*oc+j] - value[j]
 				k++
@@ -182,34 +186,19 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 // Evaluate takes a surrogate produced by Compute and evaluates it at the
 // given points.
-func (self *Interpolator) Evaluate(s *Surrogate, points []float64) []float64 {
-	ic, oc, nc := s.ic, s.oc, s.nc
+func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
+	ic, oc, nc := surrogate.ic, surrogate.oc, surrogate.nc
 	pc := uint32(len(points)) / ic
+
+	basis := self.basis
+	indices := surrogate.indices[0 : nc*ic]
+	surpluses := surrogate.surpluses[0 : nc*oc]
 
 	values := make([]float64, pc*oc)
 	for i := uint32(0); i < pc; i++ {
-		evaluate(self.basis, s, nc, points[i*ic:], values[i*oc:])
+		basis.EvaluateComposite(indices, surpluses,
+			points[i*ic:(i+1)*ic], values[i*oc:(i+1)*oc])
 	}
 
 	return values
-}
-
-func evaluate(b Basis, s *Surrogate, nc uint32, point []float64, value []float64) {
-	ic, oc := s.ic, s.oc
-
-	// Treat the first separately in case value is not zeroed.
-	weight := b.Evaluate(s.indices, point)
-	for j := uint32(0); j < oc; j++ {
-		value[j] = s.surpluses[j] * weight
-	}
-
-	for i := uint32(1); i < nc; i++ {
-		weight = b.Evaluate(s.indices[i*ic:], point)
-		if weight == 0 {
-			continue
-		}
-		for j := uint32(0); j < oc; j++ {
-			value[j] += s.surpluses[i*oc+j] * weight
-		}
-	}
 }

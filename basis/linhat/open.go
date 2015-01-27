@@ -17,44 +17,64 @@ func NewOpen(dimensions uint16) *Open {
 // Evaluate computes the value of the multi-dimensional basis function
 // corresponding to the given index at the given point.
 func (o *Open) Evaluate(index []uint64, point []float64) float64 {
-	value := 1.0
+	result := []float64{0}
+	o.EvaluateComposite(index, []float64{1}, point, result)
+	return result[0]
+}
 
-	for i := uint16(0); i < o.dc; i++ {
-		if point[i] < 0 || 1 < point[i] {
-			return 0
-		}
+// EvaluateCoposite computes a vector-valued weighted sum wherein each term is a
+// weight vector multiplied by a multi-dimensional basis evaluated at a point.
+func (o *Open) EvaluateComposite(indices []uint64, weights, point, result []float64) {
+	dc := int(o.dc)
+	oc := len(result)
+	nc := len(indices) / dc
 
-		level := uint32(index[i])
-
-		if level == 0 {
-			continue
-		}
-
-		order := uint32(index[i] >> 32)
-		count := uint32(2)<<level - 1
-
-		switch order {
-		case 0:
-			scale := float64(count + 1)
-			if point[i] >= 2/scale {
-				return 0
-			}
-			value *= 2 - scale*point[i]
-		case count - 1:
-			scale1, scale2 := float64(count-1), float64(count+1)
-			if point[i] <= scale1/scale2 {
-				return 0
-			}
-			value *= scale2*point[i] - scale1
-		default:
-			node := float64(order+1) / float64(count+1)
-			scale, distance := float64(count+1), math.Abs(point[i]-node)
-			if distance >= 1/scale {
-				return 0
-			}
-			value *= 1 - scale*distance
-		}
+	for i := 0; i < oc; i++ {
+		result[i] = 0
 	}
 
-	return value
+outer:
+	for i := 0; i < nc; i++ {
+		value := 1.0
+
+		for j := 0; j < dc; j++ {
+			if point[j] < 0 || 1 < point[j] {
+				continue outer
+			}
+
+			level := uint32(indices[i*dc+j])
+			if level == 0 {
+				continue
+			}
+
+			order := uint32(indices[i*dc+j] >> 32)
+			count := uint32(2)<<level - 1
+
+			switch order {
+			case 0:
+				scale := float64(count + 1)
+				if point[j] >= 2/scale {
+					continue outer
+				}
+				value *= 2 - scale*point[j]
+			case count - 1:
+				scale1, scale2 := float64(count-1), float64(count+1)
+				if point[j] <= scale1/scale2 {
+					continue outer
+				}
+				value *= scale2*point[j] - scale1
+			default:
+				node := float64(order+1) / float64(count+1)
+				scale, distance := float64(count+1), math.Abs(point[j]-node)
+				if distance >= 1/scale {
+					continue outer
+				}
+				value *= 1 - scale*distance
+			}
+		}
+
+		for j := 0; j < oc; j++ {
+			result[j] += weights[i*oc+j] * value
+		}
+	}
 }
