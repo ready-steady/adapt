@@ -27,6 +27,24 @@ func TestEvaluateStep(t *testing.T) {
 	assert.Equal(values, fixtureStep.values, t)
 }
 
+func TestComputeHat(t *testing.T) {
+	fixtureHat.prepare()
+	algorithm := makeInterpolator(1, 1, 0)
+
+	surrogate := algorithm.Compute(hat)
+
+	assert.Equal(surrogate, fixtureHat.surrogate, t)
+}
+
+func TestEvaluateHat(t *testing.T) {
+	fixtureHat.prepare()
+	algorithm := makeInterpolator(1, 1, 0)
+
+	values := algorithm.Evaluate(fixtureHat.surrogate, fixtureHat.points)
+
+	assert.AlmostEqual(values, fixtureHat.values, t)
+}
+
 func TestComputeCube(t *testing.T) {
 	fixtureCube.prepare()
 	algorithm := makeInterpolator(2, 1, fixtureCube.surrogate.level)
