@@ -9,7 +9,7 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestConstructStep(t *testing.T) {
+func TestComputeStep(t *testing.T) {
 	fixtureStep.prepare()
 	algorithm := makeInterpolator(1, 1, fixtureStep.surrogate.level)
 
@@ -27,7 +27,7 @@ func TestEvaluateStep(t *testing.T) {
 	assert.Equal(values, fixtureStep.values, t)
 }
 
-func TestConstructCube(t *testing.T) {
+func TestComputeCube(t *testing.T) {
 	fixtureCube.prepare()
 	algorithm := makeInterpolator(2, 1, fixtureCube.surrogate.level)
 
@@ -36,7 +36,7 @@ func TestConstructCube(t *testing.T) {
 	assert.Equal(surrogate, fixtureCube.surrogate, t)
 }
 
-func TestConstructBox(t *testing.T) {
+func TestComputeBox(t *testing.T) {
 	fixtureBox.prepare()
 	algorithm := makeInterpolator(2, 3, fixtureBox.surrogate.level)
 
