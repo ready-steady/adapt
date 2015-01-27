@@ -23,7 +23,8 @@ func (c *Closed) Evaluate(index []uint64, point []float64) float64 {
 }
 
 // EvaluateCoposite computes a vector-valued weighted sum wherein each term is a
-// weight vector multiplied by a multi-dimensional basis evaluated at a point.
+// vector of weights multiplied by a multi-dimensional basis function evaluated
+// at a point.
 func (c *Closed) EvaluateComposite(indices []uint64, weights, point, result []float64) {
 	dc := int(c.dc)
 	oc := len(result)
