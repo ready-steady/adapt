@@ -58,7 +58,7 @@ func BenchmarkHat(b *testing.B) {
 	algorithm := makeInterpolator(1, 1, 0)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Compute(hat)
+		algorithm.Compute(hat)
 	}
 }
 
@@ -66,7 +66,7 @@ func BenchmarkCube(b *testing.B) {
 	algorithm := makeInterpolator(2, 1, 0)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Compute(cube)
+		algorithm.Compute(cube)
 	}
 }
 
@@ -74,7 +74,7 @@ func BenchmarkBox(b *testing.B) {
 	algorithm := makeInterpolator(2, 3, 0)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Compute(box)
+		algorithm.Compute(box)
 	}
 }
 
@@ -83,7 +83,7 @@ func BenchmarkMany(b *testing.B) {
 	function := many(2, 1000)
 
 	for i := 0; i < b.N; i++ {
-		_ = algorithm.Compute(function)
+		algorithm.Compute(function)
 	}
 }
 
