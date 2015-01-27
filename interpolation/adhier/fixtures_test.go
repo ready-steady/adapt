@@ -404,7 +404,6 @@ var fixtureBox = fixture{
 		nc: 20,
 
 		surpluses: []float64{
-			// Love go fmt!
 			+1.0, 0.0, 0.0,
 			-1.0, 0.0, 0.0,
 			+0.0, 0.0, 0.0,
