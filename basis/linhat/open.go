@@ -6,7 +6,7 @@ import (
 
 // Open represents an instance of the basis on (0, 1)^n.
 type Open struct {
-	dc uint16
+	ic uint16
 }
 
 // NewOpen creates an instance of the basis on (0, 1)^n.
@@ -18,9 +18,9 @@ func NewOpen(dimensions uint16) *Open {
 // a vector of weights multiplied by a multi-dimensional basis function
 // evaluated at a point.
 func (o *Open) EvaluateComposite(indices []uint64, weights, point, result []float64) {
-	dc := int(o.dc)
+	ic := int(o.ic)
 	oc := len(result)
-	nc := len(indices) / dc
+	nc := len(indices) / ic
 
 	for i := 0; i < oc; i++ {
 		result[i] = 0
@@ -30,17 +30,17 @@ outer:
 	for i := 0; i < nc; i++ {
 		value := 1.0
 
-		for j := 0; j < dc; j++ {
+		for j := 0; j < ic; j++ {
 			if point[j] < 0 || 1 < point[j] {
 				continue outer
 			}
 
-			level := uint32(indices[i*dc+j])
+			level := uint32(indices[i*ic+j])
 			if level == 0 {
 				continue
 			}
 
-			order := uint32(indices[i*dc+j] >> 32)
+			order := uint32(indices[i*ic+j] >> 32)
 			count := uint32(2)<<level - 1
 
 			switch order {
