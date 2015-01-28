@@ -19,7 +19,7 @@ type Grid interface {
 // used in the algorithm.
 type Basis interface {
 	Outputs() uint16
-	EvaluateComposite(indices []uint64, weights, point []float64) []float64
+	EvaluateComposite(indices []uint64, weights, points []float64) []float64
 }
 
 // Interpolator represents a particular instantiation of the algorithm.
