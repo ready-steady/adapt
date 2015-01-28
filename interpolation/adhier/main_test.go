@@ -272,7 +272,7 @@ func generate(surrogate *Surrogate) []float64 {
 	)
 
 	generator := rand.New(rand.NewSource(0))
-	points := make([]float64, count * surrogate.ic)
+	points := make([]float64, count*surrogate.ic)
 	for i := range points {
 		points[i] = generator.Float64()
 	}
