@@ -2,7 +2,7 @@ package newcot
 
 // Closed represents an instance of the grid on [0, 1]^n.
 type Closed struct {
-	ic uint16
+	dc uint16
 }
 
 // NewClosed creates an instance of the grid on [0, 1]^n.
@@ -10,9 +10,9 @@ func NewClosed(dimensions uint16) *Closed {
 	return &Closed{dimensions}
 }
 
-// Dimensions returns the number of dimensions of the grid.
+// Dimensions returns the dimensionality of the grid.
 func (c *Closed) Dimensions() uint16 {
-	return c.ic
+	return c.dc
 }
 
 // ComputeNodes returns the nodes corresponding to the given indices.
@@ -33,20 +33,20 @@ func (_ *Closed) ComputeNodes(indices []uint64) []float64 {
 // ComputeChildren returns the indices of the child nodes corresponding to the
 // parent nodes given by their indices.
 func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
-	ic := uint32(c.ic)
-	pc := uint32(len(parentIndices)) / ic
+	dc := uint32(c.dc)
+	pc := uint32(len(parentIndices)) / dc
 
-	indices := make([]uint64, 2*pc*ic*ic)
+	indices := make([]uint64, 2*pc*dc*dc)
 
-	hash := newHash(ic, 2*pc*ic)
+	hash := newHash(dc, 2*pc*dc)
 
 	cc := uint32(0)
 
 	push := func(p, d uint32, pair uint64) {
-		copy(indices[cc*ic:], parentIndices[p*ic:(p+1)*ic])
-		indices[cc*ic+d] = pair
+		copy(indices[cc*dc:], parentIndices[p*dc:(p+1)*dc])
+		indices[cc*dc+d] = pair
 
-		if !hash.tap(indices[cc*ic:]) {
+		if !hash.tap(indices[cc*dc:]) {
 			cc++
 		}
 	}
@@ -54,8 +54,8 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 	var i, j, level, order uint32
 
 	for i = 0; i < pc; i++ {
-		for j = 0; j < ic; j++ {
-			level = uint32(parentIndices[i*ic+j])
+		for j = 0; j < dc; j++ {
+			level = uint32(parentIndices[i*dc+j])
 
 			if level == 0 {
 				push(i, j, 1|0<<32)
@@ -63,7 +63,7 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 				continue
 			}
 
-			order = uint32(parentIndices[i*ic+j] >> 32)
+			order = uint32(parentIndices[i*dc+j] >> 32)
 
 			if level == 1 {
 				push(i, j, 2|uint64(order+1)<<32)
@@ -74,5 +74,5 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 		}
 	}
 
-	return indices[0 : cc*ic]
+	return indices[0 : cc*dc]
 }

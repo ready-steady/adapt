@@ -187,14 +187,14 @@ func TestClosedComputeChildren2D(t *testing.T) {
 
 func BenchmarkClosedComputeChildren(b *testing.B) {
 	const (
-		inputs      = 20
+		dimensions  = 20
 		targetLevel = 3
 	)
 
-	grid := NewClosed(inputs)
+	grid := NewClosed(dimensions)
 
 	// Level 0
-	indices := make([]uint64, inputs)
+	indices := make([]uint64, dimensions)
 
 	// Level 1, 2, …, (targetLevel - 1)
 	for i := 1; i < targetLevel; i++ {
