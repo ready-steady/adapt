@@ -11,7 +11,9 @@ func TestOpenEvaluateComposite(t *testing.T) {
 
 	evaluate := func(level, order uint32, point float64) float64 {
 		pair := uint64(level) | uint64(order)<<32
-		return basis.EvaluateComposite([]uint64{pair}, []float64{1}, []float64{point})[0]
+		result := make([]float64, 1)
+		basis.EvaluateComposite([]uint64{pair}, []float64{1}, []float64{point}, result)
+		return result[0]
 	}
 
 	points := []float64{

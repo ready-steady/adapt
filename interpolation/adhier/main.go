@@ -19,7 +19,7 @@ type Grid interface {
 // used in the algorithm.
 type Basis interface {
 	Outputs() uint16
-	EvaluateComposite(indices []uint64, weights, points []float64) []float64
+	EvaluateComposite(indices []uint64, weights, point, result []float64)
 }
 
 // Interpolator represents a particular instantiation of the algorithm.
@@ -75,6 +75,8 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 	var i, j, k, l uint32
 
+	value := make([]float64, oc)
+
 	min := make([]float64, oc)
 	max := make([]float64, oc)
 
@@ -89,13 +91,15 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 		nodes := self.grid.ComputeNodes(indices)
 		values := target(nodes, indices)
-		approximations := basis.EvaluateComposite(surrogate.indices[:pc*ic],
-			surrogate.surpluses[:pc*oc], nodes)
 
 		// Compute the surpluses corresponding to the active nodes.
+		passiveIndices := surrogate.indices[:pc*ic]
+		passiveSurpluses := surrogate.surpluses[:pc*oc]
 		for i, k = 0, pc*oc; i < ac; i++ {
+			basis.EvaluateComposite(passiveIndices, passiveSurpluses,
+				nodes[i*ic:(i+1)*ic], value)
 			for j = 0; j < oc; j++ {
-				surrogate.surpluses[k] = values[i*oc+j] - approximations[i*oc+j]
+				surrogate.surpluses[k] = values[i*oc+j] - value[j]
 				k++
 			}
 		}
@@ -182,11 +186,21 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 	return surrogate
 }
 
-// Evaluate takes a surrogate produced by Compute and evaluates it at the
-// given points.
+// Evaluate takes a surrogate produced by Compute and evaluates it at the given
+// points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	ic, oc, nc := surrogate.ic, surrogate.oc, surrogate.nc
+	pc := uint32(len(points)) / ic
 
-	return self.basis.EvaluateComposite(surrogate.indices[:nc*ic],
-		surrogate.surpluses[:nc*oc], points)
+	basis := self.basis
+	indices := surrogate.indices[:nc*ic]
+	surpluses := surrogate.surpluses[:nc*oc]
+
+	values := make([]float64, pc*oc)
+	for i := uint32(0); i < pc; i++ {
+		basis.EvaluateComposite(indices, surpluses,
+			points[i*ic:(i+1)*ic], values[i*oc:(i+1)*oc])
+	}
+
+	return values
 }
