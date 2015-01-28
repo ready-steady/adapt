@@ -84,7 +84,7 @@ func BenchmarkCube(b *testing.B) {
 }
 
 func BenchmarkBox(b *testing.B) {
-	interpolator := prepare(&fixtureCube, func(config *Config) {
+	interpolator := prepare(&fixtureBox, func(config *Config) {
 		config.MaxLevel = 9
 	})
 
@@ -94,15 +94,20 @@ func BenchmarkBox(b *testing.B) {
 }
 
 func BenchmarkMany(b *testing.B) {
+	const (
+		inputs  = 2
+		outputs = 1000
+	)
+
 	interpolator := prepare(&fixture{
 		surrogate: &Surrogate{
 			level: 9,
-			ic:    2,
-			oc:    1000,
+			ic:    inputs,
+			oc:    outputs,
 		},
 	})
 
-	function := many(2, 1000)
+	function := many(inputs, outputs)
 
 	for i := 0; i < b.N; i++ {
 		interpolator.Compute(function)
