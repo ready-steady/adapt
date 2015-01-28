@@ -12,11 +12,14 @@ type fixture struct {
 	values    []float64
 }
 
-func (f *fixture) prepare() {
-	if len(f.surrogate.indices) > 0 {
-		return
-	}
+func init() {
+	fixtureStep.prepare()
+	fixtureHat.prepare()
+	fixtureCube.prepare()
+	fixtureBox.prepare()
+}
 
+func (f *fixture) prepare() {
 	f.surrogate.indices = make([]uint64, len(f.levels))
 	for i := range f.levels {
 		f.surrogate.indices[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
@@ -47,98 +50,6 @@ var fixtureStep = fixture{
 	orders: []uint32{0, 0, 2, 3, 5, 7, 9, 11},
 	points: []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1},
 	values: []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-}
-
-func cube(x []float64, _ []uint64) []float64 {
-	nc := uint16(len(x)) / 2
-	y := make([]float64, nc)
-
-	for i := uint16(0); i < nc; i++ {
-		if math.Abs(2*x[2*i]-1) < 0.45 && math.Abs(2*x[2*i+1]-1) < 0.45 {
-			y[i] = 1
-		}
-	}
-
-	return y
-}
-
-var fixtureCube = fixture{
-	surrogate: &Surrogate{
-		level: 3,
-
-		ic: 2,
-		oc: 1,
-		nc: 29,
-
-		surpluses: []float64{
-			1, -1, -1, -1, -1, -0.5, 1, 1, -0.5, 1, 1, -0.5, -0.5, 0, 0.5,
-			0.5, 0.5, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0,
-		},
-	},
-
-	levels: []uint32{
-		0, 0,
-		1, 0,
-		1, 0,
-		0, 1,
-		0, 1,
-		2, 0,
-		1, 1,
-		1, 1,
-		2, 0,
-		1, 1,
-		1, 1,
-		0, 2,
-		0, 2,
-		3, 0,
-		3, 0,
-		2, 1,
-		2, 1,
-		1, 2,
-		1, 2,
-		3, 0,
-		3, 0,
-		2, 1,
-		2, 1,
-		1, 2,
-		1, 2,
-		0, 3,
-		0, 3,
-		0, 3,
-		0, 3,
-	},
-
-	orders: []uint32{
-		0, 0,
-		0, 0,
-		2, 0,
-		0, 0,
-		0, 2,
-		1, 0,
-		0, 0,
-		0, 2,
-		3, 0,
-		2, 0,
-		2, 2,
-		0, 1,
-		0, 3,
-		1, 0,
-		3, 0,
-		1, 0,
-		1, 2,
-		0, 1,
-		0, 3,
-		5, 0,
-		7, 0,
-		3, 0,
-		3, 2,
-		2, 1,
-		2, 3,
-		0, 1,
-		0, 3,
-		0, 5,
-		0, 7,
-	},
 }
 
 func hat(x []float64, _ []uint64) []float64 {
@@ -373,6 +284,98 @@ var fixtureHat = fixture{
 		+0.0000000000000000e+00, +0.0000000000000000e+00, +0.0000000000000000e+00,
 		+0.0000000000000000e+00, +0.0000000000000000e+00, +0.0000000000000000e+00,
 		+0.0000000000000000e+00, +0.0000000000000000e+00,
+	},
+}
+
+func cube(x []float64, _ []uint64) []float64 {
+	nc := uint16(len(x)) / 2
+	y := make([]float64, nc)
+
+	for i := uint16(0); i < nc; i++ {
+		if math.Abs(2*x[2*i]-1) < 0.45 && math.Abs(2*x[2*i+1]-1) < 0.45 {
+			y[i] = 1
+		}
+	}
+
+	return y
+}
+
+var fixtureCube = fixture{
+	surrogate: &Surrogate{
+		level: 3,
+
+		ic: 2,
+		oc: 1,
+		nc: 29,
+
+		surpluses: []float64{
+			1, -1, -1, -1, -1, -0.5, 1, 1, -0.5, 1, 1, -0.5, -0.5, 0, 0.5,
+			0.5, 0.5, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0,
+		},
+	},
+
+	levels: []uint32{
+		0, 0,
+		1, 0,
+		1, 0,
+		0, 1,
+		0, 1,
+		2, 0,
+		1, 1,
+		1, 1,
+		2, 0,
+		1, 1,
+		1, 1,
+		0, 2,
+		0, 2,
+		3, 0,
+		3, 0,
+		2, 1,
+		2, 1,
+		1, 2,
+		1, 2,
+		3, 0,
+		3, 0,
+		2, 1,
+		2, 1,
+		1, 2,
+		1, 2,
+		0, 3,
+		0, 3,
+		0, 3,
+		0, 3,
+	},
+
+	orders: []uint32{
+		0, 0,
+		0, 0,
+		2, 0,
+		0, 0,
+		0, 2,
+		1, 0,
+		0, 0,
+		0, 2,
+		3, 0,
+		2, 0,
+		2, 2,
+		0, 1,
+		0, 3,
+		1, 0,
+		3, 0,
+		1, 0,
+		1, 2,
+		0, 1,
+		0, 3,
+		5, 0,
+		7, 0,
+		3, 0,
+		3, 2,
+		2, 1,
+		2, 3,
+		0, 1,
+		0, 3,
+		0, 5,
+		0, 7,
 	},
 }
 

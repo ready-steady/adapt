@@ -7,7 +7,7 @@ import (
 )
 
 func TestOpenEvaluateComposite(t *testing.T) {
-	basis := NewOpen(1)
+	basis := NewOpen(1, 1)
 
 	points := []float64{
 		-1.00,

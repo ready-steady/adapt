@@ -7,19 +7,19 @@ import (
 // Closed represents an instance of the basis on [0, 1]^n.
 type Closed struct {
 	ic uint16
+	oc uint16
 }
 
 // NewClosed creates an instance of the basis on [0, 1]^n.
-func NewClosed(dimensions uint16) *Closed {
-	return &Closed{dimensions}
+func NewClosed(inputs, outputs uint16) *Closed {
+	return &Closed{inputs, outputs}
 }
 
 // EvaluateComposite computes a vector-valued weighted sum wherein each term is
 // a vector of weights multiplied by a multi-dimensional basis function
 // evaluated at a point.
 func (c *Closed) EvaluateComposite(indices []uint64, weights, point, result []float64) {
-	ic := int(c.ic)
-	oc := len(result)
+	ic, oc := int(c.ic), int(c.oc)
 	nc := len(indices) / ic
 
 	for i := 0; i < oc; i++ {

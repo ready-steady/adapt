@@ -10,98 +10,102 @@ import (
 )
 
 func TestComputeStep(t *testing.T) {
-	fixtureStep.prepare()
-	algorithm := makeInterpolator(1, 1, fixtureStep.surrogate.level)
+	interpolator := prepare(&fixtureStep)
 
-	surrogate := algorithm.Compute(step)
+	surrogate := interpolator.Compute(step)
 
 	assert.Equal(surrogate, fixtureStep.surrogate, t)
 }
 
 func TestEvaluateStep(t *testing.T) {
-	fixtureStep.prepare()
-	algorithm := makeInterpolator(1, 1, 0)
+	interpolator := prepare(&fixtureStep)
 
-	values := algorithm.Evaluate(fixtureStep.surrogate, fixtureStep.points)
+	values := interpolator.Evaluate(fixtureStep.surrogate, fixtureStep.points)
 
 	assert.Equal(values, fixtureStep.values, t)
 }
 
 func TestComputeHat(t *testing.T) {
-	fixtureHat.prepare()
-	algorithm := makeInterpolator(1, 1, 0)
+	interpolator := prepare(&fixtureHat)
 
-	surrogate := algorithm.Compute(hat)
+	surrogate := interpolator.Compute(hat)
 
 	assert.Equal(surrogate, fixtureHat.surrogate, t)
 }
 
 func TestEvaluateHat(t *testing.T) {
-	fixtureHat.prepare()
-	algorithm := makeInterpolator(1, 1, 0)
+	interpolator := prepare(&fixtureHat)
 
-	values := algorithm.Evaluate(fixtureHat.surrogate, fixtureHat.points)
+	values := interpolator.Evaluate(fixtureHat.surrogate, fixtureHat.points)
 
 	assert.AlmostEqual(values, fixtureHat.values, t)
 }
 
 func TestComputeCube(t *testing.T) {
-	fixtureCube.prepare()
-	algorithm := makeInterpolator(2, 1, fixtureCube.surrogate.level)
+	interpolator := prepare(&fixtureCube)
 
-	surrogate := algorithm.Compute(cube)
+	surrogate := interpolator.Compute(cube)
 
 	assert.Equal(surrogate, fixtureCube.surrogate, t)
 }
 
 func TestComputeBox(t *testing.T) {
-	fixtureBox.prepare()
-	algorithm := makeInterpolator(2, 3, fixtureBox.surrogate.level)
+	interpolator := prepare(&fixtureBox)
 
-	surrogate := algorithm.Compute(box)
+	surrogate := interpolator.Compute(box)
 
 	assert.Equal(surrogate, fixtureBox.surrogate, t)
 }
 
 func TestEvaluateBox(t *testing.T) {
-	fixtureBox.prepare()
-	algorithm := makeInterpolator(2, 3, 0)
+	interpolator := prepare(&fixtureBox)
 
-	values := algorithm.Evaluate(fixtureBox.surrogate, fixtureBox.points)
+	values := interpolator.Evaluate(fixtureBox.surrogate, fixtureBox.points)
 
 	assert.AlmostEqual(values, fixtureBox.values, t)
 }
 
 func BenchmarkHat(b *testing.B) {
-	algorithm := makeInterpolator(1, 1, 0)
+	interpolator := prepare(&fixtureHat)
 
 	for i := 0; i < b.N; i++ {
-		algorithm.Compute(hat)
+		interpolator.Compute(hat)
 	}
 }
 
 func BenchmarkCube(b *testing.B) {
-	algorithm := makeInterpolator(2, 1, 0)
+	interpolator := prepare(&fixtureCube, func(config *Config) {
+		config.MaxLevel = 9
+	})
 
 	for i := 0; i < b.N; i++ {
-		algorithm.Compute(cube)
+		interpolator.Compute(cube)
 	}
 }
 
 func BenchmarkBox(b *testing.B) {
-	algorithm := makeInterpolator(2, 3, 0)
+	interpolator := prepare(&fixtureCube, func(config *Config) {
+		config.MaxLevel = 9
+	})
 
 	for i := 0; i < b.N; i++ {
-		algorithm.Compute(box)
+		interpolator.Compute(box)
 	}
 }
 
 func BenchmarkMany(b *testing.B) {
-	algorithm := makeInterpolator(2, 1000, 0)
+	interpolator := prepare(&fixture{
+		surrogate: &Surrogate{
+			level: 9,
+			ic:    2,
+			oc:    1000,
+		},
+	})
+
 	function := many(2, 1000)
 
 	for i := 0; i < b.N; i++ {
-		algorithm.Compute(function)
+		interpolator.Compute(function)
 	}
 }
 
@@ -113,13 +117,13 @@ func ExampleInterpolator_step() {
 	)
 
 	grid := newcot.NewClosed(inputs)
-	basis := linhat.NewClosed(inputs)
+	basis := linhat.NewClosed(inputs, outputs)
 
 	config := DefaultConfig()
 	config.MaxLevel = 19
-	algorithm, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config, outputs)
 
-	surrogate := algorithm.Compute(step)
+	surrogate := interpolator.Compute(step)
 	fmt.Println(surrogate)
 
 	// Output:
@@ -134,13 +138,13 @@ func ExampleInterpolator_hat() {
 	)
 
 	grid := newcot.NewClosed(inputs)
-	basis := linhat.NewClosed(inputs)
+	basis := linhat.NewClosed(inputs, outputs)
 
 	config := DefaultConfig()
 	config.MaxLevel = 9
-	algorithm, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config, outputs)
 
-	surrogate := algorithm.Compute(hat)
+	surrogate := interpolator.Compute(hat)
 	fmt.Println(surrogate)
 
 	// Output:
@@ -155,13 +159,13 @@ func ExampleInterpolator_cube() {
 	)
 
 	grid := newcot.NewClosed(inputs)
-	basis := linhat.NewClosed(inputs)
+	basis := linhat.NewClosed(inputs, outputs)
 
 	config := DefaultConfig()
 	config.MaxLevel = 9
-	algorithm, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config, outputs)
 
-	surrogate := algorithm.Compute(cube)
+	surrogate := interpolator.Compute(cube)
 	fmt.Println(surrogate)
 
 	// Output:
@@ -176,26 +180,33 @@ func ExampleInterpolator_many() {
 	)
 
 	grid := newcot.NewClosed(inputs)
-	basis := linhat.NewClosed(inputs)
+	basis := linhat.NewClosed(inputs, outputs)
 	config := DefaultConfig()
 	config.MaxNodes = 300
 
-	algorithm, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config, outputs)
 
-	surrogate := algorithm.Compute(many(inputs, outputs))
+	surrogate := interpolator.Compute(many(inputs, outputs))
 	fmt.Println(surrogate)
 
 	// Output:
 	// Surrogate{inputs: 2, outputs: 1000, level: 9, nodes: 300}
 }
 
-func makeInterpolator(ic, oc uint16, ml uint8) *Interpolator {
+func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
+	surrogate := fixture.surrogate
+
+	ic, oc := uint16(surrogate.ic), uint16(surrogate.oc)
+
 	config := DefaultConfig()
-	if ml > 0 {
-		config.MaxLevel = ml
+	config.MaxLevel = surrogate.level
+
+	if len(arguments) > 0 {
+		process, _ := arguments[0].(func(*Config))
+		process(&config)
 	}
 
-	interpolator, _ := New(newcot.NewClosed(ic), linhat.NewClosed(ic), config, oc)
+	interpolator, _ := New(newcot.NewClosed(ic), linhat.NewClosed(ic, oc), config, oc)
 
 	return interpolator
 }

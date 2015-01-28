@@ -7,19 +7,19 @@ import (
 // Open represents an instance of the basis on (0, 1)^n.
 type Open struct {
 	ic uint16
+	oc uint16
 }
 
 // NewOpen creates an instance of the basis on (0, 1)^n.
-func NewOpen(dimensions uint16) *Open {
-	return &Open{dimensions}
+func NewOpen(inputs, outputs uint16) *Open {
+	return &Open{inputs, outputs}
 }
 
 // EvaluateComposite computes a vector-valued weighted sum wherein each term is
 // a vector of weights multiplied by a multi-dimensional basis function
 // evaluated at a point.
 func (o *Open) EvaluateComposite(indices []uint64, weights, point, result []float64) {
-	ic := int(o.ic)
-	oc := len(result)
+	ic, oc := int(o.ic), int(o.oc)
 	nc := len(indices) / ic
 
 	for i := 0; i < oc; i++ {
