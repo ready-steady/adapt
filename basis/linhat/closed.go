@@ -15,6 +15,11 @@ func NewClosed(inputs, outputs uint16) *Closed {
 	return &Closed{inputs, outputs}
 }
 
+// Outputs returns the dimensionality of the output.
+func (c *Closed) Outputs() uint16 {
+	return c.oc
+}
+
 // EvaluateComposite computes a number of vector-valued weighted sums wherein
 // each sum is composed of weight vectors multiplied by multi-dimensional basis
 // functions evaluated at a point. The basis functions are identified by

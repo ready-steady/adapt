@@ -176,7 +176,7 @@ func ExampleInterpolator_step() {
 
 	config := DefaultConfig()
 	config.MaxLevel = 19
-	interpolator, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config)
 
 	surrogate := interpolator.Compute(step)
 	fmt.Println(surrogate)
@@ -197,7 +197,7 @@ func ExampleInterpolator_hat() {
 
 	config := DefaultConfig()
 	config.MaxLevel = 9
-	interpolator, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config)
 
 	surrogate := interpolator.Compute(hat)
 	fmt.Println(surrogate)
@@ -218,7 +218,7 @@ func ExampleInterpolator_cube() {
 
 	config := DefaultConfig()
 	config.MaxLevel = 9
-	interpolator, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config)
 
 	surrogate := interpolator.Compute(cube)
 	fmt.Println(surrogate)
@@ -239,7 +239,7 @@ func ExampleInterpolator_many() {
 	config := DefaultConfig()
 	config.MaxNodes = 300
 
-	interpolator, _ := New(grid, basis, config, outputs)
+	interpolator, _ := New(grid, basis, config)
 
 	surrogate := interpolator.Compute(many(inputs, outputs))
 	fmt.Println(surrogate)
@@ -261,7 +261,7 @@ func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
 		process(&config)
 	}
 
-	interpolator, _ := New(newcot.NewClosed(ic), linhat.NewClosed(ic, oc), config, oc)
+	interpolator, _ := New(newcot.NewClosed(ic), linhat.NewClosed(ic, oc), config)
 
 	return interpolator
 }

@@ -18,6 +18,7 @@ type Grid interface {
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
+	Outputs() uint16
 	EvaluateComposite(indices []uint64, weights, point []float64) []float64
 }
 
@@ -32,7 +33,7 @@ type Interpolator struct {
 }
 
 // New creates an instance of the algorithm for the given configuration.
-func New(grid Grid, basis Basis, config Config, outputs uint16) (*Interpolator, error) {
+func New(grid Grid, basis Basis, config Config) (*Interpolator, error) {
 	if config.AbsError <= 0 {
 		return nil, errors.New("the absolute error is invalid")
 	}
@@ -46,7 +47,7 @@ func New(grid Grid, basis Basis, config Config, outputs uint16) (*Interpolator, 
 		config: config,
 
 		ic: uint32(grid.Dimensions()),
-		oc: uint32(outputs),
+		oc: uint32(basis.Outputs()),
 	}
 
 	return interpolator, nil
