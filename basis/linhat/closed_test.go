@@ -9,6 +9,11 @@ import (
 func TestClosedEvaluateComposite(t *testing.T) {
 	basis := NewClosed(1, 1)
 
+	evaluate := func(level, order uint32, point float64) float64 {
+		pair := uint64(level) | uint64(order)<<32
+		return basis.EvaluateComposite([]uint64{pair}, []float64{1}, []float64{point})[0]
+	}
+
 	points := []float64{-1, 0, 0.25, 0.5, 0.75, 1, 2}
 
 	cases := []struct {
@@ -27,9 +32,7 @@ func TestClosedEvaluateComposite(t *testing.T) {
 
 	for i := range cases {
 		for j := range values {
-			pair := uint64(cases[i].level) | uint64(cases[i].order)<<32
-			basis.EvaluateComposite([]uint64{pair}, []float64{1},
-				[]float64{points[j]}, values[j:j+1])
+			values[j] = evaluate(cases[i].level, cases[i].order, points[j])
 		}
 		assert.Equal(values, cases[i].values, t)
 	}

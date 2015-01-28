@@ -9,6 +9,11 @@ import (
 func TestOpenEvaluateComposite(t *testing.T) {
 	basis := NewOpen(1, 1)
 
+	evaluate := func(level, order uint32, point float64) float64 {
+		pair := uint64(level) | uint64(order)<<32
+		return basis.EvaluateComposite([]uint64{pair}, []float64{1}, []float64{point})[0]
+	}
+
 	points := []float64{
 		-1.00,
 		0.00, 0.04, 0.08, 0.12, 0.16, 0.20, 0.24, 0.28, 0.32, 0.36, 0.40, 0.44, 0.48,
@@ -117,9 +122,7 @@ func TestOpenEvaluateComposite(t *testing.T) {
 
 	for i := range cases {
 		for j := range values {
-			pair := uint64(cases[i].level) | uint64(cases[i].order)<<32
-			basis.EvaluateComposite([]uint64{pair}, []float64{1},
-				[]float64{points[j]}, values[j:j+1])
+			values[j] = evaluate(cases[i].level, cases[i].order, points[j])
 		}
 		assert.AlmostEqual(values, cases[i].values, t)
 	}

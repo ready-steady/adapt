@@ -18,7 +18,7 @@ type Grid interface {
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	EvaluateComposite(indices []uint64, weights, point, result []float64)
+	EvaluateComposite(indices []uint64, weights, point []float64) []float64
 }
 
 // Interpolator represents a particular instantiation of the algorithm.
@@ -74,8 +74,6 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 	var i, j, k, l uint32
 
-	value := make([]float64, oc)
-
 	min := make([]float64, oc)
 	max := make([]float64, oc)
 
@@ -90,14 +88,13 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 		nodes := self.grid.ComputeNodes(indices)
 		values := target(nodes, indices)
+		approximations := basis.EvaluateComposite(surrogate.indices[:pc*ic],
+			surrogate.surpluses[:pc*oc], nodes)
 
 		// Compute the surpluses corresponding to the active nodes.
-		pindices := surrogate.indices[0 : pc*ic]
-		psurpluses := surrogate.surpluses[0 : pc*oc]
 		for i, k = 0, pc*oc; i < ac; i++ {
-			basis.EvaluateComposite(pindices, psurpluses, nodes[i*ic:(i+1)*ic], value)
 			for j = 0; j < oc; j++ {
-				surrogate.surpluses[k] = values[i*oc+j] - value[j]
+				surrogate.surpluses[k] = values[i*oc+j] - approximations[i*oc+j]
 				k++
 			}
 		}
@@ -161,7 +158,7 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 			l += ic
 		}
 
-		indices = indices[0:k]
+		indices = indices[:k]
 
 	next:
 		indices = self.grid.ComputeChildren(indices)
@@ -171,7 +168,7 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 		if δ := int32(nc+ac) - int32(self.config.MaxNodes); δ > 0 {
 			ac -= uint32(δ)
-			indices = indices[0 : ac*ic]
+			indices = indices[:ac*ic]
 		}
 		if ac == 0 {
 			break
@@ -188,17 +185,7 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 // given points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	ic, oc, nc := surrogate.ic, surrogate.oc, surrogate.nc
-	pc := uint32(len(points)) / ic
 
-	basis := self.basis
-	indices := surrogate.indices[0 : nc*ic]
-	surpluses := surrogate.surpluses[0 : nc*oc]
-
-	values := make([]float64, pc*oc)
-	for i := uint32(0); i < pc; i++ {
-		basis.EvaluateComposite(indices, surpluses,
-			points[i*ic:(i+1)*ic], values[i*oc:(i+1)*oc])
-	}
-
-	return values
+	return self.basis.EvaluateComposite(surrogate.indices[:nc*ic],
+		surrogate.surpluses[:nc*oc], points)
 }
