@@ -90,7 +90,11 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 		copy(surrogate.indices[pc*ic:], indices)
 
 		nodes := self.grid.ComputeNodes(indices)
-		values := target(nodes, indices)
+
+		// NOTE: Assuming that the target function might have some logic based
+		// on the indices passed to it (for instance, caching), the indices
+		// variable should not be used here as it gets modified later on.
+		values := target(nodes, surrogate.indices[pc*ic:(pc+ac)*ic])
 
 		// Compute the surpluses corresponding to the active nodes.
 		passiveIndices := surrogate.indices[:pc*ic]
