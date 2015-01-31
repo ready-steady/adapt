@@ -73,8 +73,6 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 	var i, j, k, l uint32
 
-	value := make([]float64, oc)
-
 	min := make([]float64, oc)
 	max := make([]float64, oc)
 
@@ -96,12 +94,11 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 		// Compute the surpluses corresponding to the active nodes.
 		if level > 0 {
-			passiveIndices := surrogate.indices[:pc*ic]
-			passiveSurpluses := surrogate.surpluses[:pc*oc]
+			approximations := self.evaluate(surrogate.indices[:pc*ic],
+				surrogate.surpluses[:pc*oc], nodes)
 			for i, k = 0, pc*oc; i < ac; i++ {
-				self.evaluate(passiveIndices, passiveSurpluses, nodes[i*ic:(i+1)*ic], value)
 				for j = 0; j < oc; j++ {
-					surrogate.surpluses[k] = values[i*oc+j] - value[j]
+					surrogate.surpluses[k] = values[i*oc+j] - approximations[i*oc+j]
 					k++
 				}
 			}
@@ -195,43 +192,32 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 	return surrogate
 }
 
-// Evaluate takes a surrogate produced by Compute and evaluates it at the given
+// Evaluate takes a surrogate produced by Compute and evaluates it at a set of
 // points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	ic, oc, nc := surrogate.ic, surrogate.oc, surrogate.nc
-	pc := uint32(len(points)) / ic
-
-	indices := surrogate.indices[:nc*ic]
-	surpluses := surrogate.surpluses[:nc*oc]
-
-	values := make([]float64, pc*oc)
-	for i := uint32(0); i < pc; i++ {
-		self.evaluate(indices, surpluses, points[i*ic:(i+1)*ic], values[i*oc:(i+1)*oc])
-	}
-
-	return values
+	return self.evaluate(surrogate.indices, surrogate.surpluses, points)
 }
 
-func (self *Interpolator) evaluate(indices []uint64, surpluses, point []float64, value []float64) {
+func (self *Interpolator) evaluate(indices []uint64, surpluses, points []float64) []float64 {
 	ic, oc := self.ic, self.oc
 	nc := uint32(len(indices)) / ic
+	pc := uint32(len(points)) / ic
 
 	basis := self.basis
 
-	// Treat the first separately in case value is not zeroed.
-	weight := basis.Evaluate(indices[0:ic], point)
-	for j := uint32(0); j < oc; j++ {
-		s := surpluses[j]
-		value[j] = s * weight
+	values := make([]float64, pc*oc)
+
+	for i := uint32(0); i < pc; i++ {
+		for j := uint32(0); j < nc; j++ {
+			weight := basis.Evaluate(indices[j*ic:(j+1)*ic], points[i*ic:(i+1)*ic])
+			if weight == 0 {
+				continue
+			}
+			for k := uint32(0); k < oc; k++ {
+				values[i*oc+k] += surpluses[j*oc+k] * weight
+			}
+		}
 	}
 
-	for i := uint32(1); i < nc; i++ {
-		weight = basis.Evaluate(indices[i*ic:(i+1)*ic], point)
-		if weight == 0 {
-			continue
-		}
-		for j := uint32(0); j < oc; j++ {
-			value[j] += surpluses[i*oc+j] * weight
-		}
-	}
+	return values
 }
