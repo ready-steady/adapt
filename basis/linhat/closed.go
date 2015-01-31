@@ -1,9 +1,5 @@
 package linhat
 
-import (
-	"math"
-)
-
 // Closed represents an instance of the basis on [0, 1]^n.
 type Closed struct {
 	ic uint16
@@ -49,7 +45,10 @@ outer:
 			order := uint32(indices[i*ic+j] >> 32)
 
 			scale := float64(uint32(2) << (level - 1))
-			distance := math.Abs(point[j] - float64(order)/scale)
+			distance := point[j] - float64(order)/scale
+			if distance < 0 {
+				distance = -distance
+			}
 
 			if distance >= 1/scale {
 				continue outer

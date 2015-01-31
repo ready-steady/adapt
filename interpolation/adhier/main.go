@@ -137,7 +137,10 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 			refine := false
 
 			for j = 0; j < oc; j++ {
-				absError := math.Abs(surrogate.surpluses[(pc+i)*oc+j])
+				absError := surrogate.surpluses[(pc+i)*oc+j]
+				if absError < 0 {
+					absError = -absError
+				}
 
 				if absError > self.config.AbsError {
 					refine = true

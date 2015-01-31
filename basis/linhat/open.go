@@ -1,9 +1,5 @@
 package linhat
 
-import (
-	"math"
-)
-
 // Open represents an instance of the basis on (0, 1)^n.
 type Open struct {
 	ic uint16
@@ -63,7 +59,10 @@ outer:
 				value *= scale2*point[j] - scale1
 			default:
 				node := float64(order+1) / float64(count+1)
-				scale, distance := float64(count+1), math.Abs(point[j]-node)
+				scale, distance := float64(count+1), point[j]-node
+				if distance < 0 {
+					distance = -distance
+				}
 				if distance >= 1/scale {
 					continue outer
 				}
