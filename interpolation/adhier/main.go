@@ -248,6 +248,8 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 		<-done
 	}
 
+	close(jobs)
+
 	return values
 }
 
@@ -277,6 +279,8 @@ func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
 	for i := uint32(0); i < nc; i++ {
 		<-done
 	}
+
+	close(jobs)
 
 	return values
 }
