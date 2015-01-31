@@ -7,6 +7,7 @@ type Config struct {
 	MaxNodes uint32  // The maximal number of nodes
 	AbsError float64 // The absolute error
 	RelError float64 // The relative error
+	Workers  uint32  // The number of concurrent workers
 }
 
 // DefaultConfig returns the default configuration of the algorithm.
@@ -17,5 +18,6 @@ func DefaultConfig() Config {
 		MaxNodes: 10000,
 		AbsError: 1e-4,
 		RelError: 1e-2,
+		Workers:  0,
 	}
 }

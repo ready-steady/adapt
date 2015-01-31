@@ -5,6 +5,7 @@ package adhier
 import (
 	"errors"
 	"math"
+	"runtime"
 )
 
 // Grid is the interface that an sparse grid should satisfy in order to be used
@@ -30,6 +31,8 @@ type Interpolator struct {
 
 	ic uint32
 	oc uint32
+
+	wc uint32
 }
 
 // New creates an instance of the algorithm for the given configuration.
@@ -41,6 +44,11 @@ func New(grid Grid, basis Basis, config Config) (*Interpolator, error) {
 		return nil, errors.New("the relative error is invalid")
 	}
 
+	wc := config.Workers
+	if wc == 0 {
+		wc = uint32(runtime.GOMAXPROCS(0))
+	}
+
 	interpolator := &Interpolator{
 		grid:   grid,
 		basis:  basis,
@@ -48,6 +56,8 @@ func New(grid Grid, basis Basis, config Config) (*Interpolator, error) {
 
 		ic: uint32(grid.Dimensions()),
 		oc: uint32(basis.Outputs()),
+
+		wc: wc,
 	}
 
 	return interpolator, nil
@@ -55,7 +65,7 @@ func New(grid Grid, basis Basis, config Config) (*Interpolator, error) {
 
 // Compute takes a function and yields a surrogate for it, which can be further
 // fed to Evaluate for the actual interpolation.
-func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *Surrogate {
+func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *Surrogate {
 	ic, oc := self.ic, self.oc
 
 	surrogate := new(Surrogate)
@@ -87,14 +97,14 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 
 		nodes := self.grid.ComputeNodes(indices)
 
-		// NOTE: Assuming that the target function might have some logic based
-		// on the indices passed to it (for instance, caching), the indices
-		// variable should not be used here as it gets modified later on.
-		values := target(nodes, surrogate.indices[pc*ic:(pc+ac)*ic])
+		// NOTE: Assuming that target might have some logic based on the indices
+		// passed to it (for instance, caching), the indices variable should not
+		// be used here as it gets modified later on.
+		values := self.invoke(target, nodes, surrogate.indices[pc*ic:(pc+ac)*ic])
 
 		// Compute the surpluses corresponding to the active nodes.
 		if level > 0 {
-			approximations := self.evaluate(surrogate.indices[:pc*ic],
+			approximations := self.approximate(surrogate.indices[:pc*ic],
 				surrogate.surpluses[:pc*oc], nodes)
 			for i, k = 0, pc*oc; i < ac; i++ {
 				for j = 0; j < oc; j++ {
@@ -195,35 +205,76 @@ func (self *Interpolator) Compute(target func([]float64, []uint64) []float64) *S
 // Evaluate takes a surrogate produced by Compute and evaluates it at a set of
 // points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	return self.evaluate(surrogate.indices, surrogate.surpluses, points)
+	return self.approximate(surrogate.indices, surrogate.surpluses, points)
 }
 
-func (self *Interpolator) evaluate(indices []uint64, surpluses, points []float64) []float64 {
-	ic, oc := self.ic, self.oc
+func (self *Interpolator) approximate(indices []uint64, surpluses, points []float64) []float64 {
+	ic, oc, wc := self.ic, self.oc, self.wc
 	nc := uint32(len(indices)) / ic
 	pc := uint32(len(points)) / ic
 
 	basis := self.basis
 
-	done := make(chan bool, pc)
 	values := make([]float64, pc*oc)
 
-	for i := uint32(0); i < pc; i++ {
-		go func(point, value []float64) {
-			for j := uint32(0); j < nc; j++ {
-				weight := basis.Evaluate(indices[j*ic:(j+1)*ic], point)
-				if weight == 0 {
-					continue
+	jobs := make(chan uint32, pc)
+	done := make(chan bool, pc)
+
+	for i := uint32(0); i < wc; i++ {
+		go func() {
+			for j := range jobs {
+				point := points[j*ic : (j+1)*ic]
+				value := values[j*oc : (j+1)*oc]
+
+				for k := uint32(0); k < nc; k++ {
+					weight := basis.Evaluate(indices[k*ic:(k+1)*ic], point)
+					if weight == 0 {
+						continue
+					}
+					for l := uint32(0); l < oc; l++ {
+						value[l] += surpluses[k*oc+l] * weight
+					}
 				}
-				for k := uint32(0); k < oc; k++ {
-					value[k] += surpluses[j*oc+k] * weight
-				}
+
+				done <- true
 			}
-			done <- true
-		}(points[i*ic:(i+1)*ic], values[i*oc:(i+1)*oc])
+		}()
 	}
 
 	for i := uint32(0); i < pc; i++ {
+		jobs <- i
+	}
+	for i := uint32(0); i < pc; i++ {
+		<-done
+	}
+
+	return values
+}
+
+func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
+	nodes []float64, indices []uint64) []float64 {
+
+	ic, oc, wc := self.ic, self.oc, self.wc
+	nc := uint32(len(nodes)) / ic
+
+	values := make([]float64, nc*oc)
+
+	jobs := make(chan uint32, nc)
+	done := make(chan bool, nc)
+
+	for i := uint32(0); i < wc; i++ {
+		go func() {
+			for j := range jobs {
+				target(nodes[j*ic:(j+1)*ic], values[j*oc:(j+1)*oc], indices[j*ic:(j+1)*ic])
+				done <- true
+			}
+		}()
+	}
+
+	for i := uint32(0); i < nc; i++ {
+		jobs <- i
+	}
+	for i := uint32(0); i < nc; i++ {
 		<-done
 	}
 

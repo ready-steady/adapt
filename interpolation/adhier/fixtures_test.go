@@ -26,14 +26,12 @@ func (f *fixture) prepare() {
 	}
 }
 
-func step(x []float64, _ []uint64) []float64 {
-	y := make([]float64, len(x))
-	for i := range x {
-		if x[i] <= 0.5 {
-			y[i] = 1
-		}
+func step(x, y []float64, _ []uint64) {
+	if x[0] <= 0.5 {
+		y[0] = 1
+	} else {
+		y[0] = 0
 	}
-	return y
 }
 
 var fixtureStep = fixture{
@@ -52,20 +50,19 @@ var fixtureStep = fixture{
 	values: []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
 }
 
-func hat(x []float64, _ []uint64) []float64 {
-	y := make([]float64, len(x))
-	for i, z := range x {
-		z = 5*z - 1
-		switch {
-		case 0 <= z && z < 1:
-			y[i] = 0.5 * z * z
-		case 1 <= z && z < 2:
-			y[i] = 0.5 * (-2*z*z + 6*z - 3)
-		case 2 <= z && z < 3:
-			y[i] = 0.5 * (3 - z) * (3 - z)
-		}
+func hat(x, y []float64, _ []uint64) {
+	z := 5*x[0] - 1
+
+	switch {
+	case 0 <= z && z < 1:
+		y[0] = 0.5 * z * z
+	case 1 <= z && z < 2:
+		y[0] = 0.5 * (-2*z*z + 6*z - 3)
+	case 2 <= z && z < 3:
+		y[0] = 0.5 * (3 - z) * (3 - z)
+	default:
+		y[0] = 0
 	}
-	return y
 }
 
 var fixtureHat = fixture{
@@ -287,17 +284,12 @@ var fixtureHat = fixture{
 	},
 }
 
-func cube(x []float64, _ []uint64) []float64 {
-	nc := uint16(len(x)) / 2
-	y := make([]float64, nc)
-
-	for i := uint16(0); i < nc; i++ {
-		if math.Abs(2*x[2*i]-1) < 0.45 && math.Abs(2*x[2*i+1]-1) < 0.45 {
-			y[i] = 1
-		}
+func cube(x, y []float64, _ []uint64) {
+	if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
+		y[0] = 1
+	} else {
+		y[0] = 0
 	}
-
-	return y
 }
 
 var fixtureCube = fixture{
@@ -379,27 +371,24 @@ var fixtureCube = fixture{
 	},
 }
 
-func box(x []float64, _ []uint64) []float64 {
-	nc := len(x) / 2
-	y := make([]float64, 3*nc)
-
-	for i := 0; i < nc; i++ {
-		x1, x2 := x[2*i+0], x[2*i+1]
-
-		if x1+x2 > 0.5 {
-			y[3*i+0] = 1
-		}
-
-		if x1-x2 > 0.5 {
-			y[3*i+1] = 1
-		}
-
-		if x2-x1 > 0.5 {
-			y[3*i+2] = 1
-		}
+func box(x, y []float64, _ []uint64) {
+	if x[0]+x[1] > 0.5 {
+		y[0] = 1
+	} else {
+		y[0] = 0
 	}
 
-	return y
+	if x[0]-x[1] > 0.5 {
+		y[1] = 1
+	} else {
+		y[1] = 0
+	}
+
+	if x[1]-x[0] > 0.5 {
+		y[2] = 1
+	} else {
+		y[2] = 0
+	}
 }
 
 var fixtureBox = fixture{
@@ -729,28 +718,20 @@ var fixtureBox = fixture{
 	},
 }
 
-func many(ic, oc int) func([]float64, []uint64) []float64 {
-	return func(x []float64, _ []uint64) []float64 {
-		nc := len(x) / ic
-		y := make([]float64, nc*oc)
+func many(ic, oc int) func([]float64, []float64, []uint64) {
+	return func(x, y []float64, _ []uint64) {
+		sum, value := 0.0, 0.0
 
-		for i, k := 0, 0; i < nc; i++ {
-			sum, value := float64(0), float64(0)
-
-			for j := 0; j < ic; j++ {
-				sum += x[i*ic+j]
-			}
-
-			if sum > float64(ic)/4 {
-				value = 1
-			}
-
-			for j := 0; j < oc; j++ {
-				y[k] = value
-				k++
-			}
+		for i := 0; i < ic; i++ {
+			sum += x[i]
 		}
 
-		return y
+		if sum > float64(ic)/4 {
+			value = 1
+		}
+
+		for i := 0; i < oc; i++ {
+			y[i] = value
+		}
 	}
 }
