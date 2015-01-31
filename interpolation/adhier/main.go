@@ -205,18 +205,26 @@ func (self *Interpolator) evaluate(indices []uint64, surpluses, points []float64
 
 	basis := self.basis
 
+	done := make(chan bool, pc)
 	values := make([]float64, pc*oc)
 
 	for i := uint32(0); i < pc; i++ {
-		for j := uint32(0); j < nc; j++ {
-			weight := basis.Evaluate(indices[j*ic:(j+1)*ic], points[i*ic:(i+1)*ic])
-			if weight == 0 {
-				continue
+		go func(point, value []float64) {
+			for j := uint32(0); j < nc; j++ {
+				weight := basis.Evaluate(indices[j*ic:(j+1)*ic], point)
+				if weight == 0 {
+					continue
+				}
+				for k := uint32(0); k < oc; k++ {
+					value[k] += surpluses[j*oc+k] * weight
+				}
 			}
-			for k := uint32(0); k < oc; k++ {
-				values[i*oc+k] += surpluses[j*oc+k] * weight
-			}
-		}
+			done <- true
+		}(points[i*ic:(i+1)*ic], values[i*oc:(i+1)*oc])
+	}
+
+	for i := uint32(0); i < pc; i++ {
+		<-done
 	}
 
 	return values
