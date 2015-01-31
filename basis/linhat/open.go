@@ -16,62 +16,50 @@ func (o *Open) Outputs() uint16 {
 	return o.oc
 }
 
-// EvaluateComposite computes a vector-valued weighted sum wherein each term is
-// a vector of weights multiplied by a multi-dimensional basis function
-// evaluated at a point.
-func (o *Open) EvaluateComposite(indices []uint64, weights, point, result []float64) {
-	ic, oc := int(o.ic), int(o.oc)
-	nc := len(indices) / ic
+// Evaluate computes the value of a multi-dimensional basis function at a point.
+func (o *Open) Evaluate(index []uint64, point []float64) float64 {
+	ic := int(o.ic)
 
-	for i := 0; i < oc; i++ {
-		result[i] = 0
-	}
+	value := 1.0
 
-outer:
-	for i := 0; i < nc; i++ {
-		value := 1.0
-
-		for j := 0; j < ic; j++ {
-			if point[j] < 0 || 1 < point[j] {
-				continue outer
-			}
-
-			level := uint32(indices[i*ic+j])
-			if level == 0 {
-				continue
-			}
-
-			order := uint32(indices[i*ic+j] >> 32)
-			count := uint32(2)<<level - 1
-
-			switch order {
-			case 0:
-				scale := float64(count + 1)
-				if point[j] >= 2/scale {
-					continue outer
-				}
-				value *= 2 - scale*point[j]
-			case count - 1:
-				scale1, scale2 := float64(count-1), float64(count+1)
-				if point[j] <= scale1/scale2 {
-					continue outer
-				}
-				value *= scale2*point[j] - scale1
-			default:
-				node := float64(order+1) / float64(count+1)
-				scale, distance := float64(count+1), point[j]-node
-				if distance < 0 {
-					distance = -distance
-				}
-				if distance >= 1/scale {
-					continue outer
-				}
-				value *= 1 - scale*distance
-			}
+	for i := 0; i < ic; i++ {
+		if point[i] < 0 || 1 < point[i] {
+			return 0
 		}
 
-		for j := 0; j < oc; j++ {
-			result[j] += weights[i*oc+j] * value
+		level := uint32(index[i])
+		if level == 0 {
+			continue
+		}
+
+		order := uint32(index[i] >> 32)
+		count := uint32(2)<<level - 1
+
+		switch order {
+		case 0:
+			scale := float64(count + 1)
+			if point[i] >= 2/scale {
+				return 0
+			}
+			value *= 2 - scale*point[i]
+		case count - 1:
+			scale1, scale2 := float64(count-1), float64(count+1)
+			if point[i] <= scale1/scale2 {
+				return 0
+			}
+			value *= scale2*point[i] - scale1
+		default:
+			node := float64(order+1) / float64(count+1)
+			scale, distance := float64(count+1), point[i]-node
+			if distance < 0 {
+				distance = -distance
+			}
+			if distance >= 1/scale {
+				return 0
+			}
+			value *= 1 - scale*distance
 		}
 	}
+
+	return value
 }
