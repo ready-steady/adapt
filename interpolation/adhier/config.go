@@ -2,12 +2,24 @@ package adhier
 
 // Config represents a configuration of the algorithm.
 type Config struct {
-	MinLevel uint8   // The minimal level of interpolation
-	MaxLevel uint8   // The maximal level of interpolation
-	MaxNodes uint32  // The maximal number of nodes
-	AbsError float64 // The absolute error
-	RelError float64 // The relative error
-	Workers  uint32  // The number of concurrent workers
+	// The minimal level of interpolation. The nodes that belong to lower levels
+	// are unconditionally included in the surrogate.
+	MinLevel uint8
+	// The maximal level of interpolation. The nodes that belong to this level
+	// are not refined, and, thus, the algorithm stops.
+	MaxLevel uint8
+	// The maximal number of nodes. The algorithm stops after reaching this many
+	// nodes.
+	MaxNodes uint32
+	// The absolute error. The parameter is used for local refinement and is
+	// given in absolute units.
+	AbsError float64
+	// The relative error. The parameter is used for local refinement and is
+	// given in relative units.
+	RelError float64
+	// The number of concurrent workers. The evaluation of the target function
+	// and the surrogate itself is distributed among this many goroutines.
+	Workers uint32
 }
 
 // DefaultConfig returns the default configuration of the algorithm.
