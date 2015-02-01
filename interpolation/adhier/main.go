@@ -81,6 +81,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 	indices := make([]uint64, ac*ic)
 
 	var i, j, k, l uint32
+	var nodes, values, approximations []float64
 
 	min := make([]float64, oc)
 	max := make([]float64, oc)
@@ -94,28 +95,30 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 		surrogate.resize(pc + ac)
 		copy(surrogate.indices[pc*ic:], indices)
 
-		nodes := self.grid.ComputeNodes(indices)
+		nodes = self.grid.ComputeNodes(indices)
 
 		// NOTE: Assuming that target might have some logic based on the indices
 		// passed to it (for instance, caching), the indices variable should not
 		// be used here as it gets modified later on.
-		values := self.invoke(target, nodes, surrogate.indices[pc*ic:(pc+ac)*ic])
+		values = self.invoke(target, nodes, surrogate.indices[pc*ic:(pc+ac)*ic])
 
 		// Compute the surpluses corresponding to the active nodes.
-		if level > 0 {
-			approximations := self.approximate(surrogate.indices[:pc*ic],
-				surrogate.surpluses[:pc*oc], nodes)
-			for i, k = 0, pc*oc; i < ac; i++ {
-				for j = 0; j < oc; j++ {
-					surrogate.surpluses[k] = values[i*oc+j] - approximations[i*oc+j]
-					k++
-				}
-			}
-		} else {
-			// NOTE: The surrogate does not have any nodes yet.
+		if level == 0 {
+			// The surrogate does not have any nodes yet.
 			copy(surrogate.surpluses, values)
+			goto refineLevel
 		}
 
+		approximations = self.approximate(surrogate.indices[:pc*ic],
+			surrogate.surpluses[:pc*oc], nodes)
+		for i, k = 0, pc*oc; i < ac; i++ {
+			for j = 0; j < oc; j++ {
+				surrogate.surpluses[k] = values[i*oc+j] - approximations[i*oc+j]
+				k++
+			}
+		}
+
+	refineLevel:
 		if level >= self.config.MaxLevel || (pc+ac) >= self.config.MaxNodes {
 			break
 		}
@@ -134,7 +137,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 		}
 
 		if level < self.config.MinLevel {
-			goto next
+			goto updateIndices
 		}
 
 		k, l = 0, 0
@@ -178,7 +181,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 
 		indices = indices[:k]
 
-	next:
+	updateIndices:
 		indices = self.grid.ComputeChildren(indices)
 
 		pc += ac
