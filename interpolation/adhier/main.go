@@ -63,9 +63,24 @@ func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 	return interpolator, nil
 }
 
-// Compute takes a function and yields a surrogate for it, which can be further
-// fed to Evaluate for the actual interpolation.
-func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *Surrogate {
+// Compute takes a target function and produces an interpolant for it. The
+// interpolant can then be fed to Evaluate for approximating the target function
+// at arbitrary points.
+//
+// The second argument of Compute is an optional function that can be used for
+// monitoring the progress of interpolation. The progress function is called
+// once for each level before evaluating the target function at the nodes of
+// that level. The signature of the progress function is func(uint8, uint32,
+// uint32) where the arguments are the current level, number of active nodes,
+// and total number of nodes, respectively.
+func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
+	arguments ...interface{}) *Surrogate {
+
+	var progress func(uint8, uint32, uint32)
+	if len(arguments) > 0 {
+		progress = arguments[0].(func(uint8, uint32, uint32))
+	}
+
 	ic, oc := self.ic, self.oc
 	config := self.config
 
@@ -93,6 +108,10 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 	}
 
 	for {
+		if progress != nil {
+			progress(level, ac, pc+ac)
+		}
+
 		surrogate.resize(pc + ac)
 		copy(surrogate.indices[pc*ic:], indices)
 
