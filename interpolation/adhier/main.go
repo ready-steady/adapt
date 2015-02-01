@@ -77,7 +77,6 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 
 	ac := uint32(1) // active
 	pc := uint32(0) // passive
-	nc := uint32(0) // total
 
 	indices := make([]uint64, ac*ic)
 
@@ -117,9 +116,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 			copy(surrogate.surpluses, values)
 		}
 
-		nc += ac
-
-		if level >= self.config.MaxLevel || nc >= self.config.MaxNodes {
+		if level >= self.config.MaxLevel || (pc+ac) >= self.config.MaxNodes {
 			break
 		}
 
@@ -187,7 +184,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 		pc += ac
 		ac = uint32(len(indices)) / ic
 
-		if δ := int32(nc+ac) - int32(self.config.MaxNodes); δ > 0 {
+		if δ := int32(pc+ac) - int32(self.config.MaxNodes); δ > 0 {
 			ac -= uint32(δ)
 			indices = indices[:ac*ic]
 		}
@@ -198,7 +195,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 		level++
 	}
 
-	surrogate.finalize(level, nc)
+	surrogate.finalize(level, pc+ac)
 	return surrogate
 }
 
