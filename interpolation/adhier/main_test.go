@@ -258,7 +258,7 @@ func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
 
 	if len(arguments) > 0 {
 		process, _ := arguments[0].(func(*Config))
-		process(&config)
+		process(config)
 	}
 
 	interpolator, _ := New(newcot.NewClosed(ic), linhat.NewClosed(ic, oc), config)

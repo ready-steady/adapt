@@ -23,8 +23,8 @@ type Config struct {
 }
 
 // DefaultConfig returns the default configuration of the algorithm.
-func DefaultConfig() Config {
-	return Config{
+func DefaultConfig() *Config {
+	return &Config{
 		MinLevel: 1,
 		MaxLevel: 9,
 		MaxNodes: 10000,

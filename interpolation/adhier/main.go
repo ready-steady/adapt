@@ -27,7 +27,7 @@ type Basis interface {
 type Interpolator struct {
 	grid   Grid
 	basis  Basis
-	config Config
+	config *Config
 
 	ic uint32
 	oc uint32
@@ -36,7 +36,7 @@ type Interpolator struct {
 }
 
 // New creates an instance of the algorithm for the given configuration.
-func New(grid Grid, basis Basis, config Config) (*Interpolator, error) {
+func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 	if config.AbsError <= 0 {
 		return nil, errors.New("the absolute error is invalid")
 	}
@@ -67,6 +67,7 @@ func New(grid Grid, basis Basis, config Config) (*Interpolator, error) {
 // fed to Evaluate for the actual interpolation.
 func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *Surrogate {
 	ic, oc := self.ic, self.oc
+	config := self.config
 
 	surrogate := new(Surrogate)
 	surrogate.initialize(ic, oc)
@@ -119,7 +120,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 		}
 
 	refineLevel:
-		if level >= self.config.MaxLevel || (pc+ac) >= self.config.MaxNodes {
+		if level >= config.MaxLevel || (pc+ac) >= config.MaxNodes {
 			break
 		}
 
@@ -136,7 +137,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 			}
 		}
 
-		if level < self.config.MinLevel {
+		if level < config.MinLevel {
 			goto updateIndices
 		}
 
@@ -151,14 +152,14 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 					absError = -absError
 				}
 
-				if absError > self.config.AbsError {
+				if absError > config.AbsError {
 					refine = true
 					break
 				}
 
 				relError := absError / (max[j] - min[j])
 
-				if relError > self.config.RelError {
+				if relError > config.RelError {
 					refine = true
 					break
 				}
@@ -187,7 +188,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64)) *
 		pc += ac
 		ac = uint32(len(indices)) / ic
 
-		if δ := int32(pc+ac) - int32(self.config.MaxNodes); δ > 0 {
+		if δ := int32(pc+ac) - int32(config.MaxNodes); δ > 0 {
 			ac -= uint32(δ)
 			indices = indices[:ac*ic]
 		}
