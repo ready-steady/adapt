@@ -20,9 +20,9 @@ func init() {
 }
 
 func (f *fixture) prepare() {
-	f.surrogate.indices = make([]uint64, len(f.levels))
+	f.surrogate.Indices = make([]uint64, len(f.levels))
 	for i := range f.levels {
-		f.surrogate.indices[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
+		f.surrogate.Indices[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
 	}
 }
 
@@ -36,13 +36,13 @@ func step(x, y []float64, _ []uint64) {
 
 var fixtureStep = fixture{
 	surrogate: &Surrogate{
-		level: 4,
+		Inputs:  1,
+		Outputs: 1,
 
-		ic: 1,
-		oc: 1,
-		nc: 8,
+		Level: 4,
+		Nodes: 8,
 
-		surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
+		Surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
 	},
 	levels: []uint32{0, 1, 1, 2, 3, 3, 4, 4},
 	orders: []uint32{0, 0, 2, 3, 5, 7, 9, 11},
@@ -67,13 +67,13 @@ func hat(x, y []float64, _ []uint64) {
 
 var fixtureHat = fixture{
 	surrogate: &Surrogate{
-		level: 9,
+		Inputs:  1,
+		Outputs: 1,
 
-		ic: 1,
-		oc: 1,
-		nc: 305,
+		Level: 9,
+		Nodes: 305,
 
-		surpluses: []float64{
+		Surpluses: []float64{
 			+7.50000000000000e-01, -7.50000000000000e-01, -7.50000000000000e-01,
 			-3.43750000000000e-01, -3.43750000000000e-01, -1.56250000000000e-02,
 			-7.81250000000000e-03, -7.81250000000000e-03, -1.56250000000000e-02,
@@ -294,13 +294,13 @@ func cube(x, y []float64, _ []uint64) {
 
 var fixtureCube = fixture{
 	surrogate: &Surrogate{
-		level: 3,
+		Inputs:  2,
+		Outputs: 1,
 
-		ic: 2,
-		oc: 1,
-		nc: 29,
+		Level: 3,
+		Nodes: 29,
 
-		surpluses: []float64{
+		Surpluses: []float64{
 			1, -1, -1, -1, -1, -0.5, 1, 1, -0.5, 1, 1, -0.5, -0.5, 0, 0.5,
 			0.5, 0.5, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0,
 		},
@@ -393,13 +393,13 @@ func box(x, y []float64, _ []uint64) {
 
 var fixtureBox = fixture{
 	surrogate: &Surrogate{
-		level: 3,
+		Inputs:  2,
+		Outputs: 3,
 
-		ic: 2,
-		oc: 3,
-		nc: 20,
+		Level: 3,
+		Nodes: 20,
 
-		surpluses: []float64{
+		Surpluses: []float64{
 			+1.0, 0.0, 0.0,
 			-1.0, 0.0, 0.0,
 			+0.0, 0.0, 0.0,

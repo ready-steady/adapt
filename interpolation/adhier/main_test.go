@@ -88,9 +88,10 @@ func BenchmarkComputeMany(b *testing.B) {
 
 	interpolator := prepare(&fixture{
 		surrogate: &Surrogate{
-			level: 9,
-			ic:    inputs,
-			oc:    outputs,
+			Inputs:  inputs,
+			Outputs: outputs,
+
+			Level: 9,
 		},
 	})
 	function := many(inputs, outputs)
@@ -148,9 +149,10 @@ func BenchmarkEvaluateMany(b *testing.B) {
 
 	interpolator := prepare(&fixture{
 		surrogate: &Surrogate{
-			level: 9,
-			ic:    inputs,
-			oc:    outputs,
+			Inputs:  inputs,
+			Outputs: outputs,
+
+			Level: 9,
 		},
 	})
 	function := many(inputs, outputs)
@@ -251,10 +253,10 @@ func ExampleInterpolator_many() {
 func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
 	surrogate := fixture.surrogate
 
-	ic, oc := uint16(surrogate.ic), uint16(surrogate.oc)
+	ic, oc := uint16(surrogate.Inputs), uint16(surrogate.Outputs)
 
 	config := DefaultConfig()
-	config.MaxLevel = surrogate.level
+	config.MaxLevel = surrogate.Level
 
 	if len(arguments) > 0 {
 		process, _ := arguments[0].(func(*Config))
@@ -272,7 +274,7 @@ func generate(surrogate *Surrogate) []float64 {
 	)
 
 	generator := rand.New(rand.NewSource(0))
-	points := make([]float64, count*surrogate.ic)
+	points := make([]float64, count*surrogate.Inputs)
 	for i := range points {
 		points[i] = generator.Float64()
 	}

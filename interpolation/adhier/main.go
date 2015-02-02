@@ -113,27 +113,27 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 		}
 
 		surrogate.resize(pc + ac)
-		copy(surrogate.indices[pc*ic:], indices)
+		copy(surrogate.Indices[pc*ic:], indices)
 
 		nodes = self.grid.ComputeNodes(indices)
 
 		// NOTE: Assuming that target might have some logic based on the indices
 		// passed to it (for instance, caching), the indices variable should not
 		// be used here as it gets modified later on.
-		values = self.invoke(target, nodes, surrogate.indices[pc*ic:(pc+ac)*ic])
+		values = self.invoke(target, nodes, surrogate.Indices[pc*ic:(pc+ac)*ic])
 
 		// Compute the surpluses corresponding to the active nodes.
 		if level == 0 {
 			// The surrogate does not have any nodes yet.
-			copy(surrogate.surpluses, values)
+			copy(surrogate.Surpluses, values)
 			goto refineLevel
 		}
 
-		approximations = self.approximate(surrogate.indices[:pc*ic],
-			surrogate.surpluses[:pc*oc], nodes)
+		approximations = self.approximate(surrogate.Indices[:pc*ic],
+			surrogate.Surpluses[:pc*oc], nodes)
 		for i, k = 0, pc*oc; i < ac; i++ {
 			for j = 0; j < oc; j++ {
-				surrogate.surpluses[k] = values[i*oc+j] - approximations[i*oc+j]
+				surrogate.Surpluses[k] = values[i*oc+j] - approximations[i*oc+j]
 				k++
 			}
 		}
@@ -166,7 +166,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 			refine := false
 
 			for j = 0; j < oc; j++ {
-				absError := surrogate.surpluses[(pc+i)*oc+j]
+				absError := surrogate.Surpluses[(pc+i)*oc+j]
 				if absError < 0 {
 					absError = -absError
 				}
@@ -225,7 +225,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 // Evaluate takes a surrogate produced by Compute and evaluates it at a set of
 // points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	return self.approximate(surrogate.indices, surrogate.surpluses, points)
+	return self.approximate(surrogate.Indices, surrogate.Surpluses, points)
 }
 
 func (self *Interpolator) approximate(indices []uint64, surpluses, points []float64) []float64 {
