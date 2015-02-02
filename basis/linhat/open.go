@@ -23,10 +23,6 @@ func (o *Open) Evaluate(index []uint64, point []float64) float64 {
 	value := 1.0
 
 	for i := 0; i < ic; i++ {
-		if point[i] < 0 || 1 < point[i] {
-			return 0
-		}
-
 		level := uint32(index[i])
 		if level == 0 {
 			continue
