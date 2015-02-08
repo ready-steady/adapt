@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math"
 	"runtime"
+	"sync"
 )
 
 // Grid is the interface that an sparse grid should satisfy in order to be used
@@ -238,7 +239,8 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 	values := make([]float64, pc*oc)
 
 	jobs := make(chan uint32, pc)
-	done := make(chan bool, pc)
+	group := sync.WaitGroup{}
+	group.Add(int(pc))
 
 	for i := uint32(0); i < wc; i++ {
 		go func() {
@@ -256,7 +258,7 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 					}
 				}
 
-				done <- true
+				group.Done()
 			}
 		}()
 	}
@@ -264,10 +266,8 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 	for i := uint32(0); i < pc; i++ {
 		jobs <- i
 	}
-	for i := uint32(0); i < pc; i++ {
-		<-done
-	}
 
+	group.Wait()
 	close(jobs)
 
 	return values
@@ -282,13 +282,14 @@ func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
 	values := make([]float64, nc*oc)
 
 	jobs := make(chan uint32, nc)
-	done := make(chan bool, nc)
+	group := sync.WaitGroup{}
+	group.Add(int(nc))
 
 	for i := uint32(0); i < wc; i++ {
 		go func() {
 			for j := range jobs {
 				target(nodes[j*ic:(j+1)*ic], values[j*oc:(j+1)*oc], indices[j*ic:(j+1)*ic])
-				done <- true
+				group.Done()
 			}
 		}()
 	}
@@ -296,10 +297,8 @@ func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
 	for i := uint32(0); i < nc; i++ {
 		jobs <- i
 	}
-	for i := uint32(0); i < nc; i++ {
-		<-done
-	}
 
+	group.Wait()
 	close(jobs)
 
 	return values
