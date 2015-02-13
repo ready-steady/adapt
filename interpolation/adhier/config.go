@@ -2,6 +2,10 @@ package adhier
 
 // Config represents a configuration of the algorithm.
 type Config struct {
+	// The number of inputs.
+	Inputs uint16
+	// The number of outputs.
+	Outputs uint16
 	// The minimal level of interpolation. The nodes that belong to lower levels
 	// are unconditionally included in the surrogate.
 	MinLevel uint8
@@ -23,8 +27,10 @@ type Config struct {
 }
 
 // DefaultConfig returns the default configuration of the algorithm.
-func DefaultConfig() *Config {
+func DefaultConfig(inputs, outputs uint16) *Config {
 	return &Config{
+		Inputs:   inputs,
+		Outputs:  outputs,
 		MinLevel: 1,
 		MaxLevel: 9,
 		MaxNodes: 10000,

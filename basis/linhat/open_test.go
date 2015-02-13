@@ -7,7 +7,7 @@ import (
 )
 
 func TestOpenEvaluate(t *testing.T) {
-	basis := NewOpen(1, 1)
+	basis := NewOpen(1)
 
 	evaluate := func(level, order uint32, point float64) float64 {
 		pair := uint64(level) | uint64(order)<<32

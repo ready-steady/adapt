@@ -7,7 +7,7 @@ import (
 )
 
 func TestClosedEvaluate(t *testing.T) {
-	basis := NewClosed(1, 1)
+	basis := NewClosed(1)
 
 	evaluate := func(level, order uint32, point float64) float64 {
 		pair := uint64(level) | uint64(order)<<32

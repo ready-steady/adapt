@@ -12,7 +12,6 @@ import (
 // Grid is the interface that an sparse grid should satisfy in order to be used
 // in the algorithm.
 type Grid interface {
-	Dimensions() uint16
 	ComputeNodes(indices []uint64) []float64
 	ComputeChildren(indices []uint64) []uint64
 }
@@ -20,7 +19,6 @@ type Grid interface {
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	Outputs() uint16
 	Evaluate(index []uint64, point []float64) float64
 }
 
@@ -38,6 +36,12 @@ type Interpolator struct {
 
 // New creates an instance of the algorithm for the given configuration.
 func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
+	if config.Inputs == 0 {
+		return nil, errors.New("the number of inputs should be positive")
+	}
+	if config.Outputs == 0 {
+		return nil, errors.New("the number of outputs should be positive")
+	}
 	if config.AbsError <= 0 {
 		return nil, errors.New("the absolute error is invalid")
 	}
@@ -55,8 +59,8 @@ func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 		basis:  basis,
 		config: config,
 
-		ic: uint32(grid.Dimensions()),
-		oc: uint32(basis.Outputs()),
+		ic: uint32(config.Inputs),
+		oc: uint32(config.Outputs),
 
 		wc: wc,
 	}

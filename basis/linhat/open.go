@@ -3,17 +3,11 @@ package linhat
 // Open represents an instance of the basis on (0, 1)^n.
 type Open struct {
 	ic uint16
-	oc uint16
 }
 
 // NewOpen creates an instance of the basis on (0, 1)^n.
-func NewOpen(inputs, outputs uint16) *Open {
-	return &Open{inputs, outputs}
-}
-
-// Outputs returns the dimensionality of the output.
-func (o *Open) Outputs() uint16 {
-	return o.oc
+func NewOpen(inputs uint16) *Open {
+	return &Open{inputs}
 }
 
 // Evaluate computes the value of a multi-dimensional basis function at a point.
