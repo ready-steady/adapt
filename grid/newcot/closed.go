@@ -2,17 +2,12 @@ package newcot
 
 // Closed represents an instance of the grid on [0, 1]^n.
 type Closed struct {
-	dc uint16
+	dc uint
 }
 
 // NewClosed creates an instance of the grid on [0, 1]^n.
-func NewClosed(dimensions uint16) *Closed {
+func NewClosed(dimensions uint) *Closed {
 	return &Closed{dimensions}
-}
-
-// Dimensions returns the dimensionality of the grid.
-func (c *Closed) Dimensions() uint16 {
-	return c.dc
 }
 
 // ComputeNodes returns the nodes corresponding to the given indices.
@@ -33,16 +28,16 @@ func (_ *Closed) ComputeNodes(indices []uint64) []float64 {
 // ComputeChildren returns the indices of the child nodes corresponding to the
 // parent nodes given by their indices.
 func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
-	dc := uint32(c.dc)
-	pc := uint32(len(parentIndices)) / dc
+	dc := c.dc
+	pc := uint(len(parentIndices)) / dc
 
 	indices := make([]uint64, 2*pc*dc*dc)
 
 	hash := newHash(dc, 2*pc*dc)
 
-	cc := uint32(0)
+	cc := uint(0)
 
-	push := func(p, d uint32, pair uint64) {
+	push := func(p, d uint, pair uint64) {
 		copy(indices[cc*dc:], parentIndices[p*dc:(p+1)*dc])
 		indices[cc*dc+d] = pair
 
@@ -51,7 +46,8 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 		}
 	}
 
-	var i, j, level, order uint32
+	var i, j uint
+	var level, order uint32
 
 	for i = 0; i < pc; i++ {
 		for j = 0; j < dc; j++ {

@@ -253,7 +253,7 @@ func ExampleInterpolator_many() {
 func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
 	surrogate := fixture.surrogate
 
-	ic, oc := uint16(surrogate.Inputs), uint16(surrogate.Outputs)
+	ic, oc := surrogate.Inputs, surrogate.Outputs
 
 	config := DefaultConfig(ic, oc)
 	config.MaxLevel = surrogate.Level

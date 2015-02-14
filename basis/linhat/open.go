@@ -2,11 +2,11 @@ package linhat
 
 // Open represents an instance of the basis on (0, 1)^n.
 type Open struct {
-	ic uint16
+	ic uint
 }
 
 // NewOpen creates an instance of the basis on (0, 1)^n.
-func NewOpen(inputs uint16) *Open {
+func NewOpen(inputs uint) *Open {
 	return &Open{inputs}
 }
 

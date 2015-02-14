@@ -10,7 +10,7 @@ type hash struct {
 	mapping map[string]bool
 }
 
-func newHash(depth uint32, capacity uint32) *hash {
+func newHash(depth uint, capacity uint) *hash {
 	return &hash{
 		depth:   int(depth),
 		mapping: make(map[string]bool, capacity),
@@ -19,14 +19,14 @@ func newHash(depth uint32, capacity uint32) *hash {
 
 func (h *hash) tap(trace []uint64) bool {
 	const (
-		sizeOfUInt64 = 8
+		sizeOfUint64 = 8
 	)
 
 	sliceHeader := *(*reflect.SliceHeader)(unsafe.Pointer(&trace))
 
 	stringHeader := reflect.StringHeader{
 		Data: sliceHeader.Data,
-		Len:  sizeOfUInt64 * h.depth,
+		Len:  sizeOfUint64 * h.depth,
 	}
 
 	key := *(*string)(unsafe.Pointer(&stringHeader))

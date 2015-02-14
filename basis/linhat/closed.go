@@ -2,11 +2,11 @@ package linhat
 
 // Closed represents an instance of the basis on [0, 1]^n.
 type Closed struct {
-	ic uint16
+	ic uint
 }
 
 // NewClosed creates an instance of the basis on [0, 1]^n.
-func NewClosed(inputs uint16) *Closed {
+func NewClosed(inputs uint) *Closed {
 	return &Closed{inputs}
 }
 

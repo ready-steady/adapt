@@ -28,10 +28,10 @@ type Interpolator struct {
 	basis  Basis
 	config *Config
 
-	ic uint32
-	oc uint32
+	ic uint
+	oc uint
 
-	wc uint32
+	wc uint
 }
 
 // New creates an instance of the algorithm for the given configuration.
@@ -51,7 +51,7 @@ func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 
 	wc := config.Workers
 	if wc == 0 {
-		wc = uint32(runtime.GOMAXPROCS(0))
+		wc = uint(runtime.GOMAXPROCS(0))
 	}
 
 	interpolator := &Interpolator{
@@ -59,8 +59,8 @@ func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 		basis:  basis,
 		config: config,
 
-		ic: uint32(config.Inputs),
-		oc: uint32(config.Outputs),
+		ic: config.Inputs,
+		oc: config.Outputs,
 
 		wc: wc,
 	}
@@ -75,15 +75,15 @@ func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 // The second argument of Compute is an optional function that can be used for
 // monitoring the progress of interpolation. The progress function is called
 // once for each level before evaluating the target function at the nodes of
-// that level. The signature of the progress function is func(uint8, uint32,
-// uint32) where the arguments are the current level, number of active nodes,
+// that level. The signature of the progress function is func(uint32, uint,
+// uint) where the arguments are the current level, number of active nodes,
 // and total number of nodes, respectively.
 func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 	arguments ...interface{}) *Surrogate {
 
-	var progress func(uint8, uint32, uint32)
+	var progress func(uint32, uint, uint)
 	if len(arguments) > 0 {
-		progress = arguments[0].(func(uint8, uint32, uint32))
+		progress = arguments[0].(func(uint32, uint, uint))
 	}
 
 	ic, oc := self.ic, self.oc
@@ -94,14 +94,14 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 
 	// Level 0 is assumed to have only one node, and the order of that node is
 	// assumed to be zero.
-	level := uint8(0)
+	level := uint32(0)
 
-	ac := uint32(1) // active
-	pc := uint32(0) // passive
+	ac := uint(1) // active
+	pc := uint(0) // passive
 
 	indices := make([]uint64, ac*ic)
 
-	var i, j, k, l uint32
+	var i, j, k, l uint
 	var nodes, values, approximations []float64
 
 	min := make([]float64, oc)
@@ -210,10 +210,10 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 		indices = self.grid.ComputeChildren(indices)
 
 		pc += ac
-		ac = uint32(len(indices)) / ic
+		ac = uint(len(indices)) / ic
 
 		if δ := int32(pc+ac) - int32(config.MaxNodes); δ > 0 {
-			ac -= uint32(δ)
+			ac -= uint(δ)
 			indices = indices[:ac*ic]
 		}
 		if ac == 0 {
@@ -235,29 +235,29 @@ func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []flo
 
 func (self *Interpolator) approximate(indices []uint64, surpluses, points []float64) []float64 {
 	ic, oc, wc := self.ic, self.oc, self.wc
-	nc := uint32(len(indices)) / ic
-	pc := uint32(len(points)) / ic
+	nc := uint(len(indices)) / ic
+	pc := uint(len(points)) / ic
 
 	basis := self.basis
 
 	values := make([]float64, pc*oc)
 
-	jobs := make(chan uint32, pc)
+	jobs := make(chan uint, pc)
 	group := sync.WaitGroup{}
 	group.Add(int(pc))
 
-	for i := uint32(0); i < wc; i++ {
+	for i := uint(0); i < wc; i++ {
 		go func() {
 			for j := range jobs {
 				point := points[j*ic : (j+1)*ic]
 				value := values[j*oc : (j+1)*oc]
 
-				for k := uint32(0); k < nc; k++ {
+				for k := uint(0); k < nc; k++ {
 					weight := basis.Evaluate(indices[k*ic:(k+1)*ic], point)
 					if weight == 0 {
 						continue
 					}
-					for l := uint32(0); l < oc; l++ {
+					for l := uint(0); l < oc; l++ {
 						value[l] += surpluses[k*oc+l] * weight
 					}
 				}
@@ -267,7 +267,7 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 		}()
 	}
 
-	for i := uint32(0); i < pc; i++ {
+	for i := uint(0); i < pc; i++ {
 		jobs <- i
 	}
 
@@ -281,15 +281,15 @@ func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
 	nodes []float64, indices []uint64) []float64 {
 
 	ic, oc, wc := self.ic, self.oc, self.wc
-	nc := uint32(len(nodes)) / ic
+	nc := uint(len(nodes)) / ic
 
 	values := make([]float64, nc*oc)
 
-	jobs := make(chan uint32, nc)
+	jobs := make(chan uint, nc)
 	group := sync.WaitGroup{}
 	group.Add(int(nc))
 
-	for i := uint32(0); i < wc; i++ {
+	for i := uint(0); i < wc; i++ {
 		go func() {
 			for j := range jobs {
 				target(nodes[j*ic:(j+1)*ic], values[j*oc:(j+1)*oc], indices[j*ic:(j+1)*ic])
@@ -298,7 +298,7 @@ func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
 		}()
 	}
 
-	for i := uint32(0); i < nc; i++ {
+	for i := uint(0); i < nc; i++ {
 		jobs <- i
 	}
 

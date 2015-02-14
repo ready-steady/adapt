@@ -12,24 +12,24 @@ const (
 // Surrogate is the result of Compute, which represents an interpolant for a
 // function.
 type Surrogate struct {
-	Inputs  uint32
-	Outputs uint32
+	Inputs  uint
+	Outputs uint
 
-	Level uint8
-	Nodes uint32
+	Level uint32
+	Nodes uint
 
 	Indices   []uint64
 	Surpluses []float64
 }
 
-func (s *Surrogate) initialize(ic, oc uint32) {
+func (s *Surrogate) initialize(ic, oc uint) {
 	s.Inputs, s.Outputs, s.Nodes = ic, oc, bufferInitCount
 
 	s.Indices = make([]uint64, bufferInitCount*ic)
 	s.Surpluses = make([]float64, bufferInitCount*oc)
 }
 
-func (s *Surrogate) finalize(level uint8, nc uint32) {
+func (s *Surrogate) finalize(level uint32, nc uint) {
 	s.Level = level
 	s.Nodes = nc
 
@@ -37,7 +37,7 @@ func (s *Surrogate) finalize(level uint8, nc uint32) {
 	s.Surpluses = s.Surpluses[0 : nc*s.Outputs]
 }
 
-func (s *Surrogate) resize(nc uint32) {
+func (s *Surrogate) resize(nc uint) {
 	if nc <= s.Nodes {
 		return
 	}
