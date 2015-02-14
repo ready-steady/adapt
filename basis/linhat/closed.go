@@ -17,24 +17,21 @@ func (c *Closed) Evaluate(index []uint64, point []float64) float64 {
 	value := 1.0
 
 	for i := 0; i < ic; i++ {
-		level := uint32(index[i])
-
+		level := 0xFFFFFFFF & index[i]
 		if level == 0 {
 			continue
 		}
 
-		order := uint32(index[i] >> 32)
+		order := index[i] >> 32
 
-		scale := float64(uint32(2) << (level - 1))
+		scale := float64(uint64(2) << (level - 1))
 		distance := point[i] - float64(order)/scale
 		if distance < 0 {
 			distance = -distance
 		}
-
 		if distance >= 1/scale {
 			return 0
 		}
-
 		value *= 1 - scale*distance
 	}
 

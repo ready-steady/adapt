@@ -15,7 +15,7 @@ func (_ *Open) ComputeNodes(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 
 	for i := range nodes {
-		nodes[i] = float64(indices[i]>>32+1) / float64(uint32(2)<<uint32(indices[i]))
+		nodes[i] = float64(indices[i]>>32+1) / float64(uint64(2)<<(0xFFFFFFFF&indices[i]))
 	}
 
 	return nodes
@@ -42,16 +42,13 @@ func (o *Open) ComputeChildren(parentIndices []uint64) []uint64 {
 		}
 	}
 
-	var i, j uint
-	var level, order uint32
+	for i := uint(0); i < pc; i++ {
+		for j := uint(0); j < dc; j++ {
+			level := 0xFFFFFFFF & parentIndices[i*dc+j]
+			order := parentIndices[i*dc+j] >> 32
 
-	for i = 0; i < pc; i++ {
-		for j = 0; j < dc; j++ {
-			level = uint32(parentIndices[i*dc+j])
-			order = uint32(parentIndices[i*dc+j] >> 32)
-
-			push(i, j, uint64(level+1)|uint64(2*order)<<32)
-			push(i, j, uint64(level+1)|uint64(2*order+2)<<32)
+			push(i, j, (level+1)|(2*order)<<32)
+			push(i, j, (level+1)|(2*order+2)<<32)
 		}
 	}
 
