@@ -212,8 +212,8 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 		pc += ac
 		ac = uint(len(indices)) / ic
 
-		if δ := int32(pc+ac) - int32(config.MaxNodes); δ > 0 {
-			ac -= uint(δ)
+		if Δ := int32(pc+ac) - int32(config.MaxNodes); Δ > 0 {
+			ac -= uint(Δ)
 			indices = indices[:ac*ic]
 		}
 		if ac == 0 {
