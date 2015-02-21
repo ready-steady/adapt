@@ -106,7 +106,6 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	threshold := abstol / reltol
 
 	// Compute the limits on the step size.
-	hmin := 16 * epsilon(0)
 	hmax := config.MaximalStep
 	if hmax == 0 {
 		hmax = 0.1 * (xend - x)
@@ -150,7 +149,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	var xnew, ε float64
 
 	for done := false; !done; {
-		hmin = 16 * epsilon(x)
+		hmin := 16 * epsilon(x)
 
 		if h < hmin {
 			h = hmin
