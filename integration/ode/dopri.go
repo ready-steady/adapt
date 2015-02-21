@@ -208,7 +208,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			// Step 1
 			derivative(xnew, ynew, f7)
 
-			// Error control
+			// Compute the relative error.
 			ε = 0
 			for i := uint(0); i < dc; i++ {
 				scale := y[i]
@@ -247,6 +247,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 				return nil, errors.New("encountered a step-size underflow")
 			}
 
+			// Shrink the step size as the current one has been rejected.
 			if rejected {
 				h = 0.5 * h
 			} else if scale := 0.8 * math.Pow(reltol/ε, power); scale > 0.1 {
@@ -263,6 +264,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			rejected = true
 		}
 
+		// Fill in the output array.
 		for cc < pc {
 			if xnew-points[cc] < 0 {
 				break
@@ -289,6 +291,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			continue
 		}
 
+		// Compute a new step size.
 		if scale := 1.25 * math.Pow(ε/reltol, power); scale > 0.2 {
 			h = h / scale
 		} else {
