@@ -126,10 +126,6 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		if h*scale > 1 {
 			h = 1 / scale
 		}
-
-		h = math.Max(hmin, h)
-	} else {
-		h = math.Min(hmax, math.Max(hmin, h))
 	}
 
 	var xnew, ε float64
