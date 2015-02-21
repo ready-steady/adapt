@@ -5,13 +5,14 @@ import (
 	"math"
 )
 
-// The Dormand–Prince method (aka RKF45).
+// DormandPrince is an integrator based on the Dormand–Prince method.
 //
 // https://en.wikipedia.org/wiki/Dormand–Prince_method
 type DormandPrince struct {
 	config Config
 }
 
+// NewDormandPrince creates a new Dormand–Prince integrator.
 func NewDormandPrince(config *Config) (*DormandPrince, error) {
 	if err := config.verify(); err != nil {
 		return nil, err
@@ -19,6 +20,12 @@ func NewDormandPrince(config *Config) (*DormandPrince, error) {
 	return &DormandPrince{config: *config}, nil
 }
 
+// Compute integrates the system of differential equations y' = f(x, y) and
+// returns the resulting solution at the specified points. The derivative
+// function is supposed to evaluate f(x, y) given x and y in its first and
+// second arguments, respectively, and to store the computed value in its third
+// argument. The initial value of y is given by initial, which corresponds to
+// the first point in points.
 func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64),
 	points []float64, initial []float64) ([]float64, error) {
 

@@ -4,14 +4,16 @@ import (
 	"errors"
 )
 
+// Config contains the configuration of an integrator.
 type Config struct {
-	MaximalStep float64
-	InitialStep float64
+	MaximalStep float64 // The maximal step size.
+	InitialStep float64 // The initial step size.
 
-	AbsoluteTolerance float64
-	RelativeTolerance float64
+	AbsoluteTolerance float64 // The absolute error tolerance.
+	RelativeTolerance float64 // The relative error tolerance.
 }
 
+// DefaultConfig returns the default configuration of an integrator.
 func DefaultConfig() *Config {
 	return &Config{
 		MaximalStep: 0,
