@@ -136,7 +136,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	var rejected bool
 
 	for done := false; !done; {
-		hmin := 16 * epsilon(x)
+		hmin = 16 * epsilon(x)
 		h = math.Min(hmax, math.Max(hmin, h))
 
 		// Close to the end?
