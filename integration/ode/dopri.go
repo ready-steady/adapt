@@ -281,17 +281,19 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			break
 		}
 
-		if !rejected {
-			if scale := 1.25 * math.Pow(ε/reltol, power); scale > 0.2 {
-				h = h / scale
-			} else {
-				h = 5 * h
-			}
-		}
-
 		x = xnew
 		copy(f1, f7)
 		copy(y, ynew)
+
+		if rejected {
+			continue
+		}
+
+		if scale := 1.25 * math.Pow(ε/reltol, power); scale > 0.2 {
+			h = h / scale
+		} else {
+			h = 5 * h
+		}
 	}
 
 	return values, nil
