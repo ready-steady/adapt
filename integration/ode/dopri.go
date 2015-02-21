@@ -148,38 +148,38 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 		for {
 			// Step 1
-			for j := uint(0); j < dc; j++ {
-				z[j] = y[j] + h*a21*f1[j]
+			for i := uint(0); i < dc; i++ {
+				z[i] = y[i] + h*a21*f1[i]
 			}
 
 			// Step 2
 			derivative(x+c2*h, z, f2)
-			for j := uint(0); j < dc; j++ {
-				z[j] = y[j] + h*(a31*f1[j]+a32*f2[j])
+			for i := uint(0); i < dc; i++ {
+				z[i] = y[i] + h*(a31*f1[i]+a32*f2[i])
 			}
 
 			// Step 3
 			derivative(x+c3*h, z, f3)
-			for j := uint(0); j < dc; j++ {
-				z[j] = y[j] + h*(a41*f1[j]+a42*f2[j]+a43*f3[j])
+			for i := uint(0); i < dc; i++ {
+				z[i] = y[i] + h*(a41*f1[i]+a42*f2[i]+a43*f3[i])
 			}
 
 			// Step 4
 			derivative(x+c4*h, z, f4)
-			for j := uint(0); j < dc; j++ {
-				z[j] = y[j] + h*(a51*f1[j]+a52*f2[j]+a53*f3[j]+a54*f4[j])
+			for i := uint(0); i < dc; i++ {
+				z[i] = y[i] + h*(a51*f1[i]+a52*f2[i]+a53*f3[i]+a54*f4[i])
 			}
 
 			// Step 5
 			derivative(x+c5*h, z, f5)
-			for j := uint(0); j < dc; j++ {
-				z[j] = y[j] + h*(a61*f1[j]+a62*f2[j]+a63*f3[j]+a64*f4[j]+a65*f5[j])
+			for i := uint(0); i < dc; i++ {
+				z[i] = y[i] + h*(a61*f1[i]+a62*f2[i]+a63*f3[i]+a64*f4[i]+a65*f5[i])
 			}
 
 			// Step 6
 			derivative(x+h, z, f6)
-			for j := uint(0); j < dc; j++ {
-				ynew[j] = y[j] + h*(a71*f1[j]+a73*f3[j]+a74*f4[j]+a75*f5[j]+a76*f6[j])
+			for i := uint(0); i < dc; i++ {
+				ynew[i] = y[i] + h*(a71*f1[i]+a73*f3[i]+a74*f4[i]+a75*f5[i]+a76*f6[i])
 			}
 
 			xnew = x + h
@@ -190,9 +190,9 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 			// Error control
 			ε = 0
-			for j := uint(0); j < dc; j++ {
-				scale := math.Max(math.Max(math.Abs(y[j]), math.Abs(ynew[j])), threshold)
-				Δ := e1*f1[j] + e3*f3[j] + e4*f4[j] + e5*f5[j] + e6*f6[j] + e7*f7[j]
+			for i := uint(0); i < dc; i++ {
+				scale := math.Max(math.Max(math.Abs(y[i]), math.Abs(ynew[i])), threshold)
+				Δ := e1*f1[i] + e3*f3[i] + e4*f4[i] + e5*f5[i] + e6*f6[i] + e7*f7[i]
 				ε = math.Max(h*math.Abs(Δ/scale), ε)
 			}
 
