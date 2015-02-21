@@ -92,6 +92,6 @@ func TestOpenEvaluate(t *testing.T) {
 		for j := range values {
 			values[j] = evaluate(cases[i].level, cases[i].order, points[j])
 		}
-		assert.AlmostEqual(values, cases[i].values, t)
+		assert.EqualWithin(values, cases[i].values, 1e-15, t)
 	}
 }

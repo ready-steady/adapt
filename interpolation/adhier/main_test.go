@@ -31,7 +31,7 @@ func TestComputeHat(t *testing.T) {
 func TestEvaluateHat(t *testing.T) {
 	interpolator := prepare(&fixtureHat)
 	values := interpolator.Evaluate(fixtureHat.surrogate, fixtureHat.points)
-	assert.AlmostEqual(values, fixtureHat.values, t)
+	assert.EqualWithin(values, fixtureHat.values, 1e-15, t)
 }
 
 func TestComputeCube(t *testing.T) {
@@ -49,7 +49,7 @@ func TestComputeBox(t *testing.T) {
 func TestEvaluateBox(t *testing.T) {
 	interpolator := prepare(&fixtureBox)
 	values := interpolator.Evaluate(fixtureBox.surrogate, fixtureBox.points)
-	assert.AlmostEqual(values, fixtureBox.values, t)
+	assert.EqualWithin(values, fixtureBox.values, 1e-15, t)
 }
 
 func BenchmarkComputeHat(b *testing.B) {
