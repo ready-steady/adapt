@@ -3,10 +3,10 @@ package ode
 type fixture struct {
 	configure func() *Config
 
-	function func(float64, []float64, []float64)
-	points   []float64
-	initial  []float64
-	values   []float64
+	derivative func(float64, []float64, []float64)
+	points     []float64
+	initial    []float64
+	values     []float64
 
 	evaluations []float64
 }
@@ -14,7 +14,7 @@ type fixture struct {
 var fixture1D = fixture{
 	configure: DefaultConfig,
 
-	function: func(x float64, _, f []float64) {
+	derivative: func(x float64, _, f []float64) {
 		f[0] = x
 	},
 
@@ -66,7 +66,7 @@ var fixture3D = fixture{
 		return config
 	},
 
-	function: func(_ float64, y, f []float64) {
+	derivative: func(_ float64, y, f []float64) {
 		f[0] = y[1] * y[2]
 		f[1] = -y[0] * y[2]
 		f[2] = -0.51 * y[0] * y[1]

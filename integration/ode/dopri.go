@@ -19,7 +19,7 @@ func NewDormandPrince(config *Config) (*DormandPrince, error) {
 	return &DormandPrince{config: *config}, nil
 }
 
-func (self *DormandPrince) Compute(function func(float64, []float64, []float64),
+func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64),
 	points []float64, initial []float64) ([]float64, error) {
 
 	const (
@@ -87,7 +87,7 @@ func (self *DormandPrince) Compute(function func(float64, []float64, []float64),
 
 	x, xend := points[0], points[pc-1]
 	copy(y, initial)
-	function(x, y, f1)
+	derivative(x, y, f1)
 
 	values := make([]float64, pc*dc)
 	copy(values, initial)
@@ -145,31 +145,31 @@ func (self *DormandPrince) Compute(function func(float64, []float64, []float64),
 			}
 
 			// Step 2
-			function(x+c2*h, z, f2)
+			derivative(x+c2*h, z, f2)
 			for j := uint(0); j < dc; j++ {
 				z[j] = y[j] + h*(a31*f1[j]+a32*f2[j])
 			}
 
 			// Step 3
-			function(x+c3*h, z, f3)
+			derivative(x+c3*h, z, f3)
 			for j := uint(0); j < dc; j++ {
 				z[j] = y[j] + h*(a41*f1[j]+a42*f2[j]+a43*f3[j])
 			}
 
 			// Step 4
-			function(x+c4*h, z, f4)
+			derivative(x+c4*h, z, f4)
 			for j := uint(0); j < dc; j++ {
 				z[j] = y[j] + h*(a51*f1[j]+a52*f2[j]+a53*f3[j]+a54*f4[j])
 			}
 
 			// Step 5
-			function(x+c5*h, z, f5)
+			derivative(x+c5*h, z, f5)
 			for j := uint(0); j < dc; j++ {
 				z[j] = y[j] + h*(a61*f1[j]+a62*f2[j]+a63*f3[j]+a64*f4[j]+a65*f5[j])
 			}
 
 			// Step 6
-			function(x+h, z, f6)
+			derivative(x+h, z, f6)
 			for j := uint(0); j < dc; j++ {
 				ynew[j] = y[j] + h*(a71*f1[j]+a73*f3[j]+a74*f4[j]+a75*f5[j]+a76*f6[j])
 			}
@@ -178,7 +178,7 @@ func (self *DormandPrince) Compute(function func(float64, []float64, []float64),
 			h = xnew - x
 
 			// Step 1
-			function(xnew, ynew, f7)
+			derivative(xnew, ynew, f7)
 
 			// Error control
 			ε = 0
