@@ -148,7 +148,9 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 	var xnew, ε float64
 
-	for done := false; !done; {
+	done := false
+
+	for {
 		hmin := 16 * epsilon(x)
 
 		if h < hmin {
