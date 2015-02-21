@@ -133,7 +133,6 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	}
 
 	var xnew, ε float64
-	var rejected bool
 
 	for done := false; !done; {
 		hmin = 16 * epsilon(x)
@@ -145,7 +144,9 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			done = true
 		}
 
-		for rejected = false; ; {
+		rejected := false
+
+		for {
 			// Step 1
 			for j := uint(0); j < dc; j++ {
 				z[j] = y[j] + h*a21*f1[j]
