@@ -115,11 +115,30 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	// Choose the initial step size.
 	h := config.InitialStep
 	if h == 0 {
-		h = math.Min(hmax, points[1]-x)
+		h = points[1] - x
+		if h > hmax {
+			h = hmax
+		}
 
-		scale := math.Inf(-1)
+		scale := 0.0
 		for i := uint(0); i < dc; i++ {
-			scale = math.Max(scale, math.Abs(f1[i]/math.Max(math.Abs(y[i]), threshold)))
+			s := y[i]
+			if s < 0 {
+				s = -s
+			}
+
+			if s < threshold {
+				s = threshold
+			}
+
+			s = f1[i] / s
+			if s < 0 {
+				s = -s
+			}
+
+			if s > scale {
+				scale = s
+			}
 		}
 		scale = scale / (0.8 * math.Pow(reltol, power))
 
@@ -132,7 +151,13 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 	for done := false; !done; {
 		hmin = 16 * epsilon(x)
-		h = math.Min(hmax, math.Max(hmin, h))
+
+		if h < hmin {
+			h = hmin
+		}
+		if h > hmax {
+			h = hmax
+		}
 
 		// Close to the end?
 		if 1.1*h >= xend-x {
@@ -187,9 +212,32 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			// Error control
 			ε = 0
 			for i := uint(0); i < dc; i++ {
-				scale := math.Max(math.Max(math.Abs(y[i]), math.Abs(ynew[i])), threshold)
-				Δ := e1*f1[i] + e3*f3[i] + e4*f4[i] + e5*f5[i] + e6*f6[i] + e7*f7[i]
-				ε = math.Max(h*math.Abs(Δ/scale), ε)
+				scale := y[i]
+				if scale < 0 {
+					scale = -scale
+				}
+				if ynew[i] > 0 {
+					if ynew[i] > scale {
+						scale = ynew[i]
+					}
+				} else {
+					if -ynew[i] > scale {
+						scale = -ynew[i]
+					}
+				}
+				if scale < threshold {
+					scale = threshold
+				}
+
+				e := e1*f1[i] + e3*f3[i] + e4*f4[i] + e5*f5[i] + e6*f6[i] + e7*f7[i]
+				if e < 0 {
+					e = -e
+				}
+
+				e = h * e / scale
+				if e > ε {
+					ε = e
+				}
 			}
 
 			if ε <= reltol {
@@ -201,13 +249,19 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			}
 
 			if rejected {
-				h = math.Max(hmin, 0.5*h)
+				h = 0.5 * h
+			} else if scale := 0.8 * math.Pow(reltol/ε, power); scale > 0.1 {
+				h = scale * h
 			} else {
-				h = math.Max(hmin, h*math.Max(0.1, 0.8*math.Pow(reltol/ε, power)))
-				rejected = true
+				h = 0.1 * h
+			}
+
+			if h < hmin {
+				h = hmin
 			}
 
 			done = false
+			rejected = true
 		}
 
 		for cc < pc {
@@ -291,6 +345,8 @@ func (_ *DormandPrince) interpolate(x float64, y, f []float64, h, xnext float64,
 }
 
 func epsilon(x float64) float64 {
-	x = math.Abs(x)
+	if x < 0 {
+		x = -x
+	}
 	return math.Nextafter(x, x+1) - x
 }
