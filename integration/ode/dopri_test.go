@@ -42,9 +42,10 @@ func TestDormandPrinceComputeToy(t *testing.T) {
 	integrator, err := NewDormandPrince(fixture.configure())
 	assert.Success(err, t)
 
-	values, err := integrator.Compute(derivative, fixture.points, fixture.initial)
+	values, stats, err := integrator.Compute(derivative, fixture.points, fixture.initial)
 	assert.Success(err, t)
 	assert.EqualWithin(values, fixture.values, 1e-15, t)
+	assert.Equal(*stats, Stats{Evaluations: 61, Rejections: 0, Steps: 10}, t)
 }
 
 func TestDormandPrinceComputeNonstiff(t *testing.T) {
@@ -53,16 +54,10 @@ func TestDormandPrinceComputeNonstiff(t *testing.T) {
 	integrator, err := NewDormandPrince(fixture.configure())
 	assert.Success(err, t)
 
-	evaluations := 0
-	derivative := func(x float64, y, f []float64) {
-		evaluations++
-		fixture.derivative(x, y, f)
-	}
-
-	values, err := integrator.Compute(derivative, fixture.points, fixture.initial)
+	values, stats, err := integrator.Compute(fixture.derivative, fixture.points, fixture.initial)
 	assert.Success(err, t)
 	assert.EqualWithin(values, fixture.values, 1e-14, t)
-	assert.Equal(evaluations, 151, t)
+	assert.Equal(*stats, Stats{Evaluations: 151, Rejections: 3, Steps: 22}, t)
 }
 
 func TestDormandPrinceComputeStiff(t *testing.T) {
@@ -71,16 +66,10 @@ func TestDormandPrinceComputeStiff(t *testing.T) {
 	integrator, err := NewDormandPrince(fixture.configure())
 	assert.Success(err, t)
 
-	evaluations := 0
-	derivative := func(x float64, y, f []float64) {
-		evaluations++
-		fixture.derivative(x, y, f)
-	}
-
-	values, err := integrator.Compute(derivative, fixture.points, fixture.initial)
+	values, stats, err := integrator.Compute(fixture.derivative, fixture.points, fixture.initial)
 	assert.Success(err, t)
 	assert.EqualWithin(values, fixture.values, 3e-13, t)
-	assert.Equal(evaluations, 20179, t)
+	assert.Equal(*stats, Stats{Evaluations: 20179, Rejections: 323, Steps: 3040}, t)
 }
 
 func BenchmarkDormandPrinceComputeNonstiff(b *testing.B) {

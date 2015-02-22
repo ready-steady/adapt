@@ -27,7 +27,7 @@ func NewDormandPrince(config *Config) (*DormandPrince, error) {
 // argument. The initial value of y is given by initial, which corresponds to
 // the first point in points.
 func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64),
-	points []float64, initial []float64) ([]float64, error) {
+	points []float64, initial []float64) ([]float64, *Stats, error) {
 
 	const (
 		c2 = 1.0 / 5
@@ -68,22 +68,22 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 	pc := uint(len(points))
 	if pc < 2 {
-		return nil, errors.New("need at least two points")
+		return nil, nil, errors.New("need at least two points")
 	}
 
 	dc := uint(len(initial))
 	if dc == 0 {
-		return nil, errors.New("need an initial value")
+		return nil, nil, errors.New("need an initial value")
 	}
+
+	stats := &Stats{}
 
 	z := make([]float64, dc)
 
 	y := make([]float64, dc)
-
 	ynew := make([]float64, dc)
 
 	f := make([]float64, 7*dc)
-
 	f1 := f[0*dc : 1*dc]
 	f2 := f[1*dc : 2*dc]
 	f3 := f[2*dc : 3*dc]
@@ -95,6 +95,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	x, xend := points[0], points[pc-1]
 	copy(y, initial)
 	derivative(x, y, f1)
+	stats.Evaluations++
 
 	values := make([]float64, pc*dc)
 	copy(values, initial)
@@ -151,6 +152,8 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	done := false
 
 	for {
+		stats.Steps++
+
 		hmin := 16 * epsilon(x)
 
 		if h < hmin {
@@ -210,6 +213,8 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			// Step 1
 			derivative(xnew, ynew, f7)
 
+			stats.Evaluations += 6
+
 			// Compute the relative error.
 			ε = 0
 			for i := uint(0); i < dc; i++ {
@@ -245,8 +250,10 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 				break
 			}
 
+			stats.Rejections++
+
 			if h <= hmin {
-				return nil, errors.New("encountered a step-size underflow")
+				return nil, stats, errors.New("encountered a step-size underflow")
 			}
 
 			// Shrink the step size as the current one has been rejected.
@@ -301,7 +308,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		}
 	}
 
-	return values, nil
+	return values, stats, nil
 }
 
 func (_ *DormandPrince) interpolate(x float64, y, f []float64, h, xnext float64, ynext []float64) {
