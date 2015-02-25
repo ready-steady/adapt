@@ -103,17 +103,17 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 	config := &self.config
 
-	abstol, reltol := config.AbsoluteTolerance, config.RelativeTolerance
-	threshold := abstol / reltol
+	abserr, relerr := config.AbsError, config.RelError
+	threshold := abserr / relerr
 
 	// Compute the limits on the step size.
-	hmax := config.MaximalStep
+	hmax := config.MaxStep
 	if hmax == 0 {
 		hmax = 0.1 * (xend - x)
 	}
 
 	// Choose the initial step size.
-	h := config.InitialStep
+	h := config.TryStep
 	if h == 0 {
 		h = points[1] - x
 		if h > hmax {
@@ -140,7 +140,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 				scale = s
 			}
 		}
-		scale = scale / (0.8 * math.Pow(reltol, power))
+		scale = scale / (0.8 * math.Pow(relerr, power))
 
 		if h*scale > 1 {
 			h = 1 / scale
@@ -246,7 +246,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 				}
 			}
 
-			if ε <= reltol {
+			if ε <= relerr {
 				break
 			}
 
@@ -259,7 +259,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			// Shrink the step size as the current one has been rejected.
 			if rejected {
 				h = 0.5 * h
-			} else if scale := 0.8 * math.Pow(reltol/ε, power); scale > 0.1 {
+			} else if scale := 0.8 * math.Pow(relerr/ε, power); scale > 0.1 {
 				h = scale * h
 			} else {
 				h = 0.1 * h
@@ -301,7 +301,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		}
 
 		// Compute a new step size.
-		if scale := 1.25 * math.Pow(ε/reltol, power); scale > 0.2 {
+		if scale := 1.25 * math.Pow(ε/relerr, power); scale > 0.2 {
 			h = h / scale
 		} else {
 			h = 5 * h

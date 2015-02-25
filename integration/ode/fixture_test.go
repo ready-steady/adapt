@@ -35,8 +35,8 @@ var fixtureToy = fixture{
 var fixtureNonstiff = fixture{
 	configure: func() *Config {
 		config := DefaultConfig()
-		config.AbsoluteTolerance = 1e-4
-		config.RelativeTolerance = 1e-4
+		config.AbsError = 1e-4
+		config.RelError = 1e-4
 		return config
 	},
 
@@ -89,7 +89,7 @@ var fixtureNonstiff = fixture{
 var fixtureStiff = fixture{
 	configure: func() *Config {
 		config := DefaultConfig()
-		config.RelativeTolerance = 1e-4
+		config.RelError = 1e-4
 		return config
 	},
 
