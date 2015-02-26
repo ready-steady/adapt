@@ -37,16 +37,16 @@ type Interpolator struct {
 // New creates an instance of the algorithm for the given configuration.
 func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 	if config.Inputs == 0 {
-		return nil, errors.New("the number of inputs should not be zero")
+		return nil, errors.New("the number of inputs should be positive")
 	}
 	if config.Outputs == 0 {
-		return nil, errors.New("the number of outputs should not be zero")
+		return nil, errors.New("the number of outputs should be positive")
 	}
 	if config.AbsError < 0 {
-		return nil, errors.New("the absolute error should not be negative")
+		return nil, errors.New("the absolute error tolerance should be nonnegative")
 	}
 	if config.RelError < 0 {
-		return nil, errors.New("the relative error should not be negative")
+		return nil, errors.New("the relative error tolerance should be nonnegative")
 	}
 
 	wc := config.Workers
