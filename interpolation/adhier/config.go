@@ -15,11 +15,11 @@ type Config struct {
 	// The maximal number of nodes. The algorithm stops after reaching this many
 	// nodes.
 	MaxNodes uint
-	// The absolute error. The parameter is used for local refinement and is
-	// given in absolute units.
+	// The absolute error tolerance. The parameter is used for local refinement
+	// and is given in absolute units.
 	AbsError float64
-	// The relative error. The parameter is used for local refinement and is
-	// given in relative units.
+	// The relative error tolerance. The parameter is used for local refinement
+	// and is given in relative units.
 	RelError float64
 	// The number of concurrent workers. The evaluation of the target function
 	// and the surrogate itself is distributed among this many goroutines.
