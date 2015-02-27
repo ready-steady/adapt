@@ -115,10 +115,11 @@ func (s *Cubic) Compute(x []float64) []float64 {
 
 		z := x[i] - s.breaks[k]
 		for j := 0; j < nd; j++ {
-			y[i*nd+j] = s.weights[k*nd*4+j*4]
-			y[i*nd+j] = z*y[i*nd+j] + s.weights[k*nd*4+j*4+1]
-			y[i*nd+j] = z*y[i*nd+j] + s.weights[k*nd*4+j*4+2]
-			y[i*nd+j] = z*y[i*nd+j] + s.weights[k*nd*4+j*4+3]
+			y[i*nd+j] = z*(z*(z*
+				s.weights[k*nd*4+j*4]+
+				s.weights[k*nd*4+j*4+1])+
+				s.weights[k*nd*4+j*4+2]) +
+				s.weights[k*nd*4+j*4+3]
 		}
 	}
 
