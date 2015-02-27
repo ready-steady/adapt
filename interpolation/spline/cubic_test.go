@@ -2,6 +2,7 @@ package spline
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/ready-steady/support/assert"
@@ -172,4 +173,46 @@ func TestCubicCompute2DNP(t *testing.T) {
 
 	cubic := NewCubic(x, y)
 	assert.EqualWithin(cubic.Compute(xnew), ynew, 2e-15, t)
+}
+
+func BenchmarkNewCubic1D(b *testing.B)      { benchmarkNewCubic(10000, 1, b) }
+func BenchmarkNewCubic10D(b *testing.B)     { benchmarkNewCubic(10000, 10, b) }
+func BenchmarkCubicCompute1D(b *testing.B)  { benchmarkCubicCompute(10000, 1, 10000, b) }
+func BenchmarkCubicCompute10D(b *testing.B) { benchmarkCubicCompute(10000, 10, 10000, b) }
+
+func benchmarkNewCubic(n, nd int, b *testing.B) {
+	x, y := sequence(n), random(n*nd)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		NewCubic(x, y)
+	}
+}
+
+func benchmarkCubicCompute(n, nd, np int, b *testing.B) {
+	x, y, xnew := sequence(n), random(n*nd), sequence(np)
+	cubic := NewCubic(x, y)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		cubic.Compute(xnew)
+	}
+}
+
+func sequence(n int) []float64 {
+	x := make([]float64, n)
+	for i := range x {
+		x[i] = float64(i) / float64(n)
+	}
+	return x
+}
+
+func random(n int) []float64 {
+	x := make([]float64, n)
+	for i := range x {
+		x[i] = rand.Float64()
+	}
+	return x
 }
