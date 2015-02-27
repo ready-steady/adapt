@@ -1,7 +1,6 @@
 language: go
 
-install:
-  - go test -i ./...
+install: go get -t ./...
 
 notifications:
   email:
