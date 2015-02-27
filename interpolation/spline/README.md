@@ -6,4 +6,4 @@ The package provides algorithms for [spline interpolation][1].
 
 [1]: https://en.wikipedia.org/wiki/Spline_interpolation
 
-[doc]: http://godoc.org/github.com/ready-steady/numeric/interpolation/adhier
+[doc]: http://godoc.org/github.com/ready-steady/numeric/interpolation/spline
