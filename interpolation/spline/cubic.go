@@ -10,9 +10,9 @@ type Cubic struct {
 	weights []float64
 }
 
-// NewCubic constructs a cubic interpolant for a series of points. The abscissae
-// should be a strictly increasing sequence with at least two elements. The
-// ordinates can be multidimensional.
+// NewCubic constructs a cubic interpolant for a series of nodes. The abscissae
+// of the nodes should be a strictly increasing sequence with at least two
+// elements. The ordinates of the nodes can be multidimensional.
 func NewCubic(x, y []float64) *Cubic {
 	n := len(x)
 	nd := len(y) / n
@@ -99,8 +99,9 @@ func NewCubic(x, y []float64) *Cubic {
 	return s
 }
 
-// Compute calculates the ordinates corresponding to a series of abscissae. The
-// abscissae should be an increasing sequence.
+// Compute interpolates the ordinates of a series of points. The abscissae of
+// the points should be an increasing sequence whose elements are in the range
+// of the nodes fed into NewCubic.
 func (s *Cubic) Compute(x []float64) []float64 {
 	n, nb := len(x), len(s.breaks)
 	nd := len(s.weights) / (4 * (nb - 1))
