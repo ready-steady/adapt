@@ -1,5 +1,8 @@
 language: go
 
+install:
+  - go test -i ./...
+
 notifications:
   email:
     on_success: never
