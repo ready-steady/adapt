@@ -1,11 +1,12 @@
 # Numerical Analysis
 
-The repository hosts four packages:
+The repository hosts five packages:
 
 * basis/[linhat](basis/linhat),
 * grid/[newcot](grid/newcot),
-* integration/[ode](integration/ode), and
-* interpolation/[adhier](interpolation/adhier).
+* integration/[ode](integration/ode),
+* interpolation/[adhier](interpolation/adhier), and
+* interpolation/[spline](interpolation/spline).
 
 ## Contributing
 
