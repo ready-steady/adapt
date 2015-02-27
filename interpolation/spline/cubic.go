@@ -84,14 +84,15 @@ func NewCubic(x, y []float64) *Cubic {
 		copy(s.breaks, x)
 
 		s.weights = make([]float64, (n-1)*nd*4)
-		for i := 0; i < (n - 1); i++ {
+		for i, k := 0, 0; i < (n - 1); i++ {
 			for j := 0; j < nd; j++ {
 				α := (dydx[i*nd+j] - slopes[j*n+i]) / dx[i]
 				β := (slopes[j*n+i+1] - dydx[i*nd+j]) / dx[i]
-				s.weights[i*nd*4+j*4] = (β - α) / dx[i]
-				s.weights[i*nd*4+j*4+1] = 2*α - β
-				s.weights[i*nd*4+j*4+2] = slopes[j*n+i]
-				s.weights[i*nd*4+j*4+3] = y[i*nd+j]
+				s.weights[k] = (β - α) / dx[i]
+				s.weights[k+1] = 2*α - β
+				s.weights[k+2] = slopes[j*n+i]
+				s.weights[k+3] = y[i*nd+j]
+				k += 4
 			}
 		}
 	}
@@ -108,18 +109,15 @@ func (s *Cubic) Compute(x []float64) []float64 {
 
 	y := make([]float64, n*nd)
 
-	for i, k := 0, 0; i < n; i++ {
-		for x[i] > s.breaks[k+1] && k < (nb-2) {
-			k++
+	for i, l := 0, 0; i < n; i++ {
+		for x[i] > s.breaks[l+1] && l < (nb-2) {
+			l++
 		}
 
-		z := x[i] - s.breaks[k]
-		for j := 0; j < nd; j++ {
-			y[i*nd+j] = z*(z*(z*
-				s.weights[k*nd*4+j*4]+
-				s.weights[k*nd*4+j*4+1])+
-				s.weights[k*nd*4+j*4+2]) +
-				s.weights[k*nd*4+j*4+3]
+		z := x[i] - s.breaks[l]
+		for j, k := 0, l*nd*4; j < nd; j++ {
+			y[i*nd+j] = z*(z*(z*s.weights[k]+s.weights[k+1])+s.weights[k+2]) + s.weights[k+3]
+			k += 4
 		}
 	}
 
