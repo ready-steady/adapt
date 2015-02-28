@@ -20,14 +20,18 @@ func NewDormandPrince(config *Config) (*DormandPrince, error) {
 	return &DormandPrince{config: *config}, nil
 }
 
-// Compute integrates the system of differential equations y' = f(x, y) and
-// returns the resulting solution at the specified points. The derivative
-// function is supposed to evaluate f(x, y) given x and y in its first and
-// second arguments, respectively, and to store the computed value in its third
-// argument. The initial value of y is given by initial, which corresponds to
-// the first point in points.
+// Compute integrates the system of differential equations y' = f(x, y). The
+// derivative function should evaluate f(x, y) given x and y in its first and
+// second arguments, respectively, and store the result in its third argument.
+// The initial value of y is given by initial. The first and last elements of
+// the points array specify the interval of integration; hence, points should
+// contain at least two elements. If points contain more than two elements, the
+// solution is returned at exactly those points; otherwise, apart from the
+// endpoints, the solution is also given a number of intermediary points that
+// the algorithm internally goes through. The solution is returned in the first
+// output of the function while the corresponding points in the second one.
 func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64),
-	points []float64, initial []float64) ([]float64, *Stats, error) {
+	points []float64, initial []float64) ([]float64, []float64, *Stats, error) {
 
 	const (
 		c2 = 1.0 / 5
@@ -66,7 +70,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		power = 1.0 / 5
 	)
 
-	np, nd := len(points), len(initial)
+	np, nd, nc := len(points), len(initial), 0
 
 	stats := &Stats{}
 
@@ -85,13 +89,14 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	f7 := f[6*nd : 7*nd]
 
 	x, xend := points[0], points[np-1]
+
+	// Should the solution be returned at fixed points?
+	fixed := np > 2
+
+	// Prepare the first iteration.
 	copy(y, initial)
 	derivative(x, y, f1)
 	stats.Evaluations++
-
-	values := make([]float64, np*nd)
-	copy(values, initial)
-	nc := 1
 
 	config := &self.config
 
@@ -138,6 +143,23 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			h = 1 / scale
 		}
 	}
+
+	var values []float64
+	if fixed {
+		values = make([]float64, np*nd)
+	} else {
+		values = make([]float64, 0, 2*nd)
+		points = make([]float64, 0, 2)
+	}
+
+	// Done with the first point.
+	if fixed {
+		copy(values, initial)
+	} else {
+		values = append(values, initial...)
+		points = append(points, x)
+	}
+	nc += 1
 
 	var xnew, ε float64
 
@@ -245,7 +267,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			stats.Rejections++
 
 			if h <= hmin {
-				return nil, stats, errors.New("encountered a step-size underflow")
+				return nil, nil, stats, errors.New("encountered a step-size underflow")
 			}
 
 			// Shrink the step size as the current one has been rejected.
@@ -265,18 +287,23 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 			rejected = true
 		}
 
-		// Fill in the output array.
-		for nc < np {
-			if xnew-points[nc] < 0 {
-				break
-			}
+		if fixed {
+			for nc < np {
+				if xnew-points[nc] < 0 {
+					break
+				}
 
-			if points[nc] == xnew {
-				copy(values[nc*nd:(nc+1)*nd], ynew)
-			} else {
-				self.interpolate(x, y, f, h, points[nc], values[nc*nd:(nc+1)*nd])
-			}
+				if points[nc] == xnew {
+					copy(values[nc*nd:(nc+1)*nd], ynew)
+				} else {
+					self.interpolate(x, y, f, h, points[nc], values[nc*nd:(nc+1)*nd])
+				}
 
+				nc++
+			}
+		} else {
+			values = append(values, ynew...)
+			points = append(points, xnew)
 			nc++
 		}
 
@@ -300,7 +327,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		}
 	}
 
-	return values, stats, nil
+	return values, points, stats, nil
 }
 
 func (_ *DormandPrince) interpolate(x float64, y, f []float64, h, xnext float64, ynext []float64) {

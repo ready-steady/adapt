@@ -8,6 +8,7 @@ import (
 
 func TestDormandPrinceComputeToy(t *testing.T) {
 	fixture := &fixtureToy
+	input, output := &fixture.input, &fixture.output
 
 	evaluations := []float64{
 		0.0000000000000000e+00, 2.0000000000000004e-02, 2.9999999999999999e-02,
@@ -36,60 +37,61 @@ func TestDormandPrinceComputeToy(t *testing.T) {
 	derivative := func(x float64, y, f []float64) {
 		assert.Equal(x, evaluations[0], t)
 		evaluations = evaluations[1:]
-		fixture.derivative(x, y, f)
+		input.derivative(x, y, f)
 	}
 
-	integrator, err := NewDormandPrince(fixture.configure())
-	assert.Success(err, t)
+	integrator, _ := NewDormandPrince(fixture.configure())
 
-	values, stats, err := integrator.Compute(derivative, fixture.points, fixture.initial)
-	assert.Success(err, t)
-	assert.EqualWithin(values, fixture.values, 1e-15, t)
+	values, _, stats, _ := integrator.Compute(derivative, input.points, input.value)
+	assert.EqualWithin(values, output.values, 1e-15, t)
 	assert.Equal(*stats, Stats{Evaluations: 61, Rejections: 0, Steps: 10}, t)
 }
 
 func TestDormandPrinceComputeNonstiff(t *testing.T) {
 	fixture := &fixtureNonstiff
+	input, output := &fixture.input, &fixture.output
 
-	integrator, err := NewDormandPrince(fixture.configure())
-	assert.Success(err, t)
+	integrator, _ := NewDormandPrince(fixture.configure())
 
-	values, stats, err := integrator.Compute(fixture.derivative, fixture.points, fixture.initial)
-	assert.Success(err, t)
-	assert.EqualWithin(values, fixture.values, 1e-14, t)
+	values, _, stats, _ := integrator.Compute(input.derivative, input.points, input.value)
+	assert.EqualWithin(values, output.values, 1e-14, t)
 	assert.Equal(*stats, Stats{Evaluations: 151, Rejections: 3, Steps: 22}, t)
 }
 
 func TestDormandPrinceComputeStiff(t *testing.T) {
 	fixture := &fixtureStiff
+	input, output := &fixture.input, &fixture.output
 
-	integrator, err := NewDormandPrince(fixture.configure())
-	assert.Success(err, t)
+	integrator, _ := NewDormandPrince(fixture.configure())
 
-	values, stats, err := integrator.Compute(fixture.derivative, fixture.points, fixture.initial)
-	assert.Success(err, t)
-	assert.EqualWithin(values, fixture.values, 3e-13, t)
+	values, points, stats, _ := integrator.Compute(input.derivative, input.points, input.value)
+	assert.EqualWithin(values, output.values, 3e-13, t)
+	assert.EqualWithin(points, output.points, 4e-9, t)
 	assert.Equal(*stats, Stats{Evaluations: 20179, Rejections: 323, Steps: 3040}, t)
 }
 
 func BenchmarkDormandPrinceComputeNonstiff(b *testing.B) {
 	fixture := &fixtureNonstiff
+	input := &fixture.input
+
 	integrator, _ := NewDormandPrince(fixture.configure())
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		integrator.Compute(fixture.derivative, fixture.points, fixture.initial)
+		integrator.Compute(input.derivative, input.points, input.value)
 	}
 }
 
 func BenchmarkDormandPrinceComputeStiff(b *testing.B) {
 	fixture := &fixtureStiff
+	input := &fixture.input
+
 	integrator, _ := NewDormandPrince(fixture.configure())
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		integrator.Compute(fixture.derivative, fixture.points, fixture.initial)
+		integrator.Compute(input.derivative, input.points, input.value)
 	}
 }
