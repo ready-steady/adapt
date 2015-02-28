@@ -66,12 +66,12 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		power = 1.0 / 5
 	)
 
-	pc := uint(len(points))
+	pc := len(points)
 	if pc < 2 {
 		return nil, nil, errors.New("need at least two points")
 	}
 
-	dc := uint(len(initial))
+	dc := len(initial)
 	if dc == 0 {
 		return nil, nil, errors.New("need an initial value")
 	}
@@ -99,7 +99,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 	values := make([]float64, pc*dc)
 	copy(values, initial)
-	cc := uint(1)
+	cc := 1
 
 	config := &self.config
 
@@ -121,7 +121,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		}
 
 		scale := 0.0
-		for i := uint(0); i < dc; i++ {
+		for i := 0; i < dc; i++ {
 			s := y[i]
 			if s < 0 {
 				s = -s
@@ -173,37 +173,37 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 		for {
 			// Step 1
-			for i := uint(0); i < dc; i++ {
+			for i := 0; i < dc; i++ {
 				z[i] = y[i] + h*a21*f1[i]
 			}
 
 			// Step 2
 			derivative(x+c2*h, z, f2)
-			for i := uint(0); i < dc; i++ {
+			for i := 0; i < dc; i++ {
 				z[i] = y[i] + h*(a31*f1[i]+a32*f2[i])
 			}
 
 			// Step 3
 			derivative(x+c3*h, z, f3)
-			for i := uint(0); i < dc; i++ {
+			for i := 0; i < dc; i++ {
 				z[i] = y[i] + h*(a41*f1[i]+a42*f2[i]+a43*f3[i])
 			}
 
 			// Step 4
 			derivative(x+c4*h, z, f4)
-			for i := uint(0); i < dc; i++ {
+			for i := 0; i < dc; i++ {
 				z[i] = y[i] + h*(a51*f1[i]+a52*f2[i]+a53*f3[i]+a54*f4[i])
 			}
 
 			// Step 5
 			derivative(x+c5*h, z, f5)
-			for i := uint(0); i < dc; i++ {
+			for i := 0; i < dc; i++ {
 				z[i] = y[i] + h*(a61*f1[i]+a62*f2[i]+a63*f3[i]+a64*f4[i]+a65*f5[i])
 			}
 
 			// Step 6
 			derivative(x+h, z, f6)
-			for i := uint(0); i < dc; i++ {
+			for i := 0; i < dc; i++ {
 				ynew[i] = y[i] + h*(a71*f1[i]+a73*f3[i]+a74*f4[i]+a75*f5[i]+a76*f6[i])
 			}
 
@@ -217,7 +217,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 
 			// Compute the relative error.
 			ε = 0
-			for i := uint(0); i < dc; i++ {
+			for i := 0; i < dc; i++ {
 				scale := y[i]
 				if scale < 0 {
 					scale = -scale
@@ -334,14 +334,14 @@ func (_ *DormandPrince) interpolate(x float64, y, f []float64, h, xnext float64,
 		c74 = 5.0 / 2
 	)
 
-	dc := uint(len(y))
+	dc := len(y)
 
 	s1 := (xnext - x) / h
 	s2 := s1 * s1
 	s3 := s1 * s2
 	s4 := s1 * s3
 
-	for i := uint(0); i < dc; i++ {
+	for i := 0; i < dc; i++ {
 		f1 := f[0*dc+i]
 		f3 := f[2*dc+i]
 		f4 := f[3*dc+i]
