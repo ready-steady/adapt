@@ -66,15 +66,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 		power = 1.0 / 5
 	)
 
-	np := len(points)
-	if np < 2 {
-		return nil, nil, errors.New("need at least two points")
-	}
-
-	nd := len(initial)
-	if nd == 0 {
-		return nil, nil, errors.New("need an initial value")
-	}
+	np, nd := len(points), len(initial)
 
 	stats := &Stats{}
 
