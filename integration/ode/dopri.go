@@ -27,7 +27,7 @@ func NewDormandPrince(config *Config) (*DormandPrince, error) {
 // the points array specify the interval of integration; hence, points should
 // contain at least two elements. If points contain more than two elements, the
 // solution is returned at exactly those points; otherwise, apart from the
-// endpoints, the solution is also given a number of intermediary points that
+// endpoints, the solution is also given at a number of intermediary points that
 // the algorithm internally goes through. The solution is returned in the first
 // output of the function while the corresponding points in the second one.
 func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64),
