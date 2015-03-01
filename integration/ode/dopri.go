@@ -296,7 +296,7 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 				if points[nc] == xnew {
 					copy(values[nc*nd:(nc+1)*nd], ynew)
 				} else {
-					self.interpolate(x, y, f, h, points[nc], values[nc*nd:(nc+1)*nd])
+					interpolate(x, y, f, h, points[nc], values[nc*nd:(nc+1)*nd])
 				}
 
 				nc++
@@ -330,7 +330,14 @@ func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64
 	return values, points, stats, nil
 }
 
-func (_ *DormandPrince) interpolate(x float64, y, f []float64, h, xnext float64, ynext []float64) {
+func epsilon(x float64) float64 {
+	if x < 0 {
+		x = -x
+	}
+	return math.Nextafter(x, x+1) - x
+}
+
+func interpolate(x float64, y, f []float64, h, xnext float64, ynext []float64) {
 	const (
 		c11 = 1.0
 		c12 = -183.0 / 64
@@ -374,11 +381,4 @@ func (_ *DormandPrince) interpolate(x float64, y, f []float64, h, xnext float64,
 			h*s3*(c13*f1+c33*f3+c43*f4+c53*f5+c63*f6+c73*f7) +
 			h*s4*(c14*f1+c34*f3+c44*f4+c54*f5+c64*f6+c74*f7)
 	}
-}
-
-func epsilon(x float64) float64 {
-	if x < 0 {
-		x = -x
-	}
-	return math.Nextafter(x, x+1) - x
 }
