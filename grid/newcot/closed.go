@@ -2,12 +2,12 @@ package newcot
 
 // Closed represents an instance of the grid on [0, 1]^n.
 type Closed struct {
-	dc uint
+	nd int
 }
 
 // NewClosed creates an instance of the grid on [0, 1]^n.
 func NewClosed(dimensions uint) *Closed {
-	return &Closed{dimensions}
+	return &Closed{int(dimensions)}
 }
 
 // ComputeNodes returns the nodes corresponding to the given indices.
@@ -29,27 +29,27 @@ func (_ *Closed) ComputeNodes(indices []uint64) []float64 {
 // ComputeChildren returns the indices of the child nodes corresponding to the
 // parent nodes given by their indices.
 func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
-	dc := c.dc
-	pc := uint(len(parentIndices)) / dc
+	nd := c.nd
+	np := len(parentIndices) / nd
 
-	indices := make([]uint64, 2*pc*dc*dc)
+	indices := make([]uint64, 2*np*nd*nd)
 
-	hash := newHash(dc, 2*pc*dc)
+	hash := newHash(nd, 2*np*nd)
 
-	cc := uint(0)
+	nc := 0
 
-	push := func(p, d uint, pair uint64) {
-		copy(indices[cc*dc:], parentIndices[p*dc:(p+1)*dc])
-		indices[cc*dc+d] = pair
+	push := func(p, d int, pair uint64) {
+		copy(indices[nc*nd:], parentIndices[p*nd:(p+1)*nd])
+		indices[nc*nd+d] = pair
 
-		if !hash.tap(indices[cc*dc:]) {
-			cc++
+		if !hash.tap(indices[nc*nd:]) {
+			nc++
 		}
 	}
 
-	for i := uint(0); i < pc; i++ {
-		for j := uint(0); j < dc; j++ {
-			level := 0xFFFFFFFF & parentIndices[i*dc+j]
+	for i := 0; i < np; i++ {
+		for j := 0; j < nd; j++ {
+			level := 0xFFFFFFFF & parentIndices[i*nd+j]
 
 			if level == 0 {
 				push(i, j, 1|0<<32)
@@ -57,7 +57,7 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 				continue
 			}
 
-			order := parentIndices[i*dc+j] >> 32
+			order := parentIndices[i*nd+j] >> 32
 
 			if level == 1 {
 				push(i, j, 2|(order+1)<<32)
@@ -68,5 +68,5 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 		}
 	}
 
-	return indices[0 : cc*dc]
+	return indices[0 : nc*nd]
 }

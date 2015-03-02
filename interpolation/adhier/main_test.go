@@ -253,9 +253,9 @@ func ExampleInterpolator_many() {
 func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
 	surrogate := fixture.surrogate
 
-	ic, oc := surrogate.Inputs, surrogate.Outputs
+	ni, no := surrogate.Inputs, surrogate.Outputs
 
-	config := DefaultConfig(ic, oc)
+	config := DefaultConfig(ni, no)
 	config.MaxLevel = surrogate.Level
 
 	if len(arguments) > 0 {
@@ -263,7 +263,7 @@ func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
 		process(config)
 	}
 
-	interpolator, _ := New(newcot.NewClosed(ic), linhat.NewClosed(ic), config)
+	interpolator, _ := New(newcot.NewClosed(ni), linhat.NewClosed(ni), config)
 
 	return interpolator
 }

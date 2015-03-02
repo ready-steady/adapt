@@ -2,21 +2,21 @@ package linhat
 
 // Closed represents an instance of the basis on [0, 1]^n.
 type Closed struct {
-	ic uint
+	ni int
 }
 
 // NewClosed creates an instance of the basis on [0, 1]^n.
 func NewClosed(inputs uint) *Closed {
-	return &Closed{inputs}
+	return &Closed{int(inputs)}
 }
 
 // Evaluate computes the value of a multi-dimensional basis function at a point.
 func (c *Closed) Evaluate(index []uint64, point []float64) float64 {
-	ic := int(c.ic)
+	ni := c.ni
 
 	value := 1.0
 
-	for i := 0; i < ic; i++ {
+	for i := 0; i < ni; i++ {
 		level := 0xFFFFFFFF & index[i]
 		if level == 0 {
 			continue

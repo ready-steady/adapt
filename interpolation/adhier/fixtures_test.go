@@ -718,19 +718,19 @@ var fixtureBox = fixture{
 	},
 }
 
-func many(ic, oc int) func([]float64, []float64, []uint64) {
+func many(ni, no int) func([]float64, []float64, []uint64) {
 	return func(x, y []float64, _ []uint64) {
 		sum, value := 0.0, 0.0
 
-		for i := 0; i < ic; i++ {
+		for i := 0; i < ni; i++ {
 			sum += x[i]
 		}
 
-		if sum > float64(ic)/4 {
+		if sum > float64(ni)/4 {
 			value = 1
 		}
 
-		for i := 0; i < oc; i++ {
+		for i := 0; i < no; i++ {
 			y[i] = value
 		}
 	}
