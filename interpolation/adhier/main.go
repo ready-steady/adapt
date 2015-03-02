@@ -30,7 +30,6 @@ type Interpolator struct {
 
 	ni uint
 	no uint
-
 	nw uint
 }
 
@@ -61,7 +60,6 @@ func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 
 		ni: config.Inputs,
 		no: config.Outputs,
-
 		nw: nw,
 	}
 
