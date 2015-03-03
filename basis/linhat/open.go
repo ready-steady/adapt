@@ -10,7 +10,7 @@ func NewOpen(inputs uint) *Open {
 	return &Open{int(inputs)}
 }
 
-// Evaluate computes the value of a multi-dimensional basis function at a point.
+// Evaluate computes the value of a multidimensional basis function at a point.
 func (o *Open) Evaluate(index []uint64, point []float64) float64 {
 	ni := o.ni
 
