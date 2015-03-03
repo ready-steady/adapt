@@ -28,26 +28,29 @@ func (o *Open) Evaluate(index []uint64, point []float64) float64 {
 		switch order {
 		case 0:
 			scale := float64(count + 1)
-			if scale*point[i] >= 2 {
+			if scale*point[i] < 2 {
+				value *= 2 - scale*point[i]
+			} else {
 				return 0
 			}
-			value *= 2 - scale*point[i]
 		case count - 1:
 			scale1, scale2 := float64(count-1), float64(count+1)
-			if scale2*point[i] <= scale1 {
+			if scale2*point[i] > scale1 {
+				value *= scale2*point[i] - scale1
+			} else {
 				return 0
 			}
-			value *= scale2*point[i] - scale1
 		default:
 			scale := float64(count + 1)
 			distance := point[i] - float64(order+1)/scale
 			if distance < 0 {
 				distance = -distance
 			}
-			if scale*distance >= 1 {
+			if scale*distance < 1 {
+				value *= 1 - scale*distance
+			} else {
 				return 0
 			}
-			value *= 1 - scale*distance
 		}
 	}
 

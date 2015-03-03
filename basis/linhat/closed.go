@@ -29,10 +29,11 @@ func (c *Closed) Evaluate(index []uint64, point []float64) float64 {
 		if distance < 0 {
 			distance = -distance
 		}
-		if scale*distance >= 1 {
+		if scale*distance < 1 {
+			value *= 1 - scale*distance
+		} else {
 			return 0
 		}
-		value *= 1 - scale*distance
 	}
 
 	return value
