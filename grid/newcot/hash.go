@@ -22,12 +22,13 @@ func (h *hash) tap(trace []uint64) bool {
 		sizeOfUint64 = 8
 	)
 
-	header := reflect.StringHeader{
-		Data: ((*reflect.SliceHeader)(unsafe.Pointer(&trace))).Data,
-		Len:  sizeOfUint64 * h.depth,
-	}
+	var bytes []byte
+	header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
+	header.Data = ((*reflect.SliceHeader)(unsafe.Pointer(&trace))).Data
+	header.Cap = sizeOfUint64 * h.depth
+	header.Len = header.Cap
 
-	key := *(*string)(unsafe.Pointer(&header))
+	key := string(bytes)
 
 	if _, ok := h.mapping[key]; ok {
 		return true

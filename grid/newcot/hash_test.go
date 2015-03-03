@@ -2,6 +2,7 @@ package newcot
 
 import (
 	"math/rand"
+	"sort"
 	"testing"
 	"unsafe"
 
@@ -16,22 +17,43 @@ func TestHashTap(t *testing.T) {
 	hash := newHash(2, capacity)
 
 	assert.Equal(hash.tap([]uint64{4, 2}), false, t)
+	assert.Equal(hash.tap([]uint64{6, 9}), false, t)
 	assert.Equal(hash.tap([]uint64{4, 2}), true, t)
 
 	keys := make([]string, 0, capacity)
 	for k, _ := range hash.mapping {
 		keys = append(keys, k)
 	}
+	sort.Sort(sort.StringSlice(keys))
 
-	assert.Equal(len(keys), 1, t)
+	assert.Equal(len(keys), 2, t)
 
 	if isLittleEndian() {
 		assert.Equal(keys[0],
 			"\x04\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00", t)
+		assert.Equal(keys[1],
+			"\x06\x00\x00\x00\x00\x00\x00\x00\x09\x00\x00\x00\x00\x00\x00\x00", t)
 	} else {
 		assert.Equal(keys[0],
 			"\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x02", t)
+		assert.Equal(keys[1],
+			"\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x09", t)
 	}
+}
+
+func TestHashTapOverlap(t *testing.T) {
+	const (
+		capacity = 10
+	)
+
+	hash := newHash(2, capacity)
+
+	key := []uint64{4, 2}
+	assert.Equal(hash.tap(key), false, t)
+
+	key[0], key[1] = 6, 9
+	key = []uint64{4, 2}
+	assert.Equal(hash.tap(key), true, t)
 }
 
 func isLittleEndian() bool {
