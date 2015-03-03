@@ -39,8 +39,8 @@ func (o *Open) Evaluate(index []uint64, point []float64) float64 {
 			}
 			value *= scale2*point[i] - scale1
 		default:
-			node := float64(order+1) / float64(count+1)
-			scale, distance := float64(count+1), point[i]-node
+			scale := float64(count + 1)
+			distance := point[i] - float64(order+1)/scale
 			if distance < 0 {
 				distance = -distance
 			}
