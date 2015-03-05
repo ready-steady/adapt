@@ -72,12 +72,11 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 		power = 1.0 / 5
 	)
 
-	np, nd, nc := len(points), len(initial), 0
-
 	stats := &Stats{}
 
-	z := make([]float64, nd)
+	np, nd, nc := len(points), len(initial), 0
 
+	z := make([]float64, nd)
 	y := make([]float64, nd)
 	ynew := make([]float64, nd)
 
@@ -163,11 +162,9 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 	}
 	nc += 1
 
-	var xnew, ε float64
+	for done := false; ; {
+		var xnew, ε float64
 
-	done := false
-
-	for {
 		stats.Steps++
 
 		hmin := 16 * epsilon(x)
@@ -224,7 +221,6 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 			}
 
 			xnew = x + h
-			h = xnew - x
 
 			// Step 1
 			derivative(xnew, ynew, f7)
