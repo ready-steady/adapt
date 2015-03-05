@@ -1,5 +1,5 @@
-// Package rk4 provides an integrator based on the fourth-order Runge–Kutta
-// method.
+// Package rk4 provides an integrator of system of ordinary differential
+// equations based on the fourth-order Runge–Kutta method.
 //
 // https://en.wikipedia.org/wiki/Runge–Kutta_methods
 package rk4
