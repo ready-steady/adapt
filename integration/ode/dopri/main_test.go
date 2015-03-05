@@ -1,4 +1,4 @@
-package ode
+package dopri
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestDormandPrinceComputeToy(t *testing.T) {
+func TestComputeToy(t *testing.T) {
 	fixture := &fixtureToy
 	input, output := &fixture.input, &fixture.output
 
@@ -40,29 +40,29 @@ func TestDormandPrinceComputeToy(t *testing.T) {
 		input.derivative(x, y, f)
 	}
 
-	integrator, _ := NewDormandPrince(fixture.configure())
+	integrator, _ := New(fixture.configure())
 
 	values, _, stats, _ := integrator.Compute(derivative, input.points, input.value)
 	assert.EqualWithin(values, output.values, 1e-15, t)
 	assert.Equal(*stats, Stats{Evaluations: 61, Rejections: 0, Steps: 10}, t)
 }
 
-func TestDormandPrinceComputeNonstiff(t *testing.T) {
+func TestComputeNonstiff(t *testing.T) {
 	fixture := &fixtureNonstiff
 	input, output := &fixture.input, &fixture.output
 
-	integrator, _ := NewDormandPrince(fixture.configure())
+	integrator, _ := New(fixture.configure())
 
 	values, _, stats, _ := integrator.Compute(input.derivative, input.points, input.value)
 	assert.EqualWithin(values, output.values, 1e-14, t)
 	assert.Equal(*stats, Stats{Evaluations: 151, Rejections: 3, Steps: 22}, t)
 }
 
-func TestDormandPrinceComputeStiff(t *testing.T) {
+func TestComputeStiff(t *testing.T) {
 	fixture := &fixtureStiff
 	input, output := &fixture.input, &fixture.output
 
-	integrator, _ := NewDormandPrince(fixture.configure())
+	integrator, _ := New(fixture.configure())
 
 	values, points, stats, _ := integrator.Compute(input.derivative, input.points, input.value)
 	assert.EqualWithin(values, output.values, 3e-13, t)
@@ -70,11 +70,11 @@ func TestDormandPrinceComputeStiff(t *testing.T) {
 	assert.Equal(*stats, Stats{Evaluations: 20179, Rejections: 323, Steps: 3040}, t)
 }
 
-func BenchmarkDormandPrinceComputeNonstiff(b *testing.B) {
+func BenchmarkComputeNonstiff(b *testing.B) {
 	fixture := &fixtureNonstiff
 	input := &fixture.input
 
-	integrator, _ := NewDormandPrince(fixture.configure())
+	integrator, _ := New(fixture.configure())
 
 	b.ResetTimer()
 
@@ -83,11 +83,11 @@ func BenchmarkDormandPrinceComputeNonstiff(b *testing.B) {
 	}
 }
 
-func BenchmarkDormandPrinceComputeStiff(b *testing.B) {
+func BenchmarkComputeStiff(b *testing.B) {
 	fixture := &fixtureStiff
 	input := &fixture.input
 
-	integrator, _ := NewDormandPrince(fixture.configure())
+	integrator, _ := New(fixture.configure())
 
 	b.ResetTimer()
 

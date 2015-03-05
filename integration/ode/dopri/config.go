@@ -1,4 +1,4 @@
-package ode
+package dopri
 
 import (
 	"errors"

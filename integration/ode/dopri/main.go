@@ -1,23 +1,25 @@
-package ode
+// Package dopri provides an integrator of systems of ordinary differential
+// equations based on the Dormand–Prince method.
+//
+// https://en.wikipedia.org/wiki/Dormand–Prince_method
+package dopri
 
 import (
 	"errors"
 	"math"
 )
 
-// DormandPrince is an integrator based on the Dormand–Prince method.
-//
-// https://en.wikipedia.org/wiki/Dormand–Prince_method
-type DormandPrince struct {
+// Integrator is an integrator.
+type Integrator struct {
 	config Config
 }
 
-// NewDormandPrince creates a new Dormand–Prince integrator.
-func NewDormandPrince(config *Config) (*DormandPrince, error) {
+// New creates a new integrator.
+func New(config *Config) (*Integrator, error) {
 	if err := config.verify(); err != nil {
 		return nil, err
 	}
-	return &DormandPrince{config: *config}, nil
+	return &Integrator{config: *config}, nil
 }
 
 // Compute integrates the system of differential equations y' = f(x, y). The
@@ -30,7 +32,7 @@ func NewDormandPrince(config *Config) (*DormandPrince, error) {
 // endpoints, the solution is also given at a number of intermediary points that
 // the algorithm internally goes through. The solution is returned in the first
 // output of the function while the corresponding points in the second one.
-func (self *DormandPrince) Compute(derivative func(float64, []float64, []float64),
+func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 	points []float64, initial []float64) ([]float64, []float64, *Stats, error) {
 
 	const (

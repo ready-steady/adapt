@@ -1,4 +1,4 @@
-package ode
+package dopri
 
 type fixture struct {
 	configure func() *Config

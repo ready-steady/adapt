@@ -1,4 +1,4 @@
-package ode
+package dopri
 
 // Stats contains information about the work done by an integrator.
 type Stats struct {
