@@ -68,3 +68,17 @@ func TestEvaluateBox(t *testing.T) {
 
 	assert.EqualWithin(values, fixture.values, 1e-15, t)
 }
+
+func TestComputeEvaluateKraichnanOrszag(t *testing.T) {
+	fixture := &fixtureKraichnanOrszag
+
+	interpolator := prepare(fixture)
+	surrogate := interpolator.Compute(kraichnanOrszag)
+
+	assert.Equal(surrogate.Level, fixture.surrogate.Level, t)
+	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
+
+	values := interpolator.Evaluate(surrogate, fixture.points)
+
+	assert.EqualWithin(values, fixture.values, 1e-15, t)
+}
