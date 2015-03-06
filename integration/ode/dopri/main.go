@@ -22,18 +22,25 @@ func New(config *Config) (*Integrator, error) {
 	return &Integrator{config: *config}, nil
 }
 
-// Compute integrates the system of differential equations y' = f(x, y). The
-// derivative function should evaluate f(x, y) given x and y in its first and
-// second arguments, respectively, and store the result in its third argument.
-// The initial value of y is given by initial. The first and last elements of
-// the points array specify the interval of integration; hence, points should
-// contain at least two elements. If points contain more than two elements, the
-// solution is returned at exactly those points; otherwise, apart from the
-// endpoints, the solution is also given at a number of intermediary points that
-// the algorithm internally goes through. The solution is returned in the first
-// output of the function while the corresponding points in the second one.
-func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
-	points []float64, initial []float64) ([]float64, []float64, *Stats, error) {
+// Compute integrates the system of differential equations dy/dx = f(x, y). See
+// Integrator.Compute in the parent package.
+//
+// Apart from the endpoints, the solution is returned at a number of
+// intermediate points. These points can be specified by xs. If xs does not
+// specify any intermediate points, the algorithm reports the points that it
+// internally traverses.
+func (self *Integrator) Compute(dydx func(float64, []float64, []float64),
+	y0 []float64, xs []float64) ([]float64, []float64, error) {
+
+	ys, xs, _, err := self.ComputeWithStats(dydx, y0, xs)
+
+	return ys, xs, err
+}
+
+// ComputeWithStats augments Compute by providing additional information about
+// the solution process.
+func (self *Integrator) ComputeWithStats(dydx func(float64, []float64, []float64),
+	y0 []float64, xs []float64) ([]float64, []float64, *Stats, error) {
 
 	const (
 		c2 = 1.0 / 5
@@ -74,7 +81,7 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 
 	stats := &Stats{}
 
-	np, nd, nc := len(points), len(initial), 0
+	nd, nx, nc := len(y0), len(xs), 0
 
 	z := make([]float64, nd)
 	y := make([]float64, nd)
@@ -89,14 +96,14 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 	f6 := f[5*nd : 6*nd]
 	f7 := f[6*nd : 7*nd]
 
-	x, xend := points[0], points[np-1]
+	x, xend := xs[0], xs[nx-1]
 
 	// Should the solution be returned at fixed points?
-	fixed := np > 2
+	fixed := nx > 2
 
 	// Prepare the first iteration.
-	copy(y, initial)
-	derivative(x, y, f1)
+	copy(y, y0)
+	dydx(x, y, f1)
 	stats.Evaluations++
 
 	config := &self.config
@@ -113,7 +120,7 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 	// Choose the initial step size.
 	h := config.TryStep
 	if h == 0 {
-		h = points[1] - x
+		h = xs[1] - x
 		if h > hmax {
 			h = hmax
 		}
@@ -145,20 +152,20 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 		}
 	}
 
-	var values []float64
+	var ys []float64
 	if fixed {
-		values = make([]float64, np*nd)
+		ys = make([]float64, nx*nd)
 	} else {
-		values = make([]float64, 0, 2*nd)
-		points = make([]float64, 0, 2)
+		ys = make([]float64, 0, 2*nd)
+		xs = make([]float64, 0, 2)
 	}
 
 	// Done with the first point.
 	if fixed {
-		copy(values, initial)
+		copy(ys, y0)
 	} else {
-		values = append(values, initial...)
-		points = append(points, x)
+		ys = append(ys, y0...)
+		xs = append(xs, x)
 	}
 	nc += 1
 
@@ -191,31 +198,31 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 			}
 
 			// Step 2
-			derivative(x+c2*h, z, f2)
+			dydx(x+c2*h, z, f2)
 			for i := 0; i < nd; i++ {
 				z[i] = y[i] + h*(a31*f1[i]+a32*f2[i])
 			}
 
 			// Step 3
-			derivative(x+c3*h, z, f3)
+			dydx(x+c3*h, z, f3)
 			for i := 0; i < nd; i++ {
 				z[i] = y[i] + h*(a41*f1[i]+a42*f2[i]+a43*f3[i])
 			}
 
 			// Step 4
-			derivative(x+c4*h, z, f4)
+			dydx(x+c4*h, z, f4)
 			for i := 0; i < nd; i++ {
 				z[i] = y[i] + h*(a51*f1[i]+a52*f2[i]+a53*f3[i]+a54*f4[i])
 			}
 
 			// Step 5
-			derivative(x+c5*h, z, f5)
+			dydx(x+c5*h, z, f5)
 			for i := 0; i < nd; i++ {
 				z[i] = y[i] + h*(a61*f1[i]+a62*f2[i]+a63*f3[i]+a64*f4[i]+a65*f5[i])
 			}
 
 			// Step 6
-			derivative(x+h, z, f6)
+			dydx(x+h, z, f6)
 			for i := 0; i < nd; i++ {
 				ynew[i] = y[i] + h*(a71*f1[i]+a73*f3[i]+a74*f4[i]+a75*f5[i]+a76*f6[i])
 			}
@@ -223,7 +230,7 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 			xnew = x + h
 
 			// Step 1
-			derivative(xnew, ynew, f7)
+			dydx(xnew, ynew, f7)
 
 			stats.Evaluations += 6
 
@@ -286,22 +293,22 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 		}
 
 		if fixed {
-			for nc < np {
-				if xnew-points[nc] < 0 {
+			for nc < nx {
+				if xnew-xs[nc] < 0 {
 					break
 				}
 
-				if points[nc] == xnew {
-					copy(values[nc*nd:(nc+1)*nd], ynew)
+				if xs[nc] == xnew {
+					copy(ys[nc*nd:(nc+1)*nd], ynew)
 				} else {
-					interpolate(x, y, f, h, points[nc], values[nc*nd:(nc+1)*nd])
+					interpolate(x, y, f, h, xs[nc], ys[nc*nd:(nc+1)*nd])
 				}
 
 				nc++
 			}
 		} else {
-			values = append(values, ynew...)
-			points = append(points, xnew)
+			ys = append(ys, ynew...)
+			xs = append(xs, xnew)
 			nc++
 		}
 
@@ -325,7 +332,7 @@ func (self *Integrator) Compute(derivative func(float64, []float64, []float64),
 		}
 	}
 
-	return values, points, stats, nil
+	return ys, xs, stats, nil
 }
 
 func epsilon(x float64) float64 {

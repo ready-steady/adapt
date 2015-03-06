@@ -9,7 +9,8 @@ import (
 func TestComputeSimple(t *testing.T) {
 	fixture := &fixtureSimple
 
-	solution := Compute(fixture.dydx, fixture.y0, fixture.x0, fixture.Δx, fixture.n)
+	integrator, _ := New(fixture.configure())
+	ys, _, _ := integrator.Compute(fixture.dydx, fixture.y0, fixture.xs)
 
-	assert.Equal(solution, fixture.solution, t)
+	assert.Equal(ys, fixture.ys, t)
 }

@@ -34,16 +34,16 @@ func TestComputeToy(t *testing.T) {
 		1.0000000000000000e+00,
 	}
 
-	derivative := func(x float64, y, f []float64) {
+	dydx := func(x float64, y, f []float64) {
 		assert.Equal(x, evaluations[0], t)
 		evaluations = evaluations[1:]
-		input.derivative(x, y, f)
+		input.dydx(x, y, f)
 	}
 
 	integrator, _ := New(fixture.configure())
 
-	values, _, stats, _ := integrator.Compute(derivative, input.points, input.value)
-	assert.EqualWithin(values, output.values, 1e-15, t)
+	ys, _, stats, _ := integrator.ComputeWithStats(dydx, input.y0, input.xs)
+	assert.EqualWithin(ys, output.ys, 1e-15, t)
 	assert.Equal(*stats, Stats{Evaluations: 61, Rejections: 0, Steps: 10}, t)
 }
 
@@ -53,8 +53,8 @@ func TestComputeNonstiff(t *testing.T) {
 
 	integrator, _ := New(fixture.configure())
 
-	values, _, stats, _ := integrator.Compute(input.derivative, input.points, input.value)
-	assert.EqualWithin(values, output.values, 1e-14, t)
+	ys, _, stats, _ := integrator.ComputeWithStats(input.dydx, input.y0, input.xs)
+	assert.EqualWithin(ys, output.ys, 1e-14, t)
 	assert.Equal(*stats, Stats{Evaluations: 151, Rejections: 3, Steps: 22}, t)
 }
 
@@ -64,9 +64,9 @@ func TestComputeStiff(t *testing.T) {
 
 	integrator, _ := New(fixture.configure())
 
-	values, points, stats, _ := integrator.Compute(input.derivative, input.points, input.value)
-	assert.EqualWithin(values, output.values, 3e-13, t)
-	assert.EqualWithin(points, output.points, 4e-9, t)
+	ys, xs, stats, _ := integrator.ComputeWithStats(input.dydx, input.y0, input.xs)
+	assert.EqualWithin(ys, output.ys, 3e-13, t)
+	assert.EqualWithin(xs, output.xs, 4e-9, t)
 	assert.Equal(*stats, Stats{Evaluations: 20179, Rejections: 323, Steps: 3040}, t)
 }
 
@@ -79,7 +79,7 @@ func BenchmarkComputeNonstiff(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		integrator.Compute(input.derivative, input.points, input.value)
+		integrator.ComputeWithStats(input.dydx, input.y0, input.xs)
 	}
 }
 
@@ -92,6 +92,6 @@ func BenchmarkComputeStiff(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		integrator.Compute(input.derivative, input.points, input.value)
+		integrator.ComputeWithStats(input.dydx, input.y0, input.xs)
 	}
 }

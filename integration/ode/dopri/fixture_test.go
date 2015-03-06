@@ -7,35 +7,35 @@ type fixture struct {
 }
 
 type input struct {
-	derivative func(float64, []float64, []float64)
-	points     []float64
-	value      []float64
+	dydx func(float64, []float64, []float64)
+	y0   []float64
+	xs   []float64
 }
 
 type output struct {
-	values []float64
-	points []float64
+	ys []float64
+	xs []float64
 }
 
 var fixtureToy = fixture{
 	configure: DefaultConfig,
 
 	input: input{
-		derivative: func(x float64, _, f []float64) {
+		dydx: func(x float64, _, f []float64) {
 			f[0] = x
 		},
 
-		points: []float64{
-			0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+		y0: []float64{
+			0.0,
 		},
 
-		value: []float64{
-			0.0,
+		xs: []float64{
+			0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
 		},
 	},
 
 	output: output{
-		values: []float64{
+		ys: []float64{
 			0.0000000000000000e+00, 5.0000000000000010e-03, 2.0000000000000004e-02,
 			4.5000000000000012e-02, 8.0000000000000016e-02, 1.2500000000000003e-01,
 			1.8000000000000005e-01, 2.4500000000000005e-01, 3.2000000000000017e-01,
@@ -54,25 +54,25 @@ var fixtureNonstiff = fixture{
 	},
 
 	input: input{
-		derivative: func(_ float64, y, f []float64) {
+		dydx: func(_ float64, y, f []float64) {
 			f[0] = y[1] * y[2]
 			f[1] = -y[0] * y[2]
 			f[2] = -0.51 * y[0] * y[1]
 		},
 
-		points: []float64{
+		y0: []float64{
+			0, 1, 1,
+		},
+
+		xs: []float64{
 			0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5,
 			5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5,
 			10.0, 10.5, 11.0, 11.5, 12.0,
 		},
-
-		value: []float64{
-			0, 1, 1,
-		},
 	},
 
 	output: output{
-		values: []float64{
+		ys: []float64{
 			+0.0000000000000000e+00, +1.0000000000000000e+00, 1.0000000000000000e+00,
 			+4.7057951382671398e-01, +8.8235952146627583e-01, 9.4184203922654752e-01,
 			+8.0218789928559686e-01, +5.9703883835824367e-01, 8.1962474271971020e-01,
@@ -111,23 +111,23 @@ var fixtureStiff = fixture{
 	},
 
 	input: input{
-		derivative: func(_ float64, y, f []float64) {
+		dydx: func(_ float64, y, f []float64) {
 			y2 := y[0] * y[0]
 			y3 := y[0] * y2
 			f[0] = y2 - y3
 		},
 
-		points: []float64{
-			0.0, 2 / 0.0001,
+		y0: []float64{
+			0.0001,
 		},
 
-		value: []float64{
-			0.0001,
+		xs: []float64{
+			0.0, 2 / 0.0001,
 		},
 	},
 
 	output: output{
-		values: []float64{
+		ys: []float64{
 			1.0000000000000000e-04, 1.2499645266687446e-04, 1.6665207674733694e-04,
 			2.4994059760468490e-04, 4.9965480391210202e-04, 6.1433012444869241e-04,
 			7.9728803658445915e-04, 1.2270187512740756e-03, 1.9342907194357696e-03,
@@ -1144,7 +1144,7 @@ var fixtureStiff = fixture{
 			9.9998074053915520e-01, 9.9996320652853465e-01,
 		},
 
-		points: []float64{
+		xs: []float64{
 			0.0000000000000000e+00, 2.0000000000000000e+03, 4.0000000000000000e+03,
 			6.0000000000000000e+03, 8.0000000000000000e+03, 8.3737996872694002e+03,
 			8.7475993745388005e+03, 9.1873031312883104e+03, 9.4857588807363791e+03,

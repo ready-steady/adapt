@@ -1,28 +1,28 @@
 package rk4
 
 type fixture struct {
+	configure func() *Config
+
 	dydx func(float64, []float64, []float64)
+	y0   []float64
+	xs   []float64
 
-	y0 []float64
-	Δx float64
-	x0 float64
-	n  uint
-
-	solution []float64
+	ys []float64
 }
 
 var fixtureSimple = fixture{
+	configure: func() *Config {
+		return &Config{Step: 0.2}
+	},
+
 	dydx: func(_ float64, y, f []float64) {
 		f[0] = y[1]
 		f[1] = -y[0]
 	},
-
 	y0: []float64{0, 1},
-	Δx: 0.2,
-	x0: 0.0,
-	n:  190,
+	xs: []float64{0, (190 - 1) * 0.2},
 
-	solution: []float64{
+	ys: []float64{
 		+0.0000000000000000e+00, +1.0000000000000000e+00,
 		+1.9866666666666669e-01, +9.8006666666666664e-01,
 		+3.8941315555555556e-01, +9.2106222666666659e-01,
