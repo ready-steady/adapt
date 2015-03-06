@@ -2,14 +2,22 @@ package adhier
 
 import (
 	"math"
+	"math/rand"
+
+	"github.com/ready-steady/numeric/basis/linhat"
+	"github.com/ready-steady/numeric/grid/newcot"
 )
 
 type fixture struct {
+	configure func(*Config)
+
 	surrogate *Surrogate
-	levels    []uint32
-	orders    []uint32
-	points    []float64
-	values    []float64
+
+	levels []uint32
+	orders []uint32
+
+	points []float64
+	values []float64
 }
 
 func init() {
@@ -17,6 +25,41 @@ func init() {
 	fixtureHat.prepare()
 	fixtureCube.prepare()
 	fixtureBox.prepare()
+}
+
+func prepare(fixture *fixture, arguments ...interface{}) *Interpolator {
+	surrogate := fixture.surrogate
+
+	ni, no := surrogate.Inputs, surrogate.Outputs
+
+	config := DefaultConfig(ni, no)
+	config.MaxLevel = surrogate.Level
+	if fixture.configure != nil {
+		fixture.configure(config)
+	}
+
+	if len(arguments) > 0 {
+		process, _ := arguments[0].(func(*Config))
+		process(config)
+	}
+
+	interpolator, _ := New(newcot.NewClosed(ni), linhat.NewClosed(ni), config)
+
+	return interpolator
+}
+
+func generate(surrogate *Surrogate) []float64 {
+	const (
+		count = 10000
+	)
+
+	generator := rand.New(rand.NewSource(0))
+	points := make([]float64, count*surrogate.Inputs)
+	for i := range points {
+		points[i] = generator.Float64()
+	}
+
+	return points
 }
 
 func (f *fixture) prepare() {
