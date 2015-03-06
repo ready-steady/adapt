@@ -11,45 +11,66 @@ import (
 )
 
 func TestComputeStep(t *testing.T) {
-	interpolator := prepare(&fixtureStep)
+	fixture := &fixtureStep
+
+	interpolator := prepare(fixture)
 	surrogate := interpolator.Compute(step)
-	assert.Equal(surrogate, fixtureStep.surrogate, t)
+
+	assert.Equal(surrogate, fixture.surrogate, t)
 }
 
 func TestEvaluateStep(t *testing.T) {
-	interpolator := prepare(&fixtureStep)
-	values := interpolator.Evaluate(fixtureStep.surrogate, fixtureStep.points)
-	assert.Equal(values, fixtureStep.values, t)
+	fixture := &fixtureStep
+
+	interpolator := prepare(fixture)
+	values := interpolator.Evaluate(fixture.surrogate, fixture.points)
+
+	assert.Equal(values, fixture.values, t)
 }
 
 func TestComputeHat(t *testing.T) {
-	interpolator := prepare(&fixtureHat)
+	fixture := &fixtureHat
+
+	interpolator := prepare(fixture)
 	surrogate := interpolator.Compute(hat)
-	assert.Equal(surrogate, fixtureHat.surrogate, t)
+
+	assert.Equal(surrogate, fixture.surrogate, t)
 }
 
 func TestEvaluateHat(t *testing.T) {
-	interpolator := prepare(&fixtureHat)
-	values := interpolator.Evaluate(fixtureHat.surrogate, fixtureHat.points)
-	assert.EqualWithin(values, fixtureHat.values, 1e-15, t)
+	fixture := &fixtureHat
+
+	interpolator := prepare(fixture)
+	values := interpolator.Evaluate(fixture.surrogate, fixture.points)
+
+	assert.EqualWithin(values, fixture.values, 1e-15, t)
 }
 
 func TestComputeCube(t *testing.T) {
-	interpolator := prepare(&fixtureCube)
+	fixture := &fixtureCube
+
+	interpolator := prepare(fixture)
 	surrogate := interpolator.Compute(cube)
-	assert.Equal(surrogate, fixtureCube.surrogate, t)
+
+	assert.Equal(surrogate, fixture.surrogate, t)
 }
 
 func TestComputeBox(t *testing.T) {
-	interpolator := prepare(&fixtureBox)
+	fixture := &fixtureBox
+
+	interpolator := prepare(fixture)
 	surrogate := interpolator.Compute(box)
-	assert.Equal(surrogate, fixtureBox.surrogate, t)
+
+	assert.Equal(surrogate, fixture.surrogate, t)
 }
 
 func TestEvaluateBox(t *testing.T) {
-	interpolator := prepare(&fixtureBox)
-	values := interpolator.Evaluate(fixtureBox.surrogate, fixtureBox.points)
-	assert.EqualWithin(values, fixtureBox.values, 1e-15, t)
+	fixture := &fixtureBox
+
+	interpolator := prepare(fixture)
+	values := interpolator.Evaluate(fixture.surrogate, fixture.points)
+
+	assert.EqualWithin(values, fixture.values, 1e-15, t)
 }
 
 func BenchmarkComputeHat(b *testing.B) {
