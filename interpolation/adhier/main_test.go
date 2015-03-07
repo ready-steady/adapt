@@ -80,5 +80,5 @@ func TestComputeEvaluateKraichnanOrszag(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 
-	assert.EqualWithin(values, fixture.values, 1e-15, t)
+	assert.EqualWithin(values, fixture.values, 6e-14, t)
 }
