@@ -10,7 +10,7 @@ func TestComputeStep(t *testing.T) {
 	fixture := &fixtureStep
 
 	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(step)
+	surrogate := interpolator.Compute(fixture.target)
 
 	assert.Equal(surrogate, fixture.surrogate, t)
 }
@@ -28,7 +28,7 @@ func TestComputeHat(t *testing.T) {
 	fixture := &fixtureHat
 
 	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(hat)
+	surrogate := interpolator.Compute(fixture.target)
 
 	assert.Equal(surrogate, fixture.surrogate, t)
 }
@@ -46,7 +46,7 @@ func TestComputeCube(t *testing.T) {
 	fixture := &fixtureCube
 
 	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(cube)
+	surrogate := interpolator.Compute(fixture.target)
 
 	assert.Equal(surrogate, fixture.surrogate, t)
 }
@@ -55,7 +55,7 @@ func TestComputeBox(t *testing.T) {
 	fixture := &fixtureBox
 
 	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(box)
+	surrogate := interpolator.Compute(fixture.target)
 
 	assert.Equal(surrogate, fixture.surrogate, t)
 }
@@ -73,7 +73,7 @@ func TestComputeEvaluateKraichnanOrszag(t *testing.T) {
 	fixture := &fixtureKraichnanOrszag
 
 	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(kraichnanOrszag)
+	surrogate := interpolator.Compute(fixture.target)
 
 	assert.Equal(surrogate.Level, fixture.surrogate.Level, t)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)

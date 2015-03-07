@@ -12,6 +12,8 @@ import (
 type fixture struct {
 	configure func(*Config)
 
+	target func([]float64, []float64, []uint64)
+
 	surrogate *Surrogate
 
 	levels []uint32
@@ -70,15 +72,15 @@ func (f *fixture) prepare() {
 	}
 }
 
-func step(x, y []float64, _ []uint64) {
-	if x[0] <= 0.5 {
-		y[0] = 1
-	} else {
-		y[0] = 0
-	}
-}
-
 var fixtureStep = fixture{
+	target: func(x, y []float64, _ []uint64) {
+		if x[0] <= 0.5 {
+			y[0] = 1
+		} else {
+			y[0] = 0
+		}
+	},
+
 	surrogate: &Surrogate{
 		Inputs:  1,
 		Outputs: 1,
@@ -88,28 +90,30 @@ var fixtureStep = fixture{
 
 		Surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
 	},
+
 	levels: []uint32{0, 1, 1, 2, 3, 3, 4, 4},
 	orders: []uint32{0, 0, 2, 3, 5, 7, 9, 11},
+
 	points: []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1},
 	values: []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
 }
 
-func hat(x, y []float64, _ []uint64) {
-	z := 5*x[0] - 1
-
-	switch {
-	case 0 <= z && z < 1:
-		y[0] = 0.5 * z * z
-	case 1 <= z && z < 2:
-		y[0] = 0.5 * (-2*z*z + 6*z - 3)
-	case 2 <= z && z < 3:
-		y[0] = 0.5 * (3 - z) * (3 - z)
-	default:
-		y[0] = 0
-	}
-}
-
 var fixtureHat = fixture{
+	target: func(x, y []float64, _ []uint64) {
+		z := 5*x[0] - 1
+
+		switch {
+		case 0 <= z && z < 1:
+			y[0] = 0.5 * z * z
+		case 1 <= z && z < 2:
+			y[0] = 0.5 * (-2*z*z + 6*z - 3)
+		case 2 <= z && z < 3:
+			y[0] = 0.5 * (3 - z) * (3 - z)
+		default:
+			y[0] = 0
+		}
+	},
+
 	surrogate: &Surrogate{
 		Inputs:  1,
 		Outputs: 1,
@@ -328,15 +332,15 @@ var fixtureHat = fixture{
 	},
 }
 
-func cube(x, y []float64, _ []uint64) {
-	if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
-		y[0] = 1
-	} else {
-		y[0] = 0
-	}
-}
-
 var fixtureCube = fixture{
+	target: func(x, y []float64, _ []uint64) {
+		if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
+			y[0] = 1
+		} else {
+			y[0] = 0
+		}
+	},
+
 	surrogate: &Surrogate{
 		Inputs:  2,
 		Outputs: 1,
@@ -415,27 +419,27 @@ var fixtureCube = fixture{
 	},
 }
 
-func box(x, y []float64, _ []uint64) {
-	if x[0]+x[1] > 0.5 {
-		y[0] = 1
-	} else {
-		y[0] = 0
-	}
-
-	if x[0]-x[1] > 0.5 {
-		y[1] = 1
-	} else {
-		y[1] = 0
-	}
-
-	if x[1]-x[0] > 0.5 {
-		y[2] = 1
-	} else {
-		y[2] = 0
-	}
-}
-
 var fixtureBox = fixture{
+	target: func(x, y []float64, _ []uint64) {
+		if x[0]+x[1] > 0.5 {
+			y[0] = 1
+		} else {
+			y[0] = 0
+		}
+
+		if x[0]-x[1] > 0.5 {
+			y[1] = 1
+		} else {
+			y[1] = 0
+		}
+
+		if x[1]-x[0] > 0.5 {
+			y[2] = 1
+		} else {
+			y[2] = 0
+		}
+	},
+
 	surrogate: &Surrogate{
 		Inputs:  2,
 		Outputs: 3,
@@ -762,51 +766,33 @@ var fixtureBox = fixture{
 	},
 }
 
-func many(ni, no int) func([]float64, []float64, []uint64) {
-	return func(x, y []float64, _ []uint64) {
-		sum, value := 0.0, 0.0
-
-		for i := 0; i < ni; i++ {
-			sum += x[i]
-		}
-
-		if sum > float64(ni)/4 {
-			value = 1
-		}
-
-		for i := 0; i < no; i++ {
-			y[i] = value
-		}
-	}
-}
-
-var kraichnanOrszag = func(y0, ys []float64, _ []uint64) {
-	dydt := func(_ float64, y, f []float64) {
-		f[0] = y[0] * y[2]
-		f[1] = -y[1] * y[2]
-		f[2] = -y[0]*y[0] + y[1]*y[1]
-	}
-	y0 = []float64{2*y0[0] - 1, 2*y0[1] - 1, 2*y0[2] - 1}
-	xs := []float64{0, 30}
-
-	integrator, _ := rk4.New(&rk4.Config{Step: 0.01})
-	Ys, _, _ := integrator.Compute(dydt, y0, xs)
-
-	if len(ys) != 3*301 || len(Ys) != 3*3001 {
-		panic("something went wrong")
-	}
-
-	for i := 0; i < 301; i++ {
-		ys[3*i+0] = Ys[10*3*i+0]
-		ys[3*i+1] = Ys[10*3*i+1]
-		ys[3*i+2] = Ys[10*3*i+2]
-	}
-}
-
 var fixtureKraichnanOrszag = fixture{
 	configure: func(config *Config) {
 		config.AbsError = 1e-2
 		config.RelError = 1e10
+	},
+
+	target: func(y0, ys []float64, _ []uint64) {
+		dydt := func(_ float64, y, f []float64) {
+			f[0] = y[0] * y[2]
+			f[1] = -y[1] * y[2]
+			f[2] = -y[0]*y[0] + y[1]*y[1]
+		}
+		y0 = []float64{2*y0[0] - 1, 2*y0[1] - 1, 2*y0[2] - 1}
+		xs := []float64{0, 30}
+
+		integrator, _ := rk4.New(&rk4.Config{Step: 0.01})
+		Ys, _, _ := integrator.Compute(dydt, y0, xs)
+
+		if len(ys) != 3*301 || len(Ys) != 3*3001 {
+			panic("something went wrong")
+		}
+
+		for i := 0; i < 301; i++ {
+			ys[3*i+0] = Ys[10*3*i+0]
+			ys[3*i+1] = Ys[10*3*i+1]
+			ys[3*i+2] = Ys[10*3*i+2]
+		}
 	},
 
 	surrogate: &Surrogate{
