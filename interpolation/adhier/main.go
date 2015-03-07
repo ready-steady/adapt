@@ -63,15 +63,15 @@ func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
 // The second argument of Compute is an optional function that can be used for
 // monitoring the progress of interpolation. The progress function is called
 // once for each level before evaluating the target function at the nodes of
-// that level. The signature of the progress function is func(uint32, uint,
-// uint) where the arguments are the current level, number of active nodes,
-// and total number of nodes, respectively.
+// that level. The signature of the progress function is func(uint, uint, uint)
+// where the arguments are the current level, number of active nodes, and total
+// number of nodes, respectively.
 func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 	arguments ...interface{}) *Surrogate {
 
-	var progress func(uint32, uint, uint)
+	var progress func(uint, uint, uint)
 	if len(arguments) > 0 {
-		progress = arguments[0].(func(uint32, uint, uint))
+		progress = arguments[0].(func(uint, uint, uint))
 	}
 
 	ni, no := self.ni, self.no
@@ -82,7 +82,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 
 	// Level 0 is assumed to have only one node, and the order of that node is
 	// assumed to be zero.
-	level := uint32(0)
+	level := uint(0)
 
 	na := uint(1) // active
 	np := uint(0) // passive

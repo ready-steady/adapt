@@ -15,7 +15,7 @@ type Surrogate struct {
 	Inputs  uint
 	Outputs uint
 
-	Level uint32
+	Level uint
 	Nodes uint
 
 	Indices   []uint64
@@ -29,7 +29,7 @@ func (s *Surrogate) initialize(ni, no uint) {
 	s.Surpluses = make([]float64, bufferInitCount*no)
 }
 
-func (s *Surrogate) finalize(level uint32, nn uint) {
+func (s *Surrogate) finalize(level uint, nn uint) {
 	s.Level = level
 	s.Nodes = nn
 

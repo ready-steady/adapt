@@ -12,10 +12,10 @@ type Config struct {
 	Outputs uint
 	// The minimal level of interpolation. The nodes that belong to lower levels
 	// are unconditionally included in the surrogate.
-	MinLevel uint32
+	MinLevel uint
 	// The maximal level of interpolation. The nodes that belong to this level
 	// are not refined, and, thus, the algorithm stops.
-	MaxLevel uint32
+	MaxLevel uint
 	// The maximal number of nodes. The algorithm stops after reaching this many
 	// nodes.
 	MaxNodes uint
