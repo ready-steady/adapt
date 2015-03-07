@@ -1,5 +1,9 @@
 package adhier
 
+import (
+	"errors"
+)
+
 // Config represents a configuration of the algorithm.
 type Config struct {
 	// The number of inputs.
@@ -38,4 +42,21 @@ func DefaultConfig(inputs, outputs uint) *Config {
 		RelError: 1e-2,
 		Workers:  0,
 	}
+}
+
+func (c *Config) verify() error {
+	if c.Inputs == 0 {
+		return errors.New("the number of inputs should be positive")
+	}
+	if c.Outputs == 0 {
+		return errors.New("the number of outputs should be positive")
+	}
+	if c.AbsError < 0 {
+		return errors.New("the absolute error tolerance should be nonnegative")
+	}
+	if c.RelError < 0 {
+		return errors.New("the relative error tolerance should be nonnegative")
+	}
+
+	return nil
 }
