@@ -246,7 +246,7 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 						continue
 					}
 					for l := uint(0); l < no; l++ {
-						value[l] += surpluses[k*no+l] * weight
+						value[l] += weight * surpluses[k*no+l]
 					}
 				}
 
