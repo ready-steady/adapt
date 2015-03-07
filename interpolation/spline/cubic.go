@@ -4,15 +4,16 @@ import (
 	"github.com/ready-steady/linear/system"
 )
 
-// Cubic represents a cubic interpolant.
+// Cubic is a cubic-spline interpolant.
 type Cubic struct {
 	nodes   []float64
 	weights []float64
 }
 
-// NewCubic constructs a cubic interpolant for a series of nodes. The abscissae
-// of the nodes should be a strictly increasing sequence with at least two
-// elements. The ordinates of the nodes can be multidimensional.
+// NewCubic constructs a cubic-spline interpolant for a function y = f(x) given
+// as a series of points (x, y). The x coordinates should be a strictly
+// increasing sequence with at least two elements. The corresponding y
+// coordinates can be multidimensional.
 func NewCubic(x, y []float64) *Cubic {
 	nn := len(x)
 	nd := len(y) / nn
@@ -100,9 +101,9 @@ func NewCubic(x, y []float64) *Cubic {
 	return s
 }
 
-// Evaluate interpolates the ordinates of a series of points. The abscissae of
-// the points should be an increasing sequence whose elements are in the range
-// of the nodes fed into NewCubic.
+// Evaluate interpolates the function values y = f(x). The x coordinates should
+// be an increasing sequence whose elements belong to the range of the points
+// that the interpolant has been constructed with.
 func (s *Cubic) Evaluate(x []float64) []float64 {
 	nn, np := len(s.nodes), len(x)
 	nd := len(s.weights) / (4 * (nn - 1))
