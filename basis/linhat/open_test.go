@@ -6,12 +6,12 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestOpenEvaluate(t *testing.T) {
+func TestOpenCompute(t *testing.T) {
 	basis := NewOpen(1)
 
 	evaluate := func(level, order uint32, point float64) float64 {
 		pair := uint64(level) | uint64(order)<<32
-		return basis.Evaluate([]uint64{pair}, []float64{point})
+		return basis.Compute([]uint64{pair}, []float64{point})
 	}
 
 	points := []float64{

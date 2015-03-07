@@ -6,17 +6,17 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestClosedComputeNodes1D(t *testing.T) {
+func TestClosedCompute1D(t *testing.T) {
 	grid := NewClosed(1)
 
 	levels := []uint32{0, 1, 1, 2, 2, 3, 3, 3, 3}
 	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
 	nodes := []float64{0.5, 0, 1, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
 
-	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
+	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
 }
 
-func TestClosedComputeNodes2D(t *testing.T) {
+func TestClosedCompute2D(t *testing.T) {
 	grid := NewClosed(2)
 
 	levels := []uint32{
@@ -67,7 +67,7 @@ func TestClosedComputeNodes2D(t *testing.T) {
 		0.75, 0.50,
 	}
 
-	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
+	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
 }
 
 func TestClosedComputeChildren1D(t *testing.T) {

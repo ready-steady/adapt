@@ -11,14 +11,14 @@ import (
 // Grid is the interface that an sparse grid should satisfy in order to be used
 // in the algorithm.
 type Grid interface {
-	ComputeNodes(indices []uint64) []float64
+	Compute(indices []uint64) []float64
 	ComputeChildren(indices []uint64) []uint64
 }
 
 // Basis is the interface that a functional basis should satisfy in order to be
 // used in the algorithm.
 type Basis interface {
-	Evaluate(index []uint64, point []float64) float64
+	Compute(index []uint64, point []float64) float64
 }
 
 // Interpolator represents a particular instantiation of the algorithm.
@@ -108,7 +108,7 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 		surrogate.resize(np + na)
 		copy(surrogate.Indices[np*ni:], indices)
 
-		nodes = self.grid.ComputeNodes(indices)
+		nodes = self.grid.Compute(indices)
 
 		// NOTE: Assuming that target might have some logic based on the indices
 		// passed to it (for instance, caching), the indices variable should not
@@ -241,7 +241,7 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 				value := values[j*no : (j+1)*no]
 
 				for k := uint(0); k < nn; k++ {
-					weight := basis.Evaluate(indices[k*ni:(k+1)*ni], point)
+					weight := basis.Compute(indices[k*ni:(k+1)*ni], point)
 					if weight == 0 {
 						continue
 					}

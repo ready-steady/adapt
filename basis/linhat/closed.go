@@ -10,8 +10,8 @@ func NewClosed(inputs uint) *Closed {
 	return &Closed{int(inputs)}
 }
 
-// Evaluate computes the value of a multidimensional basis function at a point.
-func (c *Closed) Evaluate(index []uint64, point []float64) float64 {
+// Compute evaluates the value of a multidimensional basis function at a point.
+func (c *Closed) Compute(index []uint64, point []float64) float64 {
 	ni := c.ni
 
 	value := 1.0

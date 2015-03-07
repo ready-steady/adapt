@@ -10,8 +10,8 @@ func NewClosed(dimensions uint) *Closed {
 	return &Closed{int(dimensions)}
 }
 
-// ComputeNodes returns the nodes corresponding to the given indices.
-func (_ *Closed) ComputeNodes(indices []uint64) []float64 {
+// Compute returns the nodes corresponding to the given indices.
+func (_ *Closed) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 
 	for i := range nodes {

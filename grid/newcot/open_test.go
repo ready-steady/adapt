@@ -6,7 +6,7 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestOpenComputeNodes1D(t *testing.T) {
+func TestOpenCompute1D(t *testing.T) {
 	grid := NewOpen(1)
 
 	levels := []uint32{0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3}
@@ -17,10 +17,10 @@ func TestOpenComputeNodes1D(t *testing.T) {
 		0.4375, 0.5625, 0.6875, 0.8125, 0.9375,
 	}
 
-	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
+	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
 }
 
-func TestOpenComputeNodes2D(t *testing.T) {
+func TestOpenCompute2D(t *testing.T) {
 	grid := NewOpen(2)
 
 	levels := []uint32{
@@ -200,7 +200,7 @@ func TestOpenComputeNodes2D(t *testing.T) {
 		0.875, 0.875,
 	}
 
-	assert.Equal(grid.ComputeNodes(compose(levels, orders)), nodes, t)
+	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
 }
 
 func TestOpenComputeChildren1D(t *testing.T) {

@@ -10,8 +10,8 @@ func NewOpen(dimensions uint) *Open {
 	return &Open{int(dimensions)}
 }
 
-// ComputeNodes returns the nodes corresponding to the given indices.
-func (_ *Open) ComputeNodes(indices []uint64) []float64 {
+// Compute returns the nodes corresponding to the given indices.
+func (_ *Open) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 
 	for i := range nodes {
