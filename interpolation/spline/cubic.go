@@ -6,7 +6,7 @@ import (
 
 // Cubic represents a cubic interpolant.
 type Cubic struct {
-	breaks  []float64
+	nodes   []float64
 	weights []float64
 }
 
@@ -14,12 +14,12 @@ type Cubic struct {
 // of the nodes should be a strictly increasing sequence with at least two
 // elements. The ordinates of the nodes can be multidimensional.
 func NewCubic(x, y []float64) *Cubic {
-	n := len(x)
-	nd := len(y) / n
+	nn := len(x)
+	nd := len(y) / nn
 
-	dx := make([]float64, n-1)
-	dydx := make([]float64, (n-1)*nd)
-	for i := 0; i < (n - 1); i++ {
+	dx := make([]float64, nn-1)
+	dydx := make([]float64, (nn-1)*nd)
+	for i := 0; i < (nn - 1); i++ {
 		dx[i] = x[i+1] - x[i]
 		for j := 0; j < nd; j++ {
 			dydx[i*nd+j] = (y[(i+1)*nd+j] - y[i*nd+j]) / dx[i]
@@ -28,16 +28,16 @@ func NewCubic(x, y []float64) *Cubic {
 
 	s := &Cubic{}
 
-	switch n {
+	switch nn {
 	case 2:
-		s.breaks = []float64{x[0], x[1]}
+		s.nodes = []float64{x[0], x[1]}
 		s.weights = make([]float64, nd*4)
 		for j := 0; j < nd; j++ {
 			s.weights[j*4+2] = dydx[j]
 			s.weights[j*4+3] = y[j]
 		}
 	case 3:
-		s.breaks = []float64{x[0], x[2]}
+		s.nodes = []float64{x[0], x[2]}
 		s.weights = make([]float64, nd*4)
 		for j := 0; j < nd; j++ {
 			c1 := (dydx[nd+j] - dydx[j]) / (x[2] - x[0])
@@ -47,50 +47,50 @@ func NewCubic(x, y []float64) *Cubic {
 		}
 	default:
 		xb := x[2] - x[0]
-		xe := x[n-1] - x[n-3]
+		xe := x[nn-1] - x[nn-3]
 
-		a := make([]float64, n)
-		for i := 0; i < (n - 2); i++ {
+		a := make([]float64, nn)
+		for i := 0; i < (nn - 2); i++ {
 			a[i] = dx[i+1]
 		}
-		a[n-2] = xe
+		a[nn-2] = xe
 
-		b := make([]float64, n)
+		b := make([]float64, nn)
 		b[0] = dx[1]
-		for i := 1; i < (n - 1); i++ {
+		for i := 1; i < (nn - 1); i++ {
 			b[i] = 2 * (dx[i] + dx[i-1])
 		}
-		b[n-1] = dx[n-3]
+		b[nn-1] = dx[nn-3]
 
-		c := make([]float64, n)
+		c := make([]float64, nn)
 		c[1] = xb
-		for i := 2; i < n; i++ {
+		for i := 2; i < nn; i++ {
 			c[i] = dx[i-2]
 		}
 
-		d := make([]float64, nd*n)
+		d := make([]float64, nd*nn)
 		for j := 0; j < nd; j++ {
-			d[j*n] = ((dx[0]+2*xb)*dx[1]*dydx[j] + dx[0]*dx[0]*dydx[nd+j]) / xb
-			for i := 1; i < (n - 1); i++ {
-				d[j*n+i] = 3 * (dx[i]*dydx[(i-1)*nd+j] + dx[i-1]*dydx[i*nd+j])
+			d[j*nn] = ((dx[0]+2*xb)*dx[1]*dydx[j] + dx[0]*dx[0]*dydx[nd+j]) / xb
+			for i := 1; i < (nn - 1); i++ {
+				d[j*nn+i] = 3 * (dx[i]*dydx[(i-1)*nd+j] + dx[i-1]*dydx[i*nd+j])
 			}
-			d[j*n+n-1] = (dx[n-2]*dx[n-2]*dydx[(n-3)*nd+j] +
-				(2*xe+dx[n-2])*dx[n-3]*dydx[(n-2)*nd+j]) / xe
+			d[j*nn+nn-1] = (dx[nn-2]*dx[nn-2]*dydx[(nn-3)*nd+j] +
+				(2*xe+dx[nn-2])*dx[nn-3]*dydx[(nn-2)*nd+j]) / xe
 		}
 
 		slopes := system.ComputeTridiagonal(a, b, c, d)
 
-		s.breaks = make([]float64, n)
-		copy(s.breaks, x)
+		s.nodes = make([]float64, nn)
+		copy(s.nodes, x)
 
-		s.weights = make([]float64, (n-1)*nd*4)
-		for i, k := 0, 0; i < (n - 1); i++ {
+		s.weights = make([]float64, (nn-1)*nd*4)
+		for i, k := 0, 0; i < (nn - 1); i++ {
 			for j := 0; j < nd; j++ {
-				α := (dydx[i*nd+j] - slopes[j*n+i]) / dx[i]
-				β := (slopes[j*n+i+1] - dydx[i*nd+j]) / dx[i]
+				α := (dydx[i*nd+j] - slopes[j*nn+i]) / dx[i]
+				β := (slopes[j*nn+i+1] - dydx[i*nd+j]) / dx[i]
 				s.weights[k] = (β - α) / dx[i]
 				s.weights[k+1] = 2*α - β
-				s.weights[k+2] = slopes[j*n+i]
+				s.weights[k+2] = slopes[j*nn+i]
 				s.weights[k+3] = y[i*nd+j]
 				k += 4
 			}
@@ -100,21 +100,21 @@ func NewCubic(x, y []float64) *Cubic {
 	return s
 }
 
-// Compute interpolates the ordinates of a series of points. The abscissae of
+// Evaluate interpolates the ordinates of a series of points. The abscissae of
 // the points should be an increasing sequence whose elements are in the range
 // of the nodes fed into NewCubic.
-func (s *Cubic) Compute(x []float64) []float64 {
-	n, nb := len(x), len(s.breaks)
-	nd := len(s.weights) / (4 * (nb - 1))
+func (s *Cubic) Evaluate(x []float64) []float64 {
+	nn, np := len(s.nodes), len(x)
+	nd := len(s.weights) / (4 * (nn - 1))
 
-	y := make([]float64, n*nd)
+	y := make([]float64, np*nd)
 
-	for i, l := 0, 0; i < n; i++ {
-		for x[i] > s.breaks[l+1] && l < (nb-2) {
+	for i, l := 0, 0; i < np; i++ {
+		for x[i] > s.nodes[l+1] && l < (nn-2) {
 			l++
 		}
 
-		z := x[i] - s.breaks[l]
+		z := x[i] - s.nodes[l]
 		for j, k := 0, l*nd*4; j < nd; j++ {
 			y[i*nd+j] = z*(z*(z*s.weights[k]+s.weights[k+1])+s.weights[k+2]) + s.weights[k+3]
 			k += 4

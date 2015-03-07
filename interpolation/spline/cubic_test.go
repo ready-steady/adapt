@@ -15,7 +15,7 @@ func TestCubicCompute1D2P(t *testing.T) {
 	ynew := []float64{2.8960723750139596e+00, 3.0103662977992611e+00}
 
 	cubic := NewCubic(x, y)
-	assert.EqualWithin(cubic.Compute(xnew), ynew, 1e-15, t)
+	assert.EqualWithin(cubic.Evaluate(xnew), ynew, 1e-15, t)
 }
 
 func TestCubicCompute1D3P(t *testing.T) {
@@ -25,7 +25,7 @@ func TestCubicCompute1D3P(t *testing.T) {
 	ynew := []float64{2.5688178059174831e+00, 2.9828931685532520e+00}
 
 	cubic := NewCubic(x, y)
-	assert.EqualWithin(cubic.Compute(xnew), ynew, 1e-15, t)
+	assert.EqualWithin(cubic.Evaluate(xnew), ynew, 1e-15, t)
 }
 
 func TestCubicCompute1DNP(t *testing.T) {
@@ -65,7 +65,7 @@ func TestCubicCompute1DNP(t *testing.T) {
 	}
 
 	cubic := NewCubic(x, y)
-	assert.EqualWithin(cubic.Compute(xnew), ynew, 1e-15, t)
+	assert.EqualWithin(cubic.Evaluate(xnew), ynew, 1e-15, t)
 }
 
 func TestCubicCompute2D2P(t *testing.T) {
@@ -81,7 +81,7 @@ func TestCubicCompute2D2P(t *testing.T) {
 	}
 
 	cubic := NewCubic(x, y)
-	assert.EqualWithin(cubic.Compute(xnew), ynew, 1e-15, t)
+	assert.EqualWithin(cubic.Evaluate(xnew), ynew, 1e-15, t)
 }
 
 func TestCubicCompute2D3P(t *testing.T) {
@@ -98,7 +98,7 @@ func TestCubicCompute2D3P(t *testing.T) {
 	}
 
 	cubic := NewCubic(x, y)
-	assert.EqualWithin(cubic.Compute(xnew), ynew, 2e-15, t)
+	assert.EqualWithin(cubic.Evaluate(xnew), ynew, 2e-15, t)
 }
 
 func TestCubicCompute2DNP(t *testing.T) {
@@ -172,7 +172,7 @@ func TestCubicCompute2DNP(t *testing.T) {
 	}
 
 	cubic := NewCubic(x, y)
-	assert.EqualWithin(cubic.Compute(xnew), ynew, 2e-15, t)
+	assert.EqualWithin(cubic.Evaluate(xnew), ynew, 2e-15, t)
 }
 
 func BenchmarkNewCubic1D(b *testing.B)      { benchmarkNewCubic(10000, 1, b) }
@@ -180,8 +180,8 @@ func BenchmarkNewCubic10D(b *testing.B)     { benchmarkNewCubic(10000, 10, b) }
 func BenchmarkCubicCompute1D(b *testing.B)  { benchmarkCubicCompute(10000, 1, 10000, b) }
 func BenchmarkCubicCompute10D(b *testing.B) { benchmarkCubicCompute(10000, 10, 10000, b) }
 
-func benchmarkNewCubic(n, nd int, b *testing.B) {
-	x, y := sequence(n), random(n*nd)
+func benchmarkNewCubic(nn, nd int, b *testing.B) {
+	x, y := sequence(nn), random(nn*nd)
 
 	b.ResetTimer()
 
@@ -190,14 +190,14 @@ func benchmarkNewCubic(n, nd int, b *testing.B) {
 	}
 }
 
-func benchmarkCubicCompute(n, nd, np int, b *testing.B) {
-	x, y, xnew := sequence(n), random(n*nd), sequence(np)
+func benchmarkCubicCompute(nn, nd, np int, b *testing.B) {
+	x, y, xnew := sequence(nn), random(nn*nd), sequence(np)
 	cubic := NewCubic(x, y)
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		cubic.Compute(xnew)
+		cubic.Evaluate(xnew)
 	}
 }
 
