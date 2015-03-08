@@ -29,8 +29,8 @@ type GenericTarget struct {
 	RefineFunc  func([]float64) bool
 }
 
-// NewGenericTarget returns a generic target.
-func NewGenericTarget(inputs, outputs uint) *GenericTarget {
+// NewTarget returns a generic target.
+func NewTarget(inputs, outputs uint) *GenericTarget {
 	return &GenericTarget{
 		Inputs:  inputs,
 		Outputs: outputs,
