@@ -24,9 +24,9 @@ type GenericTarget struct {
 	Inputs  uint
 	Outputs uint
 
-	ComputeFunc func([]float64, []float64)
-	MonitorFunc func(uint, uint, uint)
-	RefineFunc  func([]float64) bool
+	ComputeHandler func([]float64, []float64)
+	MonitorHandler func(uint, uint, uint)
+	RefineHandler  func([]float64) bool
 }
 
 // NewTarget returns a generic target.
@@ -42,15 +42,15 @@ func (t *GenericTarget) Dimensions() (uint, uint) {
 }
 
 func (t *GenericTarget) Compute(node, value []float64) {
-	t.ComputeFunc(node, value)
+	t.ComputeHandler(node, value)
 }
 
 func (t *GenericTarget) Monitor(level, active, passive uint) {
-	if t.MonitorFunc != nil {
-		t.MonitorFunc(level, active, passive)
+	if t.MonitorHandler != nil {
+		t.MonitorHandler(level, active, passive)
 	}
 }
 
 func (t *GenericTarget) Refine(surplus []float64) bool {
-	return t.RefineFunc(surplus)
+	return t.RefineHandler(surplus)
 }
