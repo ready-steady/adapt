@@ -5,7 +5,7 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Compute returns the value of the quantity at a point.
+	// Compute calculates the value of the quantity at a point.
 	Compute(point, value []float64)
 
 	// Monitor is called once on each level before evaluating the quantity at
