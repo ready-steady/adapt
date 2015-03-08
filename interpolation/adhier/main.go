@@ -45,7 +45,7 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 func (self *Interpolator) Compute(target Target) *Surrogate {
 	config := &self.config
 
-	ni, no := target.Inputs(), target.Outputs()
+	ni, no := target.Dimensions()
 
 	surrogate := new(Surrogate)
 	surrogate.initialize(ni, no)

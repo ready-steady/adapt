@@ -19,13 +19,16 @@ func ExampleInterpolator_step() {
 	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewAbsErrorTarget(inputs, outputs, tolerance)
+	target := NewGenericTarget(inputs, outputs)
 	target.ComputeFunc = func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
+	}
+	target.RefineFunc = func(ε []float64) bool {
+		return math.Abs(ε[0]) > tolerance
 	}
 
 	surrogate := interpolator.Compute(target)
