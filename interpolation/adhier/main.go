@@ -132,6 +132,10 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			indices = indices[:na*ni]
 		}
 
+		if na == 0 {
+			break
+		}
+
 		level++
 	}
 
