@@ -29,17 +29,6 @@ type GenericTarget struct {
 	RefineFunc  func([]float64) bool
 }
 
-// AbsErrorTarget is a quantity to be interpolated whose local adaptivity guide
-// is the absolute error at the nodes of the underlying sparse grid.
-type AbsErrorTarget struct {
-	Inputs    uint
-	Outputs   uint
-	Tolerance float64
-
-	ComputeFunc func([]float64, []float64)
-	MonitorFunc func(uint, uint, uint)
-}
-
 // NewGenericTarget returns a generic target.
 func NewGenericTarget(inputs, outputs uint) *GenericTarget {
 	return &GenericTarget{
@@ -64,39 +53,4 @@ func (t *GenericTarget) Monitor(level, active, passive uint) {
 
 func (t *GenericTarget) Refine(surplus []float64) bool {
 	return t.RefineFunc(surplus)
-}
-
-// NewAbsErrorTarget returns an absolute-error-driven target.
-func NewAbsErrorTarget(inputs, outputs uint, tolerance float64) *AbsErrorTarget {
-	return &AbsErrorTarget{
-		Inputs:    inputs,
-		Outputs:   outputs,
-		Tolerance: tolerance,
-	}
-}
-
-func (t *AbsErrorTarget) Dimensions() (uint, uint) {
-	return t.Inputs, t.Outputs
-}
-
-func (t *AbsErrorTarget) Compute(node, value []float64) {
-	t.ComputeFunc(node, value)
-}
-
-func (t *AbsErrorTarget) Monitor(level, active, passive uint) {
-	if t.MonitorFunc != nil {
-		t.MonitorFunc(level, active, passive)
-	}
-}
-
-func (t *AbsErrorTarget) Refine(surplus []float64) bool {
-	for _, ε := range surplus {
-		if ε < 0 {
-			ε = -ε
-		}
-		if ε > t.Tolerance {
-			return true
-		}
-	}
-	return false
 }

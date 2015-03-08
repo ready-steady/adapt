@@ -50,13 +50,16 @@ func ExampleInterpolator_cube() {
 	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewAbsErrorTarget(inputs, outputs, tolerance)
+	target := NewGenericTarget(inputs, outputs)
 	target.ComputeFunc = func(x, y []float64) {
 		if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
+	}
+	target.RefineFunc = func(Δ []float64) bool {
+		return math.Abs(Δ[0]) > tolerance
 	}
 
 	surrogate := interpolator.Compute(target)

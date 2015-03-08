@@ -23,6 +23,43 @@ type fixture struct {
 	values []float64
 }
 
+type absErrorTarget struct {
+	inputs    uint
+	outputs   uint
+	tolerance float64
+	compute   func([]float64, []float64)
+}
+
+func newAbsErrorTarget(inputs, outputs uint, tolerance float64) *absErrorTarget {
+	return &absErrorTarget{
+		inputs:    inputs,
+		outputs:   outputs,
+		tolerance: tolerance,
+	}
+}
+
+func (t *absErrorTarget) Dimensions() (uint, uint) {
+	return t.inputs, t.outputs
+}
+
+func (t *absErrorTarget) Compute(node, value []float64) {
+	t.compute(node, value)
+}
+
+func (t *absErrorTarget) Monitor(_, _, _ uint) {}
+
+func (t *absErrorTarget) Refine(surplus []float64) bool {
+	for _, ε := range surplus {
+		if ε < 0 {
+			ε = -ε
+		}
+		if ε > t.tolerance {
+			return true
+		}
+	}
+	return false
+}
+
 func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target) {
 	const (
 		tolerance = 1e-4
@@ -39,8 +76,8 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 
 	var target Target
 	if fixture.target == nil {
-		target = NewAbsErrorTarget(ni, no, tolerance)
-		target.(*AbsErrorTarget).ComputeFunc = fixture.compute
+		target = newAbsErrorTarget(ni, no, tolerance)
+		target.(*absErrorTarget).compute = fixture.compute
 	} else {
 		target = fixture.target()
 	}
@@ -320,8 +357,8 @@ var fixtureHat = fixture{
 
 var fixtureCube = fixture{
 	target: func() Target {
-		target := NewAbsErrorTarget(2, 1, 1e-2)
-		target.ComputeFunc = func(x, y []float64) {
+		target := newAbsErrorTarget(2, 1, 1e-2)
+		target.compute = func(x, y []float64) {
 			x0, x1 := 2*x[0]-1, 2*x[1]-1
 			x02, x12 := x0*x0, x1*x1
 			x03, x13 := x02*x0, x12*x1
