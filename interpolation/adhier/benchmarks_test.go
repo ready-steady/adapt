@@ -25,7 +25,7 @@ func BenchmarkComputeCube(b *testing.B) {
 
 func BenchmarkComputeBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator, target := prepare(fixture, func(config *Config) {
+	interpolator, target := prepare(fixture, func(config *Config, _ Target) {
 		config.MaxLevel = 9
 	})
 
@@ -36,19 +36,21 @@ func BenchmarkComputeBox(b *testing.B) {
 
 func BenchmarkComputeMany(b *testing.B) {
 	const (
-		inputs  = 2
-		outputs = 1000
+		inputs    = 2
+		outputs   = 1000
+		tolerance = 1e-4
 	)
 
 	interpolator, target := prepare(&fixture{
+		target: func() Target {
+			return NewAbsErrorTarget(inputs, outputs, tolerance, many(inputs, outputs))
+		},
 		surrogate: &Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
-
-			Level: 9,
+			Level:   9,
 		},
 	})
-	target.ComputeFunc = many(inputs, outputs)
 
 	for i := 0; i < b.N; i++ {
 		interpolator.Compute(target)
@@ -70,7 +72,7 @@ func BenchmarkEvaluateHat(b *testing.B) {
 
 func BenchmarkEvaluateCube(b *testing.B) {
 	fixture := &fixtureCube
-	interpolator, target := prepare(fixture, func(config *Config) {
+	interpolator, target := prepare(fixture, func(config *Config, _ Target) {
 		config.MaxLevel = 9
 	})
 	surrogate := interpolator.Compute(target)
@@ -85,7 +87,7 @@ func BenchmarkEvaluateCube(b *testing.B) {
 
 func BenchmarkEvaluateBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator, target := prepare(fixture, func(config *Config) {
+	interpolator, target := prepare(fixture, func(config *Config, _ Target) {
 		config.MaxLevel = 9
 	})
 	surrogate := interpolator.Compute(target)
@@ -100,19 +102,21 @@ func BenchmarkEvaluateBox(b *testing.B) {
 
 func BenchmarkEvaluateMany(b *testing.B) {
 	const (
-		inputs  = 2
-		outputs = 1000
+		inputs    = 2
+		outputs   = 1000
+		tolerance = 1e-4
 	)
 
 	interpolator, target := prepare(&fixture{
+		target: func() Target {
+			return NewAbsErrorTarget(inputs, outputs, tolerance, many(inputs, outputs))
+		},
 		surrogate: &Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
-
-			Level: 9,
+			Level:   9,
 		},
 	})
-	target.ComputeFunc = many(inputs, outputs)
 	surrogate := interpolator.Compute(target)
 	points := generate(surrogate)
 

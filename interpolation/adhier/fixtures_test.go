@@ -9,7 +9,9 @@ import (
 )
 
 type fixture struct {
-	prepare func(config *Config, target *AbsErrorTarget)
+	config func() *Config
+	target func() Target
+
 	compute func([]float64, []float64)
 
 	surrogate *Surrogate
@@ -21,26 +23,29 @@ type fixture struct {
 	values []float64
 }
 
-func prepare(fixture *fixture, configure ...func(*Config)) (*Interpolator, *AbsErrorTarget) {
+func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target) {
 	const (
 		tolerance = 1e-4
 	)
 
-	surrogate := fixture.surrogate
+	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
-	ni, no := surrogate.Inputs, surrogate.Outputs
-
-	config := NewConfig()
-	config.MaxLevel = surrogate.Level
-
-	target := NewAbsErrorTarget(ni, no, tolerance, fixture.compute)
-
-	if fixture.prepare != nil {
-		fixture.prepare(config, target)
+	var config *Config
+	if fixture.config == nil {
+		config = NewConfig()
+	} else {
+		config = fixture.config()
 	}
 
-	for i := range configure {
-		configure[i](config)
+	var target Target
+	if fixture.target == nil {
+		target = NewAbsErrorTarget(ni, no, tolerance, fixture.compute)
+	} else {
+		target = fixture.target()
+	}
+
+	if len(arguments) > 0 {
+		arguments[0].(func(*Config, Target))(config, target)
 	}
 
 	interpolator := New(newcot.NewClosed(ni), linhat.NewClosed(ni), config)
@@ -63,6 +68,12 @@ func (f *fixture) initialize() {
 }
 
 var fixtureStep = fixture{
+	config: func() *Config {
+		config := NewConfig()
+		config.MaxLevel = 4
+		return config
+	},
+
 	compute: func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1
@@ -307,19 +318,17 @@ var fixtureHat = fixture{
 }
 
 var fixtureCube = fixture{
-	prepare: func(_ *Config, target *AbsErrorTarget) {
-		target.tolerance = 1e-2
-	},
+	target: func() Target {
+		return NewAbsErrorTarget(2, 1, 1e-2, func(x, y []float64) {
+			x0, x1 := 2*x[0]-1, 2*x[1]-1
+			x02, x12 := x0*x0, x1*x1
+			x03, x13 := x02*x0, x12*x1
 
-	compute: func(x, y []float64) {
-		x0, x1 := 2*x[0]-1, 2*x[1]-1
-		x02, x12 := x0*x0, x1*x1
-		x03, x13 := x02*x0, x12*x1
-
-		y[0] = math.Exp(-x02-x12) - x03 - x13
-		if math.Abs(x0) < 0.45 && math.Abs(x1) < 0.45 {
-			y[0] += 1
-		}
+			y[0] = math.Exp(-x02-x12) - x03 - x13
+			if math.Abs(x0) < 0.45 && math.Abs(x1) < 0.45 {
+				y[0] += 1
+			}
+		})
 	},
 
 	surrogate: &Surrogate{
@@ -559,6 +568,12 @@ var fixtureCube = fixture{
 }
 
 var fixtureBox = fixture{
+	config: func() *Config {
+		config := NewConfig()
+		config.MaxLevel = 3
+		return config
+	},
+
 	compute: func(x, y []float64) {
 		if x[0]+x[1] > 0.5 {
 			y[0] = 1
@@ -661,31 +676,35 @@ var fixtureBox = fixture{
 }
 
 var fixtureKraichnanOrszag = fixture{
-	prepare: func(_ *Config, target *AbsErrorTarget) {
-		target.tolerance = 1e-2
+	config: func() *Config {
+		config := NewConfig()
+		config.MaxLevel = 8
+		return config
 	},
 
-	compute: func(y0, ys []float64) {
-		dydt := func(_ float64, y, f []float64) {
-			f[0] = y[0] * y[2]
-			f[1] = -y[1] * y[2]
-			f[2] = -y[0]*y[0] + y[1]*y[1]
-		}
-		y0 = []float64{2*y0[0] - 1, 2*y0[1] - 1, 2*y0[2] - 1}
-		xs := []float64{0, 30}
+	target: func() Target {
+		return NewAbsErrorTarget(3, 3*301, 1e-2, func(y0, ys []float64) {
+			dydt := func(_ float64, y, f []float64) {
+				f[0] = y[0] * y[2]
+				f[1] = -y[1] * y[2]
+				f[2] = -y[0]*y[0] + y[1]*y[1]
+			}
+			y0 = []float64{2*y0[0] - 1, 2*y0[1] - 1, 2*y0[2] - 1}
+			xs := []float64{0, 30}
 
-		integrator, _ := rk4.New(&rk4.Config{Step: 0.01})
-		Ys, _, _ := integrator.Compute(dydt, y0, xs)
+			integrator, _ := rk4.New(&rk4.Config{Step: 0.01})
+			Ys, _, _ := integrator.Compute(dydt, y0, xs)
 
-		if len(ys) != 3*301 || len(Ys) != 3*3001 {
-			panic("something went wrong")
-		}
+			if len(ys) != 3*301 || len(Ys) != 3*3001 {
+				panic("something went wrong")
+			}
 
-		for i := 0; i < 301; i++ {
-			ys[3*i+0] = Ys[10*3*i+0]
-			ys[3*i+1] = Ys[10*3*i+1]
-			ys[3*i+2] = Ys[10*3*i+2]
-		}
+			for i := 0; i < 301; i++ {
+				ys[3*i+0] = Ys[10*3*i+0]
+				ys[3*i+1] = Ys[10*3*i+1]
+				ys[3*i+2] = Ys[10*3*i+2]
+			}
+		})
 	},
 
 	surrogate: &Surrogate{
