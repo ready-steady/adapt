@@ -8,6 +8,13 @@ import (
 	"github.com/ready-steady/numeric/integration/ode/rk4"
 )
 
+func init() {
+	fixtureStep.initialize()
+	fixtureHat.initialize()
+	fixtureCube.initialize()
+	fixtureBox.initialize()
+}
+
 type fixture struct {
 	config func() *Config
 	target func() Target
@@ -23,24 +30,11 @@ type fixture struct {
 	values []float64
 }
 
-func newAbsErrorTarget(inputs, outputs uint, tolerance float64,
-	compute func([]float64, []float64)) *GenericTarget {
-
-	target := NewTarget(inputs, outputs)
-	target.ComputeHandler = compute
-	target.RefineHandler = func(surplus []float64) bool {
-		for _, ε := range surplus {
-			if ε < 0 {
-				ε = -ε
-			}
-			if ε > tolerance {
-				return true
-			}
-		}
-		return false
+func (f *fixture) initialize() {
+	f.surrogate.Indices = make([]uint64, len(f.levels))
+	for i := range f.levels {
+		f.surrogate.Indices[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
 	}
-
-	return target
 }
 
 func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target) {
@@ -59,7 +53,7 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 
 	var target Target
 	if fixture.target == nil {
-		target = newAbsErrorTarget(ni, no, tolerance, fixture.compute)
+		target = newTarget(ni, no, tolerance, fixture.compute)
 	} else {
 		target = fixture.target()
 	}
@@ -73,18 +67,24 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 	return interpolator, target
 }
 
-func init() {
-	fixtureStep.initialize()
-	fixtureHat.initialize()
-	fixtureCube.initialize()
-	fixtureBox.initialize()
-}
+func newTarget(inputs, outputs uint, tolerance float64,
+	compute func([]float64, []float64)) Target {
 
-func (f *fixture) initialize() {
-	f.surrogate.Indices = make([]uint64, len(f.levels))
-	for i := range f.levels {
-		f.surrogate.Indices[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
+	quantity := NewQuantity(inputs, outputs)
+	quantity.ComputeHandler = compute
+	quantity.RefineHandler = func(surplus []float64) bool {
+		for _, ε := range surplus {
+			if ε < 0 {
+				ε = -ε
+			}
+			if ε > tolerance {
+				return true
+			}
+		}
+		return false
 	}
+
+	return quantity
 }
 
 var fixtureStep = fixture{
@@ -339,7 +339,7 @@ var fixtureHat = fixture{
 
 var fixtureCube = fixture{
 	target: func() Target {
-		return newAbsErrorTarget(2, 1, 1e-2, func(x, y []float64) {
+		return newTarget(2, 1, 1e-2, func(x, y []float64) {
 			x0, x1 := 2*x[0]-1, 2*x[1]-1
 			x02, x12 := x0*x0, x1*x1
 			x03, x13 := x02*x0, x12*x1

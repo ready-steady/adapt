@@ -19,19 +19,19 @@ func ExampleInterpolator_step() {
 	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewTarget(inputs, outputs)
-	target.ComputeHandler = func(x, y []float64) {
+	quantity := NewQuantity(inputs, outputs)
+	quantity.ComputeHandler = func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
 	}
-	target.RefineHandler = func(Δ []float64) bool {
+	quantity.RefineHandler = func(Δ []float64) bool {
 		return math.Abs(Δ[0]) > tolerance
 	}
 
-	surrogate := interpolator.Compute(target)
+	surrogate := interpolator.Compute(quantity)
 
 	fmt.Println(surrogate)
 
@@ -50,19 +50,19 @@ func ExampleInterpolator_cube() {
 	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewTarget(inputs, outputs)
-	target.ComputeHandler = func(x, y []float64) {
+	quantity := NewQuantity(inputs, outputs)
+	quantity.ComputeHandler = func(x, y []float64) {
 		if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
 	}
-	target.RefineHandler = func(Δ []float64) bool {
+	quantity.RefineHandler = func(Δ []float64) bool {
 		return math.Abs(Δ[0]) > tolerance
 	}
 
-	surrogate := interpolator.Compute(target)
+	surrogate := interpolator.Compute(quantity)
 
 	fmt.Println(surrogate)
 
