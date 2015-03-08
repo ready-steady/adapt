@@ -11,53 +11,49 @@ import (
 // Interpolation in one dimension.
 func ExampleInterpolator_step() {
 	const (
-		inputs  = 1
-		outputs = 1
+		inputs    = 1
+		outputs   = 1
+		tolerance = 1e-4
 	)
 
-	target := func(x, y []float64, _ []uint64) {
+	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
+	interpolator := New(grid, basis, NewConfig())
+
+	target := NewAbsErrorTarget(inputs, outputs, tolerance, func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
-	}
+	})
 
-	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
-
-	config := DefaultConfig(inputs, outputs)
-	config.MaxLevel = 19
-
-	interpolator, _ := New(grid, basis, config)
 	surrogate := interpolator.Compute(target)
 
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 1, outputs: 1, level: 19, nodes: 38}
+	// Surrogate{inputs: 1, outputs: 1, level: 9, nodes: 18}
 }
 
 // Interpolation in two dimensions.
 func ExampleInterpolator_cube() {
 	const (
-		inputs  = 2
-		outputs = 1
+		inputs    = 2
+		outputs   = 1
+		tolerance = 1e-4
 	)
 
-	target := func(x, y []float64, _ []uint64) {
+	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
+	interpolator := New(grid, basis, NewConfig())
+
+	target := NewAbsErrorTarget(inputs, outputs, tolerance, func(x, y []float64) {
 		if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
-	}
+	})
 
-	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
-
-	config := DefaultConfig(inputs, outputs)
-	config.MaxLevel = 9
-
-	interpolator, _ := New(grid, basis, config)
 	surrogate := interpolator.Compute(target)
 
 	fmt.Println(surrogate)

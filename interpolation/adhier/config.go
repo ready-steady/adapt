@@ -1,15 +1,7 @@
 package adhier
 
-import (
-	"errors"
-)
-
 // Config represents a configuration of the algorithm.
 type Config struct {
-	// The number of inputs.
-	Inputs uint
-	// The number of outputs.
-	Outputs uint
 	// The minimal level of interpolation. The nodes that belong to lower levels
 	// are unconditionally included in the surrogate.
 	MinLevel uint
@@ -19,44 +11,16 @@ type Config struct {
 	// The maximal number of nodes. The algorithm stops after reaching this many
 	// nodes.
 	MaxNodes uint
-	// The absolute error tolerance. The parameter is used for local refinement
-	// and is given in absolute units.
-	AbsError float64
-	// The relative error tolerance. The parameter is used for local refinement
-	// and is given in relative units.
-	RelError float64
 	// The number of concurrent workers. The evaluation of the target function
 	// and the surrogate itself is distributed among this many goroutines.
 	Workers uint
 }
 
-// DefaultConfig returns the default configuration of the algorithm.
-func DefaultConfig(inputs, outputs uint) *Config {
+// NewConfig returns a new configuration with default values.
+func NewConfig() *Config {
 	return &Config{
-		Inputs:   inputs,
-		Outputs:  outputs,
 		MinLevel: 1,
 		MaxLevel: 9,
 		MaxNodes: 10000,
-		AbsError: 1e-4,
-		RelError: 1e-2,
-		Workers:  0,
 	}
-}
-
-func (c *Config) verify() error {
-	if c.Inputs == 0 {
-		return errors.New("the number of inputs should be positive")
-	}
-	if c.Outputs == 0 {
-		return errors.New("the number of outputs should be positive")
-	}
-	if c.AbsError < 0 {
-		return errors.New("the absolute error tolerance should be nonnegative")
-	}
-	if c.RelError < 0 {
-		return errors.New("the relative error tolerance should be nonnegative")
-	}
-
-	return nil
 }

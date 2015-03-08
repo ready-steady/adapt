@@ -3,20 +3,17 @@
 package adhier
 
 import (
-	"math"
 	"runtime"
 	"sync"
 )
 
-// Grid is the interface that an sparse grid should satisfy in order to be used
-// in the algorithm.
+// Grid is a sparse grid.
 type Grid interface {
 	Compute(indices []uint64) []float64
 	ComputeChildren(indices []uint64) []uint64
 }
 
-// Basis is the interface that a functional basis should satisfy in order to be
-// used in the algorithm.
+// Basis is a functional basis.
 type Basis interface {
 	Compute(index []uint64, point []float64) float64
 }
@@ -25,57 +22,30 @@ type Basis interface {
 type Interpolator struct {
 	grid   Grid
 	basis  Basis
-	config *Config
-
-	ni uint
-	no uint
-	nw uint
+	config Config
 }
 
 // New creates an instance of the algorithm for the given configuration.
-func New(grid Grid, basis Basis, config *Config) (*Interpolator, error) {
-	if err := config.verify(); err != nil {
-		return nil, err
-	}
-
-	nw := config.Workers
-	if nw == 0 {
-		nw = uint(runtime.GOMAXPROCS(0))
-	}
-
+func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	interpolator := &Interpolator{
 		grid:   grid,
 		basis:  basis,
-		config: config,
-
-		ni: config.Inputs,
-		no: config.Outputs,
-		nw: nw,
+		config: *config,
 	}
 
-	return interpolator, nil
+	config = &interpolator.config
+	if config.Workers == 0 {
+		config.Workers = uint(runtime.GOMAXPROCS(0))
+	}
+
+	return interpolator
 }
 
-// Compute takes a target function and produces an interpolant for it. The
-// interpolant can then be fed to Evaluate for approximating the target function
-// at arbitrary points.
-//
-// The second argument of Compute is an optional function that can be used for
-// monitoring the progress of interpolation. The progress function is called
-// once for each level before evaluating the target function at the nodes of
-// that level. The signature of the progress function is func(uint, uint, uint)
-// where the arguments are the current level, number of active nodes, and total
-// number of nodes, respectively.
-func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
-	arguments ...interface{}) *Surrogate {
+// Compute constructs an interpolant for a quantity of interest.
+func (self *Interpolator) Compute(target Target) *Surrogate {
+	config := &self.config
 
-	var progress func(uint, uint, uint)
-	if len(arguments) > 0 {
-		progress = arguments[0].(func(uint, uint, uint))
-	}
-
-	ni, no := self.ni, self.no
-	config := self.config
+	ni, no := target.Inputs(), target.Outputs()
 
 	surrogate := new(Surrogate)
 	surrogate.initialize(ni, no)
@@ -89,123 +59,58 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 
 	indices := make([]uint64, na*ni)
 
-	var i, j, k, l uint
-	var nodes, values, approximations []float64
-
-	min := make([]float64, no)
-	max := make([]float64, no)
-
-	min[0], max[0] = math.Inf(1), math.Inf(-1)
-	for i = 1; i < no; i++ {
-		min[i], max[i] = min[0], max[0]
-	}
+	var i, j, k uint
+	var nodes, values, approximations, surpluses []float64
 
 	for {
-		if progress != nil {
-			progress(level, na, np+na)
-		}
+		target.Monitor(level, na, np)
 
 		surrogate.resize(np + na)
 		copy(surrogate.Indices[np*ni:], indices)
 
 		nodes = self.grid.Compute(indices)
 
-		// NOTE: Assuming that target might have some logic based on the indices
-		// passed to it (for instance, caching), the indices variable should not
-		// be used here as it gets modified later on.
-		values = self.invoke(target, nodes, surrogate.Indices[np*ni:(np+na)*ni])
+		values = invoke(target.Compute, nodes, ni, no, config.Workers)
+		approximations = approximate(self.basis, surrogate.Indices[:np*ni],
+			surrogate.Surpluses[:np*no], nodes, ni, no, config.Workers)
 
-		// Compute the surpluses corresponding to the active nodes.
-		if level == 0 {
-			// The surrogate does not have any nodes yet.
-			copy(surrogate.Surpluses, values)
-			goto refineLevel
+		surpluses = surrogate.Surpluses[np*no : (np+na)*no]
+		for i = 0; i < na*no; i++ {
+			surpluses[i] = values[i] - approximations[i]
 		}
 
-		approximations = self.approximate(surrogate.Indices[:np*ni],
-			surrogate.Surpluses[:np*no], nodes)
-		for i, k = 0, np*no; i < na; i++ {
-			for j = 0; j < no; j++ {
-				surrogate.Surpluses[k] = values[i*no+j] - approximations[i*no+j]
-				k++
-			}
-		}
-
-	refineLevel:
 		if level >= config.MaxLevel || (np+na) >= config.MaxNodes {
 			break
 		}
-
-		// Keep track of the maximal and minimal values of the function.
-		for i, k = 0, 0; i < na; i++ {
-			for j = 0; j < no; j++ {
-				if values[k] < min[j] {
-					min[j] = values[k]
-				}
-				if values[k] > max[j] {
-					max[j] = values[k]
-				}
-				k++
-			}
-		}
-
 		if level < config.MinLevel {
-			goto updateIndices
+			goto breed
 		}
 
-		k, l = 0, 0
-
-		for i = 0; i < na; i++ {
-			refine := false
-
-			for j = 0; j < no; j++ {
-				absError := surrogate.Surpluses[(np+i)*no+j]
-				if absError < 0 {
-					absError = -absError
+		for i, j, k = 0, 0, 0; i < na; i++ {
+			if target.Refine(surpluses[i*no : (i+1)*no]) {
+				if k != j {
+					// When there are a lot of refinements, this branch is
+					// taken only occasionally.
+					copy(indices[k:], indices[j:])
+					j = k
 				}
-
-				if absError > config.AbsError {
-					refine = true
-					break
-				}
-
-				relError := absError / (max[j] - min[j])
-
-				if relError > config.RelError {
-					refine = true
-					break
-				}
+				k += ni
 			}
-
-			if !refine {
-				l += ni
-				continue
-			}
-
-			if k != l {
-				// Shift everything, assuming a lot of refinements.
-				copy(indices[k:], indices[l:])
-				l = k
-			}
-
-			k += ni
-			l += ni
+			j += ni
 		}
 
 		indices = indices[:k]
 
-	updateIndices:
+	breed:
 		indices = self.grid.ComputeChildren(indices)
 
 		np += na
 		na = uint(len(indices)) / ni
 
+		// Trim if there are excessive nodes.
 		if Δ := int32(np+na) - int32(config.MaxNodes); Δ > 0 {
 			na -= uint(Δ)
 			indices = indices[:na*ni]
-		}
-		if na == 0 {
-			break
 		}
 
 		level++
@@ -215,18 +120,17 @@ func (self *Interpolator) Compute(target func([]float64, []float64, []uint64),
 	return surrogate
 }
 
-// Evaluate takes a surrogate produced by Compute and evaluates it at a set of
-// points.
+// Evaluate takes a surrogate produced by Compute and evaluates it at a number
+// of points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	return self.approximate(surrogate.Indices, surrogate.Surpluses, points)
+	return approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
+		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
 }
 
-func (self *Interpolator) approximate(indices []uint64, surpluses, points []float64) []float64 {
-	ni, no, nw := self.ni, self.no, self.nw
-	nn := uint(len(indices)) / ni
-	np := uint(len(points)) / ni
+func approximate(basis Basis, indices []uint64, surpluses, points []float64,
+	ni, no, nw uint) []float64 {
 
-	basis := self.basis
+	nn, np := uint(len(indices))/ni, uint(len(points))/ni
 
 	values := make([]float64, np*no)
 
@@ -265,10 +169,7 @@ func (self *Interpolator) approximate(indices []uint64, surpluses, points []floa
 	return values
 }
 
-func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
-	nodes []float64, indices []uint64) []float64 {
-
-	ni, no, nw := self.ni, self.no, self.nw
+func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
 	nn := uint(len(nodes)) / ni
 
 	values := make([]float64, nn*no)
@@ -280,7 +181,7 @@ func (self *Interpolator) invoke(target func([]float64, []float64, []uint64),
 	for i := uint(0); i < nw; i++ {
 		go func() {
 			for j := range jobs {
-				target(nodes[j*ni:(j+1)*ni], values[j*no:(j+1)*no], indices[j*ni:(j+1)*ni])
+				compute(nodes[j*ni:(j+1)*ni], values[j*no:(j+1)*no])
 				group.Done()
 			}
 		}()

@@ -1,37 +1,36 @@
 package adhier
 
 import (
+	"math/rand"
 	"testing"
 )
 
 func BenchmarkComputeHat(b *testing.B) {
 	fixture := &fixtureHat
-	interpolator := prepare(fixture)
+	interpolator, target := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target)
+		interpolator.Compute(target)
 	}
 }
 
 func BenchmarkComputeCube(b *testing.B) {
 	fixture := &fixtureCube
-	interpolator := prepare(fixture, func(config *Config) {
-		config.MaxLevel = 9
-	})
+	interpolator, target := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target)
+		interpolator.Compute(target)
 	}
 }
 
 func BenchmarkComputeBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator := prepare(fixture, func(config *Config) {
+	interpolator, target := prepare(fixture, func(config *Config) {
 		config.MaxLevel = 9
 	})
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target)
+		interpolator.Compute(target)
 	}
 }
 
@@ -41,7 +40,7 @@ func BenchmarkComputeMany(b *testing.B) {
 		outputs = 1000
 	)
 
-	interpolator := prepare(&fixture{
+	interpolator, target := prepare(&fixture{
 		surrogate: &Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
@@ -49,17 +48,17 @@ func BenchmarkComputeMany(b *testing.B) {
 			Level: 9,
 		},
 	})
-	function := many(inputs, outputs)
+	target.ComputeFunc = many(inputs, outputs)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(function)
+		interpolator.Compute(target)
 	}
 }
 
 func BenchmarkEvaluateHat(b *testing.B) {
 	fixture := &fixtureHat
-	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(fixture.target)
+	interpolator, target := prepare(fixture)
+	surrogate := interpolator.Compute(target)
 	points := generate(surrogate)
 
 	b.ResetTimer()
@@ -71,10 +70,10 @@ func BenchmarkEvaluateHat(b *testing.B) {
 
 func BenchmarkEvaluateCube(b *testing.B) {
 	fixture := &fixtureCube
-	interpolator := prepare(fixture, func(config *Config) {
+	interpolator, target := prepare(fixture, func(config *Config) {
 		config.MaxLevel = 9
 	})
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(target)
 	points := generate(surrogate)
 
 	b.ResetTimer()
@@ -86,10 +85,10 @@ func BenchmarkEvaluateCube(b *testing.B) {
 
 func BenchmarkEvaluateBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator := prepare(fixture, func(config *Config) {
+	interpolator, target := prepare(fixture, func(config *Config) {
 		config.MaxLevel = 9
 	})
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(target)
 	points := generate(surrogate)
 
 	b.ResetTimer()
@@ -105,7 +104,7 @@ func BenchmarkEvaluateMany(b *testing.B) {
 		outputs = 1000
 	)
 
-	interpolator := prepare(&fixture{
+	interpolator, target := prepare(&fixture{
 		surrogate: &Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
@@ -113,8 +112,8 @@ func BenchmarkEvaluateMany(b *testing.B) {
 			Level: 9,
 		},
 	})
-	function := many(inputs, outputs)
-	surrogate := interpolator.Compute(function)
+	target.ComputeFunc = many(inputs, outputs)
+	surrogate := interpolator.Compute(target)
 	points := generate(surrogate)
 
 	b.ResetTimer()
@@ -124,8 +123,8 @@ func BenchmarkEvaluateMany(b *testing.B) {
 	}
 }
 
-func many(ni, no int) func([]float64, []float64, []uint64) {
-	return func(x, y []float64, _ []uint64) {
+func many(ni, no int) func([]float64, []float64) {
+	return func(x, y []float64) {
 		sum, value := 0.0, 0.0
 
 		for i := 0; i < ni; i++ {
@@ -140,4 +139,18 @@ func many(ni, no int) func([]float64, []float64, []uint64) {
 			y[i] = value
 		}
 	}
+}
+
+func generate(surrogate *Surrogate) []float64 {
+	const (
+		count = 10000
+	)
+
+	generator := rand.New(rand.NewSource(0))
+	points := make([]float64, count*surrogate.Inputs)
+	for i := range points {
+		points[i] = generator.Float64()
+	}
+
+	return points
 }
