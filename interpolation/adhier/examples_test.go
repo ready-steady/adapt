@@ -27,8 +27,8 @@ func ExampleInterpolator_step() {
 			y[0] = 0
 		}
 	}
-	target.RefineFunc = func(ε []float64) bool {
-		return math.Abs(ε[0]) > tolerance
+	target.RefineFunc = func(Δ []float64) bool {
+		return math.Abs(Δ[0]) > tolerance
 	}
 
 	surrogate := interpolator.Compute(target)
