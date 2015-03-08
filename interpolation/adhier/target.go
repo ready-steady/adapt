@@ -35,15 +35,11 @@ type AbsErrorTarget struct {
 }
 
 // NewAbsErrorTarget returns an absolute-error-driven target.
-func NewAbsErrorTarget(inputs, outputs uint, tolerance float64,
-	compute func([]float64, []float64)) *AbsErrorTarget {
-
+func NewAbsErrorTarget(inputs, outputs uint, tolerance float64) *AbsErrorTarget {
 	return &AbsErrorTarget{
 		inputs:    inputs,
 		outputs:   outputs,
 		tolerance: tolerance,
-
-		ComputeFunc: compute,
 	}
 }
 

@@ -39,7 +39,8 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 
 	var target Target
 	if fixture.target == nil {
-		target = NewAbsErrorTarget(ni, no, tolerance, fixture.compute)
+		target = NewAbsErrorTarget(ni, no, tolerance)
+		target.(*AbsErrorTarget).ComputeFunc = fixture.compute
 	} else {
 		target = fixture.target()
 	}
@@ -319,7 +320,8 @@ var fixtureHat = fixture{
 
 var fixtureCube = fixture{
 	target: func() Target {
-		return NewAbsErrorTarget(2, 1, 1e-2, func(x, y []float64) {
+		target := NewAbsErrorTarget(2, 1, 1e-2)
+		target.ComputeFunc = func(x, y []float64) {
 			x0, x1 := 2*x[0]-1, 2*x[1]-1
 			x02, x12 := x0*x0, x1*x1
 			x03, x13 := x02*x0, x12*x1
@@ -328,7 +330,8 @@ var fixtureCube = fixture{
 			if math.Abs(x0) < 0.45 && math.Abs(x1) < 0.45 {
 				y[0] += 1
 			}
-		})
+		}
+		return target
 	},
 
 	surrogate: &Surrogate{
@@ -683,7 +686,8 @@ var fixtureKraichnanOrszag = fixture{
 	},
 
 	target: func() Target {
-		return NewAbsErrorTarget(3, 3*301, 1e-2, func(y0, ys []float64) {
+		target := NewAbsErrorTarget(3, 3*301, 1e-2)
+		target.ComputeFunc = func(y0, ys []float64) {
 			dydt := func(_ float64, y, f []float64) {
 				f[0] = y[0] * y[2]
 				f[1] = -y[1] * y[2]
@@ -704,7 +708,8 @@ var fixtureKraichnanOrszag = fixture{
 				ys[3*i+1] = Ys[10*3*i+1]
 				ys[3*i+2] = Ys[10*3*i+2]
 			}
-		})
+		}
+		return target
 	},
 
 	surrogate: &Surrogate{

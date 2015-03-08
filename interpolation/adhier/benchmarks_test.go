@@ -43,7 +43,9 @@ func BenchmarkComputeMany(b *testing.B) {
 
 	interpolator, target := prepare(&fixture{
 		target: func() Target {
-			return NewAbsErrorTarget(inputs, outputs, tolerance, many(inputs, outputs))
+			target := NewAbsErrorTarget(inputs, outputs, tolerance)
+			target.ComputeFunc = many(inputs, outputs)
+			return target
 		},
 		surrogate: &Surrogate{
 			Inputs:  inputs,
@@ -109,7 +111,9 @@ func BenchmarkEvaluateMany(b *testing.B) {
 
 	interpolator, target := prepare(&fixture{
 		target: func() Target {
-			return NewAbsErrorTarget(inputs, outputs, tolerance, many(inputs, outputs))
+			target := NewAbsErrorTarget(inputs, outputs, tolerance)
+			target.ComputeFunc = many(inputs, outputs)
+			return target
 		},
 		surrogate: &Surrogate{
 			Inputs:  inputs,

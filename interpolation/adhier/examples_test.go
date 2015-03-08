@@ -19,13 +19,14 @@ func ExampleInterpolator_step() {
 	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewAbsErrorTarget(inputs, outputs, tolerance, func(x, y []float64) {
+	target := NewAbsErrorTarget(inputs, outputs, tolerance)
+	target.ComputeFunc = func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
-	})
+	}
 
 	surrogate := interpolator.Compute(target)
 
@@ -46,13 +47,14 @@ func ExampleInterpolator_cube() {
 	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewAbsErrorTarget(inputs, outputs, tolerance, func(x, y []float64) {
+	target := NewAbsErrorTarget(inputs, outputs, tolerance)
+	target.ComputeFunc = func(x, y []float64) {
 		if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
 			y[0] = 1
 		} else {
 			y[0] = 0
 		}
-	})
+	}
 
 	surrogate := interpolator.Compute(target)
 
