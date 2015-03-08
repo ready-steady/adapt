@@ -28,8 +28,8 @@ type Target interface {
 
 	// Monitor is called once on each level before evaluating the quantity at
 	// the nodes of that level. The arguments are the current level, number of
-	// active nodes, and number of passive nodes, respectively.
-	Monitor(level, active, passive uint)
+	// passive nodes, and number of active nodes, respectively.
+	Monitor(level, passive, active uint)
 
 	// Refine checks if a node of the underlying sparse grid should be refined
 	// based on its hierarchical surplus, which is the difference between the
@@ -82,7 +82,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	var nodes, values, approximations, surpluses []float64
 
 	for {
-		target.Monitor(level, na, np)
+		target.Monitor(level, np, na)
 
 		surrogate.resize(np + na)
 		copy(surrogate.Indices[np*ni:], indices)

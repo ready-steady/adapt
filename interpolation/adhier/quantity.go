@@ -26,9 +26,9 @@ func (q *Quantity) Compute(node, value []float64) {
 	q.ComputeHandler(node, value)
 }
 
-func (q *Quantity) Monitor(level, active, passive uint) {
+func (q *Quantity) Monitor(level, passive, active uint) {
 	if q.MonitorHandler != nil {
-		q.MonitorHandler(level, active, passive)
+		q.MonitorHandler(level, passive, active)
 	}
 }
 
