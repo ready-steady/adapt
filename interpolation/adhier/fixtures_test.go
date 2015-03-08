@@ -23,41 +23,24 @@ type fixture struct {
 	values []float64
 }
 
-type absErrorTarget struct {
-	inputs    uint
-	outputs   uint
-	tolerance float64
-	compute   func([]float64, []float64)
-}
+func newAbsErrorTarget(inputs, outputs uint, tolerance float64,
+	compute func([]float64, []float64)) *GenericTarget {
 
-func newAbsErrorTarget(inputs, outputs uint, tolerance float64) *absErrorTarget {
-	return &absErrorTarget{
-		inputs:    inputs,
-		outputs:   outputs,
-		tolerance: tolerance,
-	}
-}
-
-func (t *absErrorTarget) Dimensions() (uint, uint) {
-	return t.inputs, t.outputs
-}
-
-func (t *absErrorTarget) Compute(node, value []float64) {
-	t.compute(node, value)
-}
-
-func (t *absErrorTarget) Monitor(_, _, _ uint) {}
-
-func (t *absErrorTarget) Refine(surplus []float64) bool {
-	for _, ε := range surplus {
-		if ε < 0 {
-			ε = -ε
+	target := NewTarget(inputs, outputs)
+	target.ComputeHandler = compute
+	target.RefineHandler = func(surplus []float64) bool {
+		for _, ε := range surplus {
+			if ε < 0 {
+				ε = -ε
+			}
+			if ε > tolerance {
+				return true
+			}
 		}
-		if ε > t.tolerance {
-			return true
-		}
+		return false
 	}
-	return false
+
+	return target
 }
 
 func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target) {
@@ -76,8 +59,7 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 
 	var target Target
 	if fixture.target == nil {
-		target = newAbsErrorTarget(ni, no, tolerance)
-		target.(*absErrorTarget).compute = fixture.compute
+		target = newAbsErrorTarget(ni, no, tolerance, fixture.compute)
 	} else {
 		target = fixture.target()
 	}
@@ -357,8 +339,7 @@ var fixtureHat = fixture{
 
 var fixtureCube = fixture{
 	target: func() Target {
-		target := newAbsErrorTarget(2, 1, 1e-2)
-		target.compute = func(x, y []float64) {
+		return newAbsErrorTarget(2, 1, 1e-2, func(x, y []float64) {
 			x0, x1 := 2*x[0]-1, 2*x[1]-1
 			x02, x12 := x0*x0, x1*x1
 			x03, x13 := x02*x0, x12*x1
@@ -367,8 +348,7 @@ var fixtureCube = fixture{
 			if math.Abs(x0) < 0.45 && math.Abs(x1) < 0.45 {
 				y[0] += 1
 			}
-		}
-		return target
+		})
 	},
 
 	surrogate: &Surrogate{
