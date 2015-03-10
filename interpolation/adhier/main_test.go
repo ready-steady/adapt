@@ -15,6 +15,9 @@ func TestStep(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.Equal(values, fixture.values, t)
+
+	integral := interpolator.Integrate(surrogate)
+	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestHat(t *testing.T) {
@@ -26,6 +29,9 @@ func TestHat(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 1e-15, t)
+
+	integral := interpolator.Integrate(surrogate)
+	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestCube(t *testing.T) {
@@ -38,6 +44,9 @@ func TestCube(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 2e-15, t)
+
+	integral := interpolator.Integrate(surrogate)
+	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestBox(t *testing.T) {
@@ -49,6 +58,9 @@ func TestBox(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 1e-15, t)
+
+	integral := interpolator.Integrate(surrogate)
+	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestKraichnanOrszag(t *testing.T) {
@@ -61,4 +73,7 @@ func TestKraichnanOrszag(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 6e-14, t)
+
+	integral := interpolator.Integrate(surrogate)
+	assert.EqualWithin(integral, fixture.integral, 2e-14, t)
 }

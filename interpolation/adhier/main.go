@@ -16,6 +16,7 @@ type Grid interface {
 // Basis is a functional basis.
 type Basis interface {
 	Compute(index []uint64, point []float64) float64
+	Integrate(index []uint64) float64
 }
 
 // Target is a quantity to be interpolated.
@@ -23,7 +24,7 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Compute calculates the value of the quantity at a point.
+	// Compute evaluates the quantity at a point in [0, 1]^n.
 	Compute(point, value []float64)
 
 	// Monitor is called once on each level before evaluating the quantity at
@@ -143,11 +144,32 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	return surrogate
 }
 
-// Evaluate takes a surrogate produced by Compute and evaluates it at a number
-// of points.
+// Evaluate computes the values of a surrogate at a set of points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
+}
+
+// Integrate computes the integral of a surrogate over [0, 1]^n.
+func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
+	basis, indices, surpluses := self.basis, surrogate.Indices, surrogate.Surpluses
+
+	ni, no := surrogate.Inputs, surrogate.Outputs
+	nn := uint(len(indices)) / ni
+
+	value := make([]float64, no)
+
+	for i := uint(0); i < nn; i++ {
+		weight := basis.Integrate(indices[i*ni : (i+1)*ni])
+		if weight == 0 {
+			continue
+		}
+		for j := uint(0); j < no; j++ {
+			value[j] += weight * surpluses[i*no+j]
+		}
+	}
+
+	return value
 }
 
 func approximate(basis Basis, indices []uint64, surpluses, points []float64,
