@@ -9,9 +9,8 @@ import (
 func TestClosedCompute(t *testing.T) {
 	basis := NewClosed(1)
 
-	evaluate := func(level, order uint32, point float64) float64 {
-		pair := uint64(level) | uint64(order)<<32
-		return basis.Compute([]uint64{pair}, []float64{point})
+	compute := func(level, order uint32, point float64) float64 {
+		return basis.Compute([]uint64{compose(level, order)}, []float64{point})
 	}
 
 	points := []float64{0, 0.25, 0.5, 0.75, 1}
@@ -32,7 +31,7 @@ func TestClosedCompute(t *testing.T) {
 
 	for i := range cases {
 		for j := range values {
-			values[j] = evaluate(cases[i].level, cases[i].order, points[j])
+			values[j] = compute(cases[i].level, cases[i].order, points[j])
 		}
 		assert.Equal(values, cases[i].values, t)
 	}
