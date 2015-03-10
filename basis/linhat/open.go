@@ -10,7 +10,7 @@ func NewOpen(inputs uint) *Open {
 	return &Open{int(inputs)}
 }
 
-// Compute evaluates the value of a multidimensional basis function at a point.
+// Compute evaluates the value of a basis function at a point.
 func (o *Open) Compute(index []uint64, point []float64) float64 {
 	ni := o.ni
 
@@ -19,7 +19,7 @@ func (o *Open) Compute(index []uint64, point []float64) float64 {
 	for i := 0; i < ni; i++ {
 		level := 0xFFFFFFFF & index[i]
 		if level == 0 {
-			continue
+			continue // value *= 1
 		}
 
 		order := index[i] >> 32
@@ -31,14 +31,14 @@ func (o *Open) Compute(index []uint64, point []float64) float64 {
 			if scale*point[i] < 2 {
 				value *= 2 - scale*point[i]
 			} else {
-				return 0
+				return 0 // value *= 0
 			}
 		case count - 1:
 			scale1, scale2 := float64(count-1), float64(count+1)
 			if scale2*point[i] > scale1 {
 				value *= scale2*point[i] - scale1
 			} else {
-				return 0
+				return 0 // value *= 0
 			}
 		default:
 			scale := float64(count + 1)
@@ -49,7 +49,7 @@ func (o *Open) Compute(index []uint64, point []float64) float64 {
 			if scale*distance < 1 {
 				value *= 1 - scale*distance
 			} else {
-				return 0
+				return 0 // value *= 0
 			}
 		}
 	}

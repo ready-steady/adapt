@@ -10,7 +10,7 @@ func NewClosed(inputs uint) *Closed {
 	return &Closed{int(inputs)}
 }
 
-// Compute evaluates the value of a multidimensional basis function at a point.
+// Compute evaluates the value of a basis function at a point.
 func (c *Closed) Compute(index []uint64, point []float64) float64 {
 	ni := c.ni
 
@@ -19,7 +19,7 @@ func (c *Closed) Compute(index []uint64, point []float64) float64 {
 	for i := 0; i < ni; i++ {
 		level := 0xFFFFFFFF & index[i]
 		if level == 0 {
-			continue
+			continue // value *= 1
 		}
 
 		order := index[i] >> 32
@@ -32,7 +32,7 @@ func (c *Closed) Compute(index []uint64, point []float64) float64 {
 		if scale*distance < 1 {
 			value *= 1 - scale*distance
 		} else {
-			return 0
+			return 0 // value *= 0
 		}
 	}
 
