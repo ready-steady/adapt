@@ -94,3 +94,15 @@ func TestOpenCompute(t *testing.T) {
 		assert.EqualWithin(values, cases[i].values, 1e-15, t)
 	}
 }
+
+func TestOpenIntegrate(t *testing.T) {
+	basis := NewOpen(1)
+
+	levels := []uint32{0, 1, 1, 2, 2, 2, 2}
+	orders := []uint32{0, 0, 2, 0, 2, 4, 6}
+	values := []float64{1, 0.5, 0.5, 0.25, 0.125, 0.125, 0.25}
+
+	for i := range levels {
+		assert.Equal(basis.Integrate([]uint64{compose(levels[i], orders[i])}), values[i], t)
+	}
+}

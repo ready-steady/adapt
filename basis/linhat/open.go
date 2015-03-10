@@ -56,3 +56,29 @@ func (o *Open) Compute(index []uint64, point []float64) float64 {
 
 	return value
 }
+
+// Integrate computes the integral of a basis function on (0, 1)^n.
+func (o *Open) Integrate(index []uint64) float64 {
+	ni := o.ni
+
+	value := 1.0
+
+	for i := 0; i < ni; i++ {
+		level := 0xFFFFFFFF & index[i]
+		if level == 0 {
+			continue // value *= 1
+		}
+
+		order := index[i] >> 32
+		count := uint64(2)<<level - 1
+
+		switch order {
+		case 0, count - 1:
+			value *= 2 / float64(count+1)
+		default:
+			value *= 1 / float64(count+1)
+		}
+	}
+
+	return value
+}

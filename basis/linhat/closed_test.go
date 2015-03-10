@@ -36,3 +36,14 @@ func TestClosedCompute(t *testing.T) {
 		assert.Equal(values, cases[i].values, t)
 	}
 }
+
+func TestClosedIntegrate(t *testing.T) {
+	basis := NewClosed(1)
+
+	levels := []uint32{0, 1, 2, 3}
+	values := []float64{1, 0.25, 1.0 / 2 / 2, 1.0 / 2 / 2 / 2}
+
+	for i := range levels {
+		assert.Equal(basis.Integrate([]uint64{compose(levels[i], uint32(0))}), values[i], t)
+	}
+}
