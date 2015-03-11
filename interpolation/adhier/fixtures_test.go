@@ -16,6 +16,8 @@ func init() {
 }
 
 type fixture struct {
+	rule string
+
 	config func() *Config
 	target func() Target
 
@@ -44,8 +46,6 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 		tolerance = 1e-4
 	)
 
-	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
-
 	var config *Config
 	if fixture.config == nil {
 		config = NewConfig()
@@ -55,7 +55,8 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 
 	var target Target
 	if fixture.target == nil {
-		target = newTarget(ni, no, tolerance, fixture.compute)
+		target = newTarget(fixture.surrogate.Inputs, fixture.surrogate.Outputs,
+			tolerance, fixture.compute)
 	} else {
 		target = fixture.target()
 	}
@@ -64,9 +65,14 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 		arguments[0].(func(*Config, Target))(config, target)
 	}
 
-	interpolator := New(newcot.NewClosed(ni), linhat.NewClosed(ni), config)
+	ni, _ := target.Dimensions()
 
-	return interpolator, target
+	switch fixture.rule {
+	case "open":
+		return New(newcot.NewOpen(ni), linhat.NewOpen(ni), config), target
+	default:
+		return New(newcot.NewClosed(ni), linhat.NewClosed(ni), config), target
+	}
 }
 
 func newTarget(inputs, outputs uint, tolerance float64,
@@ -2001,4 +2007,25 @@ var fixtureKraichnanOrszag = fixture{
 		+1.0191500421363742e-17, +2.5854853272075695e-01, -4.3368086899420177e-18,
 		+2.5854853272075673e-01, -2.1028101135356358e-16, +4.8391001451591442e-01,
 	},
+}
+
+var fixtureParabola = fixture{
+	rule: "open",
+
+	config: func() *Config {
+		config := NewConfig()
+		config.MaxLevel = 20
+		return config
+	},
+
+	target: func() Target {
+		return newTarget(1, 1, 1e-6, func(x, y []float64) {
+			y[0] = (x[0] - 0.5) * (x[0] - 0.5)
+		})
+	},
+
+	points: []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1},
+	values: []float64{0.25, 0.16, 0.09, 0.04, 0.01, 0, 0.01, 0.04, 0.09, 0.16, 0.25},
+
+	integral: []float64{1.0 / 12},
 }

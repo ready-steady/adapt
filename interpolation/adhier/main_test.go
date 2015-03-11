@@ -77,3 +77,16 @@ func TestKraichnanOrszag(t *testing.T) {
 	integral := interpolator.Integrate(surrogate)
 	assert.EqualWithin(integral, fixture.integral, 2e-14, t)
 }
+
+func TestParabola(t *testing.T) {
+	fixture := &fixtureParabola
+	interpolator, target := prepare(fixture)
+
+	surrogate := interpolator.Compute(target)
+
+	values := interpolator.Evaluate(surrogate, fixture.points)
+	assert.EqualWithin(values, fixture.values, 1e-6, t)
+
+	integral := interpolator.Integrate(surrogate)
+	assert.EqualWithin(integral, fixture.integral, 1e-6, t)
+}
