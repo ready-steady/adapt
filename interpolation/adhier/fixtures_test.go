@@ -78,9 +78,9 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 func newTarget(inputs, outputs uint, tolerance float64,
 	compute func([]float64, []float64)) Target {
 
-	quantity := NewQuantity(inputs, outputs)
-	quantity.ComputeHandler = compute
-	quantity.RefineHandler = func(surplus []float64) bool {
+	target := NewTarget(inputs, outputs)
+	target.ComputeHandler = compute
+	target.RefineHandler = func(surplus []float64) bool {
 		for _, ε := range surplus {
 			if ε < 0 {
 				ε = -ε
@@ -92,7 +92,7 @@ func newTarget(inputs, outputs uint, tolerance float64,
 		return false
 	}
 
-	return quantity
+	return target
 }
 
 var fixtureStep = fixture{
