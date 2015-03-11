@@ -1,11 +1,11 @@
 package newcot
 
-// Open represents an instance of the grid on (0, 1)^n.
+// Open represents an instance of the grid in (0, 1)^n.
 type Open struct {
 	nd int
 }
 
-// NewOpen creates an instance of the grid on (0, 1)^n.
+// NewOpen creates an instance of the grid in (0, 1)^n.
 func NewOpen(dimensions uint) *Open {
 	return &Open{int(dimensions)}
 }

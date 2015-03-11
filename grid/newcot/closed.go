@@ -1,11 +1,11 @@
 package newcot
 
-// Closed represents an instance of the grid on [0, 1]^n.
+// Closed represents an instance of the grid in [0, 1]^n.
 type Closed struct {
 	nd int
 }
 
-// NewClosed creates an instance of the grid on [0, 1]^n.
+// NewClosed creates an instance of the grid in [0, 1]^n.
 func NewClosed(dimensions uint) *Closed {
 	return &Closed{int(dimensions)}
 }

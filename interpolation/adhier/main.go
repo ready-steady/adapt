@@ -7,13 +7,13 @@ import (
 	"sync"
 )
 
-// Grid is a sparse grid.
+// Grid is a sparse grid in [0, 1]^n.
 type Grid interface {
 	Compute(indices []uint64) []float64
 	ComputeChildren(indices []uint64) []uint64
 }
 
-// Basis is a functional basis.
+// Basis is a functional basis in [0, 1]^n.
 type Basis interface {
 	Compute(index []uint64, point []float64) float64
 	Integrate(index []uint64) float64

@@ -1,11 +1,11 @@
 package linhat
 
-// Open represents an instance of the basis on (0, 1)^n.
+// Open represents an instance of the basis in (0, 1)^n.
 type Open struct {
 	ni int
 }
 
-// NewOpen creates an instance of the basis on (0, 1)^n.
+// NewOpen creates an instance of the basis in (0, 1)^n.
 func NewOpen(inputs uint) *Open {
 	return &Open{int(inputs)}
 }
@@ -57,7 +57,7 @@ func (o *Open) Compute(index []uint64, point []float64) float64 {
 	return value
 }
 
-// Integrate computes the integral of a basis function on (0, 1)^n.
+// Integrate computes the integral of a basis function in (0, 1)^n.
 func (o *Open) Integrate(index []uint64) float64 {
 	ni := o.ni
 
