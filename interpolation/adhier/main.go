@@ -61,8 +61,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	indices := make([]uint64, na*ni)
 
 	var i uint
-	var nodes, values, approximations, surpluses []float64
-	var refine []bool
 
 	for {
 		target.Monitor(level, np, na)
@@ -70,13 +68,13 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surrogate.resize(np + na)
 		copy(surrogate.Indices[np*ni:], indices)
 
-		nodes = self.grid.Compute(indices)
+		nodes := self.grid.Compute(indices)
 
-		values = invoke(target.Compute, nodes, ni, no, config.Workers)
-		approximations = approximate(self.basis, surrogate.Indices[:np*ni],
+		values := invoke(target.Compute, nodes, ni, no, config.Workers)
+		approximations := approximate(self.basis, surrogate.Indices[:np*ni],
 			surrogate.Surpluses[:np*no], nodes, ni, no, config.Workers)
 
-		surpluses = surrogate.Surpluses[np*no : (np+na)*no]
+		surpluses := surrogate.Surpluses[np*no : (np+na)*no]
 		for i = 0; i < na*no; i++ {
 			surpluses[i] = values[i] - approximations[i]
 		}
@@ -85,7 +83,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			break
 		}
 
-		refine = make([]bool, na*ni)
+		refine := make([]bool, na*ni)
 		if level < config.MinLevel {
 			for i = 0; i < na*ni; i++ {
 				refine[i] = true
