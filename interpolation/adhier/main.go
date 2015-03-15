@@ -98,8 +98,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		na = uint(len(indices)) / ni
 
 		// Trim if there are excessive nodes.
-		if Δ := int32(np+na) - int32(config.MaxNodes); Δ > 0 {
-			na -= uint(Δ)
+		if np+na > config.MaxNodes {
+			na = config.MaxNodes - np
 			indices = indices[:na*ni]
 		}
 
