@@ -27,8 +27,8 @@ func ExampleInterpolator_step() {
 			y[0] = 0
 		}
 	}
-	target.RefineHandler = func(Δ []float64) bool {
-		return math.Abs(Δ[0]) > tolerance
+	target.RefineHandler = func(Δ []float64, dimensions []bool) {
+		dimensions[0] = math.Abs(Δ[0]) > tolerance
 	}
 
 	surrogate := interpolator.Compute(target)
@@ -58,8 +58,9 @@ func ExampleInterpolator_cube() {
 			y[0] = 0
 		}
 	}
-	target.RefineHandler = func(Δ []float64) bool {
-		return math.Abs(Δ[0]) > tolerance
+	target.RefineHandler = func(Δ []float64, dimensions []bool) {
+		dimensions[0] = math.Abs(Δ[0]) > tolerance
+		dimensions[1] = dimensions[0]
 	}
 
 	surrogate := interpolator.Compute(target)

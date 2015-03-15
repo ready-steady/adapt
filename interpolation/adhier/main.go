@@ -10,7 +10,7 @@ import (
 // Grid is a sparse grid in [0, 1]^n.
 type Grid interface {
 	Compute(indices []uint64) []float64
-	ComputeChildren(indices []uint64) []uint64
+	ComputeChildren(indices []uint64, dimensions []bool) []uint64
 }
 
 // Basis is a functional basis in [0, 1]^n.
@@ -60,8 +60,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	indices := make([]uint64, na*ni)
 
-	var i, j, k uint
+	var i uint
 	var nodes, values, approximations, surpluses []float64
+	var refine []bool
 
 	for {
 		target.Monitor(level, np, na)
@@ -83,27 +84,19 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		if level >= config.MaxLevel || (np+na) >= config.MaxNodes {
 			break
 		}
+
+		refine = make([]bool, na*ni)
 		if level < config.MinLevel {
-			goto breed
-		}
-
-		for i, j, k = 0, 0, 0; i < na; i++ {
-			if target.Refine(surpluses[i*no : (i+1)*no]) {
-				if k != j {
-					// When there are a lot of refinements, this branch is
-					// taken only occasionally.
-					copy(indices[k:], indices[j:])
-					j = k
-				}
-				k += ni
+			for i = 0; i < na*ni; i++ {
+				refine[i] = true
 			}
-			j += ni
+		} else {
+			for i = 0; i < na; i++ {
+				target.Refine(surpluses[i*no:(i+1)*no], refine[i*ni:(i+1)*ni])
+			}
 		}
 
-		indices = indices[:k]
-
-	breed:
-		indices = self.grid.ComputeChildren(indices)
+		indices = self.grid.ComputeChildren(indices, refine)
 
 		np += na
 		na = uint(len(indices)) / ni

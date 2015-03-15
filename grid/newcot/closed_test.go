@@ -78,7 +78,7 @@ func TestClosedComputeChildren1D(t *testing.T) {
 	childLevels := []uint32{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
 	childOrders := []uint32{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
 
-	indices := grid.ComputeChildren(compose(levels, orders))
+	indices := grid.ComputeChildren(compose(levels, orders), truth(len(levels)))
 
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
@@ -180,7 +180,7 @@ func TestClosedComputeChildren2D(t *testing.T) {
 		7, 0,
 	}
 
-	indices := grid.ComputeChildren(compose(levels, orders))
+	indices := grid.ComputeChildren(compose(levels, orders), truth(len(levels)))
 
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
@@ -198,13 +198,15 @@ func BenchmarkClosedComputeChildren(b *testing.B) {
 
 	// Level 1, 2, …, (targetLevel - 1)
 	for i := 1; i < targetLevel; i++ {
-		indices = grid.ComputeChildren(indices)
+		indices = grid.ComputeChildren(indices, truth(len(indices)))
 	}
+
+	mask := truth(len(indices))
 
 	b.ResetTimer()
 
 	// Level targetLevel
 	for i := 0; i < b.N; i++ {
-		grid.ComputeChildren(indices)
+		grid.ComputeChildren(indices, mask)
 	}
 }

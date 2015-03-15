@@ -13,10 +13,11 @@ type Target interface {
 	// passive nodes, and number of active nodes, respectively.
 	Monitor(level, passive, active uint)
 
-	// Refine checks if a node of the underlying sparse grid should be refined
-	// based on its hierarchical surplus, which is the difference between the
-	// true value of the quantity at the node and its current approximation.
-	Refine(surplus []float64) bool
+	// Refine identifies the dimensions of the underlying sparse grid that
+	// should be refined based on a hierarchical surplus, which is the
+	// difference between the true value of the quantity at a node and its
+	// current approximation.
+	Refine(surplus []float64, dimensions []bool)
 }
 
 // GenericTarget is a generic quantity satisfying the Target interface.
@@ -26,7 +27,7 @@ type GenericTarget struct {
 
 	ComputeHandler func([]float64, []float64) // != nil
 	MonitorHandler func(uint, uint, uint)
-	RefineHandler  func([]float64) bool // != nil
+	RefineHandler  func([]float64, []bool) // != nil
 }
 
 // NewTarget returns a new generic quantity.
@@ -51,6 +52,6 @@ func (t *GenericTarget) Monitor(level, passive, active uint) {
 	}
 }
 
-func (t *GenericTarget) Refine(surplus []float64) bool {
-	return t.RefineHandler(surplus)
+func (t *GenericTarget) Refine(surplus []float64, dimensions []bool) {
+	t.RefineHandler(surplus, dimensions)
 }

@@ -221,7 +221,7 @@ func TestOpenComputeChildren1D(t *testing.T) {
 		0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
 	}
 
-	indices := grid.ComputeChildren(compose(levels, orders))
+	indices := grid.ComputeChildren(compose(levels, orders), truth(len(levels)))
 
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }

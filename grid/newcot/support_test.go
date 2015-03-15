@@ -9,3 +9,13 @@ func compose(levels []uint32, orders []uint32) []uint64 {
 
 	return indices
 }
+
+func truth(n int) []bool {
+	mask := make([]bool, n)
+
+	for i := range mask {
+		mask[i] = true
+	}
+
+	return mask
+}

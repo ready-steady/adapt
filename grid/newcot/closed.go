@@ -26,30 +26,34 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
-// ComputeChildren returns the indices of the child nodes corresponding to the
-// parent nodes given by their indices.
-func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
+// ComputeChildren returns the child indices corresponding to a set of parent
+// indices with respect to specific dimensions given by a mask.
+func (c *Closed) ComputeChildren(indices []uint64, dimensions []bool) []uint64 {
 	nd := c.nd
-	np := len(parentIndices) / nd
+	np := len(indices) / nd
 
-	indices := make([]uint64, 2*np*nd*nd)
+	childIndices := make([]uint64, 2*np*nd*nd)
 
 	hash := newHash(nd, 2*np*nd)
 
 	nc := 0
 
 	push := func(p, d int, pair uint64) {
-		copy(indices[nc*nd:], parentIndices[p*nd:(p+1)*nd])
-		indices[nc*nd+d] = pair
+		copy(childIndices[nc*nd:], indices[p*nd:(p+1)*nd])
+		childIndices[nc*nd+d] = pair
 
-		if !hash.tap(indices[nc*nd:]) {
+		if !hash.tap(childIndices[nc*nd:]) {
 			nc++
 		}
 	}
 
 	for i := 0; i < np; i++ {
 		for j := 0; j < nd; j++ {
-			level := 0xFFFFFFFF & parentIndices[i*nd+j]
+			if !dimensions[i*nd+j] {
+				continue
+			}
+
+			level := 0xFFFFFFFF & indices[i*nd+j]
 
 			if level == 0 {
 				push(i, j, 1|0<<32)
@@ -57,7 +61,7 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 				continue
 			}
 
-			order := parentIndices[i*nd+j] >> 32
+			order := indices[i*nd+j] >> 32
 
 			if level == 1 {
 				push(i, j, 2|(order+1)<<32)
@@ -68,5 +72,5 @@ func (c *Closed) ComputeChildren(parentIndices []uint64) []uint64 {
 		}
 	}
 
-	return indices[0 : nc*nd]
+	return childIndices[0 : nc*nd]
 }
