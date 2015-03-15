@@ -60,8 +60,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	indices := make([]uint64, na*ni)
 
-	var i uint
-
 	for {
 		target.Monitor(level, np, na)
 
@@ -75,7 +73,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			surrogate.Surpluses[:np*no], nodes, ni, no, config.Workers)
 
 		surpluses := surrogate.Surpluses[np*no : (np+na)*no]
-		for i = 0; i < na*no; i++ {
+		for i := uint(0); i < na*no; i++ {
 			surpluses[i] = values[i] - approximations[i]
 		}
 
@@ -85,11 +83,11 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		refine := make([]bool, na*ni)
 		if level < config.MinLevel {
-			for i = 0; i < na*ni; i++ {
+			for i := uint(0); i < na*ni; i++ {
 				refine[i] = true
 			}
 		} else {
-			for i = 0; i < na; i++ {
+			for i := uint(0); i < na; i++ {
 				target.Refine(surpluses[i*no:(i+1)*no], refine[i*ni:(i+1)*ni])
 			}
 		}
