@@ -10,7 +10,7 @@ import (
 // Grid is a sparse grid in [0, 1]^n.
 type Grid interface {
 	Compute(indices []uint64) []float64
-	ComputeChildren(indices []uint64, dimensions []bool) []uint64
+	Breed(indices []uint64, dimensions []bool) []uint64
 }
 
 // Basis is a functional basis in [0, 1]^n.
@@ -92,7 +92,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			}
 		}
 
-		indices = self.grid.ComputeChildren(indices, refine)
+		indices = self.grid.Breed(indices, refine)
 
 		np += na
 		na = uint(len(indices)) / ni

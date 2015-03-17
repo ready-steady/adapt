@@ -203,7 +203,7 @@ func TestOpenCompute2D(t *testing.T) {
 	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
 }
 
-func TestOpenComputeChildren1D(t *testing.T) {
+func TestOpenBreed1D(t *testing.T) {
 	grid := NewOpen(1)
 
 	levels := []uint32{0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3}
@@ -221,7 +221,7 @@ func TestOpenComputeChildren1D(t *testing.T) {
 		0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
 	}
 
-	indices := grid.ComputeChildren(compose(levels, orders), truth(len(levels)))
+	indices := grid.Breed(compose(levels, orders), truth(len(levels)))
 
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
