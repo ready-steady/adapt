@@ -88,7 +88,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			}
 		} else {
 			for i := uint(0); i < na; i++ {
-				target.Refine(surpluses[i*no:(i+1)*no], refine[i*ni:(i+1)*ni])
+				target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no],
+					refine[i*ni:(i+1)*ni])
 			}
 		}
 
