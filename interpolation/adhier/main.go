@@ -10,7 +10,7 @@ import (
 // Grid is a sparse grid in [0, 1]^n.
 type Grid interface {
 	Compute(indices []uint64) []float64
-	Breed(indices []uint64, dimensions []bool) []uint64
+	Breed(indices []uint64, selectors []bool) []uint64
 }
 
 // Basis is a functional basis in [0, 1]^n.
@@ -48,20 +48,19 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	ni, no := target.Dimensions()
 
-	surrogate := new(Surrogate)
-	surrogate.initialize(ni, no)
+	surrogate := newSurrogate(ni, no)
 
-	// Level 0 is assumed to have only one node, and the order of that node is
-	// assumed to be zero.
-	level := uint(0)
+	hash := newHash(ni, 0)
+	queue := newQueue(ni, config.MinLevel, config.MaxLevel, config.Rate)
 
-	na := uint(1) // active
-	np := uint(0) // passive
+	// The zeroth level is assumed to have only one node, and the order of that
+	// node is assumed to be zero.
+	na, np := uint(1), uint(0)
 
 	indices := make([]uint64, na*ni)
 
-	for {
-		target.Monitor(level, np, na)
+	for k := uint(0); ; k++ {
+		target.Monitor(k, np, na)
 
 		surrogate.resize(np + na)
 		copy(surrogate.Indices[np*ni:], indices)
@@ -77,27 +76,23 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			surpluses[i] = values[i] - approximations[i]
 		}
 
-		if level >= config.MaxLevel || (np+na) >= config.MaxNodes {
+		if np+na >= config.MaxNodes {
 			break
 		}
 
-		refine := make([]bool, na*ni)
-		if level < config.MinLevel {
-			for i := uint(0); i < na*ni; i++ {
-				refine[i] = true
-			}
-		} else {
-			scores := make([]float64, na*ni)
-			for i := uint(0); i < na; i++ {
-				target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no],
-					scores[i*ni:(i+1)*ni])
-			}
-			for i := uint(0); i < na*ni; i++ {
-				refine[i] = scores[i] > 0
-			}
+		scores := make([]float64, na*ni)
+		for i := uint(0); i < na; i++ {
+			target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no],
+				scores[i*ni:(i+1)*ni])
 		}
 
-		indices = self.grid.Breed(indices, refine)
+		var selectors []bool
+		indices, selectors = queue.process(indices, scores)
+		if len(indices) == 0 {
+			break
+		}
+
+		indices = hash.unique(self.grid.Breed(indices, selectors))
 
 		np += na
 		na = uint(len(indices)) / ni
@@ -107,15 +102,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			na = config.MaxNodes - np
 			indices = indices[:na*ni]
 		}
-
-		if na == 0 {
-			break
-		}
-
-		level++
 	}
 
-	surrogate.finalize(level, np+na)
+	surrogate.finalize(np + na)
 	return surrogate
 }
 

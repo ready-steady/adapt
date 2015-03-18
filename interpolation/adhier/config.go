@@ -2,6 +2,10 @@ package adhier
 
 // Config represents a configuration of the algorithm.
 type Config struct {
+	// The refinement rate of the algorithm. The parameter specifies the
+	// fraction of the nodes queued for refinement that should be taken from the
+	// queue at each iteration.
+	Rate float64 // ⊆ (0, 1]
 	// The minimal level of interpolation. The nodes that belong to lower levels
 	// are unconditionally included in the surrogate.
 	MinLevel uint
@@ -19,6 +23,7 @@ type Config struct {
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
+		Rate:     1,
 		MinLevel: 1,
 		MaxLevel: 9,
 		MaxNodes: 10000,

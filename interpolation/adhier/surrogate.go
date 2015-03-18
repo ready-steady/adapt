@@ -22,19 +22,37 @@ type Surrogate struct {
 	Surpluses []float64
 }
 
-func (s *Surrogate) initialize(ni, no uint) {
-	s.Inputs, s.Outputs, s.Nodes = ni, no, bufferInitCount
+func newSurrogate(ni, no uint) *Surrogate {
+	return &Surrogate{
+		Inputs:  ni,
+		Outputs: no,
 
-	s.Indices = make([]uint64, bufferInitCount*ni)
-	s.Surpluses = make([]float64, bufferInitCount*no)
+		Nodes: bufferInitCount,
+
+		Indices:   make([]uint64, bufferInitCount*ni),
+		Surpluses: make([]float64, bufferInitCount*no),
+	}
 }
 
-func (s *Surrogate) finalize(level uint, nn uint) {
+func (s *Surrogate) finalize(nn uint) {
+	ni, no := s.Inputs, s.Outputs
+
+	s.Indices = s.Indices[:nn*ni]
+	s.Surpluses = s.Surpluses[:nn*no]
+
+	level := uint(0)
+	for i := uint(0); i < nn; i++ {
+		l := uint(0)
+		for j := uint(0); j < ni; j++ {
+			l += uint(0xFFFFFFFF & s.Indices[i*ni+j])
+		}
+		if l > level {
+			level = l
+		}
+	}
+
 	s.Level = level
 	s.Nodes = nn
-
-	s.Indices = s.Indices[0 : nn*s.Inputs]
-	s.Surpluses = s.Surpluses[0 : nn*s.Outputs]
 }
 
 func (s *Surrogate) resize(nn uint) {
@@ -49,8 +67,8 @@ func (s *Surrogate) resize(nn uint) {
 	indices := make([]uint64, nn*s.Inputs)
 	surpluses := make([]float64, nn*s.Outputs)
 
-	copy(indices, s.Indices[0:s.Nodes*s.Inputs])
-	copy(surpluses, s.Surpluses[0:s.Nodes*s.Outputs])
+	copy(indices, s.Indices[:s.Nodes*s.Inputs])
+	copy(surpluses, s.Surpluses[:s.Nodes*s.Outputs])
 
 	s.Nodes = nn
 

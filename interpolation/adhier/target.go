@@ -8,10 +8,11 @@ type Target interface {
 	// Compute evaluates the quantity at a point in [0, 1]^n.
 	Compute(point, value []float64)
 
-	// Monitor is called once on each level before evaluating the quantity at
-	// the nodes of that level. The arguments are the current level, number of
-	// passive nodes, and number of active nodes, respectively.
-	Monitor(level, passive, active uint)
+	// Monitor is called once for each iteration before evaluating the quantity
+	// at the active nodes of that iteration. The arguments are the iteration
+	// number, number of passive nodes, and number of active nodes,
+	// respectively.
+	Monitor(iteration, passive, active uint)
 
 	// Refine takes a node and its hierarchical surplus and identifies the
 	// dimensions that should be refined by assigning scores to them.

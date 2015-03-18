@@ -1,4 +1,4 @@
-package newcot
+package adhier
 
 import (
 	"math/rand"
@@ -9,16 +9,16 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestHashTap(t *testing.T) {
+func TestHashUnique(t *testing.T) {
 	const (
 		capacity = 10
 	)
 
 	hash := newHash(2, capacity)
 
-	assert.Equal(hash.tap([]uint64{4, 2}), false, t)
-	assert.Equal(hash.tap([]uint64{6, 9}), false, t)
-	assert.Equal(hash.tap([]uint64{4, 2}), true, t)
+	assert.Equal(hash.unique([]uint64{4, 2}), []uint64{4, 2}, t)
+	assert.Equal(hash.unique([]uint64{6, 9}), []uint64{6, 9}, t)
+	assert.Equal(hash.unique([]uint64{4, 2}), []uint64{}, t)
 
 	keys := make([]string, 0, capacity)
 	for k, _ := range hash.mapping {
@@ -41,7 +41,7 @@ func TestHashTap(t *testing.T) {
 	}
 }
 
-func TestHashTapOverlap(t *testing.T) {
+func TestHashUniqueOverlap(t *testing.T) {
 	const (
 		capacity = 10
 	)
@@ -49,11 +49,11 @@ func TestHashTapOverlap(t *testing.T) {
 	hash := newHash(2, capacity)
 
 	key := []uint64{4, 2}
-	assert.Equal(hash.tap(key), false, t)
+	assert.Equal(hash.unique(key), key, t)
 
 	key[0], key[1] = 6, 9
 	key = []uint64{4, 2}
-	assert.Equal(hash.tap(key), true, t)
+	assert.Equal(hash.unique(key), []uint64{}, t)
 }
 
 func isLittleEndian() bool {
@@ -70,19 +70,17 @@ func BenchmarkHashTap(b *testing.B) {
 		capacity = 2 * parentCount * dimensionCount
 	)
 
+	hash := newHash(depth, capacity)
+
 	generator := rand.New(rand.NewSource(0))
-	data := make([]uint64, 2*parentCount*dimensionCount)
-	for _, i := range data {
-		data[i] = uint64(generator.Int63())
+	indices := make([]uint64, 2*parentCount*dimensionCount)
+	for _, i := range indices {
+		indices[i] = uint64(generator.Int63())
 	}
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		hash := newHash(depth, capacity)
-		for j := 0; j < parentCount; j++ {
-			hash.tap(data[(2*j+0)*depth : (2*j+1)*depth])
-			hash.tap(data[(2*j+1)*depth : (2*j+2)*depth])
-		}
+		hash.unique(indices)
 	}
 }

@@ -27,29 +27,23 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 }
 
 // Breed returns the child indices corresponding to a set of parent indices with
-// respect to specific dimensions given by a mask.
-func (c *Closed) Breed(indices []uint64, mask []bool) []uint64 {
+// respect to specific dimensions.
+func (c *Closed) Breed(indices []uint64, selectors []bool) []uint64 {
 	nd := c.nd
 	np := len(indices) / nd
 
 	childIndices := make([]uint64, 2*np*nd*nd)
 
-	hash := newHash(nd, 2*np*nd)
-
 	nc := 0
-
 	push := func(p, d int, pair uint64) {
 		copy(childIndices[nc*nd:], indices[p*nd:(p+1)*nd])
 		childIndices[nc*nd+d] = pair
-
-		if !hash.tap(childIndices[nc*nd:]) {
-			nc++
-		}
+		nc++
 	}
 
 	for i := 0; i < np; i++ {
 		for j := 0; j < nd; j++ {
-			if !mask[i*nd+j] {
+			if !selectors[i*nd+j] {
 				continue
 			}
 
