@@ -87,9 +87,13 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 				refine[i] = true
 			}
 		} else {
+			scores := make([]float64, na*ni)
 			for i := uint(0); i < na; i++ {
 				target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no],
-					refine[i*ni:(i+1)*ni])
+					scores[i*ni:(i+1)*ni])
+			}
+			for i := uint(0); i < na*ni; i++ {
+				refine[i] = scores[i] > 0
 			}
 		}
 
@@ -123,24 +127,8 @@ func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []flo
 
 // Integrate computes the integral of a surrogate over [0, 1]^n.
 func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
-	basis, indices, surpluses := self.basis, surrogate.Indices, surrogate.Surpluses
-
-	ni, no := surrogate.Inputs, surrogate.Outputs
-	nn := uint(len(indices)) / ni
-
-	value := make([]float64, no)
-
-	for i := uint(0); i < nn; i++ {
-		weight := basis.Integrate(indices[i*ni : (i+1)*ni])
-		if weight == 0 {
-			continue
-		}
-		for j := uint(0); j < no; j++ {
-			value[j] += weight * surpluses[i*no+j]
-		}
-	}
-
-	return value
+	return integrate(self.basis, surrogate.Indices, surrogate.Surpluses,
+		surrogate.Inputs, surrogate.Outputs)
 }
 
 func approximate(basis Basis, indices []uint64, surpluses, points []float64,
@@ -211,4 +199,22 @@ func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	close(jobs)
 
 	return values
+}
+
+func integrate(basis Basis, indices []uint64, surpluses []float64, ni, no uint) []float64 {
+	nn := uint(len(indices)) / ni
+
+	value := make([]float64, no)
+
+	for i := uint(0); i < nn; i++ {
+		weight := basis.Integrate(indices[i*ni : (i+1)*ni])
+		if weight == 0 {
+			continue
+		}
+		for j := uint(0); j < no; j++ {
+			value[j] += weight * surpluses[i*no+j]
+		}
+	}
+
+	return value
 }
