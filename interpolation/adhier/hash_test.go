@@ -10,17 +10,13 @@ import (
 )
 
 func TestHashUnique(t *testing.T) {
-	const (
-		capacity = 10
-	)
-
-	hash := newHash(2, capacity)
+	hash := newHash(2)
 
 	assert.Equal(hash.unique([]uint64{4, 2}), []uint64{4, 2}, t)
 	assert.Equal(hash.unique([]uint64{6, 9}), []uint64{6, 9}, t)
 	assert.Equal(hash.unique([]uint64{4, 2}), []uint64{}, t)
 
-	keys := make([]string, 0, capacity)
+	keys := make([]string, 0)
 	for k, _ := range hash.mapping {
 		keys = append(keys, k)
 	}
@@ -42,11 +38,7 @@ func TestHashUnique(t *testing.T) {
 }
 
 func TestHashUniqueOverlap(t *testing.T) {
-	const (
-		capacity = 10
-	)
-
-	hash := newHash(2, capacity)
+	hash := newHash(2)
 
 	key := []uint64{4, 2}
 	assert.Equal(hash.unique(key), key, t)
@@ -63,17 +55,14 @@ func isLittleEndian() bool {
 
 func BenchmarkHashUnique(b *testing.B) {
 	const (
-		dimensionCount = 20
-		parentCount    = 1000
-
-		depth    = dimensionCount
-		capacity = 2 * parentCount * dimensionCount
+		ni = 20
+		nn = 1000
 	)
 
-	hash := newHash(depth, capacity)
+	hash := newHash(ni)
 
 	generator := rand.New(rand.NewSource(0))
-	indices := make([]uint64, 2*parentCount*dimensionCount)
+	indices := make([]uint64, 2*nn*ni)
 	for _, i := range indices {
 		indices[i] = uint64(generator.Int63())
 	}

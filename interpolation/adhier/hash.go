@@ -10,10 +10,10 @@ type hash struct {
 	mapping map[string]bool
 }
 
-func newHash(ni uint, capacity uint) *hash {
+func newHash(ni uint) *hash {
 	return &hash{
 		ni:      int(ni),
-		mapping: make(map[string]bool, capacity),
+		mapping: make(map[string]bool),
 	}
 }
 

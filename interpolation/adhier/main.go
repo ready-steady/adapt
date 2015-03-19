@@ -50,7 +50,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	surrogate := newSurrogate(ni, no)
 
-	hash := newHash(ni, 0)
+	hash := newHash(ni)
 	queue := newQueue(ni, config.MinLevel, config.MaxLevel, config.Rate)
 
 	// The zeroth level is assumed to have only one node, and the order of that
