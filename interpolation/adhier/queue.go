@@ -53,13 +53,12 @@ func (q *fakeQueue) process(indices []uint64, scores []float64) ([]uint64, []boo
 
 	min, max := q.min, q.max
 
-	newIndices := make([]uint64, nn*ni)
 	selectors := make([]bool, nn*ni)
 
 	ns := 0
 
-	for i := 0; i < nn; i++ {
-		index := indices[i*ni : (i+1)*ni]
+	for i, k := 0, 0; i < nn; i++ {
+		index := indices[k*ni : (k+1)*ni]
 		score := scores[i*ni : (i+1)*ni]
 		selector := selectors[ns*ni : (ns+1)*ni]
 
@@ -79,15 +78,20 @@ func (q *fakeQueue) process(indices []uint64, scores []float64) ([]uint64, []boo
 			skip = false
 		}
 		if level >= max || skip {
+			k++
 			continue
 		}
 
-		copy(newIndices[ns*ni:], index)
+		if k > ns {
+			copy(indices[ns*ni:], indices[k*ni:])
+			k = ns
+		}
 
+		k++
 		ns++
 	}
 
-	return newIndices[:ns*ni], selectors[:ns*ni]
+	return indices[:ns*ni], selectors[:ns*ni]
 }
 
 func (q *realQueue) process(indices []uint64, scores []float64) ([]uint64, []bool) {

@@ -35,20 +35,20 @@ func (h *hash) unique(indices []uint64) []uint64 {
 
 	ns := 0
 
-	for i, j := 0, 0; i < nn; i++ {
-		header.Data = offset + uintptr(j*nb)
+	for i, k := 0, 0; i < nn; i++ {
+		header.Data = offset + uintptr(k*nb)
 		key := string(bytes)
 
 		if _, ok := h.mapping[key]; !ok {
 			h.mapping[key] = true
-			if j > ns {
-				copy(indices[ns*ni:], indices[j*ni:])
-				j = ns
+			if k > ns {
+				copy(indices[ns*ni:], indices[k*ni:])
+				k = ns
 			}
 			ns++
 		}
 
-		j++
+		k++
 	}
 
 	return indices[:ns*ni]
