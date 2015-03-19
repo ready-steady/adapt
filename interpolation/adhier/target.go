@@ -16,7 +16,7 @@ type Target interface {
 
 	// Refine takes a node and its hierarchical surplus and identifies the
 	// dimensions that should be refined by assigning scores to them.
-	Refine(node, surplus, scores []float64)
+	Refine(node, surplus, score []float64)
 }
 
 // GenericTarget is a generic quantity satisfying the Target interface.
