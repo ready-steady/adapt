@@ -21,9 +21,9 @@ func (_ *Open) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
-// Breed returns the child indices corresponding to a set of parent indices with
-// respect to specific dimensions.
-func (o *Open) Breed(indices []uint64, selectors []bool) []uint64 {
+// Refine returns the child indices corresponding to a set of parent indices
+// with respect to specific dimensions.
+func (o *Open) Refine(indices []uint64, selectors []bool) []uint64 {
 	nd := o.nd
 	np := len(indices) / nd
 
