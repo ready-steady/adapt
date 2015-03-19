@@ -9,14 +9,14 @@ type queue interface {
 }
 
 type fakeQueue struct {
-	ni  uint
+	ni  int
 	min uint
 	max uint
 }
 
 type realQueue struct {
-	ni   uint
-	nn   uint
+	ni   int
+	nn   int
 	min  uint
 	max  uint
 	rate float64
@@ -33,13 +33,13 @@ type element struct {
 func newQueue(ni, min, max uint, rate float64) queue {
 	if rate <= 0 || rate >= 1 {
 		return &fakeQueue{
-			ni:  ni,
+			ni:  int(ni),
 			min: min,
 			max: max,
 		}
 	} else {
 		return &realQueue{
-			ni:   ni,
+			ni:   int(ni),
 			min:  min,
 			max:  max,
 			rate: rate,
@@ -49,23 +49,23 @@ func newQueue(ni, min, max uint, rate float64) queue {
 
 func (q *fakeQueue) process(indices []uint64, scores []float64) ([]uint64, []bool) {
 	ni := q.ni
-	nn := uint(len(indices)) / ni
+	nn := len(indices) / ni
 
 	min, max := q.min, q.max
 
 	newIndices := make([]uint64, nn*ni)
 	selectors := make([]bool, nn*ni)
 
-	ns := uint(0)
+	ns := 0
 
-	for i := uint(0); i < nn; i++ {
+	for i := 0; i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
 		score := scores[i*ni : (i+1)*ni]
 		selector := selectors[ns*ni : (ns+1)*ni]
 
 		skip := true
 		level := uint(0)
-		for j := uint(0); j < ni; j++ {
+		for j := 0; j < ni; j++ {
 			level += uint(0xFFFFFFFF & index[j])
 			selector[j] = score[j] > 0
 			if selector[j] {
@@ -73,7 +73,7 @@ func (q *fakeQueue) process(indices []uint64, scores []float64) ([]uint64, []boo
 			}
 		}
 		if level < min {
-			for j := uint(0); j < ni; j++ {
+			for j := 0; j < ni; j++ {
 				selector[j] = true
 			}
 			skip = false
@@ -97,20 +97,20 @@ func (q *realQueue) process(indices []uint64, scores []float64) ([]uint64, []boo
 
 func (q *realQueue) push(indices []uint64, scores []float64) {
 	ni := q.ni
-	nn, ns := uint(len(indices))/ni, uint(0)
+	nn, ns := len(indices)/ni, 0
 
 	min, max := q.min, q.max
 
 	selectors := make([]bool, nn*ni)
 
-	for i := uint(0); i < nn; i++ {
+	for i := 0; i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
 		score := scores[i*ni : (i+1)*ni]
 		selector := selectors[i*ni : (i+1)*ni]
 
 		total := 0.0
 		level := uint(0)
-		for j := uint(0); j < ni; j++ {
+		for j := 0; j < ni; j++ {
 			level += uint(0xFFFFFFFF & index[j])
 			selector[j] = score[j] > 0
 			if selector[j] {
@@ -119,7 +119,7 @@ func (q *realQueue) push(indices []uint64, scores []float64) {
 			}
 		}
 		if level < min {
-			for j := uint(0); j < ni; j++ {
+			for j := 0; j < ni; j++ {
 				selector[j] = true
 			}
 			total = math.Inf(1)
@@ -156,13 +156,13 @@ func (q *realQueue) push(indices []uint64, scores []float64) {
 
 func (q *realQueue) pull() ([]uint64, []bool) {
 	ni := q.ni
-	nn := uint(q.rate * float64(q.nn))
+	nn := int(q.rate * float64(q.nn))
 
 	indices := make([]uint64, nn*ni)
 	selectors := make([]bool, nn*ni)
 
 	current := q.root
-	for i := uint(0); i < nn; i++ {
+	for i := 0; i < nn; i++ {
 		copy(indices[i*ni:], current.index)
 		copy(selectors[i*ni:], current.selector)
 		current = current.next
