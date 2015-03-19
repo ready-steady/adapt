@@ -161,6 +161,9 @@ func (q *realQueue) push(indices []uint64, scores []float64) {
 func (q *realQueue) pull() ([]uint64, []bool) {
 	ni := q.ni
 	nn := int(q.rate * float64(q.nn))
+	if nn == 0 && q.nn > 0 {
+		nn++
+	}
 
 	indices := make([]uint64, nn*ni)
 	selectors := make([]bool, nn*ni)
