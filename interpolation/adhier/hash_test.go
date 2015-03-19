@@ -61,7 +61,7 @@ func isLittleEndian() bool {
 	return *(*byte)(unsafe.Pointer(&x)) == 0x04
 }
 
-func BenchmarkHashTap(b *testing.B) {
+func BenchmarkHashUnique(b *testing.B) {
 	const (
 		dimensionCount = 20
 		parentCount    = 1000

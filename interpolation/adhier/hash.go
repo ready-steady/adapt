@@ -6,13 +6,13 @@ import (
 )
 
 type hash struct {
-	ni      uint
+	ni      int
 	mapping map[string]bool
 }
 
 func newHash(ni uint, capacity uint) *hash {
 	return &hash{
-		ni:      ni,
+		ni:      int(ni),
 		mapping: make(map[string]bool, capacity),
 	}
 }
@@ -23,30 +23,33 @@ func (h *hash) unique(indices []uint64) []uint64 {
 	)
 
 	ni := h.ni
-	nn := uint(len(indices)) / ni
-	nb := uintptr(ni) * sizeOfUint64
+	nn := len(indices) / ni
+	nb := ni * sizeOfUint64
 
 	var bytes []byte
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
-	header.Data = ((*reflect.SliceHeader)(unsafe.Pointer(&indices))).Data
-	header.Cap = int(nb)
-	header.Len = int(nb)
+	header.Cap = nb
+	header.Len = nb
 
-	newIndices := make([]uint64, nn*ni)
+	offset := ((*reflect.SliceHeader)(unsafe.Pointer(&indices))).Data
 
-	ns := uint(0)
+	ns := 0
 
-	for i := uint(0); i < nn; i++ {
+	for i, j := 0, 0; i < nn; i++ {
+		header.Data = offset + uintptr(j*nb)
 		key := string(bytes)
 
 		if _, ok := h.mapping[key]; !ok {
-			copy(newIndices[ns*ni:], indices[i*ni:(i+1)*ni])
 			h.mapping[key] = true
+			if j > ns {
+				copy(indices[ns*ni:], indices[j*ni:])
+				j = ns
+			}
 			ns++
 		}
 
-		header.Data += nb
+		j++
 	}
 
-	return newIndices[:ns*ni]
+	return indices[:ns*ni]
 }
