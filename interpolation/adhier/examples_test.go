@@ -27,7 +27,7 @@ func ExampleInterpolator_step() {
 			y[0] = 0
 		}
 	}
-	target.RefineHandler = func(_, surplus []float64, _ float64) float64 {
+	target.RefineHandler = func(_, surplus, _ []float64) float64 {
 		if math.Abs(surplus[0]) > tolerance {
 			return 1
 		} else {
@@ -62,7 +62,7 @@ func ExampleInterpolator_cube() {
 			y[0] = 0
 		}
 	}
-	target.RefineHandler = func(_, surplus []float64, _ float64) float64 {
+	target.RefineHandler = func(_, surplus, _ []float64) float64 {
 		if math.Abs(surplus[0]) > tolerance {
 			return 1
 		} else {

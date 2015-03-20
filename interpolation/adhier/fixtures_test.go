@@ -80,7 +80,7 @@ func newTarget(inputs, outputs uint, tolerance float64,
 
 	target := NewTarget(inputs, outputs)
 	target.ComputeHandler = compute
-	target.RefineHandler = func(_, surplus []float64, _ float64) float64 {
+	target.RefineHandler = func(_, surplus, _ []float64) float64 {
 		for _, ε := range surplus {
 			if ε < 0 {
 				ε = -ε
@@ -755,7 +755,7 @@ func (t *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 
 func (t *kraichnanOrszagTarget) Monitor(_, _, _ uint) {}
 
-func (t *kraichnanOrszagTarget) Refine(_, surplus []float64, _ float64) float64 {
+func (t *kraichnanOrszagTarget) Refine(_, surplus, _ []float64) float64 {
 	const (
 		tolerance = 1e-2
 	)
