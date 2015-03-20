@@ -80,18 +80,16 @@ func newTarget(inputs, outputs uint, tolerance float64,
 
 	target := NewTarget(inputs, outputs)
 	target.ComputeHandler = compute
-	target.RefineHandler = func(_, surplus, score []float64) {
+	target.RefineHandler = func(_, surplus []float64, _ float64) float64 {
 		for _, ε := range surplus {
 			if ε < 0 {
 				ε = -ε
 			}
 			if ε > tolerance {
-				for i := range score {
-					score[i] = 1
-				}
-				break
+				return 1
 			}
 		}
+		return 0
 	}
 
 	return target
@@ -757,26 +755,24 @@ func (t *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 
 func (t *kraichnanOrszagTarget) Monitor(_, _, _ uint) {}
 
-func (t *kraichnanOrszagTarget) Refine(_, surplus, score []float64) {
+func (t *kraichnanOrszagTarget) Refine(_, surplus []float64, _ float64) float64 {
 	const (
 		tolerance = 1e-2
 	)
 
 	_, no := t.Dimensions()
 
-	result := 0.0
-
 	if math.Abs(surplus[no-5]) > tolerance {
-		result = 1
+		return 1
 	}
 	if math.Abs(surplus[no-3]) > tolerance {
-		result = 1
+		return 1
 	}
 	if math.Abs(surplus[no-1]) > tolerance {
-		result = 1
+		return 1
 	}
 
-	score[0], score[1], score[2] = result, result, result
+	return 0
 }
 
 var fixtureKraichnanOrszag = fixture{

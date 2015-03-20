@@ -10,7 +10,7 @@ import (
 // Grid is a sparse grid in [0, 1]^n.
 type Grid interface {
 	Compute(indices []uint64) []float64
-	Refine(indices []uint64, selectors []bool) []uint64
+	Refine(indices []uint64) []uint64
 }
 
 // Basis is a functional basis in [0, 1]^n.
@@ -80,19 +80,18 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			break
 		}
 
-		scores := make([]float64, na*ni)
+		scores := weigh(self.basis, indices, surpluses, ni, no)
 		for i := uint(0); i < na; i++ {
-			target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no],
-				scores[i*ni:(i+1)*ni])
+			scores[i] = target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no], scores[i])
 		}
 
-		var selectors []bool
-		indices, selectors = queue.process(indices, scores)
+		queue.push(indices, scores)
+		indices = queue.pull()
 		if len(indices) == 0 {
 			break
 		}
 
-		indices = hash.unique(self.grid.Refine(indices, selectors))
+		indices = hash.unique(self.grid.Refine(indices))
 
 		np += na
 		na = uint(len(indices)) / ni
@@ -197,13 +196,25 @@ func integrate(basis Basis, indices []uint64, surpluses []float64, ni, no uint) 
 
 	for i := uint(0); i < nn; i++ {
 		weight := basis.Integrate(indices[i*ni : (i+1)*ni])
-		if weight == 0 {
-			continue
-		}
 		for j := uint(0); j < no; j++ {
 			value[j] += weight * surpluses[i*no+j]
 		}
 	}
 
 	return value
+}
+
+func weigh(basis Basis, indices []uint64, surpluses []float64, ni, no uint) []float64 {
+	nn := uint(len(indices)) / ni
+
+	scores := make([]float64, nn)
+
+	for i := uint(0); i < nn; i++ {
+		weight := basis.Integrate(indices[i*ni : (i+1)*ni])
+		for j := uint(0); j < no; j++ {
+			scores[i] += weight * surpluses[i*no+j]
+		}
+	}
+
+	return scores
 }
