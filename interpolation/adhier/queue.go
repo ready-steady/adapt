@@ -20,6 +20,9 @@ type element struct {
 }
 
 func newQueue(ni, min, max uint, rate float64) *queue {
+	if rate <= 0 || rate > 1 {
+		rate = 1
+	}
 	return &queue{
 		ni:   int(ni),
 		min:  min,
