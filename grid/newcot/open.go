@@ -21,9 +21,8 @@ func (_ *Open) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
-// Refine returns the child indices corresponding to a set of parent indices
-// with respect to specific dimensions.
-func (o *Open) Refine(indices []uint64, selectors []bool) []uint64 {
+// Refine returns the child indices corresponding to a set of parent indices.
+func (o *Open) Refine(indices []uint64) []uint64 {
 	nd := o.nd
 	np := len(indices) / nd
 
@@ -38,10 +37,6 @@ func (o *Open) Refine(indices []uint64, selectors []bool) []uint64 {
 
 	for i := 0; i < np; i++ {
 		for j := 0; j < nd; j++ {
-			if !selectors[i*nd+j] {
-				continue
-			}
-
 			level := 0xFFFFFFFF & indices[i*nd+j]
 			order := indices[i*nd+j] >> 32
 

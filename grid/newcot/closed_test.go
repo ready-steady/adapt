@@ -78,7 +78,7 @@ func TestClosedRefine1D(t *testing.T) {
 	childLevels := []uint32{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
 	childOrders := []uint32{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
 
-	indices := grid.Refine(compose(levels, orders), truth(len(levels)))
+	indices := grid.Refine(compose(levels, orders))
 
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
@@ -204,7 +204,7 @@ func TestClosedRefine2D(t *testing.T) {
 		3, 2,
 	}
 
-	indices := grid.Refine(compose(levels, orders), truth(len(levels)))
+	indices := grid.Refine(compose(levels, orders))
 
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
@@ -222,15 +222,13 @@ func BenchmarkClosedRefine(b *testing.B) {
 
 	// Level 1, 2, …, (targetLevel - 1)
 	for i := 1; i < targetLevel; i++ {
-		indices = grid.Refine(indices, truth(len(indices)))
+		indices = grid.Refine(indices)
 	}
-
-	mask := truth(len(indices))
 
 	b.ResetTimer()
 
 	// Level targetLevel
 	for i := 0; i < b.N; i++ {
-		grid.Refine(indices, mask)
+		grid.Refine(indices)
 	}
 }
