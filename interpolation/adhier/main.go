@@ -80,11 +80,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			break
 		}
 
-		scores := make([]float64, na)
-		volumes := measure(self.basis, indices, surpluses, ni, no)
+		scores := measure(self.basis, indices, ni)
 		for i := uint(0); i < na; i++ {
-			scores[i] = target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no],
-				volumes[i*no:(i+1)*no])
+			scores[i] = target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no], scores[i])
 		}
 
 		queue.push(indices, scores)
@@ -206,16 +204,13 @@ func integrate(basis Basis, indices []uint64, surpluses []float64, ni, no uint) 
 	return value
 }
 
-func measure(basis Basis, indices []uint64, surpluses []float64, ni, no uint) []float64 {
+func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni
 
-	volumes := make([]float64, nn*no)
+	volumes := make([]float64, nn)
 
 	for i := uint(0); i < nn; i++ {
-		weight := basis.Integrate(indices[i*ni : (i+1)*ni])
-		for j := uint(0); j < no; j++ {
-			volumes[i*no+j] = weight * surpluses[i*no+j]
-		}
+		volumes[i] = basis.Integrate(indices[i*ni : (i+1)*ni])
 	}
 
 	return volumes
