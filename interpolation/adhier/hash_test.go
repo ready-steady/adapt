@@ -9,12 +9,12 @@ import (
 	"github.com/ready-steady/support/assert"
 )
 
-func TestHashUnique(t *testing.T) {
+func TestHashUnseen(t *testing.T) {
 	hash := newHash(2)
 
-	assert.Equal(hash.unique([]uint64{4, 2}), []uint64{4, 2}, t)
-	assert.Equal(hash.unique([]uint64{6, 9}), []uint64{6, 9}, t)
-	assert.Equal(hash.unique([]uint64{4, 2}), []uint64{}, t)
+	assert.Equal(hash.unseen([]uint64{4, 2}), []uint64{4, 2}, t)
+	assert.Equal(hash.unseen([]uint64{6, 9}), []uint64{6, 9}, t)
+	assert.Equal(hash.unseen([]uint64{4, 2}), []uint64{}, t)
 
 	keys := make([]string, 0)
 	for k, _ := range hash.mapping {
@@ -37,15 +37,25 @@ func TestHashUnique(t *testing.T) {
 	}
 }
 
-func TestHashUniqueOverlap(t *testing.T) {
+func TestHashUnseenOverlap(t *testing.T) {
 	hash := newHash(2)
 
 	key := []uint64{4, 2}
-	assert.Equal(hash.unique(key), key, t)
+	assert.Equal(hash.unseen(key), []uint64{4, 2}, t)
 
 	key[0], key[1] = 6, 9
-	key = []uint64{4, 2}
-	assert.Equal(hash.unique(key), []uint64{}, t)
+	assert.Equal(hash.unseen([]uint64{4, 2}), []uint64{}, t)
+}
+
+func TestHashTapOverlap(t *testing.T) {
+	hash := newHash(2)
+
+	key := []uint64{4, 2}
+	hash.tap(key)
+	assert.Equal(hash.find([]uint64{4, 2}), true, t)
+
+	key[0], key[1] = 6, 9
+	assert.Equal(hash.find([]uint64{4, 2}), true, t)
 }
 
 func isLittleEndian() bool {
@@ -53,7 +63,7 @@ func isLittleEndian() bool {
 	return *(*byte)(unsafe.Pointer(&x)) == 0x04
 }
 
-func BenchmarkHashUnique(b *testing.B) {
+func BenchmarkHashUnseen(b *testing.B) {
 	const (
 		ni = 20
 		nn = 1000
@@ -70,6 +80,6 @@ func BenchmarkHashUnique(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		hash.unique(indices)
+		hash.unseen(indices)
 	}
 }

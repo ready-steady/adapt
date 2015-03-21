@@ -85,7 +85,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		indices = queue.pull()
 		indices = self.grid.Refine(indices)
-		indices = hash.unique(indices)
+		indices = hash.unseen(indices)
 		self.grid.Balance(indices, hash.find, func(index []uint64) {
 			indices = append(indices, index...)
 			hash.tap(index)

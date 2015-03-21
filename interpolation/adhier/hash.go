@@ -43,7 +43,7 @@ func (h *hash) tap(index []uint64) {
 	h.mapping[string(bytes)] = true
 }
 
-func (h *hash) unique(indices []uint64) []uint64 {
+func (h *hash) unseen(indices []uint64) []uint64 {
 	ni := h.ni
 	nn := len(indices) / ni
 	nb := ni * sizeOfUint64
