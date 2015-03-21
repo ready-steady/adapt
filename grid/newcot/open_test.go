@@ -225,3 +225,86 @@ func TestOpenRefine1D(t *testing.T) {
 
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
+
+func TestOpenBalance2D(t *testing.T) {
+	const (
+		nd = 2
+	)
+
+	grid := NewOpen(nd)
+
+	levels := []uint32{
+		0, 0,
+		1, 0,
+		1, 0,
+		0, 1,
+		0, 1,
+	}
+
+	orders := []uint32{
+		0, 0,
+		0, 0,
+		2, 0,
+		0, 0,
+		0, 2,
+	}
+
+	childLevels := []uint32{
+		1, 1,
+		1, 1,
+		0, 2,
+		0, 2,
+	}
+
+	childOrders := []uint32{
+		0, 0,
+		2, 0,
+		0, 0,
+		0, 2,
+	}
+
+	indices := compose(levels, orders)
+	childIndices := compose(childLevels, childOrders)
+
+	indices = append(indices, childIndices...)
+
+	find := func(index []uint64) bool {
+		nn := len(indices) / nd
+
+		for i := 0; i < nn; i++ {
+			match := true
+			for j := 0; j < nd; j++ {
+				if indices[i*nd+j] != index[j] {
+					match = false
+					break
+				}
+			}
+			if match {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	push := func(index []uint64) {
+		indices = append(indices, index...)
+	}
+
+	grid.Balance(childIndices, find, push)
+
+	neighborLevels := []uint32{
+		1, 1,
+		1, 1,
+	}
+
+	neighborOrders := []uint32{
+		0, 2,
+		2, 2,
+	}
+
+	assert.Equal(indices, append(append(
+		compose(levels, orders),
+		compose(childLevels, childOrders)...),
+		compose(neighborLevels, neighborOrders)...), t)
+}

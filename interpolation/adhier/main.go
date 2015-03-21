@@ -11,6 +11,7 @@ import (
 type Grid interface {
 	Compute(indices []uint64) []float64
 	Refine(indices []uint64) []uint64
+	Balance(indices []uint64, find func([]uint64) bool, push func([]uint64))
 }
 
 // Basis is a functional basis in [0, 1]^n.
@@ -81,7 +82,15 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		}
 
 		queue.push(indices, scores)
-		indices = hash.unique(self.grid.Refine(queue.pull()))
+
+		indices = queue.pull()
+		indices = self.grid.Refine(indices)
+		indices = hash.unique(indices)
+		self.grid.Balance(indices, hash.find, func(index []uint64) {
+			indices = append(indices, index...)
+			hash.tap(index)
+		})
+
 		nodes = self.grid.Compute(indices)
 
 		np += na

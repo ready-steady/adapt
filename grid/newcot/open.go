@@ -24,9 +24,9 @@ func (_ *Open) Compute(indices []uint64) []float64 {
 // Refine returns the child indices corresponding to a set of parent indices.
 func (o *Open) Refine(indices []uint64) []uint64 {
 	nd := o.nd
-	np := len(indices) / nd
+	nn := len(indices) / nd
 
-	childIndices := make([]uint64, 2*np*nd*nd)
+	childIndices := make([]uint64, 2*nn*nd*nd)
 
 	nc := 0
 	push := func(p, d int, pair uint64) {
@@ -35,7 +35,7 @@ func (o *Open) Refine(indices []uint64) []uint64 {
 		nc++
 	}
 
-	for i := 0; i < np; i++ {
+	for i := 0; i < nn; i++ {
 		for j := 0; j < nd; j++ {
 			level := 0xFFFFFFFF & indices[i*nd+j]
 			order := indices[i*nd+j] >> 32
@@ -46,4 +46,64 @@ func (o *Open) Refine(indices []uint64) []uint64 {
 	}
 
 	return childIndices
+}
+
+// Balance identifies the missing neighbors of a set of child nodes with respect
+// to their parent nodes in each dimension.
+func (o *Open) Balance(indices []uint64,
+	find func([]uint64) bool, push func([]uint64)) {
+
+	for {
+		indices = o.socialize(indices, find, push)
+		if len(indices) == 0 {
+			break
+		}
+	}
+}
+
+func (o *Open) socialize(indices []uint64,
+	find func([]uint64) bool, push func([]uint64)) []uint64 {
+
+	nd := o.nd
+	nn := len(indices) / nd
+
+	index := make([]uint64, nd)
+	missing := make([]uint64, 0, nd)
+
+	for i := 0; i < nn; i++ {
+		copy(index, indices[i*nd:(i+1)*nd])
+
+		for j, pair := range index {
+			level := 0xFFFFFFFF & pair
+			if level == 0 {
+				continue
+			}
+
+			level -= 1
+			order := (pair >> 32) / 2
+
+			right := order%2 == 1
+			if right {
+				order = (2*order - 2) / 2
+			}
+
+			index[j] = level | order<<32
+
+			if find(index) {
+				if right {
+					index[j] = (level + 1) | (2*order)<<32
+				} else {
+					index[j] = (level + 1) | (2*order+2)<<32
+				}
+				if !find(index) {
+					push(index)
+					missing = append(missing, index...)
+				}
+			}
+
+			index[j] = pair
+		}
+	}
+
+	return missing
 }

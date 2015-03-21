@@ -29,9 +29,9 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 // Refine returns the child indices corresponding to a set of parent indices.
 func (c *Closed) Refine(indices []uint64) []uint64 {
 	nd := c.nd
-	np := len(indices) / nd
+	nn := len(indices) / nd
 
-	childIndices := make([]uint64, 2*np*nd*nd)
+	childIndices := make([]uint64, 2*nn*nd*nd)
 
 	nc := 0
 	push := func(p, d int, pair uint64) {
@@ -40,7 +40,7 @@ func (c *Closed) Refine(indices []uint64) []uint64 {
 		nc++
 	}
 
-	for i := 0; i < np; i++ {
+	for i := 0; i < nn; i++ {
 		for j := 0; j < nd; j++ {
 			level := 0xFFFFFFFF & indices[i*nd+j]
 
@@ -62,4 +62,9 @@ func (c *Closed) Refine(indices []uint64) []uint64 {
 	}
 
 	return childIndices[0 : nc*nd]
+}
+
+// Balance identifies the missing neighbors of a set of child nodes with respect
+// to their parent nodes in each dimension.
+func (c *Closed) Balance(_ []uint64, _ func([]uint64) bool, _ func([]uint64)) {
 }
