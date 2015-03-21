@@ -58,11 +58,6 @@ func TestHashTapOverlap(t *testing.T) {
 	assert.Equal(hash.find([]uint64{4, 2}), true, t)
 }
 
-func isLittleEndian() bool {
-	var x uint32 = 0x01020304
-	return *(*byte)(unsafe.Pointer(&x)) == 0x04
-}
-
 func BenchmarkHashUnseen(b *testing.B) {
 	const (
 		ni = 20
@@ -82,4 +77,9 @@ func BenchmarkHashUnseen(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		hash.unseen(indices)
 	}
+}
+
+func isLittleEndian() bool {
+	var x uint32 = 0x01020304
+	return *(*byte)(unsafe.Pointer(&x)) == 0x04
 }
