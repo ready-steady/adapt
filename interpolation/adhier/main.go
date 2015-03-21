@@ -195,9 +195,9 @@ func integrate(basis Basis, indices []uint64, surpluses []float64, ni, no uint) 
 	value := make([]float64, no)
 
 	for i := uint(0); i < nn; i++ {
-		weight := basis.Integrate(indices[i*ni : (i+1)*ni])
+		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
 		for j := uint(0); j < no; j++ {
-			value[j] += weight * surpluses[i*no+j]
+			value[j] += surpluses[i*no+j] * volume
 		}
 	}
 
