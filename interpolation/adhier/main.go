@@ -48,11 +48,13 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 
 // Compute constructs an interpolant for a quantity of interest.
 func (self *Interpolator) Compute(target Target) *Surrogate {
+	config := &self.config
+
 	ni, no := target.Dimensions()
-	nw := self.config.Workers
+	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	queue := newQueue(ni, &self.config)
+	queue := newQueue(ni, config)
 	hash := newHash(ni)
 
 	indices := queue.pull()
@@ -86,10 +88,13 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		indices = queue.pull()
 		indices = self.grid.Refine(indices)
 		indices = hash.unseen(indices)
-		self.grid.Balance(indices, hash.find, func(index []uint64) {
-			indices = append(indices, index...)
-			hash.tap(index)
-		})
+
+		if config.Balance {
+			self.grid.Balance(indices, hash.find, func(index []uint64) {
+				indices = append(indices, index...)
+				hash.tap(index)
+			})
+		}
 
 		nodes = self.grid.Compute(indices)
 
