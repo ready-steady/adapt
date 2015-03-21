@@ -38,72 +38,59 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	if config.Workers == 0 {
 		config.Workers = uint(runtime.GOMAXPROCS(0))
 	}
+	if config.Rate == 0 {
+		config.Rate = 1
+	}
 
 	return interpolator
 }
 
 // Compute constructs an interpolant for a quantity of interest.
 func (self *Interpolator) Compute(target Target) *Surrogate {
-	config := &self.config
-
 	ni, no := target.Dimensions()
+	nw := self.config.Workers
 
 	surrogate := newSurrogate(ni, no)
-
+	queue := newQueue(ni, &self.config)
 	hash := newHash(ni)
-	queue := newQueue(ni, config.MinLevel, config.MaxLevel, config.Rate)
 
-	// The zeroth level is assumed to have only one node, and the order of that
-	// node is assumed to be zero.
-	na, np := uint(1), uint(0)
+	indices := queue.pull()
+	nodes := self.grid.Compute(indices)
 
-	indices := make([]uint64, na*ni)
+	na, np := uint(len(indices))/ni, uint(0)
 
-	for k := uint(0); ; k++ {
+	for k := uint(0); na > 0; k++ {
 		target.Monitor(k, np, na)
 
-		surrogate.resize(np + na)
-		copy(surrogate.Indices[np*ni:], indices)
+		values := invoke(target.Compute, nodes, ni, no, nw)
 
-		nodes := self.grid.Compute(indices)
+		approximations := approximate(self.basis, surrogate.Indices,
+			surrogate.Surpluses, nodes, ni, no, nw)
 
-		values := invoke(target.Compute, nodes, ni, no, config.Workers)
-		approximations := approximate(self.basis, surrogate.Indices[:np*ni],
-			surrogate.Surpluses[:np*no], nodes, ni, no, config.Workers)
-
-		surpluses := surrogate.Surpluses[np*no : (np+na)*no]
+		surpluses := make([]float64, na*no)
 		for i := uint(0); i < na*no; i++ {
 			surpluses[i] = values[i] - approximations[i]
 		}
 
-		if np+na >= config.MaxNodes {
-			break
-		}
+		surrogate.push(indices, surpluses)
 
 		scores := measure(self.basis, indices, ni)
 		for i := uint(0); i < na; i++ {
-			scores[i] = target.Refine(nodes[i*ni:(i+1)*ni], surpluses[i*no:(i+1)*no], scores[i])
+			scores[i] = target.Refine(nodes[i*ni:(i+1)*ni],
+				surpluses[i*no:(i+1)*no], scores[i])
 		}
 
 		queue.push(indices, scores)
-		indices = queue.pull()
-		if len(indices) == 0 {
-			break
-		}
-
-		indices = hash.unique(self.grid.Refine(indices))
+		indices = hash.unique(self.grid.Refine(queue.pull()))
+		nodes = self.grid.Compute(indices)
 
 		np += na
 		na = uint(len(indices)) / ni
-
-		// Trim if there are excessive nodes.
-		if np+na > config.MaxNodes {
-			na = config.MaxNodes - np
-			indices = indices[:na*ni]
-		}
 	}
 
-	surrogate.finalize(np + na)
+	surrogate.Nodes = np
+	surrogate.Level = level(surrogate.Indices, ni)
+
 	return surrogate
 }
 
@@ -214,4 +201,21 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	}
 
 	return volumes
+}
+
+func level(indices []uint64, ni uint) uint {
+	nn := uint(len(indices)) / ni
+
+	level := uint(0)
+	for i := uint(0); i < nn; i++ {
+		l := uint(0)
+		for j := uint(0); j < ni; j++ {
+			l += uint(0xFFFFFFFF & indices[i*ni+j])
+		}
+		if l > level {
+			level = l
+		}
+	}
+
+	return level
 }

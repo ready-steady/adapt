@@ -5,11 +5,13 @@ import (
 )
 
 type queue struct {
-	ni   int
-	nn   int
-	min  uint
-	max  uint
+	ni int
+	nn int
+
+	lmin uint
+	lmax uint
 	rate float64
+
 	root *element
 }
 
@@ -19,15 +21,19 @@ type element struct {
 	next  *element
 }
 
-func newQueue(ni, min, max uint, rate float64) *queue {
-	if rate <= 0 || rate > 1 {
-		rate = 1
-	}
+func newQueue(ni uint, c *Config) *queue {
 	return &queue{
-		ni:   int(ni),
-		min:  min,
-		max:  max,
-		rate: rate,
+		ni: int(ni),
+		nn: 1,
+
+		lmin: c.MinLevel,
+		lmax: c.MaxLevel,
+		rate: c.Rate,
+
+		root: &element{
+			index: make([]uint64, ni),
+			score: math.Inf(1),
+		},
 	}
 }
 
@@ -35,7 +41,7 @@ func (q *queue) push(indices []uint64, scores []float64) {
 	ni := q.ni
 	nn, ns := len(indices)/ni, 0
 
-	min, max := q.min, q.max
+	lmin, lmax := q.lmin, q.lmax
 
 	for i := 0; i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
@@ -45,10 +51,10 @@ func (q *queue) push(indices []uint64, scores []float64) {
 		for j := 0; j < ni; j++ {
 			level += uint(0xFFFFFFFF & index[j])
 		}
-		if level < min {
+		if level < lmin {
 			score = math.Inf(1)
 		}
-		if level >= max || score <= 0 {
+		if level >= lmax || score <= 0 {
 			continue
 		}
 
