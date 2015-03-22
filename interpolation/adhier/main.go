@@ -55,7 +55,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	surrogate := newSurrogate(ni, no)
 	queue := newQueue(ni, config)
-	hash := newHash(ni)
+	history := newHash(ni)
 
 	indices := queue.pull()
 	nodes := self.grid.Compute(indices)
@@ -87,12 +87,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		indices = queue.pull()
 		indices = self.grid.Refine(indices)
-		indices = hash.unseen(indices)
+		indices = history.unseen(indices)
 
 		if config.Balance {
-			self.grid.Balance(indices, hash.find, func(index []uint64) {
+			self.grid.Balance(indices, history.find, func(index []uint64) {
 				indices = append(indices, index...)
-				hash.tap(index)
+				history.add(index)
 			})
 		}
 
