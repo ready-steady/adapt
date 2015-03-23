@@ -125,14 +125,14 @@ func socialize(grid Grid, indices []uint64, ni uint,
 		for j := uint(0); j < ni; j++ {
 			pair := index[j]
 
-			grid.Parent(index, uint(j))
+			grid.Parent(index, j)
 			if !find(index) {
 				index[j] = pair
 				continue
 			}
 			index[j] = pair
 
-			grid.Sibling(index, uint(j))
+			grid.Sibling(index, j)
 			if !find(index) {
 				push(index)
 				siblings = append(siblings, index...)
