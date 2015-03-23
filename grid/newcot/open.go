@@ -48,62 +48,35 @@ func (o *Open) Refine(indices []uint64) []uint64 {
 	return childIndices
 }
 
-// Balance identifies the missing neighbors of a set of child nodes with respect
-// to their parent nodes in each dimension.
-func (o *Open) Balance(indices []uint64,
-	find func([]uint64) bool, push func([]uint64)) {
-
-	for {
-		indices = o.socialize(indices, find, push)
-		if len(indices) == 0 {
-			break
-		}
+// Parent transforms an index into its parent index in the ith dimension.
+func (_ *Open) Parent(index []uint64, i uint) {
+	level := 0xFFFFFFFF & index[i]
+	if level == 0 {
+		return
 	}
+	level -= 1
+
+	order := (index[i] >> 32) / 2
+	if order%2 == 1 {
+		order = (index[i]>>32 - 2) / 2
+	}
+
+	index[i] = level | order<<32
 }
 
-func (o *Open) socialize(indices []uint64,
-	find func([]uint64) bool, push func([]uint64)) []uint64 {
-
-	nd := o.nd
-	nn := len(indices) / nd
-
-	index := make([]uint64, nd)
-	missing := make([]uint64, 0, nd)
-
-	for i := 0; i < nn; i++ {
-		copy(index, indices[i*nd:(i+1)*nd])
-
-		for j, pair := range index {
-			level := 0xFFFFFFFF & pair
-			if level == 0 {
-				continue
-			}
-
-			level -= 1
-			order := (pair >> 32) / 2
-
-			right := order%2 == 1
-			if right {
-				order = (2*order - 2) / 2
-			}
-
-			index[j] = level | order<<32
-
-			if find(index) {
-				if right {
-					index[j] = (level + 1) | (2*order)<<32
-				} else {
-					index[j] = (level + 1) | (2*order+2)<<32
-				}
-				if !find(index) {
-					push(index)
-					missing = append(missing, index...)
-				}
-			}
-
-			index[j] = pair
-		}
+// Sibling transforms an index into its sibling index in the ith dimension.
+func (_ *Open) Sibling(index []uint64, i uint) {
+	level := 0xFFFFFFFF & index[i]
+	if level == 0 {
+		return
 	}
 
-	return missing
+	order := index[i] >> 32
+	if (order/2)%2 == 1 {
+		order -= 2
+	} else {
+		order += 2
+	}
+
+	index[i] = level | order<<32
 }

@@ -11,7 +11,8 @@ import (
 type Grid interface {
 	Compute(indices []uint64) []float64
 	Refine(indices []uint64) []uint64
-	Balance(indices []uint64, find func([]uint64) bool, push func([]uint64))
+	Parent(index []uint64, i uint)
+	Sibling(index []uint64, i uint)
 }
 
 // Basis is a functional basis in [0, 1]^n.
@@ -92,7 +93,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		indices = history.unseen(indices)
 
 		if config.Balance {
-			self.grid.Balance(indices, history.find, func(index []uint64) {
+			balance(self.grid, indices, ni, history.find, func(index []uint64) {
 				indices = append(indices, index...)
 				history.add(index)
 			})
@@ -217,4 +218,47 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	}
 
 	return volumes
+}
+
+func balance(grid Grid, indices []uint64, ni uint,
+	find func([]uint64) bool, push func([]uint64)) {
+
+	for {
+		indices = socialize(grid, indices, ni, find, push)
+		if len(indices) == 0 {
+			break
+		}
+	}
+}
+
+func socialize(grid Grid, indices []uint64, ni uint,
+	find func([]uint64) bool, push func([]uint64)) []uint64 {
+
+	nn := uint(len(indices)) / ni
+
+	siblings := make([]uint64, 0, ni)
+
+	for i := uint(0); i < nn; i++ {
+		index := indices[i*ni : (i+1)*ni]
+
+		for j := uint(0); j < ni; j++ {
+			pair := index[j]
+
+			grid.Parent(index, uint(j))
+			if !find(index) {
+				index[j] = pair
+				continue
+			}
+			index[j] = pair
+
+			grid.Sibling(index, uint(j))
+			if !find(index) {
+				push(index)
+				siblings = append(siblings, index...)
+			}
+			index[j] = pair
+		}
+	}
+
+	return siblings
 }

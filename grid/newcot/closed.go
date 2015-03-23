@@ -64,7 +64,10 @@ func (c *Closed) Refine(indices []uint64) []uint64 {
 	return childIndices[0 : nc*nd]
 }
 
-// Balance identifies the missing neighbors of a set of child nodes with respect
-// to their parent nodes in each dimension.
-func (c *Closed) Balance(_ []uint64, _ func([]uint64) bool, _ func([]uint64)) {
+// Parent transforms an index into its parent index in the ith dimension.
+func (_ *Closed) Parent(_ []uint64, _ uint) {
+}
+
+// Sibling transforms an index into its sibling index in the ith dimension.
+func (_ *Closed) Sibling(_ []uint64, _ uint) {
 }
