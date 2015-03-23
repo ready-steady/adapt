@@ -92,10 +92,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		indices = history.unseen(indices)
 
 		if config.Balance {
-			balance(self.grid, indices, ni, history.find, func(index []uint64) {
-				indices = append(indices, index...)
-				history.add(index)
-			})
+			indices = append(indices, balance(self.grid, history, indices)...)
 		}
 
 		nodes = self.grid.Compute(indices)

@@ -101,40 +101,44 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	return volumes
 }
 
-func balance(grid Grid, indices []uint64, ni uint,
-	find func([]uint64) bool, push func([]uint64)) {
+func balance(grid Grid, history *hash, indices []uint64) []uint64 {
+	neighbors := make([]uint64, 0)
 
 	for {
-		indices = socialize(grid, indices, ni, find, push)
+		indices = socialize(grid, history, indices)
+
 		if len(indices) == 0 {
 			break
 		}
+
+		neighbors = append(neighbors, indices...)
 	}
+
+	return neighbors
 }
 
-func socialize(grid Grid, indices []uint64, ni uint,
-	find func([]uint64) bool, push func([]uint64)) []uint64 {
-
-	nn := uint(len(indices)) / ni
+func socialize(grid Grid, history *hash, indices []uint64) []uint64 {
+	ni := history.ni
+	nn := len(indices) / ni
 
 	siblings := make([]uint64, 0, ni)
 
-	for i := uint(0); i < nn; i++ {
+	for i := 0; i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
 
-		for j := uint(0); j < ni; j++ {
+		for j := 0; j < ni; j++ {
 			pair := index[j]
 
-			grid.Parent(index, j)
-			if !find(index) {
+			grid.Parent(index, uint(j))
+			if !history.find(index) {
 				index[j] = pair
 				continue
 			}
 			index[j] = pair
 
-			grid.Sibling(index, j)
-			if !find(index) {
-				push(index)
+			grid.Sibling(index, uint(j))
+			if !history.find(index) {
+				history.add(index)
 				siblings = append(siblings, index...)
 			}
 			index[j] = pair

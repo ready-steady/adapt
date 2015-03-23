@@ -12,6 +12,7 @@ func TestBalance(t *testing.T) {
 		ni = 2
 	)
 
+	history := newHash(ni)
 	grid := newcot.NewOpen(ni)
 
 	parents := []uint64{
@@ -29,37 +30,18 @@ func TestBalance(t *testing.T) {
 		0 | 0<<32, 2 | 2<<32,
 	}
 
-	indices := append(parents, children...)
-
-	find := func(index []uint64) bool {
-		nn := len(indices) / ni
-
-		for i := 0; i < nn; i++ {
-			match := true
-			for j := 0; j < ni; j++ {
-				if indices[i*ni+j] != index[j] {
-					match = false
-					break
-				}
-			}
-			if match {
-				return true
-			}
-		}
-
-		return false
-	}
-
-	push := func(index []uint64) {
-		indices = append(indices, index...)
-	}
-
-	balance(grid, children, ni, find, push)
-
 	siblings := []uint64{
 		1 | 0<<32, 1 | 2<<32,
 		1 | 2<<32, 1 | 2<<32,
 	}
 
-	assert.Equal(indices, append(append(parents, children...), siblings...), t)
+	for i := 0; i < len(parents); i += ni {
+		history.add(parents[i : i+ni])
+	}
+
+	for i := 0; i < len(children); i += ni {
+		history.add(children[i : i+ni])
+	}
+
+	assert.Equal(balance(grid, history, children), siblings, t)
 }
