@@ -57,10 +57,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	queue := newQueue(ni, config)
 	history := newHash(ni)
 
+	na, np := uint(1), uint(0)
+
+	queue.push(make([]uint64, na*ni), make([]float64, na))
+
 	indices := queue.pull()
 	nodes := self.grid.Compute(indices)
-
-	na, np := uint(len(indices))/ni, uint(0)
 
 	for k := uint(0); na > 0; k++ {
 		target.Monitor(k, np, na)
@@ -103,7 +105,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	}
 
 	surrogate.Nodes = np
-	surrogate.Level = level(surrogate.Indices, ni)
+	surrogate.Level = queue.lnow
 
 	return surrogate
 }
@@ -215,21 +217,4 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	}
 
 	return volumes
-}
-
-func level(indices []uint64, ni uint) uint {
-	nn := uint(len(indices)) / ni
-
-	level := uint(0)
-	for i := uint(0); i < nn; i++ {
-		l := uint(0)
-		for j := uint(0); j < ni; j++ {
-			l += uint(0xFFFFFFFF & indices[i*ni+j])
-		}
-		if l > level {
-			level = l
-		}
-	}
-
-	return level
 }

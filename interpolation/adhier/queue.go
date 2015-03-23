@@ -8,8 +8,10 @@ type queue struct {
 	ni int
 	nn int
 
+	lnow uint
 	lmin uint
 	lmax uint
+
 	rate float64
 
 	root *element
@@ -24,16 +26,11 @@ type element struct {
 func newQueue(ni uint, c *Config) *queue {
 	return &queue{
 		ni: int(ni),
-		nn: 1,
 
 		lmin: c.MinLevel,
 		lmax: c.MaxLevel,
-		rate: c.Rate,
 
-		root: &element{
-			index: make([]uint64, ni),
-			score: math.Inf(1),
-		},
+		rate: c.Rate,
 	}
 }
 
@@ -41,21 +38,24 @@ func (q *queue) push(indices []uint64, scores []float64) {
 	ni := q.ni
 	nn, ns := len(indices)/ni, 0
 
-	lmin, lmax := q.lmin, q.lmax
+	lnow, lmin, lmax := q.lnow, q.lmin, q.lmax
 
 	for i := 0; i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
 		score := scores[i]
+		if score < 0 {
+			score = -score
+		}
 
-		level := uint(0)
+		l := uint(0)
 		for j := 0; j < ni; j++ {
-			level += uint(0xFFFFFFFF & index[j])
+			l += uint(0xFFFFFFFF & index[j])
 		}
-		if level < lmin {
-			score = math.Inf(1)
+		if l > lnow {
+			lnow = l
 		}
-		if level >= lmax || score <= 0 {
-			continue
+		if l >= lmin && (score == 0 || l == lmax) {
+			continue // should not be queued for refinement
 		}
 
 		candidate := &element{
@@ -81,11 +81,14 @@ func (q *queue) push(indices []uint64, scores []float64) {
 	}
 
 	q.nn += ns
+	q.lnow = lnow
 }
 
 func (q *queue) pull() []uint64 {
-	ni := q.ni
-	nn := int(math.Ceil(q.rate * float64(q.nn)))
+	ni, nn := q.ni, q.nn
+	if q.lnow >= q.lmin {
+		nn = int(math.Ceil(q.rate * float64(nn)))
+	}
 
 	indices := make([]uint64, nn*ni)
 
