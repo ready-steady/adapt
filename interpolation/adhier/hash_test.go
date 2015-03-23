@@ -47,11 +47,11 @@ func TestHashUnseenRewrite(t *testing.T) {
 	assert.Equal(hash.unseen([]uint64{4, 2}), []uint64{}, t)
 }
 
-func TestHashAddRewrite(t *testing.T) {
+func TestHashPushRewrite(t *testing.T) {
 	hash := newHash(2)
 
 	key := []uint64{4, 2}
-	hash.add(key)
+	hash.push(key)
 	assert.Equal(hash.find([]uint64{4, 2}), true, t)
 
 	key[0], key[1] = 6, 9

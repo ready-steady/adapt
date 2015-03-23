@@ -36,11 +36,11 @@ func TestBalance(t *testing.T) {
 	}
 
 	for i := 0; i < len(parents); i += ni {
-		history.add(parents[i : i+ni])
+		history.push(parents[i : i+ni])
 	}
 
 	for i := 0; i < len(children); i += ni {
-		history.add(children[i : i+ni])
+		history.push(children[i : i+ni])
 	}
 
 	assert.Equal(balance(grid, history, children), siblings, t)

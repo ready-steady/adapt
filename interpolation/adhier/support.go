@@ -138,7 +138,7 @@ func socialize(grid Grid, history *hash, indices []uint64) []uint64 {
 
 			grid.Sibling(index, uint(j))
 			if !history.find(index) {
-				history.add(index)
+				history.push(index)
 				siblings = append(siblings, index...)
 			}
 			index[j] = pair

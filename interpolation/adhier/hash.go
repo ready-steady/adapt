@@ -32,7 +32,7 @@ func (h *hash) find(index []uint64) bool {
 	return ok
 }
 
-func (h *hash) add(index []uint64) {
+func (h *hash) push(index []uint64) {
 	var bytes []byte
 
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
