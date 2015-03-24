@@ -1,12 +1,11 @@
 # Numerical Analysis [![Build Status][travis-img]][travis-url]
 
-The repository hosts five packages:
+The repository hosts four packages:
 
 * basis/[linhat](basis/linhat),
 * grid/[newcot](grid/newcot),
-* integration/[ode](integration/ode),
-* interpolation/[adhier](interpolation/adhier), and
-* interpolation/[spline](interpolation/spline).
+* integration/[ode](integration/ode), and
+* interpolation/[adhier](interpolation/adhier).
 
 ## Contributing
 
@@ -14,5 +13,5 @@ The repository hosts five packages:
 2. Implement your idea.
 3. Create a pull request.
 
-[travis-img]: https://travis-ci.org/ready-steady/numeric.svg
+[travis-img]: https://travis-ci.org/ready-steady/numeric.svg?branch=master
 [travis-url]: https://travis-ci.org/ready-steady/numeric
