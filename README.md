@@ -1,10 +1,9 @@
 # Numerical Analysis [![Build Status][travis-img]][travis-url]
 
-The repository hosts four packages:
+The repository hosts three packages:
 
 * basis/[linhat](basis/linhat),
-* grid/[newcot](grid/newcot),
-* integration/[ode](integration/ode), and
+* grid/[newcot](grid/newcot), and
 * interpolation/[adhier](interpolation/adhier).
 
 ## Contributing
