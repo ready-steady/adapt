@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/ready-steady/adhier/grid/newcot"
-	"github.com/ready-steady/support/assert"
+	"github.com/ready-steady/assert"
 )
 
 func TestBalance(t *testing.T) {

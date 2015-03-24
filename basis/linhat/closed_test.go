@@ -3,7 +3,7 @@ package linhat
 import (
 	"testing"
 
-	"github.com/ready-steady/support/assert"
+	"github.com/ready-steady/assert"
 )
 
 func TestClosedCompute(t *testing.T) {

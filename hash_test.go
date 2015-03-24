@@ -6,7 +6,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/ready-steady/support/assert"
+	"github.com/ready-steady/assert"
 )
 
 func TestHashUnseen(t *testing.T) {
