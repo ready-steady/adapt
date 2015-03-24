@@ -5,7 +5,7 @@ import (
 
 	"github.com/ready-steady/numeric/basis/linhat"
 	"github.com/ready-steady/numeric/grid/newcot"
-	"github.com/ready-steady/numeric/integration/ode/rk4"
+	"github.com/ready-steady/ode/rk4"
 )
 
 func init() {
