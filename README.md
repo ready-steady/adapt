@@ -1,10 +1,13 @@
-# Numerical Analysis [![Build Status][travis-img]][travis-url]
+# Adaptive Hierarchical Interpolation [![Build Status][travis-img]][travis-url]
 
-The repository hosts three packages:
+## [Documentation][doc]
 
-* basis/[linhat](basis/linhat),
-* grid/[newcot](grid/newcot), and
-* interpolation/[adhier](interpolation/adhier).
+## Subpackages
+
+The package contains two subpackages:
+
+* basis/[linhat](basis/linhat) and
+* grid/[newcot](grid/newcot).
 
 ## Contributing
 
@@ -12,5 +15,6 @@ The repository hosts three packages:
 2. Implement your idea.
 3. Create a pull request.
 
-[travis-img]: https://travis-ci.org/ready-steady/numeric.svg?branch=master
-[travis-url]: https://travis-ci.org/ready-steady/numeric
+[doc]: http://godoc.org/github.com/ready-steady/adhier
+[travis-img]: https://travis-ci.org/ready-steady/adhier.svg?branch=master
+[travis-url]: https://travis-ci.org/ready-steady/adhier

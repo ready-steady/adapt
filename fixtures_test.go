@@ -3,8 +3,8 @@ package adhier
 import (
 	"math"
 
-	"github.com/ready-steady/numeric/basis/linhat"
-	"github.com/ready-steady/numeric/grid/newcot"
+	"github.com/ready-steady/adhier/basis/linhat"
+	"github.com/ready-steady/adhier/grid/newcot"
 	"github.com/ready-steady/ode/rk4"
 )
 

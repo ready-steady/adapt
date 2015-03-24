@@ -3,7 +3,7 @@ package adhier
 import (
 	"testing"
 
-	"github.com/ready-steady/numeric/grid/newcot"
+	"github.com/ready-steady/adhier/grid/newcot"
 	"github.com/ready-steady/support/assert"
 )
 
