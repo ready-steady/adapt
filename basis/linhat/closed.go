@@ -2,21 +2,21 @@ package linhat
 
 // Closed represents an instance of the basis in [0, 1]^n.
 type Closed struct {
-	ni int
+	nd int
 }
 
 // NewClosed creates an instance of the basis in [0, 1]^n.
-func NewClosed(inputs uint) *Closed {
-	return &Closed{int(inputs)}
+func NewClosed(dimensions uint) *Closed {
+	return &Closed{int(dimensions)}
 }
 
 // Compute evaluates the value of a basis function at a point.
 func (c *Closed) Compute(index []uint64, point []float64) float64 {
-	ni := c.ni
+	nd := c.nd
 
 	value := 1.0
 
-	for i := 0; i < ni; i++ {
+	for i := 0; i < nd; i++ {
 		level := 0xFFFFFFFF & index[i]
 		if level == 0 {
 			continue // value *= 1
@@ -41,11 +41,11 @@ func (c *Closed) Compute(index []uint64, point []float64) float64 {
 
 // Integrate computes the integral of a basis function in [0, 1]^n.
 func (c *Closed) Integrate(index []uint64) float64 {
-	ni := c.ni
+	nd := c.nd
 
 	value := 1.0
 
-	for i := 0; i < ni; i++ {
+	for i := 0; i < nd; i++ {
 		level := 0xFFFFFFFF & index[i]
 		switch level {
 		case 0:
