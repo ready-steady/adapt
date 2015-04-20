@@ -12,6 +12,7 @@ type Surrogate struct {
 	Level   uint
 	Nodes   uint
 
+	Steps     []uint
 	Indices   []uint64
 	Surpluses []float64
 }
@@ -21,12 +22,14 @@ func newSurrogate(ni, no uint) *Surrogate {
 		Inputs:  ni,
 		Outputs: no,
 
+		Steps:     make([]uint, 0),
 		Indices:   make([]uint64, 0, ni),
 		Surpluses: make([]float64, 0, no),
 	}
 }
 
 func (s *Surrogate) push(indices []uint64, surpluses []float64) {
+	s.Steps = append(s.Steps, uint(len(indices))/s.Inputs)
 	s.Indices = append(s.Indices, indices...)
 	s.Surpluses = append(s.Surpluses, surpluses...)
 }

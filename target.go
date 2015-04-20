@@ -9,10 +9,10 @@ type Target interface {
 	Compute(point, value []float64)
 
 	// Monitor keeps track of the interpolation progress. The function is called
-	// once for each iteration before the evaluation of the quantity at the
-	// active nodes of that iteration. The arguments are the iteration number,
-	// number of passive nodes, and number of active nodes, respectively.
-	Monitor(iteration, passive, active uint)
+	// once for each interpolation step before the evaluation of the quantity at
+	// the active nodes of that step. The arguments are the step number, number
+	// of passive nodes, and number of active nodes, respectively.
+	Monitor(step, passive, active uint)
 
 	// Refine guides the spatial adaptivity. The function takes a node, the
 	// hierarchical surplus at the node, and the volume under the basis function

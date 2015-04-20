@@ -101,8 +101,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		na = uint(len(indices)) / ni
 	}
 
-	surrogate.Nodes = np
 	surrogate.Level = queue.lnow
+	surrogate.Nodes = np
 
 	return surrogate
 }
