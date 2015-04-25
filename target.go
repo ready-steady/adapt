@@ -1,4 +1,4 @@
-package adhier
+package adapt
 
 // Target is a quantity to be interpolated.
 type Target interface {

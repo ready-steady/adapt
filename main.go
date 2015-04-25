@@ -1,6 +1,6 @@
-// Package adhier provides an algorithm for adaptive hierarchical interpolation
+// Package adapt provides an algorithm for adaptive hierarchical interpolation
 // with local refinements.
-package adhier
+package adapt
 
 import (
 	"runtime"

@@ -1,4 +1,4 @@
-package adhier
+package adapt
 
 // Config represents a configuration of the algorithm.
 type Config struct {

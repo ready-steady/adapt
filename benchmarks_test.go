@@ -1,4 +1,4 @@
-package adhier
+package adapt
 
 import (
 	"math/rand"

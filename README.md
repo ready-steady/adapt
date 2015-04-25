@@ -1,4 +1,4 @@
-# Adaptive Hierarchical Interpolation [![Build Status][travis-img]][travis-url]
+# Adaptive Hierarchical Interpolation [![Build Status][status-img]][status-url]
 
 ## [Documentation][doc]
 
@@ -15,6 +15,6 @@ The package contains two subpackages:
 2. Implement your idea.
 3. Create a pull request.
 
-[doc]: http://godoc.org/github.com/ready-steady/adhier
-[travis-img]: https://travis-ci.org/ready-steady/adhier.svg?branch=master
-[travis-url]: https://travis-ci.org/ready-steady/adhier
+[doc]: http://godoc.org/github.com/ready-steady/adapt
+[status-img]: https://travis-ci.org/ready-steady/adapt.svg?branch=master
+[status-url]: https://travis-ci.org/ready-steady/adapt

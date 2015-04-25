@@ -1,11 +1,11 @@
-package adhier
+package adapt
 
 import (
 	"fmt"
 	"math"
 
-	"github.com/ready-steady/adhier/basis/linhat"
-	"github.com/ready-steady/adhier/grid/newcot"
+	"github.com/ready-steady/adapt/basis/linhat"
+	"github.com/ready-steady/adapt/grid/newcot"
 )
 
 // Interpolation in one dimension.
