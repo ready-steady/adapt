@@ -17,7 +17,15 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 
 	for i := uint(0); i < nw; i++ {
 		go func() {
+			// Kahan summation algorithm
+			// https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+			compensation := make([]float64, no)
+
 			for j := range jobs {
+				for k := uint(0); k < no; k++ {
+					compensation[k] = 0
+				}
+
 				point := points[j*ni : (j+1)*ni]
 				value := values[j*no : (j+1)*no]
 
@@ -27,7 +35,10 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 						continue
 					}
 					for l := uint(0); l < no; l++ {
-						value[l] += weight * surpluses[k*no+l]
+						delta := weight*surpluses[k*no+l] - compensation[l]
+						update := value[l] + delta
+						compensation[l] = (update - value[l]) - delta
+						value[l] = update
 					}
 				}
 
@@ -77,12 +88,19 @@ func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 func integrate(basis Basis, indices []uint64, surpluses []float64, ni, no uint) []float64 {
 	nn := uint(len(indices)) / ni
 
+	// Kahan summation algorithm
+	// https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+	compensation := make([]float64, no)
+
 	value := make([]float64, no)
 
 	for i := uint(0); i < nn; i++ {
 		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
 		for j := uint(0); j < no; j++ {
-			value[j] += surpluses[i*no+j] * volume
+			delta := surpluses[i*no+j]*volume - compensation[j]
+			update := value[j] + delta
+			compensation[j] = (update - value[j]) - delta
+			value[j] = update
 		}
 	}
 

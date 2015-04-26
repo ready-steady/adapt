@@ -46,7 +46,7 @@ func TestCube(t *testing.T) {
 	assert.EqualWithin(values, fixture.values, 2e-15, t)
 
 	integral := interpolator.Integrate(surrogate)
-	assert.Equal(integral, fixture.integral, t)
+	assert.EqualWithin(integral, fixture.integral, 1e-15, t)
 }
 
 func TestBox(t *testing.T) {
