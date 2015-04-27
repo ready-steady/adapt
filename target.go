@@ -14,11 +14,11 @@ type Target interface {
 	// of passive nodes, and number of active nodes, respectively.
 	Monitor(step, passive, active uint)
 
-	// Refine guides the spatial adaptivity. The function takes a node, the
+	// Score guides the local adaptivity. The function takes a node, the
 	// hierarchical surplus at the node, and the volume under the basis function
 	// corresponding to the node. The function returns the score of the node
 	// representing the importance of refining the node.
-	Refine(node, surplus []float64, volume float64) float64
+	Score(node, surplus []float64, volume float64) float64
 }
 
 // GenericTarget is a generic quantity satisfying the Target interface.
@@ -28,7 +28,7 @@ type GenericTarget struct {
 
 	ComputeHandler func([]float64, []float64) // != nil
 	MonitorHandler func(uint, uint, uint)
-	RefineHandler  func([]float64, []float64, float64) float64 // != nil
+	ScoreHandler   func([]float64, []float64, float64) float64 // != nil
 }
 
 // NewTarget returns a new generic quantity.
@@ -53,6 +53,6 @@ func (t *GenericTarget) Monitor(level, passive, active uint) {
 	}
 }
 
-func (t *GenericTarget) Refine(node, surplus []float64, volume float64) float64 {
-	return t.RefineHandler(node, surplus, volume)
+func (t *GenericTarget) Score(node, surplus []float64, volume float64) float64 {
+	return t.ScoreHandler(node, surplus, volume)
 }

@@ -80,7 +80,7 @@ func newTarget(inputs, outputs uint, tolerance float64,
 
 	target := NewTarget(inputs, outputs)
 	target.ComputeHandler = compute
-	target.RefineHandler = func(_, surplus []float64, _ float64) float64 {
+	target.ScoreHandler = func(_, surplus []float64, _ float64) float64 {
 		for _, ε := range surplus {
 			if ε < 0 {
 				ε = -ε
@@ -117,7 +117,8 @@ var fixtureStep = fixture{
 		Level: 4,
 		Nodes: 8,
 
-		Steps:     []uint{1, 2, 1, 2, 2},
+		Accept:    []uint{1, 2, 1, 2, 2},
+		Reject:    []uint{0, 0, 0, 0, 0},
 		Surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
 	},
 
@@ -153,7 +154,8 @@ var fixtureHat = fixture{
 		Level: 9,
 		Nodes: 305,
 
-		Steps: []uint{1, 2, 2, 4, 8, 12, 20, 40, 72, 144},
+		Accept: []uint{1, 2, 2, 4, 8, 12, 20, 40, 72, 144},
+		Reject: []uint{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		Surpluses: []float64{
 			+7.50000000000000e-01, -7.50000000000000e-01, -7.50000000000000e-01,
 			-3.43750000000000e-01, -3.43750000000000e-01, -1.56250000000000e-02,
@@ -641,7 +643,8 @@ var fixtureBox = fixture{
 		Level: 3,
 		Nodes: 20,
 
-		Steps: []uint{1, 4, 5, 10},
+		Accept: []uint{1, 4, 5, 10},
+		Reject: []uint{0, 0, 0, 0},
 		Surpluses: []float64{
 			1, 0, 0, -1, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0.5, 0, 0, 1, 0, 0,
 			1, 0, 1, 1, 1, 0, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0, -0.5, 0, 0, -0.5,
@@ -758,7 +761,7 @@ func (t *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 
 func (t *kraichnanOrszagTarget) Monitor(_, _, _ uint) {}
 
-func (t *kraichnanOrszagTarget) Refine(_, surplus []float64, _ float64) float64 {
+func (t *kraichnanOrszagTarget) Score(_, surplus []float64, _ float64) float64 {
 	const (
 		tolerance = 1e-2
 	)

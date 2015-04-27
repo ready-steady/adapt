@@ -77,15 +77,15 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			surpluses[i] = values[i] - approximations[i]
 		}
 
-		surrogate.push(indices, surpluses)
-
 		scores := measure(self.basis, indices, ni)
 		for i := uint(0); i < na; i++ {
-			scores[i] = target.Refine(nodes[i*ni:(i+1)*ni],
+			scores[i] = target.Score(nodes[i*ni:(i+1)*ni],
 				surpluses[i*no:(i+1)*no], scores[i])
 		}
 
-		queue.push(indices, scores)
+		discard := queue.push(indices, scores)
+
+		surrogate.push(indices, surpluses, discard)
 
 		indices = queue.pull()
 		indices = self.grid.Refine(indices)
