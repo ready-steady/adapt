@@ -54,14 +54,13 @@ func (_ *Open) Parent(index []uint64, i uint) {
 	if level == 0 {
 		return
 	}
-	level -= 1
 
 	order := (index[i] >> 32) / 2
 	if order%2 == 1 {
 		order = (index[i]>>32 - 2) / 2
 	}
 
-	index[i] = level | order<<32
+	index[i] = (level - 1) | order<<32
 }
 
 // Sibling transforms an index into its sibling index in the ith dimension.
