@@ -61,7 +61,7 @@ func (c *Closed) Refine(indices []uint64) []uint64 {
 		}
 	}
 
-	return childIndices[0 : nc*nd]
+	return childIndices[:nc*nd]
 }
 
 // Parent transforms an index into its parent index in the ith dimension.
