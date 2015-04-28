@@ -17,8 +17,10 @@ type Target interface {
 
 	// Score guides the local adaptivity. The function takes a node, the
 	// hierarchical surplus at the node, and the volume under the basis function
-	// corresponding to the node. The function returns the score of the node
-	// representing the importance of refining the node.
+	// corresponding to the node. The function returns the score to the node. A
+	// positive score represents the importance of refining the node. A zero
+	// score signifies that the node should not be refined. A negative score
+	// signifies that the node should be excluded from the interpolant.
 	Score(node, surplus []float64, volume float64) float64
 }
 
