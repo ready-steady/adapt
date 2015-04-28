@@ -30,21 +30,23 @@ func newSurrogate(ni, no uint) *Surrogate {
 	}
 }
 
-func (s *Surrogate) push(indices []uint64, surpluses []float64, reject []bool) {
+func (s *Surrogate) push(indices []uint64, surpluses []float64, accept []bool) uint {
 	ni, no := s.Inputs, s.Outputs
-	nn, na := uint(len(reject)), uint(0)
+	nn, na := uint(len(accept)), uint(0)
 
 	for i := uint(0); i < nn; i++ {
-		if reject[i] {
-			continue
+		if accept[i] {
+			na++
+			s.Indices = append(s.Indices, indices[i*ni:(i+1)*ni]...)
+			s.Surpluses = append(s.Surpluses, surpluses[i*no:(i+1)*no]...)
 		}
-		na++
-		s.Indices = append(s.Indices, indices[i*ni:(i+1)*ni]...)
-		s.Surpluses = append(s.Surpluses, surpluses[i*no:(i+1)*no]...)
 	}
 
+	s.Nodes += na
 	s.Accept = append(s.Accept, na)
 	s.Reject = append(s.Reject, nn-na)
+
+	return na
 }
 
 // String returns a string containing human-friendly information about the

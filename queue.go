@@ -36,17 +36,17 @@ func newQueue(ni uint, c *Config) *queue {
 
 func (q *queue) push(indices []uint64, scores []float64) []bool {
 	ni := q.ni
-	nn, ns := len(indices)/ni, 0
+	nn, nq := len(indices)/ni, 0
 
-	reject := make([]bool, nn)
+	accept := make([]bool, nn)
 
 	lnow, lmin, lmax := q.lnow, q.lmin, q.lmax
 
 	for i := 0; i < nn; i++ {
 		score := scores[i]
-		reject[i] = score < 0
+		accept[i] = score >= 0
 
-		if reject[i] {
+		if !accept[i] {
 			continue
 		}
 
@@ -82,13 +82,13 @@ func (q *queue) push(indices []uint64, scores []float64) []bool {
 			previous, current = current, current.next
 		}
 
-		ns++
+		nq++
 	}
 
-	q.nn += ns
+	q.nn += nq
 	q.lnow = lnow
 
-	return reject
+	return accept
 }
 
 func (q *queue) pull() []uint64 {

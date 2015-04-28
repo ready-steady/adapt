@@ -10,9 +10,10 @@ type Target interface {
 
 	// Monitor keeps track of the interpolation progress. The function is called
 	// once for each interpolation step before the evaluation of the quantity at
-	// the active nodes of that step. The arguments are the step number, number
-	// of passive nodes, and number of active nodes, respectively.
-	Monitor(step, passive, active uint)
+	// the nodes of that step. The arguments of the function are the step
+	// number, number of accepted nodes, number of rejected nodes, and number of
+	// current nodes, respectively.
+	Monitor(step, accept, reject, current uint)
 
 	// Score guides the local adaptivity. The function takes a node, the
 	// hierarchical surplus at the node, and the volume under the basis function
@@ -27,7 +28,7 @@ type GenericTarget struct {
 	Outputs uint // > 0
 
 	ComputeHandler func([]float64, []float64) // != nil
-	MonitorHandler func(uint, uint, uint)
+	MonitorHandler func(uint, uint, uint, uint)
 	ScoreHandler   func([]float64, []float64, float64) float64 // != nil
 }
 
@@ -47,9 +48,9 @@ func (t *GenericTarget) Compute(node, value []float64) {
 	t.ComputeHandler(node, value)
 }
 
-func (t *GenericTarget) Monitor(level, passive, active uint) {
+func (t *GenericTarget) Monitor(level, accept, reject, current uint) {
 	if t.MonitorHandler != nil {
-		t.MonitorHandler(level, passive, active)
+		t.MonitorHandler(level, accept, reject, current)
 	}
 }
 

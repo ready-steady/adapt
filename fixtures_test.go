@@ -759,7 +759,7 @@ func (t *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 	}
 }
 
-func (t *kraichnanOrszagTarget) Monitor(_, _, _ uint) {}
+func (t *kraichnanOrszagTarget) Monitor(_, _, _, _ uint) {}
 
 func (t *kraichnanOrszagTarget) Score(_, surplus []float64, _ float64) float64 {
 	const (

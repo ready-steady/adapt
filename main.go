@@ -54,40 +54,39 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	queue := newQueue(ni, config)
+	tracker := newQueue(ni, config)
 	history := newHash(ni)
 
-	na, np := uint(1), uint(0)
+	na, nr, nc := uint(0), uint(0), uint(1)
 
-	queue.push(make([]uint64, na*ni), make([]float64, na))
-
-	indices := queue.pull()
+	indices := make([]uint64, nc*ni)
 	nodes := self.grid.Compute(indices)
 
-	for k := uint(0); na > 0; k++ {
-		target.Monitor(k, np, na)
+	for k := uint(0); nc > 0; k++ {
+		target.Monitor(k, na, nr, nc)
 
 		values := invoke(target.Compute, nodes, ni, no, nw)
 
 		approximations := approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, nodes, ni, no, nw)
 
-		surpluses := make([]float64, na*no)
-		for i := uint(0); i < na*no; i++ {
+		surpluses := make([]float64, nc*no)
+		for i := uint(0); i < nc*no; i++ {
 			surpluses[i] = values[i] - approximations[i]
 		}
 
 		scores := measure(self.basis, indices, ni)
-		for i := uint(0); i < na; i++ {
+		for i := uint(0); i < nc; i++ {
 			scores[i] = target.Score(nodes[i*ni:(i+1)*ni],
 				surpluses[i*no:(i+1)*no], scores[i])
 		}
 
-		reject := queue.push(indices, scores)
+		accept := tracker.push(indices, scores)
 
-		surrogate.push(indices, surpluses, reject)
+		nn := surrogate.push(indices, surpluses, accept)
+		na, nr = na+nn, nr+nc-nn
 
-		indices = queue.pull()
+		indices = tracker.pull()
 		indices = self.grid.Refine(indices)
 		indices = history.unseen(indices)
 
@@ -97,12 +96,10 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		nodes = self.grid.Compute(indices)
 
-		np += na
-		na = uint(len(indices)) / ni
+		nc = uint(len(indices)) / ni
 	}
 
-	surrogate.Level = queue.lnow
-	surrogate.Nodes = np
+	surrogate.Level = tracker.lnow
 
 	return surrogate
 }
