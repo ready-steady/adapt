@@ -229,6 +229,26 @@ func TestClosedParent(t *testing.T) {
 	assert.Equal(children, parents, t)
 }
 
+func TestClosedSibling(t *testing.T) {
+	grid := NewClosed(1)
+
+	indices := compose(
+		[]uint32{0, 1, 1, 2, 2, 3, 3, 3, 3},
+		[]uint32{0, 0, 2, 1, 3, 1, 3, 5, 7},
+	)
+
+	siblings := compose(
+		[]uint32{0, 1, 1, 2, 2, 3, 3, 3, 3},
+		[]uint32{0, 2, 0, 1, 3, 3, 1, 7, 5},
+	)
+
+	for i := range indices {
+		grid.Sibling(indices[i:i+1], 0)
+	}
+
+	assert.Equal(indices, siblings, t)
+}
+
 func BenchmarkClosedRefine(b *testing.B) {
 	const (
 		dimensions  = 20

@@ -90,5 +90,28 @@ func (_ *Closed) Parent(index []uint64, i uint) {
 }
 
 // Sibling transforms an index into its sibling index in the ith dimension.
-func (_ *Closed) Sibling(_ []uint64, _ uint) {
+func (_ *Closed) Sibling(index []uint64, i uint) {
+	level := 0xFFFFFFFF & index[i]
+	if level == 0 || level == 2 {
+		return
+	}
+
+	var order uint64
+	switch level {
+	case 1:
+		if index[i]>>32 == 0 {
+			order = 2
+		} else {
+			order = 0
+		}
+	default:
+		order = index[i] >> 32
+		if ((order-1)/2)%2 == 1 {
+			order -= 2
+		} else {
+			order += 2
+		}
+	}
+
+	index[i] = level | order<<32
 }
