@@ -209,6 +209,26 @@ func TestClosedRefine2D(t *testing.T) {
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
 
+func TestClosedParent(t *testing.T) {
+	grid := NewClosed(1)
+
+	children := compose(
+		[]uint32{0, 1, 1, 2, 2, 3, 3, 3, 3},
+		[]uint32{0, 0, 2, 1, 3, 1, 3, 5, 7},
+	)
+
+	parents := compose(
+		[]uint32{0, 0, 0, 1, 1, 2, 2, 2, 2},
+		[]uint32{0, 0, 0, 0, 2, 1, 1, 3, 3},
+	)
+
+	for i := range children {
+		grid.Parent(children[i:i+1], 0)
+	}
+
+	assert.Equal(children, parents, t)
+}
+
 func BenchmarkClosedRefine(b *testing.B) {
 	const (
 		dimensions  = 20
