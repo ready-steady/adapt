@@ -91,7 +91,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		indices = history.unseen(indices)
 
 		if config.Balance {
-			// NOTE: Rejection might play against balancing.
 			indices = append(indices, balance(self.grid, history, indices)...)
 		}
 
