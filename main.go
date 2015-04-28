@@ -83,9 +83,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 				surpluses[i*no:(i+1)*no], scores[i])
 		}
 
-		discard := queue.push(indices, scores)
+		reject := queue.push(indices, scores)
 
-		surrogate.push(indices, surpluses, discard)
+		surrogate.push(indices, surpluses, reject)
 
 		indices = queue.pull()
 		indices = self.grid.Refine(indices)

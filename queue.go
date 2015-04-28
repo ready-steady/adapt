@@ -38,15 +38,15 @@ func (q *queue) push(indices []uint64, scores []float64) []bool {
 	ni := q.ni
 	nn, ns := len(indices)/ni, 0
 
-	discard := make([]bool, nn)
+	reject := make([]bool, nn)
 
 	lnow, lmin, lmax := q.lnow, q.lmin, q.lmax
 
 	for i := 0; i < nn; i++ {
 		score := scores[i]
-		discard[i] = score < 0
+		reject[i] = score < 0
 
-		if discard[i] {
+		if reject[i] {
 			continue
 		}
 
@@ -88,7 +88,7 @@ func (q *queue) push(indices []uint64, scores []float64) []bool {
 	q.nn += ns
 	q.lnow = lnow
 
-	return discard
+	return reject
 }
 
 func (q *queue) pull() []uint64 {

@@ -30,12 +30,12 @@ func newSurrogate(ni, no uint) *Surrogate {
 	}
 }
 
-func (s *Surrogate) push(indices []uint64, surpluses []float64, discard []bool) {
+func (s *Surrogate) push(indices []uint64, surpluses []float64, reject []bool) {
 	ni, no := s.Inputs, s.Outputs
-	nn, na := uint(len(discard)), uint(0)
+	nn, na := uint(len(reject)), uint(0)
 
 	for i := uint(0); i < nn; i++ {
-		if discard[i] {
+		if reject[i] {
 			continue
 		}
 		na++
