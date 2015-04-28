@@ -47,7 +47,7 @@ func (q *queue) push(indices []uint64, scores []float64) []bool {
 		accept[i] = score >= 0
 
 		if !accept[i] {
-			continue
+			continue // should be discarded
 		}
 
 		index := indices[i*ni : (i+1)*ni]
@@ -60,7 +60,7 @@ func (q *queue) push(indices []uint64, scores []float64) []bool {
 			lnow = l
 		}
 		if l >= lmin && (score == 0 || l == lmax) {
-			continue // should not be queued for refinement
+			continue // should not be refined
 		}
 
 		candidate := &element{
