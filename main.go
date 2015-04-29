@@ -29,12 +29,12 @@ type Interpolator struct {
 
 // Progress contains information about the interpolation process.
 type Progress struct {
-	Iteration uint      // The iteration number.
-	Level     uint      // The interpolation level.
-	Accepted  uint      // The number of accepted nodes.
-	Rejected  uint      // The number of rejected nodes.
-	Current   uint      // The number of nodes of the current iteration.
-	Integral  []float64 // The integral over the whole domain.
+	Iteration uint      // Iteration number
+	Level     uint      // Interpolation level
+	Accepted  uint      // Number of accepted nodes
+	Rejected  uint      // Number of rejected nodes
+	Current   uint      // Number of nodes of the current iteration
+	Integral  []float64 // Integral over the whole domain
 }
 
 // New creates a new interpolator.

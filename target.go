@@ -24,9 +24,9 @@ type Target interface {
 
 // Location contains information about a spacial location.
 type Location struct {
-	Node    []float64 // The node corresponding to the location.
-	Surplus []float64 // The hierarchical surplus at the node.
-	Volume  float64   // The volume under the corresponding basis function.
+	Node    []float64 // Collocation node
+	Surplus []float64 // Hierarchical surplus
+	Volume  float64   // Volume under the basis function
 }
 
 // GenericTarget is a generic target satisfying the Target interface.
