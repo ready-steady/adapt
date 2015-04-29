@@ -112,6 +112,12 @@ func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []flo
 
 // Integrate computes the integral of a surrogate over [0, 1]^n.
 func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
-	return integrate(self.basis, surrogate.Indices, surrogate.Surpluses,
-		surrogate.Inputs, surrogate.Outputs)
+	ni, no, nn := surrogate.Inputs, surrogate.Outputs, surrogate.Nodes
+
+	integral, compensation := make([]float64, no), make([]float64, no)
+
+	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses,
+		ni, no, nn, integral, compensation)
+
+	return integral
 }

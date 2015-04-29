@@ -85,26 +85,20 @@ func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	return values
 }
 
-func integrate(basis Basis, indices []uint64, surpluses []float64, ni, no uint) []float64 {
-	nn := uint(len(indices)) / ni
-
-	// Kahan summation algorithm
-	// https://en.wikipedia.org/wiki/Kahan_summation_algorithm
-	compensation := make([]float64, no)
-
-	value := make([]float64, no)
+func cumulate(basis Basis, indices []uint64, surpluses []float64,
+	ni, no, nn uint, integral, compensation []float64) {
 
 	for i := uint(0); i < nn; i++ {
 		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
 		for j := uint(0); j < no; j++ {
+			// Kahan summation algorithm
+			// https://en.wikipedia.org/wiki/Kahan_summation_algorithm
 			delta := surpluses[i*no+j]*volume - compensation[j]
-			update := value[j] + delta
-			compensation[j] = (update - value[j]) - delta
-			value[j] = update
+			update := integral[j] + delta
+			compensation[j] = (update - integral[j]) - delta
+			integral[j] = update
 		}
 	}
-
-	return value
 }
 
 func measure(basis Basis, indices []uint64, ni uint) []float64 {
