@@ -33,7 +33,7 @@ type Progress struct {
 	Level     uint      // Interpolation level
 	Accepted  uint      // Number of accepted nodes
 	Rejected  uint      // Number of rejected nodes
-	Current   uint      // Number of nodes of the current iteration
+	Current   uint      // Number of nodes of the iteration
 	Integral  []float64 // Integral over the whole domain
 }
 

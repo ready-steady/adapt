@@ -6,14 +6,14 @@ import (
 
 // Surrogate is an interpolant for a function.
 type Surrogate struct {
-	Inputs    uint      // The number of inputs.
-	Outputs   uint      // The number of outputs.
-	Level     uint      // The level of interpolation.
-	Nodes     uint      // The number of nodes.
-	Indices   []uint64  // The indices of the nodes.
-	Surpluses []float64 // The hierarchical surpluses of the nodes.
-	Accept    []uint    // The number of nodes accepted at each iteration.
-	Reject    []uint    // The number of nodes rejected at each iteration.
+	Inputs    uint      // Number of inputs
+	Outputs   uint      // Number of outputs
+	Level     uint      // Level of interpolation
+	Nodes     uint      // Number of nodes
+	Indices   []uint64  // Indices of the nodes
+	Surpluses []float64 // Hierarchical surpluses
+	Accept    []uint    // Number of nodes accepted at each iteration
+	Reject    []uint    // Number of nodes rejected at each iteration
 }
 
 func newSurrogate(ni, no uint) *Surrogate {
