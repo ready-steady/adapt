@@ -85,6 +85,31 @@ func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	return values
 }
 
+func compact(indices []uint64, surpluses, scores []float64,
+	ni, no, nn uint) ([]uint64, []float64, []float64) {
+
+	na, ne := uint(0), nn
+	for i, j := uint(0), uint(0); i < nn; i++ {
+		if scores[j] < 0 {
+			j++
+			continue
+		}
+
+		if j > na {
+			copy(indices[j*ni:], indices[(j+1)*ni:ne*ni])
+			copy(surpluses[j*no:], surpluses[(j+1)*no:ne*no])
+			copy(scores[j:], scores[(j+1):ne])
+			ne -= j - na
+			j = na
+		}
+
+		na++
+		j++
+	}
+
+	return indices[:na*ni], surpluses[:na*no], scores[:na]
+}
+
 func cumulate(basis Basis, indices []uint64, surpluses []float64,
 	ni, no, nn uint, integral, compensation []float64) {
 
@@ -158,4 +183,12 @@ func socialize(grid Grid, history *hash, indices []uint64) []uint64 {
 	}
 
 	return siblings
+}
+
+func subtract(minuend, subtrahend []float64) []float64 {
+	difference := make([]float64, len(minuend))
+	for i := range minuend {
+		difference[i] = minuend[i] - subtrahend[i]
+	}
+	return difference
 }

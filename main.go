@@ -62,44 +62,51 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	indices := make([]uint64, nc*ni)
 	nodes := self.grid.Compute(indices)
 
+	integral, compensation := make([]float64, no), make([]float64, no)
+
 	for k := uint(0); nc > 0; k++ {
+		global := Global{
+			Integral: integral,
+		}
+
 		target.Monitor(k, na, nr, nc)
 
-		values := invoke(target.Compute, nodes, ni, no, nw)
-
-		approximations := approximate(self.basis, surrogate.Indices,
-			surrogate.Surpluses, nodes, ni, no, nw)
-
-		surpluses := make([]float64, nc*no)
-		for i := uint(0); i < nc*no; i++ {
-			surpluses[i] = values[i] - approximations[i]
-		}
+		surpluses := subtract(
+			invoke(target.Compute, nodes, ni, no, nw),
+			approximate(self.basis, surrogate.Indices,
+				surrogate.Surpluses, nodes, ni, no, nw),
+		)
 
 		scores := measure(self.basis, indices, ni)
 		for i := uint(0); i < nc; i++ {
-			scores[i] = target.Score(nodes[i*ni:(i+1)*ni],
-				surpluses[i*no:(i+1)*no], scores[i])
+			local := Local{
+				Node:    nodes[i*ni : (i+1)*ni],
+				Surplus: surpluses[i*no : (i+1)*no],
+				Volume:  scores[i],
+			}
+			scores[i] = target.Score(local, global)
 		}
 
-		accept := tracker.push(indices, scores)
+		indices, surpluses, scores = compact(indices, surpluses, scores, ni, no, nc)
 
-		nn := surrogate.push(indices, surpluses, accept)
-		na, nr = na+nn, nr+nc-nn
+		nn := uint(len(scores))
 
-		indices = tracker.pull()
-		indices = self.grid.Refine(indices)
-		indices = history.unseen(indices)
+		tracker.push(indices, scores)
+		surrogate.push(indices, surpluses)
+		surrogate.step(tracker.lnow, nn, nc-nn)
 
+		cumulate(self.basis, indices, surpluses, ni, no, nn, integral, compensation)
+
+		indices = history.unseen(self.grid.Refine(tracker.pull()))
 		if config.Balance {
 			indices = append(indices, balance(self.grid, history, indices)...)
 		}
 
 		nodes = self.grid.Compute(indices)
 
-		nc = uint(len(indices)) / ni
+		nn = uint(len(indices)) / ni
+		na, nr, nc = na+nn, nr+nc-nn, nn
 	}
-
-	surrogate.Level = tracker.lnow
 
 	return surrogate
 }

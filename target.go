@@ -15,23 +15,39 @@ type Target interface {
 	// current nodes, respectively.
 	Monitor(step, accept, reject, current uint)
 
-	// Score guides the local adaptivity. The function takes a node, the
-	// hierarchical surplus at the node, and the volume under the basis function
-	// corresponding to the node. The function returns the score of the node. A
-	// positive score represents the importance of refining the node. A zero
-	// score signifies that the node should not be refined. A negative score
-	// signifies that the node should be excluded from the interpolant.
-	Score(node, surplus []float64, volume float64) float64
+	// Score guides the local adaptivity. The function assigns a score to the
+	// behavior of the target function at a particular node of the underlying
+	// grid. A positive score signifies that the node should be refined, and the
+	// score is the importance of this refinement. A zero score signifies that
+	// the node should not be refined. A negative score signifies that the node
+	// should be excluded from the interpolant.
+	Score(local Local, global Global) float64
 }
 
-// GenericTarget is a generic quantity satisfying the Target interface.
+// Global contains global information about a target function.
+type Global struct {
+	// The integral over the whole domain.
+	Integral []float64
+}
+
+// Local contains local information about a target function.
+type Local struct {
+	// The node corresponding to the location that the structure describes.
+	Node []float64
+	// The hierarchical surplus at the node.
+	Surplus []float64
+	// The volume under the basis function corresponding to the node.
+	Volume float64
+}
+
+// GenericTarget is a generic target satisfying the Target interface.
 type GenericTarget struct {
 	Inputs  uint // > 0
 	Outputs uint // > 0
 
 	ComputeHandler func([]float64, []float64) // != nil
 	MonitorHandler func(uint, uint, uint, uint)
-	ScoreHandler   func([]float64, []float64, float64) float64 // != nil
+	ScoreHandler   func(Local, Global) float64 // != nil
 }
 
 // NewTarget returns a new generic quantity.
@@ -56,6 +72,6 @@ func (t *GenericTarget) Monitor(level, accept, reject, current uint) {
 	}
 }
 
-func (t *GenericTarget) Score(node, surplus []float64, volume float64) float64 {
-	return t.ScoreHandler(node, surplus, volume)
+func (t *GenericTarget) Score(local Local, global Global) float64 {
+	return t.ScoreHandler(local, global)
 }
