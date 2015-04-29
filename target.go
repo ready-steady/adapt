@@ -1,18 +1,18 @@
 package adapt
 
-// Target is a quantity to be interpolated.
+// Target represents a function to be interpolated.
 type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Compute evaluates the quantity at a point in [0, 1]^n.
+	// Compute evaluates the target function at a point in [0, 1]^n.
 	Compute(point, value []float64)
 
 	// Monitor keeps track of the interpolation progress. The function is called
-	// once for each interpolation step before the evaluation of the quantity at
-	// the nodes of that step. The arguments of the function are the step
-	// number, number of accepted nodes, number of rejected nodes, and number of
-	// current nodes, respectively.
+	// once for each interpolation step before evaluating the target function at
+	// the nodes of that step. The arguments are the step number, number of
+	// accepted nodes, number of rejected nodes, and number of current nodes,
+	// respectively.
 	Monitor(step, accept, reject, current uint)
 
 	// Score guides the local adaptivity. The function assigns a score to the
@@ -50,7 +50,7 @@ type GenericTarget struct {
 	ScoreHandler   func(Local, Global) float64 // != nil
 }
 
-// NewTarget returns a new generic quantity.
+// NewTarget returns a new generic target.
 func NewTarget(inputs, outputs uint) *GenericTarget {
 	return &GenericTarget{
 		Inputs:  inputs,

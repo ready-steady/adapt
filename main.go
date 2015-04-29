@@ -20,14 +20,14 @@ type Basis interface {
 	Integrate(index []uint64) float64
 }
 
-// Interpolator represents a particular instantiation of the algorithm.
+// Interpolator is an instance of the algorithm.
 type Interpolator struct {
 	grid   Grid
 	basis  Basis
 	config Config
 }
 
-// New creates an instance of the algorithm for the given configuration.
+// New creates a new interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	interpolator := &Interpolator{
 		grid:   grid,
@@ -46,7 +46,7 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return interpolator
 }
 
-// Compute constructs an interpolant for a quantity of interest.
+// Compute constructs an interpolant for a function.
 func (self *Interpolator) Compute(target Target) *Surrogate {
 	config := &self.config
 
@@ -111,18 +111,17 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	return surrogate
 }
 
-// Evaluate computes the values of a surrogate at a set of points.
+// Evaluate computes the values of an interpolant at a set of points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
 }
 
-// Integrate computes the integral of a surrogate over [0, 1]^n.
+// Integrate computes the integral of an interpolant over [0, 1]^n.
 func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
 	ni, no, nn := surrogate.Inputs, surrogate.Outputs, surrogate.Nodes
 
 	integral, compensation := make([]float64, no), make([]float64, no)
-
 	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses,
 		ni, no, nn, integral, compensation)
 

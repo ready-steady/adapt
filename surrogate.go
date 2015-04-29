@@ -4,29 +4,34 @@ import (
 	"fmt"
 )
 
-// Surrogate is the result of Compute, which represents an interpolant for a
-// function.
+// Surrogate is an interpolant for a function.
 type Surrogate struct {
-	Inputs  uint
+	// The number of inputs.
+	Inputs uint
+	// The number of outputs.
 	Outputs uint
-	Level   uint
-	Nodes   uint
-
-	Accept    []uint
-	Reject    []uint
-	Indices   []uint64
+	// The level of interpolation.
+	Level uint
+	// The number of nodes.
+	Nodes uint
+	// The indices of the nodes.
+	Indices []uint64
+	// The hierarchical surpluses of the nodes.
 	Surpluses []float64
+	// The number of nodes accepted at each interpolation step.
+	Accept []uint
+	// The number of nodes rejected at each interpolation step.
+	Reject []uint
 }
 
 func newSurrogate(ni, no uint) *Surrogate {
 	return &Surrogate{
-		Inputs:  ni,
-		Outputs: no,
-
-		Accept:    make([]uint, 0),
-		Reject:    make([]uint, 0),
+		Inputs:    ni,
+		Outputs:   no,
 		Indices:   make([]uint64, 0, ni),
 		Surpluses: make([]float64, 0, no),
+		Accept:    make([]uint, 0),
+		Reject:    make([]uint, 0),
 	}
 }
 
@@ -42,8 +47,7 @@ func (s *Surrogate) step(level, accepted, rejected uint) {
 	s.Reject = append(s.Reject, rejected)
 }
 
-// String returns a string containing human-friendly information about the
-// surrogate.
+// String returns human-friendly information about the interpolant.
 func (s *Surrogate) String() string {
 	return fmt.Sprintf("Surrogate{inputs: %d, outputs: %d, level: %d, nodes: %d}",
 		s.Inputs, s.Outputs, s.Level, s.Nodes)
