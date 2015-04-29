@@ -64,11 +64,11 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	integral, compensation := make([]float64, no), make([]float64, no)
 
-	for k := uint(0); nc > 0; k++ {
-		global := Global{
-			Integral: integral,
-		}
+	global := Global{
+		Integral: integral,
+	}
 
+	for k := uint(0); nc > 0; k++ {
 		target.Monitor(k, na, nr, nc)
 
 		surpluses := subtract(
