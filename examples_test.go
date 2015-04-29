@@ -27,8 +27,8 @@ func ExampleInterpolator_step() {
 			y[0] = 0
 		}
 	}
-	target.ScoreHandler = func(local Local, _ Global) float64 {
-		if math.Abs(local.Surplus[0]) > tolerance {
+	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
+		if math.Abs(location.Surplus[0]) > tolerance {
 			return 1
 		} else {
 			return 0
@@ -62,8 +62,8 @@ func ExampleInterpolator_cube() {
 			y[0] = 0
 		}
 	}
-	target.ScoreHandler = func(local Local, _ Global) float64 {
-		if math.Abs(local.Surplus[0]) > tolerance {
+	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
+		if math.Abs(location.Surplus[0]) > tolerance {
 			return 1
 		} else {
 			return 0

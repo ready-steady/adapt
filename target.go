@@ -10,10 +10,8 @@ type Target interface {
 
 	// Monitor keeps track of the interpolation progress. The function is called
 	// once for each iteration before evaluating the target function at the
-	// nodes of that iteration. The arguments are the iteration number, number
-	// of accepted nodes, number of rejected nodes, and number of current nodes,
-	// respectively.
-	Monitor(iteration, accept, reject, current uint)
+	// nodes of that iteration.
+	Monitor(*Progress)
 
 	// Score guides the local adaptivity. The function assigns a score to the
 	// behavior of the target function at a particular node of the underlying
@@ -21,23 +19,14 @@ type Target interface {
 	// score is the importance of this refinement. A zero score signifies that
 	// the node should not be refined. A negative score signifies that the node
 	// should be excluded from the interpolant.
-	Score(local Local, global Global) float64
+	Score(*Location, *Progress) float64
 }
 
-// Global contains global information about a target function.
-type Global struct {
-	// The integral over the whole domain.
-	Integral []float64
-}
-
-// Local contains local information about a target function.
-type Local struct {
-	// The node corresponding to the location that the structure describes.
-	Node []float64
-	// The hierarchical surplus at the node.
-	Surplus []float64
-	// The volume under the basis function corresponding to the node.
-	Volume float64
+// Location contains information about a spacial location.
+type Location struct {
+	Node    []float64 // The node corresponding to the location.
+	Surplus []float64 // The hierarchical surplus at the node.
+	Volume  float64   // The volume under the corresponding basis function.
 }
 
 // GenericTarget is a generic target satisfying the Target interface.
@@ -46,8 +35,8 @@ type GenericTarget struct {
 	Outputs uint // > 0
 
 	ComputeHandler func([]float64, []float64) // != nil
-	MonitorHandler func(uint, uint, uint, uint)
-	ScoreHandler   func(Local, Global) float64 // != nil
+	MonitorHandler func(*Progress)
+	ScoreHandler   func(*Location, *Progress) float64 // != nil
 }
 
 // NewTarget returns a new generic target.
@@ -66,12 +55,12 @@ func (t *GenericTarget) Compute(node, value []float64) {
 	t.ComputeHandler(node, value)
 }
 
-func (t *GenericTarget) Monitor(iteration, accept, reject, current uint) {
+func (t *GenericTarget) Monitor(progress *Progress) {
 	if t.MonitorHandler != nil {
-		t.MonitorHandler(iteration, accept, reject, current)
+		t.MonitorHandler(progress)
 	}
 }
 
-func (t *GenericTarget) Score(local Local, global Global) float64 {
-	return t.ScoreHandler(local, global)
+func (t *GenericTarget) Score(location *Location, progress *Progress) float64 {
+	return t.ScoreHandler(location, progress)
 }

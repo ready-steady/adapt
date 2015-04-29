@@ -27,6 +27,16 @@ type Interpolator struct {
 	config Config
 }
 
+// Progress contains information about the interpolation process.
+type Progress struct {
+	Iteration uint      // The iteration number.
+	Level     uint      // The interpolation level.
+	Accepted  uint      // The number of accepted nodes.
+	Rejected  uint      // The number of rejected nodes.
+	Current   uint      // The number of nodes of the current iteration.
+	Integral  []float64 // The integral over the whole domain.
+}
+
 // New creates a new interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	interpolator := &Interpolator{
@@ -64,12 +74,17 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	integral, compensation := make([]float64, no), make([]float64, no)
 
-	global := Global{
-		Integral: integral,
-	}
-
 	for k := uint(0); nc > 0; k++ {
-		target.Monitor(k, na, nr, nc)
+		progress := Progress{
+			Iteration: k,
+			Level:     tracker.lnow,
+			Accepted:  na,
+			Rejected:  nr,
+			Current:   nc,
+			Integral:  integral,
+		}
+
+		target.Monitor(&progress)
 
 		surpluses := subtract(
 			invoke(target.Compute, nodes, ni, no, nw),
@@ -79,12 +94,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		scores := measure(self.basis, indices, ni)
 		for i := uint(0); i < nc; i++ {
-			local := Local{
+			location := Location{
 				Node:    nodes[i*ni : (i+1)*ni],
 				Surplus: surpluses[i*no : (i+1)*no],
 				Volume:  scores[i],
 			}
-			scores[i] = target.Score(local, global)
+			scores[i] = target.Score(&location, &progress)
 		}
 
 		indices, surpluses, scores = compact(indices, surpluses, scores, ni, no, nc)
