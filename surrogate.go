@@ -18,9 +18,9 @@ type Surrogate struct {
 	Indices []uint64
 	// The hierarchical surpluses of the nodes.
 	Surpluses []float64
-	// The number of nodes accepted at each interpolation step.
+	// The number of nodes accepted at each iteration.
 	Accept []uint
-	// The number of nodes rejected at each interpolation step.
+	// The number of nodes rejected at each iteration.
 	Reject []uint
 }
 

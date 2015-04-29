@@ -9,11 +9,11 @@ type Target interface {
 	Compute(point, value []float64)
 
 	// Monitor keeps track of the interpolation progress. The function is called
-	// once for each interpolation step before evaluating the target function at
-	// the nodes of that step. The arguments are the step number, number of
-	// accepted nodes, number of rejected nodes, and number of current nodes,
+	// once for each iteration before evaluating the target function at the
+	// nodes of that iteration. The arguments are the iteration number, number
+	// of accepted nodes, number of rejected nodes, and number of current nodes,
 	// respectively.
-	Monitor(step, accept, reject, current uint)
+	Monitor(iteration, accept, reject, current uint)
 
 	// Score guides the local adaptivity. The function assigns a score to the
 	// behavior of the target function at a particular node of the underlying
@@ -66,9 +66,9 @@ func (t *GenericTarget) Compute(node, value []float64) {
 	t.ComputeHandler(node, value)
 }
 
-func (t *GenericTarget) Monitor(level, accept, reject, current uint) {
+func (t *GenericTarget) Monitor(iteration, accept, reject, current uint) {
 	if t.MonitorHandler != nil {
-		t.MonitorHandler(level, accept, reject, current)
+		t.MonitorHandler(iteration, accept, reject, current)
 	}
 }
 
