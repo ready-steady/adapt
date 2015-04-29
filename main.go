@@ -105,6 +105,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		indices, surpluses, scores = compact(indices, surpluses, scores, ni, no, nc)
 
 		nn := uint(len(scores))
+		na, nr = na+nn, nr+nc-nn
 
 		tracker.push(indices, scores)
 		surrogate.push(indices, surpluses)
@@ -119,8 +120,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		nodes = self.grid.Compute(indices)
 
-		nn = uint(len(indices)) / ni
-		na, nr, nc = na+nn, nr+nc-nn, nn
+		nc = uint(len(indices)) / ni
 	}
 
 	return surrogate
