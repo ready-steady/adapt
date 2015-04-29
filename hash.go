@@ -10,13 +10,13 @@ const (
 )
 
 type hash struct {
-	ni      int
+	ni      uint
 	mapping map[string]bool
 }
 
 func newHash(ni uint) *hash {
 	return &hash{
-		ni:      int(ni),
+		ni:      ni,
 		mapping: make(map[string]bool),
 	}
 }
@@ -24,7 +24,7 @@ func newHash(ni uint) *hash {
 func (h *hash) find(index []uint64) bool {
 	header := reflect.StringHeader{
 		Data: (*reflect.SliceHeader)(unsafe.Pointer(&index)).Data,
-		Len:  h.ni * sizeOfUint64,
+		Len:  int(h.ni) * sizeOfUint64,
 	}
 
 	_, ok := h.mapping[*(*string)(unsafe.Pointer(&header))]
@@ -37,7 +37,7 @@ func (h *hash) push(index []uint64) {
 
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
 	header.Data = ((*reflect.SliceHeader)(unsafe.Pointer(&index))).Data
-	header.Cap = h.ni * sizeOfUint64
+	header.Cap = int(h.ni) * sizeOfUint64
 	header.Len = header.Cap
 
 	h.mapping[string(bytes)] = true
@@ -45,34 +45,36 @@ func (h *hash) push(index []uint64) {
 
 func (h *hash) unseen(indices []uint64) []uint64 {
 	ni := h.ni
-	nn := len(indices) / ni
+	nn := uint(len(indices)) / ni
 	nb := ni * sizeOfUint64
 
 	var bytes []byte
 
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
-	header.Cap = nb
-	header.Len = nb
+	header.Cap = int(nb)
+	header.Len = int(nb)
 
 	offset := ((*reflect.SliceHeader)(unsafe.Pointer(&indices))).Data
 
-	ns := 0
-
-	for i, k := 0, 0; i < nn; i++ {
-		header.Data = offset + uintptr(k*nb)
+	na, ne := uint(0), nn
+	for i, j := uint(0), uint(0); i < nn; i++ {
+		header.Data = offset + uintptr(j*nb)
 		key := string(bytes)
-
-		if _, ok := h.mapping[key]; !ok {
-			h.mapping[key] = true
-			if k > ns {
-				copy(indices[ns*ni:], indices[k*ni:])
-				k = ns
-			}
-			ns++
+		if _, ok := h.mapping[key]; ok {
+			j++
+			continue
 		}
 
-		k++
+		h.mapping[key] = true
+		if j > na {
+			copy(indices[na*ni:], indices[j*ni:ne*ni])
+			ne -= j - na
+			j = na
+		}
+
+		na++
+		j++
 	}
 
-	return indices[:ns*ni]
+	return indices[:na*ni]
 }

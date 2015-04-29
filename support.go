@@ -137,24 +137,24 @@ func balance(grid Grid, history *hash, indices []uint64) []uint64 {
 
 func socialize(grid Grid, history *hash, indices []uint64) []uint64 {
 	ni := history.ni
-	nn := len(indices) / ni
+	nn := uint(len(indices)) / ni
 
 	siblings := make([]uint64, 0, ni)
 
-	for i := 0; i < nn; i++ {
+	for i := uint(0); i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
 
-		for j := 0; j < ni; j++ {
+		for j := uint(0); j < ni; j++ {
 			pair := index[j]
 
-			grid.Parent(index, uint(j))
+			grid.Parent(index, j)
 			if !history.find(index) {
 				index[j] = pair
 				continue
 			}
 			index[j] = pair
 
-			grid.Sibling(index, uint(j))
+			grid.Sibling(index, j)
 			if !history.find(index) {
 				history.push(index)
 				siblings = append(siblings, index...)
