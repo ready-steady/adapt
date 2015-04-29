@@ -8,10 +8,10 @@ import (
 type Surrogate struct {
 	Inputs    uint      // Number of inputs
 	Outputs   uint      // Number of outputs
-	Level     uint      // Level of interpolation
+	Level     uint      // Interpolation level
 	Nodes     uint      // Number of nodes
 	Indices   []uint64  // Indices of the nodes
-	Surpluses []float64 // Hierarchical surpluses
+	Surpluses []float64 // Hierarchical surpluses of the nodes
 	Accept    []uint    // Number of nodes accepted at each iteration
 	Reject    []uint    // Number of nodes rejected at each iteration
 }
