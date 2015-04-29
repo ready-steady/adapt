@@ -92,9 +92,10 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 				surrogate.Surpluses, nodes, ni, no, nw),
 		)
 
+		location := Location{}
 		scores := measure(self.basis, indices, ni)
 		for i := uint(0); i < nc; i++ {
-			location := Location{
+			location = Location{
 				Node:    nodes[i*ni : (i+1)*ni],
 				Surplus: surpluses[i*no : (i+1)*no],
 				Volume:  scores[i],
