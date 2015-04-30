@@ -130,7 +130,6 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni
 
 	volumes := make([]float64, nn)
-
 	for i := uint(0); i < nn; i++ {
 		volumes[i] = basis.Integrate(indices[i*ni : (i+1)*ni])
 	}
@@ -159,7 +158,6 @@ func socialize(grid Grid, history *hash, indices []uint64) []uint64 {
 	nn := uint(len(indices)) / ni
 
 	siblings := make([]uint64, 0, ni)
-
 	for i := uint(0); i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
 
