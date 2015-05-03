@@ -71,7 +71,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	indices := make([]uint64, nc*ni)
 	nodes := self.grid.Compute(indices)
 
-	integral, compensation := make([]float64, no), make([]float64, no)
+	integral := make([]float64, no)
 
 	for k := uint(0); nc > 0; k++ {
 		progress := Progress{
@@ -110,7 +110,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surrogate.push(indices, surpluses)
 		surrogate.step(tracker.lnow, nn, nc-nn)
 
-		cumulate(self.basis, indices, surpluses, ni, no, nn, integral, compensation)
+		cumulate(self.basis, indices, surpluses, ni, no, nn, integral)
 
 		indices = history.unseen(self.grid.Refine(tracker.pull()))
 		if config.Balance {
@@ -135,9 +135,8 @@ func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []flo
 func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
 	ni, no, nn := surrogate.Inputs, surrogate.Outputs, surrogate.Nodes
 
-	integral, compensation := make([]float64, no), make([]float64, no)
-	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses,
-		ni, no, nn, integral, compensation)
+	integral := make([]float64, no)
+	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, nn, integral)
 
 	return integral
 }

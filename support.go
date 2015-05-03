@@ -17,15 +17,7 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 
 	for i := uint(0); i < nw; i++ {
 		go func() {
-			// Kahan summation algorithm
-			// https://en.wikipedia.org/wiki/Kahan_summation_algorithm
-			compensation := make([]float64, no)
-
 			for j := range jobs {
-				for k := uint(0); k < no; k++ {
-					compensation[k] = 0
-				}
-
 				point := points[j*ni : (j+1)*ni]
 				value := values[j*no : (j+1)*no]
 
@@ -35,10 +27,7 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 						continue
 					}
 					for l := uint(0); l < no; l++ {
-						delta := weight*surpluses[k*no+l] - compensation[l]
-						update := value[l] + delta
-						compensation[l] = (update - value[l]) - delta
-						value[l] = update
+						value[l] += weight * surpluses[k*no+l]
 					}
 				}
 
@@ -110,18 +99,13 @@ func compact(indices []uint64, surpluses, scores []float64,
 	return indices[:na*ni], surpluses[:na*no], scores[:na]
 }
 
-func cumulate(basis Basis, indices []uint64, surpluses []float64,
-	ni, no, nn uint, integral, compensation []float64) {
+func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no, nn uint,
+	integral []float64) {
 
 	for i := uint(0); i < nn; i++ {
 		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
 		for j := uint(0); j < no; j++ {
-			// Kahan summation algorithm
-			// https://en.wikipedia.org/wiki/Kahan_summation_algorithm
-			delta := surpluses[i*no+j]*volume - compensation[j]
-			update := integral[j] + delta
-			compensation[j] = (update - integral[j]) - delta
-			integral[j] = update
+			integral[j] += surpluses[i*no+j] * volume
 		}
 	}
 }
