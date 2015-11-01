@@ -29,6 +29,7 @@ type Interpolator struct {
 
 // Progress contains information about the interpolation process.
 type Progress struct {
+	Level     uint      // Interpolation level
 	Iteration uint      // Iteration number
 	Accepted  uint      // Number of accepted nodes
 	Rejected  uint      // Number of rejected nodes
@@ -75,6 +76,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	for k := uint(0); nc > 0; k++ {
 		progress := Progress{
+			Level:     tracker.lnow,
 			Iteration: k,
 			Accepted:  na,
 			Rejected:  nr,
