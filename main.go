@@ -86,8 +86,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		surpluses := subtract(
 			invoke(target.Compute, nodes, ni, no, nw),
-			approximate(self.basis, surrogate.Indices,
-				surrogate.Surpluses, nodes, ni, no, nw),
+			approximate(self.basis, surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw),
 		)
 
 		location := Location{}
