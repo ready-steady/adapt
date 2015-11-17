@@ -39,7 +39,7 @@ func (c *Closed) Compute(index []uint64, point []float64) float64 {
 	return value
 }
 
-// Integrate computes the integral of a basis function in [0, 1]^n.
+// Integrate computes the integral of a basis function over the whole domain.
 func (c *Closed) Integrate(index []uint64) float64 {
 	nd := c.nd
 

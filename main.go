@@ -8,16 +8,28 @@ import (
 
 // Grid is a sparse grid in [0, 1]^n.
 type Grid interface {
-	Compute(indices []uint64) []float64
-	Refine(indices []uint64) []uint64
-	Parent(index []uint64, i uint)
-	Sibling(index []uint64, i uint)
+	// Compute returns the nodes corresponding to the given indices.
+	Compute([]uint64) []float64
+
+	// Refine returns the child indices corresponding to a set of parent
+	// indices.
+	Refine([]uint64) []uint64
+
+	// Parent transforms an index into its parent index in the ith dimension.
+	Parent([]uint64, uint)
+
+	// Sibling transforms an index into its sibling index in the ith dimension.
+	Sibling([]uint64, uint)
 }
 
-// Basis is a functional basis in [0, 1]^n.
+// Basis is a functional basis in [0, 1]^n or (0, 1)^n.
 type Basis interface {
-	Compute(index []uint64, point []float64) float64
-	Integrate(index []uint64) float64
+	// Compute evaluates the value of a basis function at a point.
+	Compute([]uint64, []float64) float64
+
+	// Integrate computes the integral of a basis function over the whole
+	// domain.
+	Integrate([]uint64) float64
 }
 
 // Interpolator is an instance of the algorithm.
@@ -29,11 +41,11 @@ type Interpolator struct {
 
 // Progress contains information about the interpolation process.
 type Progress struct {
-	Level     uint      // Interpolation level
+	Level     uint      // Reached level
 	Iteration uint      // Iteration number
 	Accepted  uint      // Number of accepted nodes
 	Rejected  uint      // Number of rejected nodes
-	Current   uint      // Number of nodes of the iteration
+	Current   uint      // Number of current nodes
 	Integral  []float64 // Integral over the whole domain
 }
 
