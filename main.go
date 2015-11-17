@@ -6,7 +6,17 @@ import (
 	"runtime"
 )
 
-// Grid is a sparse grid in [0, 1]^n or (0, 1)^n.
+// Basis is a functional basis.
+type Basis interface {
+	// Compute evaluates the value of a basis function at a point.
+	Compute([]uint64, []float64) float64
+
+	// Integrate computes the integral of a basis function over the whole
+	// domain.
+	Integrate([]uint64) float64
+}
+
+// Grid is a sparse grid.
 type Grid interface {
 	// Compute returns the nodes corresponding to the given indices.
 	Compute([]uint64) []float64
@@ -22,21 +32,11 @@ type Grid interface {
 	Sibling([]uint64, uint)
 }
 
-// Basis is a functional basis in [0, 1]^n or (0, 1)^n.
-type Basis interface {
-	// Compute evaluates the value of a basis function at a point.
-	Compute([]uint64, []float64) float64
-
-	// Integrate computes the integral of a basis function over the whole
-	// domain.
-	Integrate([]uint64) float64
-}
-
 // Interpolator is an instance of the algorithm.
 type Interpolator struct {
-	grid   Grid
-	basis  Basis
 	config Config
+	basis  Basis
+	grid   Grid
 }
 
 // Progress contains information about the interpolation process.
@@ -52,9 +52,9 @@ type Progress struct {
 // New creates a new interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	interpolator := &Interpolator{
-		grid:   grid,
-		basis:  basis,
 		config: *config,
+		basis:  basis,
+		grid:   grid,
 	}
 
 	config = &interpolator.config
@@ -144,7 +144,7 @@ func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []flo
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
 }
 
-// Integrate computes the integral of an interpolant over [0, 1]^n.
+// Integrate computes the integral of an interpolant over the whole domain.
 func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
 	ni, no, nn := surrogate.Inputs, surrogate.Outputs, surrogate.Nodes
 
