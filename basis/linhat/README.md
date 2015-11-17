@@ -5,4 +5,4 @@ hat function on the unit hypercube.
 
 ## [Documentation][doc]
 
-[doc]: http://godoc.org/github.com/ready-steady/numeric/basis/linhat
+[doc]: http://godoc.org/github.com/ready-steady/adapt/basis/linhat

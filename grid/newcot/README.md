@@ -5,4 +5,4 @@ hypercube.
 
 ## [Documentation][doc]
 
-[doc]: http://godoc.org/github.com/ready-steady/numeric/grid/newcot
+[doc]: http://godoc.org/github.com/ready-steady/adapt/grid/newcot
