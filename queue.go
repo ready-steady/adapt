@@ -34,11 +34,11 @@ func newQueue(ni uint, c *Config) *queue {
 	}
 }
 
-func (q *queue) push(indices []uint64, scores []float64) {
-	ni := q.ni
+func (self *queue) push(indices []uint64, scores []float64) {
+	ni := self.ni
 	nn, nq := len(indices)/ni, 0
 
-	lnow, lmin, lmax := q.lnow, q.lmin, q.lmax
+	lnow, lmin, lmax := self.lnow, self.lmin, self.lmax
 
 	for i := 0; i < nn; i++ {
 		index := indices[i*ni : (i+1)*ni]
@@ -60,11 +60,11 @@ func (q *queue) push(indices []uint64, scores []float64) {
 			score: score,
 		}
 
-		var previous, current *element = nil, q.root
+		var previous, current *element = nil, self.root
 		for {
 			if current == nil || current.score < score {
 				if previous == nil {
-					q.root = candidate
+					self.root = candidate
 				} else {
 					previous.next = candidate
 				}
@@ -77,26 +77,26 @@ func (q *queue) push(indices []uint64, scores []float64) {
 		nq++
 	}
 
-	q.nn += nq
-	q.lnow = lnow
+	self.nn += nq
+	self.lnow = lnow
 }
 
-func (q *queue) pull() []uint64 {
-	ni, nn := q.ni, q.nn
-	if q.lnow >= q.lmin {
-		nn = int(math.Ceil(q.rate * float64(nn)))
+func (self *queue) pull() []uint64 {
+	ni, nn := self.ni, self.nn
+	if self.lnow >= self.lmin {
+		nn = int(math.Ceil(self.rate * float64(nn)))
 	}
 
 	indices := make([]uint64, nn*ni)
 
-	current := q.root
+	current := self.root
 	for i := 0; i < nn; i++ {
 		copy(indices[i*ni:], current.index)
 		current = current.next
 	}
 
-	q.root = current
-	q.nn -= nn
+	self.root = current
+	self.nn -= nn
 
 	return indices
 }

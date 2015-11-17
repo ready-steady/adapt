@@ -27,8 +27,8 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 }
 
 // Refine returns the child indices corresponding to a set of parent indices.
-func (c *Closed) Refine(indices []uint64) []uint64 {
-	nd := c.nd
+func (self *Closed) Refine(indices []uint64) []uint64 {
+	nd := self.nd
 	nn := len(indices) / nd
 
 	childIndices := make([]uint64, 2*nn*nd*nd)

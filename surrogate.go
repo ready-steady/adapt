@@ -27,20 +27,20 @@ func newSurrogate(ni, no uint) *Surrogate {
 	}
 }
 
-func (s *Surrogate) push(indices []uint64, surpluses []float64) {
-	s.Indices = append(s.Indices, indices...)
-	s.Surpluses = append(s.Surpluses, surpluses...)
+func (self *Surrogate) push(indices []uint64, surpluses []float64) {
+	self.Indices = append(self.Indices, indices...)
+	self.Surpluses = append(self.Surpluses, surpluses...)
 }
 
-func (s *Surrogate) step(level, accepted, rejected uint) {
-	s.Level = level
-	s.Nodes += accepted
-	s.Accept = append(s.Accept, accepted)
-	s.Reject = append(s.Reject, rejected)
+func (self *Surrogate) step(level, accepted, rejected uint) {
+	self.Level = level
+	self.Nodes += accepted
+	self.Accept = append(self.Accept, accepted)
+	self.Reject = append(self.Reject, rejected)
 }
 
 // String returns human-friendly information about the interpolant.
-func (s *Surrogate) String() string {
+func (self *Surrogate) String() string {
 	return fmt.Sprintf("Surrogate{inputs: %d, outputs: %d, level: %d, nodes: %d}",
-		s.Inputs, s.Outputs, s.Level, s.Nodes)
+		self.Inputs, self.Outputs, self.Level, self.Nodes)
 }

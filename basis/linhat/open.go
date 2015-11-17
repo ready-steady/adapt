@@ -11,8 +11,8 @@ func NewOpen(dimensions uint) *Open {
 }
 
 // Compute evaluates the value of a basis function at a point.
-func (o *Open) Compute(index []uint64, point []float64) float64 {
-	nd := o.nd
+func (self *Open) Compute(index []uint64, point []float64) float64 {
+	nd := self.nd
 
 	value := 1.0
 
@@ -58,8 +58,8 @@ func (o *Open) Compute(index []uint64, point []float64) float64 {
 }
 
 // Integrate computes the integral of a basis function over the whole domain.
-func (o *Open) Integrate(index []uint64) float64 {
-	nd := o.nd
+func (self *Open) Integrate(index []uint64) float64 {
+	nd := self.nd
 
 	value := 1.0
 

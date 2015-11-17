@@ -47,20 +47,20 @@ func NewTarget(inputs, outputs uint) *GenericTarget {
 	}
 }
 
-func (t *GenericTarget) Dimensions() (uint, uint) {
-	return t.Inputs, t.Outputs
+func (self *GenericTarget) Dimensions() (uint, uint) {
+	return self.Inputs, self.Outputs
 }
 
-func (t *GenericTarget) Compute(node, value []float64) {
-	t.ComputeHandler(node, value)
+func (self *GenericTarget) Compute(node, value []float64) {
+	self.ComputeHandler(node, value)
 }
 
-func (t *GenericTarget) Monitor(progress *Progress) {
-	if t.MonitorHandler != nil {
-		t.MonitorHandler(progress)
+func (self *GenericTarget) Monitor(progress *Progress) {
+	if self.MonitorHandler != nil {
+		self.MonitorHandler(progress)
 	}
 }
 
-func (t *GenericTarget) Score(location *Location, progress *Progress) float64 {
-	return t.ScoreHandler(location, progress)
+func (self *GenericTarget) Score(location *Location, progress *Progress) float64 {
+	return self.ScoreHandler(location, progress)
 }
