@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-// Grid is a sparse grid in [0, 1]^n.
+// Grid is a sparse grid in [0, 1]^n or (0, 1)^n.
 type Grid interface {
 	// Compute returns the nodes corresponding to the given indices.
 	Compute([]uint64) []float64
