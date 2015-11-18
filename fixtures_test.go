@@ -34,10 +34,10 @@ type fixture struct {
 	integral []float64
 }
 
-func (f *fixture) initialize() {
-	f.surrogate.Indices = make([]uint64, len(f.levels))
-	for i := range f.levels {
-		f.surrogate.Indices[i] = uint64(f.levels[i]) | uint64(f.orders[i])<<32
+func (self *fixture) initialize() {
+	self.surrogate.Indices = make([]uint64, len(self.levels))
+	for i := range self.levels {
+		self.surrogate.Indices[i] = uint64(self.levels[i]) | uint64(self.orders[i])<<32
 	}
 }
 
@@ -725,11 +725,11 @@ var fixtureBox = fixture{
 
 type kraichnanOrszagTarget struct{}
 
-func (t *kraichnanOrszagTarget) Dimensions() (uint, uint) {
+func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
 	return 3, 301 * 3 * 2
 }
 
-func (t *kraichnanOrszagTarget) Compute(y0, ys []float64) {
+func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 	dydt := func(_ float64, y, f []float64) {
 		f[0] = y[0] * y[2]
 		f[1] = -y[1] * y[2]
@@ -759,16 +759,16 @@ func (t *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 	}
 }
 
-func (t *kraichnanOrszagTarget) Monitor(*Progress) bool {
+func (_ *kraichnanOrszagTarget) Monitor(*Progress) bool {
 	return true
 }
 
-func (t *kraichnanOrszagTarget) Score(location *Location, _ *Progress) float64 {
+func (self *kraichnanOrszagTarget) Score(location *Location, _ *Progress) float64 {
 	const (
 		tolerance = 1e-2
 	)
 
-	_, no := t.Dimensions()
+	_, no := self.Dimensions()
 
 	if math.Abs(location.Surplus[no-5]) > tolerance {
 		return 1
