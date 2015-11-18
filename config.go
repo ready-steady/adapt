@@ -7,11 +7,11 @@ type Config struct {
 	// each iteration.
 	Rate float64 // ⊆ (0, 1]
 
-	// The minimal level of interpolation. The nodes that belong to lower levels
+	// The minimum level of interpolation. The nodes that belong to lower levels
 	// are unconditionally included in the surrogate.
 	MinLevel uint
 
-	// The maximal level of interpolation. The nodes that belong to this level
+	// The maximum level of interpolation. The nodes that belong to this level
 	// are never refined.
 	MaxLevel uint
 
