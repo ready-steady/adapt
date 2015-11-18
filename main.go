@@ -96,7 +96,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			Integral:  integral,
 		}
 
-		target.Monitor(&progress)
+		if !target.Monitor(&progress) {
+			break
+		}
 
 		surpluses := subtract(
 			invoke(target.Compute, nodes, ni, no, nw),
