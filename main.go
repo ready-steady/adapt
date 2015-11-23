@@ -86,10 +86,11 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	integral := make([]float64, no)
 
-	for k := uint(0); nc > 0; k++ {
+	iteration := uint(0)
+	for nc > 0 && na+nr+nc <= config.MaxEvaluations && iteration < config.MaxIterations {
 		progress := Progress{
 			Level:     tracker.lnow,
-			Iteration: k,
+			Iteration: iteration,
 			Accepted:  na,
 			Rejected:  nr,
 			Current:   nc,
@@ -133,6 +134,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		nodes = self.grid.Compute(indices)
 
 		nc = uint(len(indices)) / ni
+		iteration++
 	}
 
 	return surrogate

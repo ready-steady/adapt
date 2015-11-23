@@ -15,6 +15,15 @@ type Config struct {
 	// are never refined.
 	MaxLevel uint
 
+	// The maximum number of target-function evaluations. The limit is not
+	// enforced precisely. The process stops when undertaking the next iteration
+	// would violate the limit.
+	MaxEvaluations uint
+
+	// The maximum number of iterations. Depending on Rate, an iteration may or
+	// may not correspond to a level.
+	MaxIterations uint
+
 	// A flag to enable grid balancing. If it is set to true, additional nodes
 	// are added at each iteration to balance the underlying grid. Note that
 	// Target.Score should not reject any nodes in this case.
@@ -28,8 +37,10 @@ type Config struct {
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		Rate:     1,
-		MinLevel: 1,
-		MaxLevel: 9,
+		Rate:           1,
+		MinLevel:       1,
+		MaxLevel:       9,
+		MaxEvaluations: ^uint(0),
+		MaxIterations:  ^uint(0),
 	}
 }
