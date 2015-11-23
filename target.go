@@ -5,14 +5,13 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Compute evaluates the target function at a point.
+	// Compute evaluates the target function at a point in [0, 1]^n.
 	Compute(point, value []float64)
 
 	// Monitor keeps track of the interpolation progress. The function is called
 	// once for each iteration before evaluating the target function at the
-	// nodes of that iteration. The function returns true if the interpolation
-	// process should continue and false otherwise.
-	Monitor(*Progress) bool
+	// nodes of that iteration.
+	Monitor(*Progress)
 
 	// Score guides the local adaptivity. The function assigns a score to the
 	// behavior of the target function at a particular node of the underlying
@@ -36,7 +35,7 @@ type GenericTarget struct {
 	Outputs uint // > 0
 
 	ComputeHandler func([]float64, []float64) // != nil
-	MonitorHandler func(*Progress) bool
+	MonitorHandler func(*Progress)
 	ScoreHandler   func(*Location, *Progress) float64 // != nil
 }
 
@@ -56,11 +55,10 @@ func (self *GenericTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *GenericTarget) Monitor(progress *Progress) bool {
+func (self *GenericTarget) Monitor(progress *Progress) {
 	if self.MonitorHandler != nil {
-		return self.MonitorHandler(progress)
+		self.MonitorHandler(progress)
 	}
-	return true
 }
 
 func (self *GenericTarget) Score(location *Location, progress *Progress) float64 {

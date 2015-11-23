@@ -759,9 +759,7 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 	}
 }
 
-func (_ *kraichnanOrszagTarget) Monitor(*Progress) bool {
-	return true
-}
+func (t *kraichnanOrszagTarget) Monitor(*Progress) {}
 
 func (self *kraichnanOrszagTarget) Score(location *Location, _ *Progress) float64 {
 	const (
