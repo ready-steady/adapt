@@ -51,14 +51,11 @@ func (self *queue) push(indices []uint64, scores []float64) {
 		if l > lnow {
 			lnow = l
 		}
-		if l >= lmin && (score == 0 || l == lmax) {
+		if l >= lmin && (score <= 0 || l >= lmax) {
 			continue // should not be refined
 		}
 
-		candidate := &element{
-			index: index,
-			score: score,
-		}
+		candidate := &element{index: index, score: score}
 
 		var previous, current *element = nil, self.root
 		for {
