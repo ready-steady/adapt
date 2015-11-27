@@ -48,17 +48,13 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 
 func balance(grid Grid, history *hash, indices []uint64) []uint64 {
 	neighbors := make([]uint64, 0)
-
 	for {
 		indices = socialize(grid, history, indices)
-
 		if len(indices) == 0 {
 			break
 		}
-
 		neighbors = append(neighbors, indices...)
 	}
-
 	return neighbors
 }
 
@@ -128,12 +124,10 @@ func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 
 func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni
-
 	volumes := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {
 		volumes[i] = basis.Integrate(indices[i*ni : (i+1)*ni])
 	}
-
 	return volumes
 }
 
