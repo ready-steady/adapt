@@ -46,32 +46,20 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 	return values
 }
 
-func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
-	nn := uint(len(nodes)) / ni
+func balance(grid Grid, history *hash, indices []uint64) []uint64 {
+	neighbors := make([]uint64, 0)
 
-	values := make([]float64, nn*no)
+	for {
+		indices = socialize(grid, history, indices)
 
-	jobs := make(chan uint, nn)
-	group := sync.WaitGroup{}
-	group.Add(int(nn))
+		if len(indices) == 0 {
+			break
+		}
 
-	for i := uint(0); i < nw; i++ {
-		go func() {
-			for j := range jobs {
-				compute(nodes[j*ni:(j+1)*ni], values[j*no:(j+1)*no])
-				group.Done()
-			}
-		}()
+		neighbors = append(neighbors, indices...)
 	}
 
-	for i := uint(0); i < nn; i++ {
-		jobs <- i
-	}
-
-	group.Wait()
-	close(jobs)
-
-	return values
+	return neighbors
 }
 
 func compact(indices []uint64, surpluses, scores []float64,
@@ -110,6 +98,34 @@ func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no, nn uin
 	}
 }
 
+func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
+	nn := uint(len(nodes)) / ni
+
+	values := make([]float64, nn*no)
+
+	jobs := make(chan uint, nn)
+	group := sync.WaitGroup{}
+	group.Add(int(nn))
+
+	for i := uint(0); i < nw; i++ {
+		go func() {
+			for j := range jobs {
+				compute(nodes[j*ni:(j+1)*ni], values[j*no:(j+1)*no])
+				group.Done()
+			}
+		}()
+	}
+
+	for i := uint(0); i < nn; i++ {
+		jobs <- i
+	}
+
+	group.Wait()
+	close(jobs)
+
+	return values
+}
+
 func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni
 
@@ -119,22 +135,6 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	}
 
 	return volumes
-}
-
-func balance(grid Grid, history *hash, indices []uint64) []uint64 {
-	neighbors := make([]uint64, 0)
-
-	for {
-		indices = socialize(grid, history, indices)
-
-		if len(indices) == 0 {
-			break
-		}
-
-		neighbors = append(neighbors, indices...)
-	}
-
-	return neighbors
 }
 
 func socialize(grid Grid, history *hash, indices []uint64) []uint64 {
