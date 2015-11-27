@@ -73,9 +73,9 @@ func compact(indices []uint64, surpluses, scores []float64,
 		}
 
 		if j > na {
-			copy(indices[j*ni:], indices[(j+1)*ni:ne*ni])
-			copy(surpluses[j*no:], surpluses[(j+1)*no:ne*no])
-			copy(scores[j:], scores[(j+1):ne])
+			copy(indices[na*ni:], indices[j*ni:ne*ni])
+			copy(surpluses[na*no:], surpluses[j*no:ne*no])
+			copy(scores[na:], scores[j:ne])
 			ne -= j - na
 			j = na
 		}
