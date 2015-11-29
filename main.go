@@ -65,8 +65,8 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	if config.Workers == 0 {
 		config.Workers = uint(runtime.GOMAXPROCS(0))
 	}
-	if config.Rate == 0 {
-		config.Rate = 1
+	if config.Rate == 0.0 {
+		config.Rate = 1.0
 	}
 
 	return interpolator
