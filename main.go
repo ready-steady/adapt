@@ -123,7 +123,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		tracker.push(indices, scores)
 		surrogate.push(indices, surpluses)
-		surrogate.step(tracker.lnow, nn, na-nn)
+		surrogate.step(tracker.lnow, nn)
 
 		cumulate(self.basis, indices, surpluses, ni, no, nn, integral)
 

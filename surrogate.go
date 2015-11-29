@@ -12,8 +12,7 @@ type Surrogate struct {
 	Nodes     uint      // Number of nodes
 	Indices   []uint64  // Indices of the nodes
 	Surpluses []float64 // Hierarchical surpluses of the nodes
-	Accept    []uint    // Number of nodes accepted at each iteration
-	Reject    []uint    // Number of nodes rejected at each iteration
+	Passive   []uint    // Number of passive nodes at each iteration
 }
 
 func newSurrogate(ni, no uint) *Surrogate {
@@ -22,8 +21,7 @@ func newSurrogate(ni, no uint) *Surrogate {
 		Outputs:   no,
 		Indices:   make([]uint64, 0, ni),
 		Surpluses: make([]float64, 0, no),
-		Accept:    make([]uint, 0),
-		Reject:    make([]uint, 0),
+		Passive:   make([]uint, 0),
 	}
 }
 
@@ -32,11 +30,10 @@ func (self *Surrogate) push(indices []uint64, surpluses []float64) {
 	self.Surpluses = append(self.Surpluses, surpluses...)
 }
 
-func (self *Surrogate) step(level, accepted, rejected uint) {
+func (self *Surrogate) step(level, passive uint) {
 	self.Level = level
-	self.Nodes += accepted
-	self.Accept = append(self.Accept, accepted)
-	self.Reject = append(self.Reject, rejected)
+	self.Nodes += passive
+	self.Passive = append(self.Passive, passive)
 }
 
 // String returns human-friendly information about the interpolant.
