@@ -1,5 +1,5 @@
 package linhat
 
-func compose(level, order uint32) uint64 {
-	return uint64(level) | uint64(order)<<32
+func compose(level, order uint64) uint64 {
+	return level | order<<LEVEL_SIZE
 }
