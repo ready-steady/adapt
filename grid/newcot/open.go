@@ -1,5 +1,9 @@
 package newcot
 
+import (
+	"fmt"
+)
+
 // Open represents an instance of the grid in (0, 1)^n.
 type Open struct {
 	nd int
@@ -13,11 +17,9 @@ func NewOpen(dimensions uint) *Open {
 // Compute returns the nodes corresponding to the given indices.
 func (_ *Open) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
-
 	for i := range nodes {
 		nodes[i] = float64(indices[i]>>32+1) / float64(uint64(2)<<(0xFFFFFFFF&indices[i]))
 	}
-
 	return nodes
 }
 
@@ -29,9 +31,12 @@ func (self *Open) Refine(indices []uint64) []uint64 {
 	childIndices := make([]uint64, 2*nn*nd*nd)
 
 	nc := 0
-	push := func(p, d int, pair uint64) {
+	push := func(p, d int, level, order uint64) {
+		if (0xFFFFFFFF<<32)&level != 0 || (0xFFFFFFFF<<32)&order != 0 {
+			panic(fmt.Sprintf("the level %d and order %d overflow uint64", level, order))
+		}
 		copy(childIndices[nc*nd:], indices[p*nd:(p+1)*nd])
-		childIndices[nc*nd+d] = pair
+		childIndices[nc*nd+d] = level | order<<32
 		nc++
 	}
 
@@ -39,9 +44,8 @@ func (self *Open) Refine(indices []uint64) []uint64 {
 		for j := 0; j < nd; j++ {
 			level := 0xFFFFFFFF & indices[i*nd+j]
 			order := indices[i*nd+j] >> 32
-
-			push(i, j, (level+1)|(2*order)<<32)
-			push(i, j, (level+1)|(2*order+2)<<32)
+			push(i, j, level+1, 2*order)
+			push(i, j, level+1, 2*order+2)
 		}
 	}
 
