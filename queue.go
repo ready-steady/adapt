@@ -23,14 +23,14 @@ type element struct {
 	next  *element
 }
 
-func newQueue(ni uint, c *Config) *queue {
+func newQueue(ni uint, config *Config) *queue {
 	return &queue{
 		ni: int(ni),
 
-		lmin: c.MinLevel,
-		lmax: c.MaxLevel,
+		lmin: config.MinLevel,
+		lmax: config.MaxLevel,
 
-		rate: c.Rate,
+		rate: config.Rate,
 	}
 }
 
@@ -51,7 +51,7 @@ func (self *queue) push(indices []uint64, scores []float64) {
 		if l > lnow {
 			lnow = l
 		}
-		if l >= lmin && (score <= 0 || l >= lmax) {
+		if l >= lmin && (score <= 0.0 || l >= lmax) {
 			continue // should not be refined
 		}
 

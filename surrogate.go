@@ -10,7 +10,7 @@ type Surrogate struct {
 	Outputs   uint      // Number of outputs
 	Level     uint      // Interpolation level
 	Nodes     uint      // Number of nodes
-	Passive   []uint    // Number of passive nodes at each iteration
+	Active    []uint    // Number of active nodes at each iteration
 	Indices   []uint64  // Indices of the nodes
 	Surpluses []float64 // Hierarchical surpluses of the nodes
 }
@@ -19,7 +19,7 @@ func newSurrogate(ni, no uint) *Surrogate {
 	return &Surrogate{
 		Inputs:    ni,
 		Outputs:   no,
-		Passive:   make([]uint, 0),
+		Active:    make([]uint, 0),
 		Indices:   make([]uint64, 0, ni),
 		Surpluses: make([]float64, 0, no),
 	}
@@ -30,10 +30,10 @@ func (self *Surrogate) push(indices []uint64, surpluses []float64) {
 	self.Surpluses = append(self.Surpluses, surpluses...)
 }
 
-func (self *Surrogate) step(level, passive uint) {
+func (self *Surrogate) step(level, active uint) {
 	self.Level = level
-	self.Nodes += passive
-	self.Passive = append(self.Passive, passive)
+	self.Nodes += active
+	self.Active = append(self.Active, active)
 }
 
 // String returns human-friendly information about the interpolant.
