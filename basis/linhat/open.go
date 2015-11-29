@@ -19,7 +19,7 @@ func (self *Open) Compute(index []uint64, point []float64) float64 {
 	for i := 0; i < nd; i++ {
 		level := LEVEL_MASK & index[i]
 		if level == 0 {
-			continue // value *= 1
+			continue // value *= 1.0
 		}
 
 		order := index[i] >> LEVEL_SIZE
@@ -66,7 +66,7 @@ func (self *Open) Integrate(index []uint64) float64 {
 	for i := 0; i < nd; i++ {
 		level := LEVEL_MASK & index[i]
 		if level == 0 {
-			continue // value *= 1
+			continue // value *= 1.0
 		}
 
 		order := index[i] >> LEVEL_SIZE
