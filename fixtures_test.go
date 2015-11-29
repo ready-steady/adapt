@@ -25,8 +25,8 @@ type fixture struct {
 
 	surrogate *Surrogate
 
-	levels []uint32
-	orders []uint32
+	levels []uint64
+	orders []uint64
 
 	points []float64
 	values []float64
@@ -37,7 +37,7 @@ type fixture struct {
 func (self *fixture) initialize() {
 	self.surrogate.Indices = make([]uint64, len(self.levels))
 	for i := range self.levels {
-		self.surrogate.Indices[i] = uint64(self.levels[i]) | uint64(self.orders[i])<<32
+		self.surrogate.Indices[i] = self.levels[i] | self.orders[i]<<LEVEL_SIZE
 	}
 }
 
@@ -82,14 +82,14 @@ func newTarget(inputs, outputs uint, tolerance float64,
 	target.ComputeHandler = compute
 	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
 		for _, ε := range location.Surplus {
-			if ε < 0 {
+			if ε < 0.0 {
 				ε = -ε
 			}
 			if ε > tolerance {
-				return 1
+				return 1.0
 			}
 		}
-		return 0
+		return 0.0
 	}
 
 	return target
@@ -104,9 +104,9 @@ var fixtureStep = fixture{
 
 	compute: func(x, y []float64) {
 		if x[0] <= 0.5 {
-			y[0] = 1
+			y[0] = 1.0
 		} else {
-			y[0] = 0
+			y[0] = 0.0
 		}
 	},
 
@@ -117,33 +117,33 @@ var fixtureStep = fixture{
 		Level: 4,
 		Nodes: 8,
 
-		Surpluses: []float64{1, 0, -1, -0.5, -0.5, 0, -0.5, 0},
+		Surpluses: []float64{1.0, 0.0, -1.0, -0.5, -0.5, 0.0, -0.5, 0.0},
 		Accept:    []uint{1, 2, 1, 2, 2},
 		Reject:    []uint{0, 0, 0, 0, 0},
 	},
 
-	levels: []uint32{0, 1, 1, 2, 3, 3, 4, 4},
-	orders: []uint32{0, 0, 2, 3, 5, 7, 9, 11},
+	levels: []uint64{0, 1, 1, 2, 3, 3, 4, 4},
+	orders: []uint64{0, 0, 2, 3, 5, 7, 9, 11},
 
-	points: []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1},
-	values: []float64{1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
+	points: []float64{0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
+	values: []float64{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
 
 	integral: []float64{5.3125e-01},
 }
 
 var fixtureHat = fixture{
 	compute: func(x, y []float64) {
-		z := 5*x[0] - 1
+		z := 5.0*x[0] - 1.0
 
 		switch {
-		case 0 <= z && z < 1:
+		case 0.0 <= z && z < 1.0:
 			y[0] = 0.5 * z * z
-		case 1 <= z && z < 2:
-			y[0] = 0.5 * (-2*z*z + 6*z - 3)
-		case 2 <= z && z < 3:
-			y[0] = 0.5 * (3 - z) * (3 - z)
+		case 1.0 <= z && z < 2.0:
+			y[0] = 0.5 * (-2.0*z*z + 6.0*z - 3.0)
+		case 2.0 <= z && z < 3.0:
+			y[0] = 0.5 * (3.0 - z) * (3.0 - z)
 		default:
-			y[0] = 0
+			y[0] = 0.0
 		}
 	},
 
@@ -262,7 +262,7 @@ var fixtureHat = fixture{
 		Reject: []uint{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	},
 
-	levels: []uint32{
+	levels: []uint64{
 		0, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5,
 		5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
 		6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
@@ -278,7 +278,7 @@ var fixtureHat = fixture{
 		9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
 	},
 
-	orders: []uint32{
+	orders: []uint64{
 		0, 0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15, 5, 7, 9, 11, 13,
 		15, 17, 19, 21, 23, 25, 27, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33,
 		35, 37, 39, 41, 43, 45, 47, 49, 51, 25, 27, 29, 31, 33, 35, 37, 39, 41,
@@ -618,21 +618,21 @@ var fixtureBox = fixture{
 
 	compute: func(x, y []float64) {
 		if x[0]+x[1] > 0.5 {
-			y[0] = 1
+			y[0] = 1.0
 		} else {
-			y[0] = 0
+			y[0] = 0.0
 		}
 
 		if x[0]-x[1] > 0.5 {
-			y[1] = 1
+			y[1] = 1.0
 		} else {
-			y[1] = 0
+			y[1] = 0.0
 		}
 
 		if x[1]-x[0] > 0.5 {
-			y[2] = 1
+			y[2] = 1.0
 		} else {
-			y[2] = 0
+			y[2] = 0.0
 		}
 	},
 
@@ -644,21 +644,21 @@ var fixtureBox = fixture{
 		Nodes: 20,
 
 		Surpluses: []float64{
-			1, 0, 0, -1, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0.5, 0, 0, 1, 0, 0,
-			1, 0, 1, 1, 1, 0, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0, -0.5, 0, 0, -0.5,
-			0, 0.5, -0.5, 0, 0, 0.5, 0, 0.5, 0.5, 0.5, 0, -0.5, 0.5, 0, 0.5, 0,
-			0, 0, 0, 0,
+			1.0, 0.0, 0.0, -1.0, 0.0, 0.0, +0.0, 0.0, 0.0, -1.0, 0.0, 0.0, +0.0, 0.0, 0.0,
+			0.5, 0.0, 0.0, +1.0, 0.0, 0.0, +1.0, 0.0, 1.0, +1.0, 1.0, 0.0, +0.5, 0.0, 0.0,
+			0.5, 0.0, 0.0, +0.0, 0.0, 0.0, -0.5, 0.0, 0.0, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0,
+			0.5, 0.0, 0.5, +0.5, 0.5, 0.0, -0.5, 0.5, 0.0, +0.5, 0.0, 0.0, +0.0, 0.0, 0.0,
 		},
 		Accept: []uint{1, 4, 5, 10},
 		Reject: []uint{0, 0, 0, 0},
 	},
 
-	levels: []uint32{
+	levels: []uint64{
 		0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 2, 0, 1, 1, 1, 1, 1, 1, 0, 2, 3, 0, 3, 0,
 		2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 2, 0, 3, 0, 3,
 	},
 
-	orders: []uint32{
+	orders: []uint64{
 		0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 2, 2, 0, 0, 1, 1, 0, 3, 0,
 		1, 0, 1, 2, 0, 1, 0, 3, 3, 0, 2, 1, 0, 1, 0, 3,
 	},
@@ -735,8 +735,8 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 		f[1] = -y[1] * y[2]
 		f[2] = -y[0]*y[0] + y[1]*y[1]
 	}
-	y0 = []float64{2*y0[0] - 1, 2*y0[1] - 1, 2*y0[2] - 1}
-	xs := []float64{0, 30}
+	y0 = []float64{2.0*y0[0] - 1.0, 2.0*y0[1] - 1.0, 2.0*y0[2] - 1.0}
+	xs := []float64{0.0, 30.0}
 
 	integrator, _ := rk4.New(&rk4.Config{Step: 0.01})
 	Ys, _, _ := integrator.Compute(dydt, y0, xs)
@@ -769,16 +769,16 @@ func (self *kraichnanOrszagTarget) Score(location *Location, _ *Progress) float6
 	_, no := self.Dimensions()
 
 	if math.Abs(location.Surplus[no-5]) > tolerance {
-		return 1
+		return 1.0
 	}
 	if math.Abs(location.Surplus[no-3]) > tolerance {
-		return 1
+		return 1.0
 	}
 	if math.Abs(location.Surplus[no-1]) > tolerance {
-		return 1
+		return 1.0
 	}
 
-	return 0
+	return 0.0
 }
 
 var fixtureKraichnanOrszag = fixture{
@@ -2030,8 +2030,8 @@ var fixtureParabola = fixture{
 		})
 	},
 
-	points: []float64{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1},
-	values: []float64{0.25, 0.16, 0.09, 0.04, 0.01, 0, 0.01, 0.04, 0.09, 0.16, 0.25},
+	points: []float64{0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00},
+	values: []float64{0.25, 0.16, 0.09, 0.04, 0.01, 0.00, 0.01, 0.04, 0.09, 0.16, 0.25},
 
 	integral: []float64{1.0 / 12},
 }

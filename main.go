@@ -6,6 +6,11 @@ import (
 	"runtime"
 )
 
+const (
+	LEVEL_MASK = 0xFF
+	LEVEL_SIZE = 8
+)
+
 // Basis is a functional basis.
 type Basis interface {
 	// Compute evaluates the value of a basis function at a point.

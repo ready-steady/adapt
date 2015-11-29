@@ -46,7 +46,7 @@ func (self *queue) push(indices []uint64, scores []float64) {
 
 		l := uint(0)
 		for j := 0; j < ni; j++ {
-			l += uint(0xFFFFFFFF & index[j])
+			l += uint(LEVEL_MASK & index[j])
 		}
 		if l > lnow {
 			lnow = l
