@@ -46,6 +46,23 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 	return values
 }
 
+func assess(basis Basis, target Target, progress *Progress, indices []uint64,
+	nodes, surpluses []float64, ni, no uint) []float64 {
+
+	nn := uint(len(indices)) / ni
+	scores := measure(basis, indices, ni)
+	for i := uint(0); i < nn; i++ {
+		location := Location{
+			Node:    nodes[i*ni : (i+1)*ni],
+			Surplus: surpluses[i*no : (i+1)*no],
+			Volume:  scores[i],
+		}
+		scores[i] = target.Score(&location, progress)
+	}
+
+	return scores
+}
+
 func balance(grid Grid, history *hash, indices []uint64) []uint64 {
 	neighbors := make([]uint64, 0)
 	for {

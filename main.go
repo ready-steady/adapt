@@ -107,17 +107,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			approximate(self.basis, surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw),
 		)
 
-		location := Location{}
-		scores := measure(self.basis, indices, ni)
-		for i := uint(0); i < na; i++ {
-			location = Location{
-				Node:    nodes[i*ni : (i+1)*ni],
-				Surplus: surpluses[i*no : (i+1)*no],
-				Volume:  scores[i],
-			}
-			scores[i] = target.Score(&location, &progress)
-		}
-
+		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
 		tracker.push(indices, scores)
 		surrogate.push(indices, surpluses)
 		surrogate.step(tracker.lnow, na)
