@@ -58,31 +58,6 @@ func balance(grid Grid, history *hash, indices []uint64) []uint64 {
 	return neighbors
 }
 
-func compact(indices []uint64, surpluses, scores []float64,
-	ni, no, nn uint) ([]uint64, []float64, []float64) {
-
-	na, ne := uint(0), nn
-	for i, j := uint(0), uint(0); i < nn; i++ {
-		if scores[j] < 0 {
-			j++
-			continue
-		}
-
-		if j > na {
-			copy(indices[na*ni:], indices[j*ni:ne*ni])
-			copy(surpluses[na*no:], surpluses[j*no:ne*no])
-			copy(scores[na:], scores[j:ne])
-			ne -= j - na
-			j = na
-		}
-
-		na++
-		j++
-	}
-
-	return indices[:na*ni], surpluses[:na*no], scores[:na]
-}
-
 func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no, nn uint,
 	integral []float64) {
 

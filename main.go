@@ -48,9 +48,8 @@ type Interpolator struct {
 type Progress struct {
 	Level     uint      // Reached level
 	Iteration uint      // Iteration number
-	Accepted  uint      // Number of accepted nodes
-	Rejected  uint      // Number of rejected nodes
-	Current   uint      // Number of current nodes
+	Active    uint      // Number of active nodes
+	Passive   uint      // Number of passive nodes
 	Integral  []float64 // Integral over the whole domain
 }
 
@@ -84,21 +83,20 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	tracker := newQueue(ni, config)
 	history := newHash(ni)
 
-	na, nr, nc := uint(0), uint(0), uint(1)
+	na, np := uint(1), uint(0)
 
-	indices := make([]uint64, nc*ni)
+	indices := make([]uint64, na*ni)
 	nodes := self.grid.Compute(indices)
 
 	integral := make([]float64, no)
 
 	iteration := uint(0)
-	for nc > 0 && na+nr+nc <= config.MaxEvaluations && iteration < config.MaxIterations {
+	for na > 0 && np+na <= config.MaxEvaluations && iteration < config.MaxIterations {
 		progress := Progress{
 			Level:     tracker.lnow,
 			Iteration: iteration,
-			Accepted:  na,
-			Rejected:  nr,
-			Current:   nc,
+			Active:    na,
+			Passive:   np,
 			Integral:  integral,
 		}
 
@@ -111,7 +109,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		location := Location{}
 		scores := measure(self.basis, indices, ni)
-		for i := uint(0); i < nc; i++ {
+		for i := uint(0); i < na; i++ {
 			location = Location{
 				Node:    nodes[i*ni : (i+1)*ni],
 				Surplus: surpluses[i*no : (i+1)*no],
@@ -120,14 +118,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			scores[i] = target.Score(&location, &progress)
 		}
 
-		indices, surpluses, scores = compact(indices, surpluses, scores, ni, no, nc)
-
 		nn := uint(len(scores))
-		na, nr = na+nn, nr+nc-nn
+		np = np + nn
 
 		tracker.push(indices, scores)
 		surrogate.push(indices, surpluses)
-		surrogate.step(tracker.lnow, nn, nc-nn)
+		surrogate.step(tracker.lnow, nn, na-nn)
 
 		cumulate(self.basis, indices, surpluses, ni, no, nn, integral)
 
@@ -138,7 +134,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		nodes = self.grid.Compute(indices)
 
-		nc = uint(len(indices)) / ni
+		na = uint(len(indices)) / ni
 		iteration++
 	}
 
