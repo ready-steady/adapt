@@ -9,9 +9,9 @@ import (
 func TestClosedCompute1D(t *testing.T) {
 	grid := NewClosed(1)
 
-	levels := []uint32{0, 1, 1, 2, 2, 3, 3, 3, 3}
-	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
-	nodes := []float64{0.5, 0, 1, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
+	levels := []uint64{0, 1, 1, 2, 2, 3, 3, 3, 3}
+	orders := []uint64{0, 0, 2, 1, 3, 1, 3, 5, 7}
+	nodes := []float64{0.5, 0.0, 1.0, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875}
 
 	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
 }
@@ -19,7 +19,7 @@ func TestClosedCompute1D(t *testing.T) {
 func TestClosedCompute2D(t *testing.T) {
 	grid := NewClosed(2)
 
-	levels := []uint32{
+	levels := []uint64{
 		0, 0,
 		0, 1,
 		0, 1,
@@ -35,7 +35,7 @@ func TestClosedCompute2D(t *testing.T) {
 		2, 0,
 	}
 
-	orders := []uint32{
+	orders := []uint64{
 		0, 0,
 		0, 0,
 		0, 2,
@@ -73,10 +73,10 @@ func TestClosedCompute2D(t *testing.T) {
 func TestClosedRefine1D(t *testing.T) {
 	grid := NewClosed(1)
 
-	levels := []uint32{0, 1, 1, 2, 2, 3, 3, 3, 3}
-	orders := []uint32{0, 0, 2, 1, 3, 1, 3, 5, 7}
-	childLevels := []uint32{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
-	childOrders := []uint32{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
+	levels := []uint64{0, 1, 1, 2, 2, 3, 3, 3, 3}
+	orders := []uint64{0, 0, 2, 1, 3, 1, 3, 5, 7}
+	childLevels := []uint64{1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4}
+	childOrders := []uint64{0, 2, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15}
 
 	indices := grid.Refine(compose(levels, orders))
 
@@ -86,7 +86,7 @@ func TestClosedRefine1D(t *testing.T) {
 func TestClosedRefine2D(t *testing.T) {
 	grid := NewClosed(2)
 
-	levels := []uint32{
+	levels := []uint64{
 		0, 0,
 		0, 1,
 		0, 1,
@@ -102,7 +102,7 @@ func TestClosedRefine2D(t *testing.T) {
 		2, 0,
 	}
 
-	orders := []uint32{
+	orders := []uint64{
 		0, 0,
 		0, 0,
 		0, 2,
@@ -118,7 +118,7 @@ func TestClosedRefine2D(t *testing.T) {
 		3, 0,
 	}
 
-	childLevels := []uint32{
+	childLevels := []uint64{
 		1, 0,
 		1, 0,
 		0, 1,
@@ -161,7 +161,7 @@ func TestClosedRefine2D(t *testing.T) {
 		2, 1,
 	}
 
-	childOrders := []uint32{
+	childOrders := []uint64{
 		0, 0,
 		2, 0,
 		0, 0,
@@ -213,13 +213,13 @@ func TestClosedParent(t *testing.T) {
 	grid := NewClosed(1)
 
 	children := compose(
-		[]uint32{0, 1, 1, 2, 2, 3, 3, 3, 3},
-		[]uint32{0, 0, 2, 1, 3, 1, 3, 5, 7},
+		[]uint64{0, 1, 1, 2, 2, 3, 3, 3, 3},
+		[]uint64{0, 0, 2, 1, 3, 1, 3, 5, 7},
 	)
 
 	parents := compose(
-		[]uint32{0, 0, 0, 1, 1, 2, 2, 2, 2},
-		[]uint32{0, 0, 0, 0, 2, 1, 1, 3, 3},
+		[]uint64{0, 0, 0, 1, 1, 2, 2, 2, 2},
+		[]uint64{0, 0, 0, 0, 2, 1, 1, 3, 3},
 	)
 
 	for i := range children {
@@ -233,13 +233,13 @@ func TestClosedSibling(t *testing.T) {
 	grid := NewClosed(1)
 
 	indices := compose(
-		[]uint32{0, 1, 1, 2, 2, 3, 3, 3, 3},
-		[]uint32{0, 0, 2, 1, 3, 1, 3, 5, 7},
+		[]uint64{0, 1, 1, 2, 2, 3, 3, 3, 3},
+		[]uint64{0, 0, 2, 1, 3, 1, 3, 5, 7},
 	)
 
 	siblings := compose(
-		[]uint32{0, 1, 1, 2, 2, 3, 3, 3, 3},
-		[]uint32{0, 2, 0, 1, 3, 3, 1, 7, 5},
+		[]uint64{0, 1, 1, 2, 2, 3, 3, 3, 3},
+		[]uint64{0, 2, 0, 1, 3, 3, 1, 7, 5},
 	)
 
 	for i := range indices {

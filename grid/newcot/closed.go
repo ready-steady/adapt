@@ -18,11 +18,11 @@ func NewClosed(dimensions uint) *Closed {
 func (_ *Closed) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		level := 0xFFFFFFFF & indices[i]
+		level := LEVEL_MASK & indices[i]
 		if level == 0 {
 			nodes[i] = 0.5
 		} else {
-			nodes[i] = float64(indices[i]>>32) / float64(uint64(2)<<(level-1))
+			nodes[i] = float64(indices[i]>>LEVEL_SIZE) / float64(uint64(2)<<(level-1))
 		}
 	}
 	return nodes
@@ -37,17 +37,17 @@ func (self *Closed) Refine(indices []uint64) []uint64 {
 
 	nc := 0
 	push := func(p, d int, level, order uint64) {
-		if (0xFFFFFFFF<<32)&level != 0 || (0xFFFFFFFF<<32)&order != 0 {
+		if level>>LEVEL_SIZE != 0 || order>>ORDER_SIZE != 0 {
 			panic(fmt.Sprintf("the level %d and order %d overflow uint64", level, order))
 		}
 		copy(childIndices[nc*nd:], indices[p*nd:(p+1)*nd])
-		childIndices[nc*nd+d] = level | order<<32
+		childIndices[nc*nd+d] = level | order<<LEVEL_SIZE
 		nc++
 	}
 
 	for i := 0; i < nn; i++ {
 		for j := 0; j < nd; j++ {
-			level := 0xFFFFFFFF & indices[i*nd+j]
+			level := LEVEL_MASK & indices[i*nd+j]
 
 			if level == 0 {
 				push(i, j, 1, 0)
@@ -55,7 +55,7 @@ func (self *Closed) Refine(indices []uint64) []uint64 {
 				continue
 			}
 
-			order := indices[i*nd+j] >> 32
+			order := indices[i*nd+j] >> LEVEL_SIZE
 
 			if level == 1 {
 				push(i, j, 2, order+1)
@@ -71,38 +71,38 @@ func (self *Closed) Refine(indices []uint64) []uint64 {
 
 // Parent transforms an index into its parent index in the ith dimension.
 func (_ *Closed) Parent(index []uint64, i uint) {
-	switch level := 0xFFFFFFFF & index[i]; level {
+	switch level := LEVEL_MASK & index[i]; level {
 	case 0:
 	case 1:
-		index[i] = 0 | 0<<32
+		index[i] = 0 | 0<<LEVEL_SIZE
 	case 2:
-		index[i] = 1 | (index[i]>>32-1)<<32
+		index[i] = 1 | (index[i]>>LEVEL_SIZE-1)<<LEVEL_SIZE
 	default:
-		order := (index[i]>>32 - 1) / 2
+		order := (index[i]>>LEVEL_SIZE - 1) / 2
 		if order%2 == 0 {
-			order = (index[i]>>32 + 1) / 2
+			order = (index[i]>>LEVEL_SIZE + 1) / 2
 		}
-		index[i] = (level - 1) | order<<32
+		index[i] = (level - 1) | order<<LEVEL_SIZE
 	}
 }
 
 // Sibling transforms an index into its sibling index in the ith dimension.
 func (_ *Closed) Sibling(index []uint64, i uint) {
-	switch level := 0xFFFFFFFF & index[i]; level {
+	switch level := LEVEL_MASK & index[i]; level {
 	case 0, 2:
 	case 1:
-		if index[i]>>32 == 0 {
-			index[i] = 1 | 2<<32
+		if index[i]>>LEVEL_SIZE == 0 {
+			index[i] = 1 | 2<<LEVEL_SIZE
 		} else {
-			index[i] = 1 | 0<<32
+			index[i] = 1 | 0<<LEVEL_SIZE
 		}
 	default:
-		order := index[i] >> 32
+		order := index[i] >> LEVEL_SIZE
 		if ((order-1)/2)%2 == 1 {
 			order -= 2
 		} else {
 			order += 2
 		}
-		index[i] = level | order<<32
+		index[i] = level | order<<LEVEL_SIZE
 	}
 }

@@ -9,8 +9,8 @@ import (
 func TestOpenCompute1D(t *testing.T) {
 	grid := NewOpen(1)
 
-	levels := []uint32{0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3}
-	orders := []uint32{0, 0, 2, 0, 2, 4, 6, 0, 2, 4, 6, 8, 10, 12, 14}
+	levels := []uint64{0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3}
+	orders := []uint64{0, 0, 2, 0, 2, 4, 6, 0, 2, 4, 6, 8, 10, 12, 14}
 	nodes := []float64{
 		0.5000, 0.2500, 0.7500, 0.1250, 0.3750,
 		0.6250, 0.8750, 0.0625, 0.1875, 0.3125,
@@ -23,7 +23,7 @@ func TestOpenCompute1D(t *testing.T) {
 func TestOpenCompute2D(t *testing.T) {
 	grid := NewOpen(2)
 
-	levels := []uint32{
+	levels := []uint64{
 		0, 0,
 
 		0, 1,
@@ -82,7 +82,7 @@ func TestOpenCompute2D(t *testing.T) {
 		2, 2,
 	}
 
-	orders := []uint32{
+	orders := []uint64{
 		0, 0,
 
 		0, 0,
@@ -206,15 +206,15 @@ func TestOpenCompute2D(t *testing.T) {
 func TestOpenRefine1D(t *testing.T) {
 	grid := NewOpen(1)
 
-	levels := []uint32{0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3}
-	orders := []uint32{0, 0, 2, 0, 2, 4, 6, 0, 2, 4, 6, 8, 10, 12, 14}
-	childLevels := []uint32{
+	levels := []uint64{0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3}
+	orders := []uint64{0, 0, 2, 0, 2, 4, 6, 0, 2, 4, 6, 8, 10, 12, 14}
+	childLevels := []uint64{
 		1, 1,
 		2, 2, 2, 2,
 		3, 3, 3, 3, 3, 3, 3, 3,
 		4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
 	}
-	childOrders := []uint32{
+	childOrders := []uint64{
 		0, 2,
 		0, 2, 4, 6,
 		0, 2, 4, 6, 8, 10, 12, 14,
@@ -230,13 +230,13 @@ func TestOpenParent(t *testing.T) {
 	grid := NewOpen(1)
 
 	children := compose(
-		[]uint32{0, 1, 1, 2, 2, 2, 2},
-		[]uint32{0, 0, 2, 0, 2, 4, 6},
+		[]uint64{0, 1, 1, 2, 2, 2, 2},
+		[]uint64{0, 0, 2, 0, 2, 4, 6},
 	)
 
 	parents := compose(
-		[]uint32{0, 0, 0, 1, 1, 1, 1},
-		[]uint32{0, 0, 0, 0, 0, 2, 2},
+		[]uint64{0, 0, 0, 1, 1, 1, 1},
+		[]uint64{0, 0, 0, 0, 0, 2, 2},
 	)
 
 	for i := range children {
@@ -250,13 +250,13 @@ func TestOpenSibling(t *testing.T) {
 	grid := NewOpen(1)
 
 	indices := compose(
-		[]uint32{0, 1, 1, 2, 2, 2, 2},
-		[]uint32{0, 0, 2, 0, 2, 4, 6},
+		[]uint64{0, 1, 1, 2, 2, 2, 2},
+		[]uint64{0, 0, 2, 0, 2, 4, 6},
 	)
 
 	siblings := compose(
-		[]uint32{0, 1, 1, 2, 2, 2, 2},
-		[]uint32{0, 2, 0, 2, 0, 6, 4},
+		[]uint64{0, 1, 1, 2, 2, 2, 2},
+		[]uint64{0, 2, 0, 2, 0, 6, 4},
 	)
 
 	for i := range indices {
