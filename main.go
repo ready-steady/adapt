@@ -118,23 +118,21 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			scores[i] = target.Score(&location, &progress)
 		}
 
-		nn := uint(len(scores))
-		np = np + nn
-
 		tracker.push(indices, scores)
 		surrogate.push(indices, surpluses)
-		surrogate.step(tracker.lnow, nn)
+		surrogate.step(tracker.lnow, na)
 
-		cumulate(self.basis, indices, surpluses, ni, no, nn, integral)
+		cumulate(self.basis, indices, surpluses, ni, no, na, integral)
 
 		indices = history.unseen(self.grid.Refine(tracker.pull()))
 		if config.Balance {
 			indices = append(indices, balance(self.grid, history, indices)...)
 		}
-
 		nodes = self.grid.Compute(indices)
 
+		np += na
 		na = uint(len(indices)) / ni
+
 		iteration++
 	}
 
