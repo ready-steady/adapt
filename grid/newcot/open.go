@@ -18,7 +18,9 @@ func NewOpen(dimensions uint) *Open {
 func (_ *Open) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		nodes[i] = float64(indices[i]>>LEVEL_SIZE+1) / float64(uint64(2)<<(LEVEL_MASK&indices[i]))
+		level := LEVEL_MASK & indices[i]
+		order := indices[i] >> LEVEL_SIZE
+		nodes[i] = float64(order+1) / float64(uint64(2)<<level)
 	}
 	return nodes
 }

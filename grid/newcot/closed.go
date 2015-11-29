@@ -22,7 +22,8 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 		if level == 0 {
 			nodes[i] = 0.5
 		} else {
-			nodes[i] = float64(indices[i]>>LEVEL_SIZE) / float64(uint64(2)<<(level-1))
+			order := indices[i] >> LEVEL_SIZE
+			nodes[i] = float64(order) / float64(uint64(2)<<(level-1))
 		}
 	}
 	return nodes

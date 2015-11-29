@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	LEVEL_MASK = 0xFF
-	LEVEL_SIZE = 8
+	LEVEL_MASK = 0x3F
+	LEVEL_SIZE = 6
 )
 
 // Basis is a functional basis.
