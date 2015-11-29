@@ -16,9 +16,8 @@ type Target interface {
 	// Score guides the local adaptivity. The function assigns a score to the
 	// behavior of the target function at a particular node of the underlying
 	// grid. A positive score signifies that the node should be refined, and the
-	// score is the importance of this refinement. A zero score signifies that
-	// the node should not be refined. A negative score signifies that the node
-	// should be excluded from the interpolant.
+	// score is the importance of this refinement. Any other score signifies
+	// that the node should not be refined.
 	Score(*Location, *Progress) float64
 }
 
