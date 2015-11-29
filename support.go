@@ -23,7 +23,7 @@ func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 
 				for k := uint(0); k < nn; k++ {
 					weight := basis.Compute(indices[k*ni:(k+1)*ni], point)
-					if weight == 0 {
+					if weight == 0.0 {
 						continue
 					}
 					for l := uint(0); l < no; l++ {
