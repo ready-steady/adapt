@@ -37,7 +37,7 @@ type Config struct {
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		Rate:           1,
+		Rate:           1.0,
 		MinLevel:       1,
 		MaxLevel:       9,
 		MaxEvaluations: ^uint(0),

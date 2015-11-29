@@ -132,7 +132,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		np += na
 		na = uint(len(indices)) / ni
-
 		iteration++
 	}
 
