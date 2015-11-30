@@ -3,5 +3,9 @@ sudo: false
 
 install: go get -t ./...
 
+script:
+  - go test -v ./...
+  - go test -bench .
+
 notifications:
   email: false
