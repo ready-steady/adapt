@@ -85,12 +85,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	na, np := uint(1), uint(0)
 
-	indices := make([]uint64, na*ni)
-	nodes := self.grid.Compute(indices)
-
-	integral := make([]float64, no)
-
 	iteration := uint(0)
+	integral := make([]float64, no)
+	indices := make([]uint64, na*ni)
 	for na > 0 && np+na <= config.MaxEvaluations && iteration < config.MaxIterations {
 		progress := Progress{
 			Level:     tracker.lnow,
@@ -102,6 +99,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		target.Monitor(&progress)
 
+		nodes := self.grid.Compute(indices)
 		surpluses := subtract(
 			invoke(target.Compute, nodes, ni, no, nw),
 			approximate(self.basis, surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw),
@@ -118,7 +116,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		if config.Balance {
 			indices = append(indices, balance(self.grid, history, indices)...)
 		}
-		nodes = self.grid.Compute(indices)
 
 		np += na
 		na = uint(len(indices)) / ni
