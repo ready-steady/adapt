@@ -46,8 +46,8 @@ type Interpolator struct {
 
 // Progress contains information about the interpolation process.
 type Progress struct {
-	Level     uint      // Reached level
 	Iteration uint      // Iteration number
+	Level     uint      // Reached level
 	Active    uint      // Number of active nodes
 	Passive   uint      // Number of passive nodes
 	Integral  []float64 // Integral over the whole domain
@@ -83,20 +83,19 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	tracker := newQueue(ni, config)
 	history := newHash(ni)
 
-	na, np := uint(1), uint(0)
+	indices := make([]uint64, 1*ni)
+	progress := Progress{Integral: make([]float64, no)}
+	for {
+		progress.Level = tracker.lnow
+		progress.Passive += progress.Active
+		progress.Active = uint(len(indices)) / ni
 
-	iteration := uint(0)
-	integral := make([]float64, no)
-	indices := make([]uint64, na*ni)
-	for na > 0 && np+na <= config.MaxEvaluations && iteration < config.MaxIterations {
-		progress := Progress{
-			Level:     tracker.lnow,
-			Iteration: iteration,
-			Active:    na,
-			Passive:   np,
-			Integral:  integral,
+		if progress.Iteration > config.MaxIterations {
+			break
 		}
-
+		if progress.Active == 0 || progress.Active+progress.Passive > config.MaxEvaluations {
+			break
+		}
 		target.Monitor(&progress)
 
 		nodes := self.grid.Compute(indices)
@@ -108,18 +107,16 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
 		tracker.push(indices, scores)
 		surrogate.push(indices, surpluses)
-		surrogate.step(tracker.lnow, na)
+		surrogate.step(tracker.lnow, progress.Active)
 
-		cumulate(self.basis, indices, surpluses, ni, no, na, integral)
+		cumulate(self.basis, indices, surpluses, ni, no, progress.Active, progress.Integral)
 
 		indices = history.unseen(self.grid.Refine(tracker.pull()))
 		if config.Balance {
 			indices = append(indices, balance(self.grid, history, indices)...)
 		}
 
-		np += na
-		na = uint(len(indices)) / ni
-		iteration++
+		progress.Iteration++
 	}
 
 	return surrogate
