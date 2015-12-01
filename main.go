@@ -26,9 +26,9 @@ type Grid interface {
 	// Compute returns the nodes corresponding to the given indices.
 	Compute([]uint64) []float64
 
-	// Refine returns the child indices corresponding to a set of parent
+	// Children returns the child indices corresponding to a set of parent
 	// indices.
-	Refine([]uint64) []uint64
+	Children([]uint64) []uint64
 }
 
 // Interpolator is an instance of the algorithm.
@@ -108,7 +108,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		queue.push(indices, nodes, values, assess(self.basis, target, &progress, indices,
 			nodes, surpluses, ni, no))
 
-		indices = hash.filter(self.grid.Refine(queue.pull()))
+		indices = hash.filter(self.grid.Children(queue.pull()))
 
 		progress.Iteration++
 	}

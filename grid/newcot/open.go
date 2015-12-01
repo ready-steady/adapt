@@ -25,8 +25,8 @@ func (_ *Open) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
-// Refine returns the child indices corresponding to a set of parent indices.
-func (self *Open) Refine(indices []uint64) []uint64 {
+// Children returns the child indices corresponding to a set of parent indices.
+func (self *Open) Children(indices []uint64) []uint64 {
 	nd := self.nd
 	nn := len(indices) / nd
 
