@@ -40,11 +40,10 @@ type Interpolator struct {
 
 // Progress contains information about the interpolation process.
 type Progress struct {
-	Iteration uint      // Iteration number
-	Level     uint      // Reached level
-	Active    uint      // Number of active nodes
-	Passive   uint      // Number of passive nodes
-	Integral  []float64 // Integral over the whole domain
+	Level    uint      // Reached level
+	Active   uint      // Number of active nodes
+	Passive  uint      // Number of passive nodes
+	Integral []float64 // Integral over the whole domain
 }
 
 // New creates a new interpolator.
@@ -57,9 +56,6 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	config = &interpolator.config
 	if config.Workers == 0 {
 		config.Workers = uint(runtime.GOMAXPROCS(0))
-	}
-	if config.Rate == 0.0 {
-		config.Rate = 1.0
 	}
 	return interpolator
 }
@@ -82,9 +78,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		progress.Passive += progress.Active
 		progress.Active = uint(len(indices)) / ni
 
-		if progress.Iteration > config.MaxIterations {
-			break
-		}
 		if progress.Active == 0 {
 			break
 		}
@@ -103,8 +96,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
 		indices = hash.filter(self.grid.Children(queue.filter(indices, scores)))
-
-		progress.Iteration++
 	}
 
 	return surrogate
