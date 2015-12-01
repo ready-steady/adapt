@@ -26,20 +26,16 @@ func (self *hash) find(index []uint64) bool {
 		Data: (*reflect.SliceHeader)(unsafe.Pointer(&index)).Data,
 		Len:  int(self.ni) * sizeOfUint64,
 	}
-
 	_, ok := self.mapping[*(*string)(unsafe.Pointer(&header))]
-
 	return ok
 }
 
 func (self *hash) push(index []uint64) {
 	var bytes []byte
-
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
 	header.Data = ((*reflect.SliceHeader)(unsafe.Pointer(&index))).Data
 	header.Cap = int(self.ni) * sizeOfUint64
 	header.Len = header.Cap
-
 	self.mapping[string(bytes)] = true
 }
 
@@ -64,14 +60,12 @@ func (self *hash) unseen(indices []uint64) []uint64 {
 			j++
 			continue
 		}
-
 		self.mapping[key] = true
 		if j > na {
 			copy(indices[na*ni:], indices[j*ni:ne*ni])
 			ne -= j - na
 			j = na
 		}
-
 		na++
 		j++
 	}
