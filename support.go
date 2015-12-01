@@ -7,8 +7,8 @@ import (
 func approximate(basis Basis, indices []uint64, surpluses, points []float64,
 	ni, no, nw uint) []float64 {
 
-	nn, np := uint(len(indices))/ni, uint(len(points))/ni
-
+	nn := uint(len(indices)) / ni
+	np := uint(len(points)) / ni
 	values := make([]float64, np*no)
 
 	jobs := make(chan uint, np)
@@ -75,9 +75,10 @@ func balance(grid Grid, history *hash, indices []uint64) []uint64 {
 	return neighbors
 }
 
-func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no, nn uint,
+func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no uint,
 	integral []float64) {
 
+	nn := uint(len(indices)) / ni
 	for i := uint(0); i < nn; i++ {
 		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
 		for j := uint(0); j < no; j++ {
@@ -112,6 +113,17 @@ func invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	close(jobs)
 
 	return values
+}
+
+func levelize(indices []uint64, ni uint) []uint {
+	nn := uint(len(indices)) / ni
+	levels := make([]uint, nn)
+	for i := uint(0); i < nn; i++ {
+		for j := uint(0); j < ni; j++ {
+			levels[i] += uint(LEVEL_MASK & indices[i*ni+j])
+		}
+	}
+	return levels
 }
 
 func measure(basis Basis, indices []uint64, ni uint) []float64 {

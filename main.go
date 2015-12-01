@@ -60,7 +60,6 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 		basis:  basis,
 		grid:   grid,
 	}
-
 	config = &interpolator.config
 	if config.Workers == 0 {
 		config.Workers = uint(runtime.GOMAXPROCS(0))
@@ -68,7 +67,6 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	if config.Rate == 0.0 {
 		config.Rate = 1.0
 	}
-
 	return interpolator
 }
 
@@ -80,40 +78,45 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	tracker := newQueue(ni, config)
-	history := newHash(ni)
+	queue := newQueue(ni, no, config)
+	hash := newHash(ni)
 
 	indices := make([]uint64, 1*ni)
 	progress := Progress{Integral: make([]float64, no)}
 	for {
-		progress.Level = tracker.lnow
+		progress.Level = surrogate.Level
 		progress.Passive += progress.Active
 		progress.Active = uint(len(indices)) / ni
 
 		if progress.Iteration > config.MaxIterations {
 			break
 		}
-		if progress.Active == 0 || progress.Active+progress.Passive > config.MaxEvaluations {
+		if progress.Active == 0 {
+			break
+		}
+		if progress.Active+progress.Passive > config.MaxEvaluations {
 			break
 		}
 		target.Monitor(&progress)
 
 		nodes := self.grid.Compute(indices)
-		surpluses := subtract(
-			invoke(target.Compute, nodes, ni, no, nw),
-			approximate(self.basis, surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw),
-		)
+		values := invoke(target.Compute, nodes, ni, no, nw)
+		surpluses := subtract(values, approximate(self.basis, surrogate.Indices,
+			surrogate.Surpluses, nodes, ni, no, nw))
 
-		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
-		tracker.push(indices, scores)
 		surrogate.push(indices, surpluses)
-		surrogate.step(tracker.lnow, progress.Active)
+		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
-		cumulate(self.basis, indices, surpluses, ni, no, progress.Active, progress.Integral)
+		queue.update(assess(self.basis, target, &progress, queue.Indices, queue.Nodes,
+			subtract(queue.Values, approximate(self.basis, surrogate.Indices,
+				surrogate.Surpluses, queue.Nodes, ni, no, nw)), ni, no))
 
-		indices = history.unseen(self.grid.Refine(tracker.pull()))
+		queue.push(indices, nodes, values, assess(self.basis, target, &progress, indices,
+			nodes, surpluses, ni, no))
+
+		indices = hash.unseen(self.grid.Refine(queue.pull()))
 		if config.Balance {
-			indices = append(indices, balance(self.grid, history, indices)...)
+			indices = append(indices, balance(self.grid, hash, indices)...)
 		}
 
 		progress.Iteration++
@@ -130,10 +133,8 @@ func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []flo
 
 // Integrate computes the integral of an interpolant over the whole domain.
 func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
-	ni, no, nn := surrogate.Inputs, surrogate.Outputs, surrogate.Nodes
-
+	ni, no := surrogate.Inputs, surrogate.Outputs
 	integral := make([]float64, no)
-	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, nn, integral)
-
+	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, integral)
 	return integral
 }
