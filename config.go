@@ -24,11 +24,6 @@ type Config struct {
 	// may not correspond to a level.
 	MaxIterations uint
 
-	// A flag to enable grid balancing. If it is set to true, additional nodes
-	// are added at each iteration to balance the underlying grid. Note that
-	// Target.Score should not reject any nodes in this case.
-	Balance bool
-
 	// The number of concurrent workers. The evaluation of the target function
 	// and the surrogate itself is distributed among this many goroutines.
 	Workers uint

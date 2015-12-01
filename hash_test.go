@@ -9,12 +9,12 @@ import (
 	"github.com/ready-steady/assert"
 )
 
-func TestHashUnseen(t *testing.T) {
+func TestHashFilter(t *testing.T) {
 	hash := newHash(2)
 
-	assert.Equal(hash.unseen([]uint64{4, 2}), []uint64{4, 2}, t)
-	assert.Equal(hash.unseen([]uint64{6, 9}), []uint64{6, 9}, t)
-	assert.Equal(hash.unseen([]uint64{4, 2}), []uint64{}, t)
+	assert.Equal(hash.filter([]uint64{4, 2}), []uint64{4, 2}, t)
+	assert.Equal(hash.filter([]uint64{6, 9}), []uint64{6, 9}, t)
+	assert.Equal(hash.filter([]uint64{4, 2}), []uint64{}, t)
 
 	keys := make([]string, 0)
 	for k, _ := range hash.mapping {
@@ -37,28 +37,17 @@ func TestHashUnseen(t *testing.T) {
 	}
 }
 
-func TestHashUnseenRewrite(t *testing.T) {
+func TestHashFilterRewrite(t *testing.T) {
 	hash := newHash(2)
 
 	key := []uint64{4, 2}
-	assert.Equal(hash.unseen(key), []uint64{4, 2}, t)
+	assert.Equal(hash.filter(key), []uint64{4, 2}, t)
 
 	key[0], key[1] = 6, 9
-	assert.Equal(hash.unseen([]uint64{4, 2}), []uint64{}, t)
+	assert.Equal(hash.filter([]uint64{4, 2}), []uint64{}, t)
 }
 
-func TestHashPushRewrite(t *testing.T) {
-	hash := newHash(2)
-
-	key := []uint64{4, 2}
-	hash.push(key)
-	assert.Equal(hash.find([]uint64{4, 2}), true, t)
-
-	key[0], key[1] = 6, 9
-	assert.Equal(hash.find([]uint64{4, 2}), true, t)
-}
-
-func BenchmarkHashUnseen(b *testing.B) {
+func BenchmarkHashFilter(b *testing.B) {
 	const (
 		ni = 20
 		nn = 1000
@@ -75,7 +64,7 @@ func BenchmarkHashUnseen(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		hash.unseen(indices)
+		hash.filter(indices)
 	}
 }
 

@@ -21,25 +21,7 @@ func newHash(ni uint) *hash {
 	}
 }
 
-func (self *hash) find(index []uint64) bool {
-	header := reflect.StringHeader{
-		Data: (*reflect.SliceHeader)(unsafe.Pointer(&index)).Data,
-		Len:  int(self.ni) * sizeOfUint64,
-	}
-	_, ok := self.mapping[*(*string)(unsafe.Pointer(&header))]
-	return ok
-}
-
-func (self *hash) push(index []uint64) {
-	var bytes []byte
-	header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
-	header.Data = ((*reflect.SliceHeader)(unsafe.Pointer(&index))).Data
-	header.Cap = int(self.ni) * sizeOfUint64
-	header.Len = header.Cap
-	self.mapping[string(bytes)] = true
-}
-
-func (self *hash) unseen(indices []uint64) []uint64 {
+func (self *hash) filter(indices []uint64) []uint64 {
 	ni := self.ni
 	nn := uint(len(indices)) / ni
 	nb := ni * sizeOfUint64

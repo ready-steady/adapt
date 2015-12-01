@@ -63,18 +63,6 @@ func assess(basis Basis, target Target, progress *Progress, indices []uint64,
 	return scores
 }
 
-func balance(grid Grid, history *hash, indices []uint64) []uint64 {
-	neighbors := make([]uint64, 0)
-	for {
-		indices = socialize(grid, history, indices)
-		if len(indices) == 0 {
-			break
-		}
-		neighbors = append(neighbors, indices...)
-	}
-	return neighbors
-}
-
 func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no uint,
 	integral []float64) {
 
@@ -133,36 +121,6 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 		volumes[i] = basis.Integrate(indices[i*ni : (i+1)*ni])
 	}
 	return volumes
-}
-
-func socialize(grid Grid, history *hash, indices []uint64) []uint64 {
-	ni := history.ni
-	nn := uint(len(indices)) / ni
-
-	siblings := make([]uint64, 0, ni)
-	for i := uint(0); i < nn; i++ {
-		index := indices[i*ni : (i+1)*ni]
-
-		for j := uint(0); j < ni; j++ {
-			pair := index[j]
-
-			grid.Parent(index, j)
-			if !history.find(index) {
-				index[j] = pair
-				continue
-			}
-			index[j] = pair
-
-			grid.Sibling(index, j)
-			if !history.find(index) {
-				history.push(index)
-				siblings = append(siblings, index...)
-			}
-			index[j] = pair
-		}
-	}
-
-	return siblings
 }
 
 func subtract(minuend, subtrahend []float64) []float64 {

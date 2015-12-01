@@ -29,12 +29,6 @@ type Grid interface {
 	// Refine returns the child indices corresponding to a set of parent
 	// indices.
 	Refine([]uint64) []uint64
-
-	// Parent transforms an index into its parent index in the ith dimension.
-	Parent([]uint64, uint)
-
-	// Sibling transforms an index into its sibling index in the ith dimension.
-	Sibling([]uint64, uint)
 }
 
 // Interpolator is an instance of the algorithm.
@@ -114,10 +108,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		queue.push(indices, nodes, values, assess(self.basis, target, &progress, indices,
 			nodes, surpluses, ni, no))
 
-		indices = hash.unseen(self.grid.Refine(queue.pull()))
-		if config.Balance {
-			indices = append(indices, balance(self.grid, hash, indices)...)
-		}
+		indices = hash.filter(self.grid.Refine(queue.pull()))
 
 		progress.Iteration++
 	}
