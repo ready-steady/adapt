@@ -22,16 +22,16 @@ func ExampleInterpolator_step() {
 	target := NewTarget(inputs, outputs)
 	target.ComputeHandler = func(x, y []float64) {
 		if x[0] <= 0.5 {
-			y[0] = 1
+			y[0] = 1.0
 		} else {
-			y[0] = 0
+			y[0] = 0.0
 		}
 	}
 	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
 		if math.Abs(location.Surplus[0]) > tolerance {
-			return 1
+			return 1.0
 		} else {
-			return 0
+			return 0.0
 		}
 	}
 
@@ -56,17 +56,17 @@ func ExampleInterpolator_cube() {
 
 	target := NewTarget(inputs, outputs)
 	target.ComputeHandler = func(x, y []float64) {
-		if math.Abs(2*x[0]-1) < 0.45 && math.Abs(2*x[1]-1) < 0.45 {
-			y[0] = 1
+		if math.Abs(2.0*x[0]-1.0) < 0.45 && math.Abs(2.0*x[1]-1.0) < 0.45 {
+			y[0] = 1.0
 		} else {
-			y[0] = 0
+			y[0] = 0.0
 		}
 	}
 	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
 		if math.Abs(location.Surplus[0]) > tolerance {
-			return 1
+			return 1.0
 		} else {
-			return 0
+			return 0.0
 		}
 	}
 
