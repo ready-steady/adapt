@@ -72,18 +72,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	hash := newHash(ni)
 
 	indices := make([]uint64, 1*ni)
-	progress := Progress{Integral: make([]float64, no)}
+	progress := Progress{Active: 1, Integral: make([]float64, no)}
 	for {
-		progress.Level = surrogate.Level
-		progress.Passive += progress.Active
-		progress.Active = uint(len(indices)) / ni
-
-		if progress.Active == 0 {
-			break
-		}
-		if progress.Active+progress.Passive > config.MaxEvaluations {
-			break
-		}
 		target.Monitor(&progress)
 
 		nodes := self.grid.Compute(indices)
@@ -96,8 +86,18 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
 		indices = hash.filter(self.grid.Children(queue.filter(indices, scores)))
+
+		progress.Passive += progress.Active
+		progress.Active = uint(len(indices)) / ni
+
+		if progress.Active == 0 || progress.Active+progress.Passive > config.MaxEvaluations {
+			break
+		}
+
+		progress.Level++
 	}
 
+	surrogate.Level = progress.Level
 	return surrogate
 }
 

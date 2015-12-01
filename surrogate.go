@@ -27,17 +27,10 @@ func newSurrogate(ni, no uint) *Surrogate {
 
 func (self *Surrogate) push(indices []uint64, surpluses []float64) {
 	na := uint(len(indices)) / self.Inputs
-
 	self.Nodes += na
 	self.Active = append(self.Active, na)
 	self.Indices = append(self.Indices, indices...)
 	self.Surpluses = append(self.Surpluses, surpluses...)
-
-	for _, level := range levelize(indices, self.Inputs) {
-		if self.Level < level {
-			self.Level = level
-		}
-	}
 }
 
 // String returns human-friendly information about the interpolant.
