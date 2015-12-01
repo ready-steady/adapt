@@ -72,7 +72,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	queue := newQueue(ni, no, config)
+	queue := newQueue(ni, config)
 	hash := newHash(ni)
 
 	indices := make([]uint64, 1*ni)
@@ -101,14 +101,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surrogate.push(indices, surpluses)
 		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
-		queue.update(assess(self.basis, target, &progress, queue.Indices, queue.Nodes,
-			subtract(queue.Values, approximate(self.basis, surrogate.Indices,
-				surrogate.Surpluses, queue.Nodes, ni, no, nw)), ni, no))
-
-		queue.push(indices, nodes, values, assess(self.basis, target, &progress, indices,
-			nodes, surpluses, ni, no))
-
-		indices = hash.filter(self.grid.Children(queue.pull()))
+		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
+		indices = hash.filter(self.grid.Children(queue.filter(indices, scores)))
 
 		progress.Iteration++
 	}
