@@ -43,6 +43,7 @@ type Progress struct {
 	Level    uint      // Reached level
 	Active   uint      // Number of active nodes
 	Passive  uint      // Number of passive nodes
+	Refined  uint      // Number of refined nodes
 	Integral []float64 // Integral over the whole domain
 }
 
@@ -85,7 +86,11 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
 		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
-		indices = hash.filter(self.grid.Children(queue.filter(indices, scores)))
+		indices = queue.filter(indices, scores)
+
+		progress.Refined += uint(len(indices)) / ni
+
+		indices = hash.filter(self.grid.Children(indices))
 
 		progress.Passive += progress.Active
 		progress.Active = uint(len(indices)) / ni
