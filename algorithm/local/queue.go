@@ -1,4 +1,4 @@
-package adapt
+package local
 
 type queue struct {
 	ni   uint

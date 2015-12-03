@@ -1,11 +1,11 @@
-package adapt
+package local
 
 import (
 	"fmt"
 	"math"
 
 	"github.com/ready-steady/adapt/basis/linear"
-	"github.com/ready-steady/adapt/grid/newcot"
+	"github.com/ready-steady/adapt/grid/equidistant"
 )
 
 // Interpolation in one dimension.
@@ -16,7 +16,7 @@ func ExampleInterpolator_step() {
 		tolerance = 1e-4
 	)
 
-	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
+	grid, basis := equidistant.NewClosed(inputs), linear.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
 	target := NewTarget(inputs, outputs)
@@ -51,7 +51,7 @@ func ExampleInterpolator_cube() {
 		tolerance = 1e-4
 	)
 
-	grid, basis := newcot.NewClosed(inputs), linhat.NewClosed(inputs)
+	grid, basis := equidistant.NewClosed(inputs), linear.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
 	target := NewTarget(inputs, outputs)

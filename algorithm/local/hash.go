@@ -1,4 +1,4 @@
-package adapt
+package local
 
 import (
 	"reflect"

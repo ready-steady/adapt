@@ -1,6 +1,6 @@
 // Package local provides an algorithm for adaptive hierarchical interpolation
 // with local refinements.
-package adapt
+package local
 
 import (
 	"runtime"

@@ -1,4 +1,4 @@
-package adapt
+package local
 
 // Target represents a function to be interpolated.
 type Target interface {

@@ -1,10 +1,10 @@
-package adapt
+package local
 
 import (
 	"math"
 
 	"github.com/ready-steady/adapt/basis/linear"
-	"github.com/ready-steady/adapt/grid/newcot"
+	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/ode/rk4"
 )
 
@@ -69,9 +69,9 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 
 	switch fixture.rule {
 	case "open":
-		return New(newcot.NewOpen(ni), linhat.NewOpen(ni), config), target
+		return New(equidistant.NewOpen(ni), linear.NewOpen(ni), config), target
 	default:
-		return New(newcot.NewClosed(ni), linhat.NewClosed(ni), config), target
+		return New(equidistant.NewClosed(ni), linear.NewClosed(ni), config), target
 	}
 }
 
