@@ -1,4 +1,4 @@
-package linhat
+package linear
 
 // Open represents an instance of the basis in (0, 1)^n.
 type Open struct {

@@ -1,4 +1,4 @@
-package linhat
+package linear
 
 // Closed represents an instance of the basis in [0, 1]^n.
 type Closed struct {

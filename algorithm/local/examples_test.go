@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ready-steady/adapt/basis/linhat"
+	"github.com/ready-steady/adapt/basis/linear"
 	"github.com/ready-steady/adapt/grid/newcot"
 )
 

@@ -3,7 +3,7 @@ package adapt
 import (
 	"math"
 
-	"github.com/ready-steady/adapt/basis/linhat"
+	"github.com/ready-steady/adapt/basis/linear"
 	"github.com/ready-steady/adapt/grid/newcot"
 	"github.com/ready-steady/ode/rk4"
 )

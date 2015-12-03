@@ -1,4 +1,4 @@
-package linhat
+package linear
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-// Package adapt provides an algorithm for adaptive hierarchical interpolation
+// Package local provides an algorithm for adaptive hierarchical interpolation
 // with local refinements.
 package adapt
 
