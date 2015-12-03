@@ -4,9 +4,10 @@
 
 ## Subpackages
 
-The package contains two subpackages:
+The package contains three subpackages:
 
-* basis/[linhat](basis/linhat) and
+* algorithm/[local](algorithm/local),
+* basis/[linhat](basis/linhat), and
 * grid/[newcot](grid/newcot).
 
 ## Contributing
