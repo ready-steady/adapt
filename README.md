@@ -1,14 +1,12 @@
 # Adaptive Hierarchical Interpolation [![Build Status][status-img]][status-url]
 
-## [Documentation][doc]
-
 ## Subpackages
 
 The package contains three subpackages:
 
 * algorithm/[local](algorithm/local),
-* basis/[linhat](basis/linhat), and
-* grid/[newcot](grid/newcot).
+* basis/[linear](basis/linear), and
+* grid/[equidistant](grid/equidistant).
 
 ## Contributing
 
@@ -18,4 +16,3 @@ The package contains three subpackages:
 
 [status-img]: https://travis-ci.org/ready-steady/adapt.svg?branch=master
 [status-url]: https://travis-ci.org/ready-steady/adapt
-[doc]: http://godoc.org/github.com/ready-steady/adapt
