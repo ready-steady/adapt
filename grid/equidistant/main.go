@@ -1,11 +1,10 @@
-// Package newcot provides means for working with the Newton–Cotes grid on the
-// unit hypercube.
+// Package equidistant provides means for working with the Newton–Cotes grid.
 //
 // Each node in the grid is identified by a sequence of levels and orders. Such
 // a sequence is encoded as a sequence of uint64s where each uint64 is
 // (level|order<<6). Consequently, the maximal level is 2^6, and the maximal
 // order is 2^58.
-package newcot
+package equidistant
 
 const (
 	LEVEL_MASK = 0x3F

@@ -1,4 +1,4 @@
-package newcot
+package equidistant
 
 import (
 	"testing"

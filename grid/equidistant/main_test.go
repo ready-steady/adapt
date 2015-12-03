@@ -1,4 +1,4 @@
-package newcot
+package equidistant
 
 func compose(levels []uint64, orders []uint64) []uint64 {
 	indices := make([]uint64, len(levels))
