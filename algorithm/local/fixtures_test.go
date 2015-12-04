@@ -75,10 +75,8 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 	}
 }
 
-func newTarget(inputs, outputs uint, tolerance float64,
-	compute func([]float64, []float64)) Target {
-
-	target := NewTarget(inputs, outputs)
+func newTarget(ni, no uint, tolerance float64, compute func([]float64, []float64)) Target {
+	target := NewTarget(ni, no)
 	target.ComputeHandler = compute
 	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
 		for _, ε := range location.Surplus {
@@ -91,7 +89,6 @@ func newTarget(inputs, outputs uint, tolerance float64,
 		}
 		return 0.0
 	}
-
 	return target
 }
 

@@ -45,7 +45,7 @@ type Progress struct {
 	Integral []float64 // Integral over the whole domain
 }
 
-// New creates a new interpolator.
+// New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	if config.Workers == 0 {
 		panic("the number of workers should be positive")
