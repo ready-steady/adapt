@@ -1,7 +1,7 @@
 # Locally Adaptive Interpolation
 
-The package provides an algorithm for adaptive hierarchical interpolation with
-local refinements.
+The package provides an algorithm for locally adaptive hierarchical
+interpolation.
 
 ## [Documentation][doc]
 
