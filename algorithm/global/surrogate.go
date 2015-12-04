@@ -8,7 +8,6 @@ import (
 type Surrogate struct {
 	Inputs  uint // Number of inputs
 	Outputs uint // Number of outputs
-	Level   uint // Interpolation level
 	Nodes   uint // Number of nodes
 }
 
@@ -21,6 +20,6 @@ func newSurrogate(ni, no uint) *Surrogate {
 
 // String returns human-friendly information about the surrogate.
 func (self *Surrogate) String() string {
-	return fmt.Sprintf("Surrogate{inputs: %d, outputs: %d, level: %d, nodes: %d}",
-		self.Inputs, self.Outputs, self.Level, self.Nodes)
+	return fmt.Sprintf("Surrogate{inputs: %d, outputs: %d, nodes: %d}",
+		self.Inputs, self.Outputs, self.Nodes)
 }

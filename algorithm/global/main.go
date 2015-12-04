@@ -6,9 +6,6 @@ package global
 type Basis interface {
 	// Compute evaluates the value of a basis function.
 	Compute([]uint64, []float64) float64
-
-	// Integrate computes the integral of a basis function.
-	Integrate([]uint64) float64
 }
 
 // Grid is a sparse grid.
@@ -27,7 +24,7 @@ type Interpolator struct {
 	grid   Grid
 }
 
-// New creates a new interpolator.
+// New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
 		config: *config,
@@ -39,4 +36,9 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 // Compute constructs an interpolant for a function.
 func (self *Interpolator) Compute(target Target) *Surrogate {
 	return &Surrogate{}
+}
+
+// Evaluate computes the values of an interpolant at a set of points.
+func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
+	return make([]float64, surrogate.Outputs*uint(len(points))/surrogate.Inputs)
 }
