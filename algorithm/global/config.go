@@ -2,25 +2,34 @@ package global
 
 // Config represents a configuration of the algorithm.
 type Config struct {
-	// The minimum level of interpolation. The nodes that belong to lower levels
-	// are unconditionally included in the surrogate.
-	MinLevel uint
-
-	// The maximum level of interpolation. The nodes that belong to this level
-	// are never refined.
+	// The maximum level of interpolation.
 	MaxLevel uint
 
-	// The maximum number of target-function evaluations. The limit is not
-	// enforced precisely. The process stops when undertaking the next iteration
-	// would violate the limit.
+	// The maximum number of indices.
+	MaxIndices uint
+
+	// The maximum number of evaluations.
 	MaxEvaluations uint
+
+	// The degree of adaptivity.
+	Adaptivity float64
+
+	// The absolute-error tolerance.
+	AbsTolerance float64
+
+	// The relative-error tolerance.
+	RelTolerance float64
 }
 
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		MinLevel:       1,
 		MaxLevel:       9,
+		MaxIndices:     ^uint(0),
 		MaxEvaluations: ^uint(0),
+
+		Adaptivity:   1.0,
+		AbsTolerance: 1e-6,
+		RelTolerance: 1e-2,
 	}
 }
