@@ -16,18 +16,16 @@ type Basis interface {
 	// Compute evaluates the value of a basis function at a point.
 	Compute([]uint64, []float64) float64
 
-	// Integrate computes the integral of a basis function over the whole
-	// domain.
+	// Integrate computes the integral of a basis function.
 	Integrate([]uint64) float64
 }
 
 // Grid is a sparse grid.
 type Grid interface {
-	// Compute returns the nodes corresponding to the given indices.
+	// Compute returns the nodes corresponding to a set of indices.
 	Compute([]uint64) []float64
 
-	// Children returns the child indices corresponding to a set of parent
-	// indices.
+	// Children returns the child indices corresponding to a set of indices.
 	Children([]uint64) []uint64
 }
 

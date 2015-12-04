@@ -14,7 +14,7 @@ func NewClosed(dimensions uint) *Closed {
 	return &Closed{int(dimensions)}
 }
 
-// Compute returns the nodes corresponding to the given indices.
+// Compute returns the nodes corresponding to a set of indices.
 func (_ *Closed) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
@@ -29,7 +29,7 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
-// Children returns the child indices corresponding to a set of parent indices.
+// Children returns the child indices corresponding to a set of indices.
 func (self *Closed) Children(indices []uint64) []uint64 {
 	nd := self.nd
 	nn := len(indices) / nd
@@ -70,7 +70,7 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 	return childIndices[:nc*nd]
 }
 
-// Parent transforms an index into its parent index in the ith dimension.
+// Parent transforms an index into its parent index in dimension i.
 func (_ *Closed) Parent(index []uint64, i uint) {
 	switch level := LEVEL_MASK & index[i]; level {
 	case 0:
@@ -87,7 +87,7 @@ func (_ *Closed) Parent(index []uint64, i uint) {
 	}
 }
 
-// Sibling transforms an index into its sibling index in the ith dimension.
+// Sibling transforms an index into its sibling index in dimension i.
 func (_ *Closed) Sibling(index []uint64, i uint) {
 	switch level := LEVEL_MASK & index[i]; level {
 	case 0, 2:
