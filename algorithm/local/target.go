@@ -5,7 +5,7 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Compute evaluates the target function at a point in [0, 1]^n.
+	// Compute evaluates the target function at a point.
 	Compute(point, value []float64)
 
 	// Monitor keeps track of the interpolation progress. The function is called
