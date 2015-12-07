@@ -209,6 +209,112 @@ func TestClosedChildren2D(t *testing.T) {
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
 
+func TestClosedIndex(t *testing.T) {
+	grid := NewClosed(2)
+
+	cases := []struct {
+		level  []uint8
+		levels []uint64
+		orders []uint64
+	}{
+		{
+			level: []uint8{0, 0},
+			levels: []uint64{
+				0, 0,
+			},
+			orders: []uint64{
+				0, 0,
+			},
+		},
+		{
+			level: []uint8{0, 1},
+			levels: []uint64{
+				0, 1,
+				0, 1,
+			},
+			orders: []uint64{
+				0, 0,
+				0, 2,
+			},
+		},
+		{
+			level: []uint8{1, 2},
+			levels: []uint64{
+				1, 2,
+				1, 2,
+				1, 2,
+				1, 2,
+			},
+			orders: []uint64{
+				0, 1,
+				2, 1,
+				0, 3,
+				2, 3,
+			},
+		},
+		{
+			level: []uint8{2, 3},
+			levels: []uint64{
+				2, 3,
+				2, 3,
+				2, 3,
+				2, 3,
+				2, 3,
+				2, 3,
+				2, 3,
+				2, 3,
+			},
+			orders: []uint64{
+				1, 1,
+				3, 1,
+				1, 3,
+				3, 3,
+				1, 5,
+				3, 5,
+				1, 7,
+				3, 7,
+			},
+		},
+	}
+
+	for _, c := range cases {
+		assert.Equal(grid.Index(c.level), compose(c.levels, c.orders), t)
+	}
+}
+
+func TestIndexClosed(t *testing.T) {
+	cases := []struct {
+		level  uint8
+		levels []uint64
+		orders []uint64
+	}{
+		{
+			level:  0,
+			levels: []uint64{0},
+			orders: []uint64{0},
+		},
+		{
+			level:  1,
+			levels: []uint64{1, 1},
+			orders: []uint64{0, 2},
+		},
+		{
+			level:  2,
+			levels: []uint64{2, 2},
+			orders: []uint64{1, 3},
+		},
+		{
+			level:  3,
+			levels: []uint64{3, 3, 3, 3},
+			orders: []uint64{1, 3, 5, 7},
+		},
+	}
+
+	for _, c := range cases {
+		assert.Equal(indexClosed(c.level), compose(c.levels, c.orders), t)
+	}
+}
+
 func BenchmarkClosedChildren(b *testing.B) {
 	const (
 		dimensions  = 20

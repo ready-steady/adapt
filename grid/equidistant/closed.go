@@ -69,3 +69,27 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 
 	return children[:nc*nd]
 }
+
+// Index return the indices of a level.
+func (self *Closed) Index(levels []uint8) []uint64 {
+	return index(levels, indexClosed, self.nd)
+}
+
+func indexClosed(level uint8) []uint64 {
+	if level>>LEVEL_MASK != 0 {
+		panic(fmt.Sprintf("the level %d is too large", level))
+	}
+	switch level {
+	case 0:
+		return []uint64{0 | 0<<LEVEL_SIZE}
+	case 1:
+		return []uint64{1 | 0<<LEVEL_SIZE, 1 | 2<<LEVEL_SIZE}
+	default:
+		nn := uint(2) << uint(level-2)
+		indices := make([]uint64, nn)
+		for i := uint(0); i < nn; i++ {
+			indices[i] = uint64(level) | uint64(2*i+1)<<LEVEL_SIZE
+		}
+		return indices
+	}
+}
