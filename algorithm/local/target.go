@@ -8,9 +8,7 @@ type Target interface {
 	// Compute evaluates the target function at a point.
 	Compute(point, value []float64)
 
-	// Monitor keeps track of the interpolation progress. The function is called
-	// once for each iteration before evaluating the target function at the
-	// nodes of that iteration.
+	// Monitor gets called at the beginning of each iteration.
 	Monitor(*Progress)
 
 	// Score guides the local adaptivity. The function assigns a score to the

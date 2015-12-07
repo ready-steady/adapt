@@ -4,6 +4,8 @@ package local
 
 import (
 	"runtime"
+
+	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 const (
@@ -76,8 +78,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		target.Monitor(&progress)
 
 		nodes := self.grid.Compute(indices)
-		values := invoke(target.Compute, nodes, ni, no, nw)
-		surpluses := subtract(values, approximate(self.basis, surrogate.Indices,
+		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
+		surpluses := subtract(values, internal.Approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.push(indices, surpluses)
@@ -106,7 +108,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 // Evaluate computes the values of an interpolant at a set of points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
-	return approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
+	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
 }
 
