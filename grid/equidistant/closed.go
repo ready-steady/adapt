@@ -6,12 +6,12 @@ import (
 
 // Closed represents an instance of the grid in [0, 1]^n.
 type Closed struct {
-	nd int
+	nd uint
 }
 
 // NewClosed creates an instance of the grid in [0, 1]^n.
 func NewClosed(dimensions uint) *Closed {
-	return &Closed{int(dimensions)}
+	return &Closed{dimensions}
 }
 
 // Compute returns the nodes corresponding to a set of indices.
@@ -32,22 +32,22 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 // Children returns the child indices corresponding to a set of indices.
 func (self *Closed) Children(indices []uint64) []uint64 {
 	nd := self.nd
-	nn := len(indices) / nd
+	nn := uint(len(indices)) / nd
 
-	childIndices := make([]uint64, 2*nn*nd*nd)
+	children := make([]uint64, 2*nn*nd*nd)
 
-	nc := 0
-	push := func(p, d int, level, order uint64) {
+	nc := uint(0)
+	push := func(p, d uint, level, order uint64) {
 		if level>>LEVEL_SIZE != 0 || order>>ORDER_SIZE != 0 {
-			panic(fmt.Sprintf("the level %d and order %d overflow uint64", level, order))
+			panic(fmt.Sprintf("the level %d and order %d are too large", level, order))
 		}
-		copy(childIndices[nc*nd:], indices[p*nd:(p+1)*nd])
-		childIndices[nc*nd+d] = level | order<<LEVEL_SIZE
+		copy(children[nc*nd:], indices[p*nd:(p+1)*nd])
+		children[nc*nd+d] = level | order<<LEVEL_SIZE
 		nc++
 	}
 
-	for i := 0; i < nn; i++ {
-		for j := 0; j < nd; j++ {
+	for i := uint(0); i < nn; i++ {
+		for j := uint(0); j < nd; j++ {
 			level := LEVEL_MASK & indices[i*nd+j]
 
 			if level == 0 {
@@ -67,5 +67,5 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 		}
 	}
 
-	return childIndices[:nc*nd]
+	return children[:nc*nd]
 }
