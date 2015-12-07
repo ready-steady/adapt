@@ -53,35 +53,3 @@ func (self *Open) Children(indices []uint64) []uint64 {
 
 	return childIndices
 }
-
-// Parent transforms an index into its parent index in dimension i.
-func (_ *Open) Parent(index []uint64, i uint) {
-	level := LEVEL_MASK & index[i]
-	if level == 0 {
-		return
-	}
-
-	order := (index[i] >> LEVEL_SIZE) / 2
-	if order%2 == 1 {
-		order = (index[i]>>LEVEL_SIZE - 2) / 2
-	}
-
-	index[i] = (level - 1) | order<<LEVEL_SIZE
-}
-
-// Sibling transforms an index into its sibling index in dimension i.
-func (_ *Open) Sibling(index []uint64, i uint) {
-	level := LEVEL_MASK & index[i]
-	if level == 0 {
-		return
-	}
-
-	order := index[i] >> LEVEL_SIZE
-	if (order/2)%2 == 1 {
-		order -= 2
-	} else {
-		order += 2
-	}
-
-	index[i] = level | order<<LEVEL_SIZE
-}

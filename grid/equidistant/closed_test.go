@@ -209,46 +209,6 @@ func TestClosedChildren2D(t *testing.T) {
 	assert.Equal(indices, compose(childLevels, childOrders), t)
 }
 
-func TestClosedParent(t *testing.T) {
-	grid := NewClosed(1)
-
-	children := compose(
-		[]uint64{0, 1, 1, 2, 2, 3, 3, 3, 3},
-		[]uint64{0, 0, 2, 1, 3, 1, 3, 5, 7},
-	)
-
-	parents := compose(
-		[]uint64{0, 0, 0, 1, 1, 2, 2, 2, 2},
-		[]uint64{0, 0, 0, 0, 2, 1, 1, 3, 3},
-	)
-
-	for i := range children {
-		grid.Parent(children[i:i+1], 0)
-	}
-
-	assert.Equal(children, parents, t)
-}
-
-func TestClosedSibling(t *testing.T) {
-	grid := NewClosed(1)
-
-	indices := compose(
-		[]uint64{0, 1, 1, 2, 2, 3, 3, 3, 3},
-		[]uint64{0, 0, 2, 1, 3, 1, 3, 5, 7},
-	)
-
-	siblings := compose(
-		[]uint64{0, 1, 1, 2, 2, 3, 3, 3, 3},
-		[]uint64{0, 2, 0, 1, 3, 3, 1, 7, 5},
-	)
-
-	for i := range indices {
-		grid.Sibling(indices[i:i+1], 0)
-	}
-
-	assert.Equal(indices, siblings, t)
-}
-
 func BenchmarkClosedChildren(b *testing.B) {
 	const (
 		dimensions  = 20
