@@ -1,5 +1,9 @@
 package local
 
+import (
+	"runtime"
+)
+
 // Config represents a configuration of the algorithm.
 type Config struct {
 	// The minimum level of interpolation. The nodes that belong to lower levels
@@ -26,5 +30,6 @@ func NewConfig() *Config {
 		MinLevel:       1,
 		MaxLevel:       9,
 		MaxEvaluations: ^uint(0),
+		Workers:        uint(runtime.GOMAXPROCS(0)),
 	}
 }

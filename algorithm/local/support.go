@@ -48,11 +48,3 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	}
 	return volumes
 }
-
-func subtract(minuend, subtrahend []float64) []float64 {
-	difference := make([]float64, len(minuend))
-	for i := range minuend {
-		difference[i] = minuend[i] - subtrahend[i]
-	}
-	return difference
-}

@@ -73,3 +73,11 @@ func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 
 	return values
 }
+
+func Subtract(minuend, subtrahend []float64) []float64 {
+	difference := make([]float64, len(minuend))
+	for i := range minuend {
+		difference[i] = minuend[i] - subtrahend[i]
+	}
+	return difference
+}

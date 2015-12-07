@@ -3,8 +3,6 @@
 package local
 
 import (
-	"runtime"
-
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -49,16 +47,14 @@ type Progress struct {
 
 // New creates a new interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
-	interpolator := &Interpolator{
+	if config.Workers == 0 {
+		panic("the number of workers should be positive")
+	}
+	return &Interpolator{
 		config: *config,
 		basis:  basis,
 		grid:   grid,
 	}
-	config = &interpolator.config
-	if config.Workers == 0 {
-		config.Workers = uint(runtime.GOMAXPROCS(0))
-	}
-	return interpolator
 }
 
 // Compute constructs an interpolant for a function.
@@ -79,8 +75,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
-		surpluses := subtract(values, internal.Approximate(self.basis, surrogate.Indices,
-			surrogate.Surpluses, nodes, ni, no, nw))
+		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
+			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.push(indices, surpluses)
 		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
