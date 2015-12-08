@@ -12,7 +12,7 @@ type Surrogate struct {
 	Nodes     uint      // Number of nodes
 	Active    []uint    // Number of active nodes at each iteration
 	Indices   []uint64  // Indices of the nodes
-	Surpluses []float64 // Hierarchical surpluses of the nodes
+	Surpluses []float64 // Hierarchical surpluses
 }
 
 func newSurrogate(ni, no uint) *Surrogate {
@@ -20,8 +20,8 @@ func newSurrogate(ni, no uint) *Surrogate {
 		Inputs:    ni,
 		Outputs:   no,
 		Active:    make([]uint, 0),
-		Indices:   make([]uint64, 0, ni),
-		Surpluses: make([]float64, 0, no),
+		Indices:   make([]uint64, 0),
+		Surpluses: make([]float64, 0),
 	}
 }
 
