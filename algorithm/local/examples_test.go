@@ -40,7 +40,7 @@ func ExampleInterpolator_step() {
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 1, outputs: 1, level: 9, nodes: 18}
+	// {inputs:1 outputs:1 level:9 nodes:18}
 }
 
 // Interpolation in two dimensions.
@@ -75,5 +75,5 @@ func ExampleInterpolator_cube() {
 	fmt.Println(surrogate)
 
 	// Output:
-	// Surrogate{inputs: 2, outputs: 1, level: 9, nodes: 377}
+	// {inputs:2 outputs:1 level:9 nodes:377}
 }
