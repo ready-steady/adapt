@@ -35,7 +35,7 @@ func (self *Open) Children(indices []uint64) []uint64 {
 	nc := uint(0)
 	push := func(p, d uint, level, order uint64) {
 		if level>>LEVEL_SIZE != 0 || order>>ORDER_SIZE != 0 {
-			panic(fmt.Sprintf("the level %d and order %d are too large", level, order))
+			panic(fmt.Sprintf("the level %d or order %d is too large", level, order))
 		}
 		copy(children[nc*nd:], indices[p*nd:(p+1)*nd])
 		children[nc*nd+d] = level | order<<LEVEL_SIZE
