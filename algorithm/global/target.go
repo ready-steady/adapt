@@ -7,6 +7,9 @@ type Target interface {
 
 	// Compute evaluates the target function at a point.
 	Compute(point, value []float64)
+
+	// Monitor gets called at the beginning of each iteration.
+	Monitor(*Progress)
 }
 
 // GenericTarget is a generic target satisfying the Target interface.
@@ -15,6 +18,7 @@ type GenericTarget struct {
 	Outputs uint // > 0
 
 	ComputeHandler func([]float64, []float64) // != nil
+	MonitorHandler func(*Progress)
 }
 
 // NewTarget returns a new generic target.
@@ -31,4 +35,10 @@ func (self *GenericTarget) Dimensions() (uint, uint) {
 
 func (self *GenericTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
+}
+
+func (self *GenericTarget) Monitor(progress *Progress) {
+	if self.MonitorHandler != nil {
+		self.MonitorHandler(progress)
+	}
 }
