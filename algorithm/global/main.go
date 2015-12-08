@@ -3,6 +3,7 @@
 package global
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/ready-steady/adapt/algorithm/internal"
@@ -149,19 +150,17 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			if lindex[i] >= config.MaxLevel {
 				continue
 			}
+			newBackward[i*ni+i] = current
 			for j := uint(0); j < ni; j++ {
-				if lindex[j] == 0 {
+				if i == j || lindex[j] == 0 {
 					continue
 				}
-				if i == j {
-					newBackward[i*ni+j] = current
-				} else {
-					l := forward[backward[current*ni+j]*ni+i]
-					if l == none || active[l] {
-						continue admissibilityCheck
-					}
-					newBackward[i*ni+j] = l
+				z := backward[current*ni+j]*ni + i
+				l := forward[z]
+				if l == none || active[l] {
+					continue admissibilityCheck
 				}
+				newBackward[i*ni+j] = l
 			}
 			cursor = append(cursor, i)
 		}
