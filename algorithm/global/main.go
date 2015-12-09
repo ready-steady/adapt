@@ -11,7 +11,6 @@ import (
 
 var (
 	infinity = math.Inf(1.0)
-	none     = ^uint(0)
 )
 
 // Basis is a functional basis.
@@ -46,6 +45,8 @@ type Progress struct {
 
 type cursor map[uint]bool
 
+type reference map[uint]uint
+
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -68,8 +69,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	lindices := repeatUint8(0, 1*ni)
 	active := make(cursor)
 	depths := []uint{0}
-	forward := repeatUint(none, 1*ni)
-	backward := repeatUint(none, 1*ni)
+	forward := make(reference)
+	backward := make(reference)
 
 	active[0] = true
 	progress.Active++
@@ -118,17 +119,21 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 				continue
 			}
 
-			newBackward := repeatUint(none, ni)
-			newBackward[i] = current
+			newBackward := make(reference)
 			for j := uint(0); j < ni; j++ {
 				if i == j || lindex[j] == 0 {
 					continue
 				}
-				l := forward[backward[current*ni+j]*ni+i]
-				if l == none || active[l] {
+				if l, ok := forward[backward[current*ni+j]*ni+i]; !ok || active[l] {
 					continue admissibility
+				} else {
+					newBackward[j] = l
 				}
-				newBackward[j] = l
+			}
+			newBackward[i] = current
+			for j, l := range newBackward {
+				forward[l*ni+j] = total
+				backward[total*ni+j] = l
 			}
 
 			lindices = append(lindices, lindex...)
@@ -139,16 +144,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			indices = append(indices, newIndices...)
 			counts = append(counts, uint(len(newIndices))/ni)
 
-			for j := uint(0); j < ni; j++ {
-				if newBackward[j] != none {
-					forward[newBackward[j]*ni+j] = total
-				}
-			}
-
 			active[total] = true
 			depths = append(depths, depths[current]+1)
-			forward = append(forward, repeatUint(none, ni)...)
-			backward = append(backward, newBackward...)
 
 			if lindex[i] > progress.Level {
 				progress.Level = lindex[i]
