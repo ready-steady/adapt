@@ -2311,5 +2311,15 @@ func prepare(fixture *fixture) (*Interpolator, Target) {
 func newTarget(ni, no uint, compute func([]float64, []float64)) Target {
 	target := NewTarget(ni, no)
 	target.ComputeHandler = compute
+	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
+		score := 0.0
+		for _, value := range location.Surpluses {
+			if value < 0.0 {
+				value = -value
+			}
+			score += value
+		}
+		return score / float64(uint(len(location.Surpluses))/no)
+	}
 	return target
 }

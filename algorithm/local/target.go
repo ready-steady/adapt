@@ -11,17 +11,12 @@ type Target interface {
 	// Monitor gets called at the beginning of each iteration.
 	Monitor(*Progress)
 
-	// Score guides the local adaptivity. The function assigns a score to the
-	// behavior of the target function at a particular node of the underlying
-	// grid. A positive score signifies that the node should be refined, and the
-	// score is the importance of this refinement. Any other score signifies
-	// that the node should not be refined.
+	// Score assigns a score to a spacial local.
 	Score(*Location, *Progress) float64
 }
 
 // Location contains information about a spacial location.
 type Location struct {
-	Node    []float64 // Collocation node
 	Surplus []float64 // Hierarchical surplus
 	Volume  float64   // Volume under the basis function
 }

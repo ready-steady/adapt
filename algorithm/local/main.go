@@ -83,7 +83,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surrogate.push(indices, surpluses)
 		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
-		scores := assess(self.basis, target, &progress, indices, nodes, surpluses, ni, no)
+		scores := assess(self.basis, target, &progress, indices, surpluses, ni, no)
 		indices = queue.filter(indices, scores)
 
 		progress.Refined += uint(len(indices)) / ni

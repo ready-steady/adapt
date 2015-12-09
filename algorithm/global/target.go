@@ -10,6 +10,14 @@ type Target interface {
 
 	// Monitor gets called at the beginning of each iteration.
 	Monitor(*Progress)
+
+	// Score assigns a score to a dimensional location.
+	Score(*Location, *Progress) float64
+}
+
+// Location contains information about a dimensional location.
+type Location struct {
+	Surpluses []float64 // Hierarchical surpluses
 }
 
 // GenericTarget is a generic target satisfying the Target interface.
@@ -19,6 +27,7 @@ type GenericTarget struct {
 
 	ComputeHandler func([]float64, []float64) // != nil
 	MonitorHandler func(*Progress)
+	ScoreHandler   func(*Location, *Progress) float64 // != nil
 }
 
 // NewTarget returns a new generic target.
@@ -41,4 +50,8 @@ func (self *GenericTarget) Monitor(progress *Progress) {
 	if self.MonitorHandler != nil {
 		self.MonitorHandler(progress)
 	}
+}
+
+func (self *GenericTarget) Score(location *Location, progress *Progress) float64 {
+	return self.ScoreHandler(location, progress)
 }

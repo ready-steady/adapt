@@ -64,7 +64,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	progress := Progress{}
+	progress := newProgress()
 
 	lindices := repeatUint8(0, 1*ni)
 	active := make(cursor)
@@ -89,9 +89,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	terminator := newTerminator(no, config)
 	terminator.push(values, values, counts)
 
-	scores := updateScores(nil, counts, values, no)
+	scores := assess(target, progress, values, counts, no)
 	for {
-		target.Monitor(&progress)
+		target.Monitor(progress)
 
 		if terminator.check(active) {
 			break
@@ -169,9 +169,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.push(indices, surpluses)
+		scores = append(scores, assess(target, progress, surpluses, counts, no)...)
 
 		terminator.push(values, surpluses, counts)
-		scores = updateScores(scores, counts, surpluses, no)
 	}
 
 	return surrogate
@@ -181,6 +181,10 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
+}
+
+func newProgress() *Progress {
+	return &Progress{}
 }
 
 // String returns a human-friendly representation.
@@ -197,23 +201,4 @@ func (self *Progress) String() string {
 		evaluations: self.Evaluations,
 	}
 	return fmt.Sprintf("%+v", phantom)
-}
-
-func updateScores(scores []float64, counts []uint, surpluses []float64, no uint) []float64 {
-	for _, count := range counts {
-		scores = append(scores, score(surpluses[:count*no], no))
-		surpluses = surpluses[count*no:]
-	}
-	return scores
-}
-
-func score(surpluses []float64, no uint) float64 {
-	score := 0.0
-	for _, value := range surpluses {
-		if value < 0.0 {
-			value = -value
-		}
-		score += value
-	}
-	return score / float64(uint(len(surpluses))/no)
 }

@@ -1,5 +1,19 @@
 package global
 
+func assess(target Target, progress *Progress, surpluses []float64,
+	counts []uint, no uint) []float64 {
+
+	scores := make([]float64, 0, len(counts))
+	for _, count := range counts {
+		location := Location{
+			Surpluses: surpluses[:count*no],
+		}
+		scores = append(scores, target.Score(&location, progress))
+		surpluses = surpluses[count*no:]
+	}
+	return scores
+}
+
 func maxFloat64(data []float64, cursor cursor) (float64, uint) {
 	value, position := -infinity, ^uint(0)
 	for i := range cursor {
