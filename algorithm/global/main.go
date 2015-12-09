@@ -61,56 +61,26 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
+	progress := Progress{}
+
+	indices := make([]uint64, ni)
+	nodes, counts := self.grid.Compute(indices), []uint{1}
+	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
+
+	surrogate.push(indices, values)
+	progress.Evaluations++
 
 	lindices := repeatUint8(0, ni)
-	indices := make([]uint64, ni)
-	counts := []uint{1}
-
 	active := []bool{true}
 	depths := []uint{0}
-
 	forward := repeatUint(none, 1*ni)
 	backward := repeatUint(none, 1*ni)
+	progress.Active++
 
-	lower := repeatFloat64(infinity, no)
-	upper := repeatFloat64(-infinity, no)
-
-	scores := make([]float64, 0)
-	errors := make([]float64, 0)
-
-	progress := Progress{Active: 1}
+	lower, upper := updateBounds(nil, nil, values, no)
+	scores, errors := updateScores(nil, nil, counts, values, no)
 	for {
 		target.Monitor(&progress)
-
-		nn := uint(len(indices)) / ni
-		if progress.Evaluations+nn > config.MaxEvaluations {
-			break
-		}
-
-		nodes := self.grid.Compute(indices)
-		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
-		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
-			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
-
-		surrogate.push(indices, surpluses)
-		progress.Evaluations += nn
-
-		offset := uint(0)
-		for _, count := range counts {
-			score := 0.0
-			error := repeatFloat64(-infinity, no)
-			for j := uint(0); j < count; j++ {
-				for l := uint(0); l < no; l++ {
-					Δ := math.Abs(surpluses[(offset+j)*no+l])
-					error[l] = math.Max(error[l], Δ)
-					score += Δ
-				}
-			}
-			score /= float64(count)
-			scores = append(scores, score)
-			errors = append(errors, error...)
-			offset += count
-		}
 
 		cursor := find(active)
 
@@ -175,7 +145,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			break
 		}
 
-		indices, counts = indices[:0], counts[:0]
+		indices := make([]uint64, 0)
+		counts := make([]uint, 0, na)
 		for i := uint(0); i < na; i++ {
 			j := cursor[i]
 
@@ -205,6 +176,22 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 			progress.Active++
 		}
+
+		nn := uint(len(indices)) / ni
+		if progress.Evaluations+nn > config.MaxEvaluations {
+			break
+		}
+
+		nodes := self.grid.Compute(indices)
+		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
+		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
+			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
+
+		surrogate.push(indices, surpluses)
+		progress.Evaluations += nn
+
+		lower, upper = updateBounds(lower, upper, values, no)
+		scores, errors = updateScores(scores, errors, counts, surpluses, no)
 	}
 
 	return surrogate
@@ -230,4 +217,48 @@ func (self *Progress) String() string {
 		evaluations: self.Evaluations,
 	}
 	return fmt.Sprintf("%+v", phantom)
+}
+
+func updateBounds(lower, upper []float64, data []float64, no uint) ([]float64, []float64) {
+	if lower == nil {
+		lower = repeatFloat64(infinity, no)
+	}
+	if upper == nil {
+		upper = repeatFloat64(-infinity, no)
+	}
+	nn := uint(len(data)) / no
+	for i := uint(0); i < nn; i++ {
+		for j := uint(0); j < no; j++ {
+			point := data[i*no+j]
+			if lower[j] > point {
+				lower[j] = point
+			}
+			if upper[j] < point {
+				upper[j] = point
+			}
+		}
+	}
+	return lower, upper
+}
+
+func updateScores(scores, errors []float64, counts []uint, surpluses []float64,
+	no uint) ([]float64, []float64) {
+
+	offset := uint(0)
+	for _, count := range counts {
+		score := 0.0
+		error := repeatFloat64(-infinity, no)
+		for j := uint(0); j < count; j++ {
+			for l := uint(0); l < no; l++ {
+				Δ := math.Abs(surpluses[(offset+j)*no+l])
+				error[l] = math.Max(error[l], Δ)
+				score += Δ
+			}
+		}
+		score /= float64(count)
+		scores = append(scores, score)
+		errors = append(errors, error...)
+		offset += count
+	}
+	return scores, errors
 }
