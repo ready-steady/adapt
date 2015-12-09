@@ -17,3 +17,11 @@ func TestBranin(t *testing.T) {
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 1e-12, t)
 }
+
+func BenchmarkBranin(b *testing.B) {
+	fixture := &fixtureBranin
+	interpolator, target := prepare(fixture)
+	for i := 0; i < b.N; i++ {
+		interpolator.Compute(target)
+	}
+}
