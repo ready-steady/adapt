@@ -1,12 +1,5 @@
 package global
 
-func appendUint(data []uint, value uint, times uint) []uint {
-	for i := uint(0); i < times; i++ {
-		data = append(data, value)
-	}
-	return data
-}
-
 func find(data []bool) []uint {
 	n := uint(len(data))
 	indices := make([]uint, 0, n)

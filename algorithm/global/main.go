@@ -65,10 +65,11 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	indices := make([]uint64, ni)
 	nodes, counts := self.grid.Compute(indices), []uint{1}
+
 	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
+	progress.Evaluations++
 
 	surrogate.push(indices, values)
-	progress.Evaluations++
 
 	lindices := repeatUint8(0, ni)
 	active := []bool{true}
@@ -87,12 +88,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		terminate := true
 		δ := threshold(lower, upper, config.AbsTolerance, config.RelTolerance)
 
-	accuracyCheck:
+	accuracy:
 		for _, i := range cursor {
 			for j := uint(0); j < no; j++ {
 				if errors[i*no+j] > δ[j] {
 					terminate = false
-					break accuracyCheck
+					break accuracy
 				}
 			}
 		}
@@ -112,68 +113,56 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		lindex := lindices[current*ni : (current+1)*ni]
 
-		cursor = make([]uint, 0, ni)
-		newBackward := repeatUint(none, ni*ni)
+		indices := make([]uint64, 0)
+		counts := make([]uint, 0)
+		total := progress.Active + progress.Passive
 
-	admissibilityCheck:
-		for i := uint(0); i < ni; i++ {
+	admissibility:
+		for i := uint(0); i < ni && total < config.MaxIndices; i++ {
 			if lindex[i] >= config.MaxLevel {
 				continue
 			}
-			newBackward[i*ni+i] = current
+
+			newBackward := repeatUint(none, ni)
+			newBackward[i] = current
 			for j := uint(0); j < ni; j++ {
 				if i == j || lindex[j] == 0 {
 					continue
 				}
 				l := forward[backward[current*ni+j]*ni+i]
 				if l == none || active[l] {
-					continue admissibilityCheck
+					continue admissibility
 				}
-				newBackward[i*ni+j] = l
-			}
-			cursor = append(cursor, i)
-		}
-
-		na := uint(len(cursor))
-		if na == 0 {
-			continue
-		}
-
-		nt := progress.Active + progress.Passive
-		if nt+na > config.MaxIndices {
-			break
-		}
-
-		indices := make([]uint64, 0)
-		counts := make([]uint, 0, na)
-		for i := uint(0); i < na; i++ {
-			j := cursor[i]
-
-			level := lindex[j] + 1
-			if level > progress.Level {
-				progress.Level = level
+				newBackward[j] = l
 			}
 
 			lindices = append(lindices, lindex...)
-			lindices[(nt+i)*ni+j] = level
+			lindex := lindices[total*ni:]
+			lindex[i]++
 
-			newIndices := self.grid.Index(lindices[(nt+i)*ni:])
+			if lindex[i] > progress.Level {
+				progress.Level = lindex[i]
+			}
+
+			newIndices := self.grid.Index(lindex)
 			indices = append(indices, newIndices...)
 			counts = append(counts, uint(len(newIndices))/ni)
 
 			active = append(active, true)
 			depths = append(depths, depths[current]+1)
 
-			for l := uint(0); l < ni; l++ {
-				if newBackward[j*ni+l] == none {
+			for j := uint(0); j < ni; j++ {
+				if newBackward[j] == none {
 					continue
 				}
-				forward[newBackward[j*ni+l]*ni+l] = nt + i
+				forward[newBackward[j]*ni+j] = total
 			}
-			forward = appendUint(forward, none, ni)
-			backward = append(backward, newBackward[j*ni:(j+1)*ni]...)
+
+			forward = append(forward, repeatUint(none, ni)...)
+			backward = append(backward, newBackward...)
 
 			progress.Active++
+			total++
 		}
 
 		nn := uint(len(indices)) / ni
@@ -182,12 +171,14 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		}
 
 		nodes := self.grid.Compute(indices)
+
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
+		progress.Evaluations += nn
+
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.push(indices, surpluses)
-		progress.Evaluations += nn
 
 		lower, upper = updateBounds(lower, upper, values, no)
 		scores, errors = updateScores(scores, errors, counts, surpluses, no)
