@@ -45,14 +45,6 @@ func minUint(data []uint, cursor cursor) (uint, uint) {
 	return value, position
 }
 
-func repeatBool(value bool, times uint) []bool {
-	data := make([]bool, times)
-	for i := uint(0); i < times; i++ {
-		data[i] = value
-	}
-	return data
-}
-
 func repeatFloat64(value float64, times uint) []float64 {
 	data := make([]float64, times)
 	for i := uint(0); i < times; i++ {

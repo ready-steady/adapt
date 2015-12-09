@@ -68,7 +68,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	lindices := repeatUint8(0, 1*ni)
 	active := make(cursor)
-	depths := []uint{0}
 	forward := make(reference)
 	backward := make(reference)
 
@@ -89,21 +88,19 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	terminator := newTerminator(no, config)
 	terminator.push(values, values, counts)
 
-	scores := assess(target, progress, values, counts, no)
+	selector := newSelector(ni, config)
+	selector.push(assess(target, progress, values, counts, no), 0)
+
 	for !terminator.done(active) {
 		target.Monitor(progress)
 
-		min, current := minUint(depths, active)
-		max, _ := maxUint(depths)
-		if float64(min) > (1.0-config.Adaptivity)*float64(max) {
-			_, current = maxFloat64(scores, active)
-		}
+		position, depth := selector.pull(active)
 
-		delete(active, current)
+		delete(active, position)
 		progress.Active--
 		progress.Passive++
 
-		lindex := lindices[current*ni : (current+1)*ni]
+		lindex := lindices[position*ni : (position+1)*ni]
 
 		indices := make([]uint64, 0)
 		counts := make([]uint, 0)
@@ -120,13 +117,13 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 				if i == j || lindex[j] == 0 {
 					continue
 				}
-				if l, ok := forward[backward[current*ni+j]*ni+i]; !ok || active[l] {
+				if l, ok := forward[backward[position*ni+j]*ni+i]; !ok || active[l] {
 					continue admissibility
 				} else {
 					newBackward[j] = l
 				}
 			}
-			newBackward[i] = current
+			newBackward[i] = position
 			for j, l := range newBackward {
 				forward[l*ni+j] = total
 				backward[total*ni+j] = l
@@ -140,13 +137,11 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			indices = append(indices, newIndices...)
 			counts = append(counts, uint(len(newIndices))/ni)
 
-			active[total] = true
-			depths = append(depths, depths[current]+1)
-
 			if lindex[i] > progress.Level {
 				progress.Level = lindex[i]
 			}
 
+			active[total] = true
 			progress.Active++
 			total++
 		}
@@ -165,9 +160,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.push(indices, surpluses)
-		scores = append(scores, assess(target, progress, surpluses, counts, no)...)
 
 		terminator.push(values, surpluses, counts)
+		selector.push(assess(target, progress, surpluses, counts, no), depth+1)
 	}
 
 	return surrogate
