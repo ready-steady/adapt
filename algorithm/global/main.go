@@ -249,19 +249,35 @@ func updateScores(scores, errors []float64, counts []uint, surpluses []float64,
 
 	offset := uint(0)
 	for _, count := range counts {
-		score := 0.0
-		error := repeatFloat64(-infinity, no)
-		for j := uint(0); j < count; j++ {
-			for l := uint(0); l < no; l++ {
-				Δ := math.Abs(surpluses[(offset+j)*no+l])
-				error[l] = math.Max(error[l], Δ)
-				score += Δ
-			}
-		}
-		score /= float64(count)
-		scores = append(scores, score)
-		errors = append(errors, error...)
+		surpluses := surpluses[offset*no : (offset+count)*no]
+		scores = append(scores, score(surpluses, no))
+		errors = append(errors, error(surpluses, no)...)
 		offset += count
 	}
 	return scores, errors
+}
+
+func error(surpluses []float64, no uint) []float64 {
+	error := repeatFloat64(-infinity, no)
+	for i, value := range surpluses {
+		j := uint(i) % no
+		if value < 0.0 {
+			value = -value
+		}
+		if value > error[j] {
+			error[j] = value
+		}
+	}
+	return error
+}
+
+func score(surpluses []float64, no uint) float64 {
+	score := 0.0
+	for _, value := range surpluses {
+		if value < 0.0 {
+			value = -value
+		}
+		score += value
+	}
+	return score / float64(uint(len(surpluses))/no)
 }
