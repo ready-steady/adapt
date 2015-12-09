@@ -143,26 +143,24 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			lindex := lindices[total*ni:]
 			lindex[i]++
 
-			if lindex[i] > progress.Level {
-				progress.Level = lindex[i]
-			}
-
 			newIndices := self.grid.Index(lindex)
 			indices = append(indices, newIndices...)
 			counts = append(counts, uint(len(newIndices))/ni)
 
-			active = append(active, true)
-			depths = append(depths, depths[current]+1)
-
 			for j := uint(0); j < ni; j++ {
-				if newBackward[j] == none {
-					continue
+				if newBackward[j] != none {
+					forward[newBackward[j]*ni+j] = total
 				}
-				forward[newBackward[j]*ni+j] = total
 			}
 
+			active = append(active, true)
+			depths = append(depths, depths[current]+1)
 			forward = append(forward, repeatUint(none, ni)...)
 			backward = append(backward, newBackward...)
+
+			if lindex[i] > progress.Level {
+				progress.Level = lindex[i]
+			}
 
 			progress.Active++
 			total++
