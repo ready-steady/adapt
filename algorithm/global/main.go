@@ -81,26 +81,15 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	surrogate.push(indices, values)
 
-	lower, upper := updateBounds(nil, nil, values, no)
-	scores, errors := updateScores(nil, nil, counts, values, no)
+	terminator := newTerminator(no, config)
+	terminator.push(values, values, counts)
+
+	scores := updateScores(nil, counts, values, no)
 	for {
 		target.Monitor(&progress)
 
 		cursor := find(active)
-
-		terminate := true
-		δ := threshold(lower, upper, config.AbsTolerance, config.RelTolerance)
-
-	accuracy:
-		for _, i := range cursor {
-			for j := uint(0); j < no; j++ {
-				if errors[i*no+j] > δ[j] {
-					terminate = false
-					break accuracy
-				}
-			}
-		}
-		if terminate {
+		if terminator.check(cursor) {
 			break
 		}
 
@@ -181,8 +170,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		surrogate.push(indices, surpluses)
 
-		lower, upper = updateBounds(lower, upper, values, no)
-		scores, errors = updateScores(scores, errors, counts, surpluses, no)
+		terminator.push(values, surpluses, counts)
+		scores = updateScores(scores, counts, surpluses, no)
 	}
 
 	return surrogate
@@ -210,65 +199,12 @@ func (self *Progress) String() string {
 	return fmt.Sprintf("%+v", phantom)
 }
 
-func threshold(lower, upper []float64, absolute, relative float64) []float64 {
-	no := uint(len(lower))
-	threshold := make([]float64, no)
-	for i := uint(0); i < no; i++ {
-		threshold[i] = relative * (upper[i] - lower[i])
-		if threshold[i] < absolute {
-			threshold[i] = absolute
-		}
-	}
-	return threshold
-}
-
-func updateBounds(lower, upper []float64, data []float64, no uint) ([]float64, []float64) {
-	if lower == nil {
-		lower = repeatFloat64(infinity, no)
-	}
-	if upper == nil {
-		upper = repeatFloat64(-infinity, no)
-	}
-	nn := uint(len(data)) / no
-	for i := uint(0); i < nn; i++ {
-		for j := uint(0); j < no; j++ {
-			point := data[i*no+j]
-			if lower[j] > point {
-				lower[j] = point
-			}
-			if upper[j] < point {
-				upper[j] = point
-			}
-		}
-	}
-	return lower, upper
-}
-
-func updateScores(scores, errors []float64, counts []uint, surpluses []float64,
-	no uint) ([]float64, []float64) {
-
-	offset := uint(0)
+func updateScores(scores []float64, counts []uint, surpluses []float64, no uint) []float64 {
 	for _, count := range counts {
-		surpluses := surpluses[offset*no : (offset+count)*no]
-		scores = append(scores, score(surpluses, no))
-		errors = append(errors, error(surpluses, no)...)
-		offset += count
+		scores = append(scores, score(surpluses[:count*no], no))
+		surpluses = surpluses[count*no:]
 	}
-	return scores, errors
-}
-
-func error(surpluses []float64, no uint) []float64 {
-	error := repeatFloat64(-infinity, no)
-	for i, value := range surpluses {
-		j := uint(i) % no
-		if value < 0.0 {
-			value = -value
-		}
-		if value > error[j] {
-			error[j] = value
-		}
-	}
-	return error
+	return scores
 }
 
 func score(surpluses []float64, no uint) float64 {
