@@ -44,6 +44,8 @@ type Progress struct {
 	Evaluations uint  // The number of function evaluations
 }
 
+type cursor map[uint]bool
+
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -64,10 +66,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	progress := Progress{}
 
 	lindices := repeatUint8(0, 1*ni)
-	active := []bool{true}
+	active := make(cursor)
 	depths := []uint{0}
 	forward := repeatUint(none, 1*ni)
 	backward := repeatUint(none, 1*ni)
+
+	active[0] = true
 	progress.Active++
 
 	indices := self.grid.Index(lindices)
@@ -88,18 +92,17 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	for {
 		target.Monitor(&progress)
 
-		cursor := find(active)
-		if terminator.check(cursor) {
+		if terminator.check(active) {
 			break
 		}
 
-		min, current := minUint(depths, cursor...)
+		min, current := minUint(depths, active)
 		max, _ := maxUint(depths)
 		if float64(min) > (1.0-config.Adaptivity)*float64(max) {
-			_, current = maxFloat64(scores, cursor...)
+			_, current = maxFloat64(scores, active)
 		}
 
-		active[current] = false
+		delete(active, current)
 		progress.Active--
 		progress.Passive++
 
@@ -142,7 +145,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 				}
 			}
 
-			active = append(active, true)
+			active[total] = true
 			depths = append(depths, depths[current]+1)
 			forward = append(forward, repeatUint(none, ni)...)
 			backward = append(backward, newBackward...)

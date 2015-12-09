@@ -1,80 +1,34 @@
 package global
 
-func find(data []bool) []uint {
-	n := uint(len(data))
-	indices := make([]uint, 0, n)
-	for i := uint(0); i < n; i++ {
-		if data[i] {
-			indices = append(indices, i)
+func maxFloat64(data []float64, cursor cursor) (float64, uint) {
+	value, position := -infinity, ^uint(0)
+	for i := range cursor {
+		if data[i] > value {
+			value, position = data[i], i
 		}
 	}
-	return indices
+	return value, position
 }
 
-func maxFloat64(data []float64, indices ...uint) (value float64, position uint) {
-	if indices == nil {
-		count := uint(len(data))
-		value, position = data[0], 0
-		for i := uint(1); i < count; i++ {
-			if data[i] > value {
-				value, position = data[i], i
-			}
-		}
-	} else {
-		count := uint(len(indices))
-		value, position = data[indices[0]], indices[0]
-		for i := uint(1); i < count; i++ {
-			j := indices[i]
-			if data[j] > value {
-				value, position = data[j], j
-			}
+func maxUint(data []uint) (uint, uint) {
+	count := uint(len(data))
+	value, position := data[0], uint(0)
+	for i := uint(1); i < count; i++ {
+		if data[i] > value {
+			value, position = data[i], i
 		}
 	}
-	return
+	return value, position
 }
 
-func maxUint(data []uint, indices ...uint) (value uint, position uint) {
-	if indices == nil {
-		count := uint(len(data))
-		value, position = data[0], 0
-		for i := uint(1); i < count; i++ {
-			if data[i] > value {
-				value, position = data[i], i
-			}
-		}
-	} else {
-		count := uint(len(indices))
-		value, position = data[indices[0]], indices[0]
-		for i := uint(1); i < count; i++ {
-			j := indices[i]
-			if data[j] > value {
-				value, position = data[j], j
-			}
+func minUint(data []uint, cursor cursor) (uint, uint) {
+	value, position := ^uint(0), ^uint(0)
+	for i := range cursor {
+		if data[i] < value {
+			value, position = data[i], i
 		}
 	}
-	return
-}
-
-func minUint(data []uint, indices ...uint) (value uint, position uint) {
-	if indices == nil {
-		count := uint(len(data))
-		value, position = data[0], 0
-		for i := uint(1); i < count; i++ {
-			if data[i] < value {
-				value, position = data[i], i
-			}
-		}
-	} else {
-		count := uint(len(indices))
-		value, position = data[indices[0]], indices[0]
-		for i := uint(1); i < count; i++ {
-			j := indices[i]
-			if data[j] < value {
-				value, position = data[j], j
-			}
-		}
-	}
-	return
+	return value, position
 }
 
 func repeatBool(value bool, times uint) []bool {
