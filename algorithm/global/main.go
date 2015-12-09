@@ -63,20 +63,23 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	surrogate := newSurrogate(ni, no)
 	progress := Progress{}
 
-	indices := make([]uint64, ni)
-	nodes, counts := self.grid.Compute(indices), []uint{1}
-
-	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
-	progress.Evaluations++
-
-	surrogate.push(indices, values)
-
-	lindices := repeatUint8(0, ni)
+	lindices := repeatUint8(0, 1*ni)
 	active := []bool{true}
 	depths := []uint{0}
 	forward := repeatUint(none, 1*ni)
 	backward := repeatUint(none, 1*ni)
 	progress.Active++
+
+	indices := self.grid.Index(lindices)
+
+	nn := uint(len(indices)) / ni
+	nodes := self.grid.Compute(indices)
+	counts := []uint{nn}
+
+	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
+	progress.Evaluations += nn
+
+	surrogate.push(indices, values)
 
 	lower, upper := updateBounds(nil, nil, values, no)
 	scores, errors := updateScores(nil, nil, counts, values, no)
