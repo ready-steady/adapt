@@ -21,7 +21,7 @@ func newTerminator(no uint, config *Config) *terminator {
 	}
 }
 
-func (self *terminator) check(cursor cursor) bool {
+func (self *terminator) done(cursor cursor) bool {
 	no, errors := self.no, self.errors
 	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
 	for i := range cursor {

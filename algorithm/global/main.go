@@ -90,12 +90,8 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	terminator.push(values, values, counts)
 
 	scores := assess(target, progress, values, counts, no)
-	for {
+	for !terminator.done(active) {
 		target.Monitor(progress)
-
-		if terminator.check(active) {
-			break
-		}
 
 		min, current := minUint(depths, active)
 		max, _ := maxUint(depths)
