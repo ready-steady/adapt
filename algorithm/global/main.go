@@ -125,8 +125,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 				if i == j || lindex[j] == 0 {
 					continue
 				}
-				z := backward[current*ni+j]*ni + i
-				l := forward[z]
+				l := forward[backward[current*ni+j]*ni+i]
 				if l == none || active[l] {
 					continue admissibilityCheck
 				}
@@ -217,6 +216,18 @@ func (self *Progress) String() string {
 		evaluations: self.Evaluations,
 	}
 	return fmt.Sprintf("%+v", phantom)
+}
+
+func threshold(lower, upper []float64, absolute, relative float64) []float64 {
+	no := uint(len(lower))
+	threshold := make([]float64, no)
+	for i := uint(0); i < no; i++ {
+		threshold[i] = relative * (upper[i] - lower[i])
+		if threshold[i] < absolute {
+			threshold[i] = absolute
+		}
+	}
+	return threshold
 }
 
 func updateBounds(lower, upper []float64, data []float64, no uint) ([]float64, []float64) {

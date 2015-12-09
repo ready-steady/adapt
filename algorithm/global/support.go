@@ -115,15 +115,3 @@ func repeatUint8(value uint8, times uint) []uint8 {
 	}
 	return data
 }
-
-func threshold(lower, upper []float64, absolute, relative float64) []float64 {
-	no := uint(len(lower))
-	threshold := make([]float64, no)
-	for i := uint(0); i < no; i++ {
-		threshold[i] = relative * (upper[i] - lower[i])
-		if threshold[i] < absolute {
-			threshold[i] = absolute
-		}
-	}
-	return threshold
-}
