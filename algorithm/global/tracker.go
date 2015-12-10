@@ -67,6 +67,8 @@ outer:
 		self.lindices[nn*ni+i]++
 		self.norms = append(self.norms, norm)
 
+		active[nn] = true
+
 		nn++
 	}
 

@@ -88,16 +88,15 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		progress.Active--
 		progress.Passive++
+		progress.Active += nn
 
 		indices, counts = indices[:0], counts[:0]
-		for i, total := uint(0), progress.Active+progress.Passive; i < nn; i++ {
+		for i := uint(0); i < nn; i++ {
 			newIndices := self.grid.Index(lindices[i*ni : (i+1)*ni])
 			indices = append(indices, newIndices...)
 			counts = append(counts, uint(len(newIndices))/ni)
-			active[total+i] = true
 		}
 
-		progress.Active += nn
 		level := maxUint8(lindices)
 		if level > progress.Level {
 			progress.Level = level
