@@ -1,6 +1,6 @@
 package global
 
-type terminator struct {
+type accuracy struct {
 	no       uint
 	absolute float64
 	relative float64
@@ -10,8 +10,8 @@ type terminator struct {
 	upper  []float64
 }
 
-func newTerminator(no uint, config *Config) *terminator {
-	return &terminator{
+func newAccuracy(no uint, config *Config) *accuracy {
+	return &accuracy{
 		no:       no,
 		absolute: config.AbsTolerance,
 		relative: config.RelTolerance,
@@ -21,7 +21,7 @@ func newTerminator(no uint, config *Config) *terminator {
 	}
 }
 
-func (self *terminator) done(active cursor) bool {
+func (self *accuracy) enough(active cursor) bool {
 	no, errors := self.no, self.errors
 	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
 	for i := range active {
@@ -34,7 +34,7 @@ func (self *terminator) done(active cursor) bool {
 	return true
 }
 
-func (self *terminator) push(values, surpluses []float64, counts []uint) {
+func (self *accuracy) push(values, surpluses []float64, counts []uint) {
 	no := self.no
 	for i, point := range values {
 		j := uint(i) % no
