@@ -65,7 +65,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	tracker := newTracker(ni, config)
 	hash := newHash(ni)
 
 	indices := make([]uint64, 1*ni)
@@ -82,7 +81,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
 		scores := assess(self.basis, target, &progress, indices, surpluses, ni, no)
-		indices = tracker.filter(indices, scores)
+		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
 
 		progress.Refined += uint(len(indices)) / ni
 
