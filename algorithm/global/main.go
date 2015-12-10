@@ -68,8 +68,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	active := make(cursor)
 	active[0] = true
 
-	progress := &Progress{Active: 1, Evaluations: counts[0]}
-
 	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 	surrogate := newSurrogate(ni, no)
 	surrogate.push(indices, values)
@@ -78,7 +76,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	terminator.push(values, values, counts)
 
 	tracker := newTracker(ni, config)
-	tracker.push(lindices, assess(target, values, counts, no))
+	tracker.push(lindices, assess(target.Score, values, counts, no))
+
+	progress := &Progress{Active: 1, Evaluations: counts[0]}
 
 	for !terminator.done(active) {
 		target.Monitor(progress)
@@ -116,7 +116,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		surrogate.push(indices, surpluses)
 		terminator.push(values, surpluses, counts)
-		tracker.push(nil, assess(target, surpluses, counts, no))
+		tracker.push(nil, assess(target.Score, surpluses, counts, no))
 	}
 
 	return surrogate
