@@ -33,15 +33,20 @@ func newTracker(ni uint, config *Config) *tracker {
 	}
 }
 
+func (self *tracker) choose() uint {
+	min, k := minUint(self.norms, self.active)
+	max := maxUint(self.norms)
+	if float64(min) > (1.0-self.adaptivity)*float64(max) {
+		_, k = maxFloat64(self.scores, self.active)
+	}
+	return k
+}
+
 func (self *tracker) pull() (lindices []uint8) {
 	ni, nn := self.ni, self.nn
 	active, forward, backward := self.active, self.forward, self.backward
 
-	min, k := minUint(self.norms, active)
-	max := maxUint(self.norms)
-	if float64(min) > (1.0-self.adaptivity)*float64(max) {
-		_, k = maxFloat64(self.scores, active)
-	}
+	k := self.choose()
 	delete(active, k)
 
 	lindex, norm := self.lindices[k*ni:(k+1)*ni], self.norms[k]+1
