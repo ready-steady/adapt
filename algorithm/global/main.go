@@ -78,23 +78,17 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	terminator := newTerminator(no, config)
 	terminator.push(values, values, counts)
 
-	selector := newSelector(ni, config)
-	selector.push(assess(target, progress, values, counts, no), 0)
-
 	tracker := newTracker(ni, config)
-	tracker.push(lindices)
+	tracker.push(lindices, assess(target, progress, values, counts, no))
 
 	for !terminator.done(active) {
 		target.Monitor(progress)
 
-		position, depth := selector.pull(active)
+		lindices = tracker.pull(active)
+		nn := uint(len(lindices)) / ni
 
-		delete(active, position)
 		progress.Active--
 		progress.Passive++
-
-		lindices = tracker.pull(position, active)
-		nn := uint(len(lindices)) / ni
 
 		indices, counts = indices[:0], counts[:0]
 		for i, total := uint(0), progress.Active+progress.Passive; i < nn; i++ {
@@ -123,7 +117,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		surrogate.push(indices, surpluses)
 		terminator.push(values, surpluses, counts)
-		selector.push(assess(target, progress, surpluses, counts, no), depth+1)
+		tracker.push(nil, assess(target, progress, surpluses, counts, no))
 	}
 
 	return surrogate
