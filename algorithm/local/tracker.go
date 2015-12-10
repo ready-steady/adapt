@@ -1,20 +1,20 @@
 package local
 
-type queue struct {
+type tracker struct {
 	ni   uint
 	lmin uint
 	lmax uint
 }
 
-func newQueue(ni uint, config *Config) *queue {
-	return &queue{
+func newTracker(ni uint, config *Config) *tracker {
+	return &tracker{
 		ni:   ni,
 		lmin: config.MinLevel,
 		lmax: config.MaxLevel,
 	}
 }
 
-func (self *queue) filter(indices []uint64, scores []float64) []uint64 {
+func (self *tracker) filter(indices []uint64, scores []float64) []uint64 {
 	ni, nn := self.ni, uint(len(scores))
 	levels := levelize(indices, ni)
 
