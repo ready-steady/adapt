@@ -72,6 +72,11 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	for {
 		target.Monitor(progress)
 
+		progress.Evaluations += uint(len(indices)) / ni
+		if progress.Evaluations > config.MaxEvaluations {
+			break
+		}
+
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
@@ -86,27 +91,13 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		}
 
 		lindices = tracker.pull()
-
-		progress.Active--
-		progress.Passive++
-		progress.Active += uint(len(lindices)) / ni
+		progress.step(lindices, ni)
 
 		indices, counts = indices[:0], counts[:0]
-		for len(lindices) > 0 {
+		for ; len(lindices) > 0; lindices = lindices[ni:] {
 			newIndices := self.grid.Index(lindices[:ni])
 			indices = append(indices, newIndices...)
 			counts = append(counts, uint(len(newIndices))/ni)
-			lindices = lindices[ni:]
-		}
-
-		level := maxUint8(lindices)
-		if level > progress.Level {
-			progress.Level = level
-		}
-
-		progress.Evaluations += uint(len(indices)) / ni
-		if progress.Evaluations > config.MaxEvaluations {
-			break
 		}
 	}
 
@@ -117,4 +108,13 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
+}
+
+func (self *Progress) step(lindices []uint8, ni uint) {
+	self.Active--
+	self.Passive++
+	self.Active += uint(len(lindices)) / ni
+	if level := maxUint8(lindices); level > self.Level {
+		self.Level = level
+	}
 }
