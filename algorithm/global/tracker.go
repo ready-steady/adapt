@@ -14,6 +14,7 @@ type tracker struct {
 	norms    []uint
 	scores   []float64
 
+	active   cursor
 	forward  reference
 	backward reference
 }
@@ -26,16 +27,21 @@ func newTracker(ni uint, config *Config) *tracker {
 		imax:       config.MaxIndices,
 		adaptivity: config.Adaptivity,
 
+		active:   make(cursor),
 		forward:  make(reference),
 		backward: make(reference),
 	}
 }
 
-func (self *tracker) pull(active cursor) (lindices []uint8) {
+func (self *tracker) pull() (lindices []uint8) {
 	ni, nn := self.ni, self.nn
-	forward, backward := self.forward, self.backward
+	active, forward, backward := self.active, self.forward, self.backward
 
-	k := self.choose(active)
+	min, k := minUint(self.norms, active)
+	max := maxUint(self.norms)
+	if float64(min) > (1.0-self.adaptivity)*float64(max) {
+		_, k = maxFloat64(self.scores, active)
+	}
 	delete(active, k)
 
 	lindex, norm := self.lindices[k*ni:(k+1)*ni], self.norms[k]+1
@@ -82,23 +88,12 @@ func (self *tracker) push(lindices []uint8, scores []float64) {
 	ni := self.ni
 	nn := uint(len(lindices)) / ni
 
-	self.nn += nn
 	self.lindices = append(self.lindices, lindices...)
-	self.scores = append(self.scores, scores...)
 	for i := uint(0); i < nn; i++ {
-		norm := uint(0)
-		for j := uint(0); j < ni; j++ {
-			norm += uint(lindices[i*ni+j])
-		}
-		self.norms = append(self.norms, norm)
+		self.active[self.nn+i] = true
+		self.norms = append(self.norms, sumUint8(lindices[i*ni:(i+1)*ni]))
 	}
-}
+	self.scores = append(self.scores, scores...)
 
-func (self *tracker) choose(active cursor) uint {
-	min, k := minUint(self.norms, active)
-	max := maxUint(self.norms)
-	if float64(min) > (1.0-self.adaptivity)*float64(max) {
-		_, k = maxFloat64(self.scores, active)
-	}
-	return k
+	self.nn += nn
 }

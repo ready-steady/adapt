@@ -65,9 +65,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	counts := []uint{uint(len(indices)) / ni}
 	nodes := self.grid.Compute(indices)
 
-	active := make(cursor)
-	active[0] = true
-
 	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 	surrogate := newSurrogate(ni, no)
 	surrogate.push(indices, values)
@@ -80,10 +77,10 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	progress := &Progress{Active: 1, Evaluations: counts[0]}
 
-	for !terminator.done(active) {
+	for !terminator.done(tracker.active) {
 		target.Monitor(progress)
 
-		lindices = tracker.pull(active)
+		lindices = tracker.pull()
 		nn := uint(len(lindices)) / ni
 
 		progress.Active--
