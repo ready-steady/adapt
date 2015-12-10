@@ -12,7 +12,7 @@ type Target interface {
 	Monitor(*Progress)
 
 	// Score assigns a score to a spacial local.
-	Score(*Location, *Progress) float64
+	Score(*Location) float64
 }
 
 // Location contains information about a spacial location.
@@ -28,7 +28,7 @@ type GenericTarget struct {
 
 	ComputeHandler func([]float64, []float64) // != nil
 	MonitorHandler func(*Progress)
-	ScoreHandler   func(*Location, *Progress) float64 // != nil
+	ScoreHandler   func(*Location) float64 // != nil
 }
 
 // NewTarget returns a new generic target.
@@ -53,6 +53,6 @@ func (self *GenericTarget) Monitor(progress *Progress) {
 	}
 }
 
-func (self *GenericTarget) Score(location *Location, progress *Progress) float64 {
-	return self.ScoreHandler(location, progress)
+func (self *GenericTarget) Score(location *Location) float64 {
+	return self.ScoreHandler(location)
 }

@@ -78,7 +78,7 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 func newTarget(ni, no uint, tolerance float64, compute func([]float64, []float64)) Target {
 	target := NewTarget(ni, no)
 	target.ComputeHandler = compute
-	target.ScoreHandler = func(location *Location, _ *Progress) float64 {
+	target.ScoreHandler = func(location *Location) float64 {
 		for _, ε := range location.Surplus {
 			if ε < 0.0 {
 				ε = -ε
@@ -755,7 +755,7 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 
 func (t *kraichnanOrszagTarget) Monitor(*Progress) {}
 
-func (self *kraichnanOrszagTarget) Score(location *Location, _ *Progress) float64 {
+func (self *kraichnanOrszagTarget) Score(location *Location) float64 {
 	const (
 		tolerance = 1e-2
 	)

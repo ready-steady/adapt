@@ -1,6 +1,6 @@
 package local
 
-func assess(basis Basis, target Target, progress *Progress, indices []uint64,
+func assess(basis Basis, target Target, indices []uint64,
 	surpluses []float64, ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
@@ -10,7 +10,7 @@ func assess(basis Basis, target Target, progress *Progress, indices []uint64,
 			Surplus: surpluses[i*no : (i+1)*no],
 			Volume:  scores[i],
 		}
-		scores[i] = target.Score(&location, progress)
+		scores[i] = target.Score(&location)
 	}
 	return scores
 }
