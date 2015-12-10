@@ -67,7 +67,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	progress := &Progress{}
 	for {
 		lindices := tracker.pull()
-		nn := uint(len(lindices)) / ni
 
 		progress.Active = uint(len(tracker.active))
 		progress.Passive = tracker.nn - progress.Active
@@ -77,11 +76,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		target.Monitor(progress)
 
-		indices, counts := make([]uint64, 0), make([]uint, 0, nn)
+		nn := uint(len(lindices)) / ni
+		indices, counts := []uint64(nil), make([]uint, nn)
 		for i := uint(0); i < nn; i++ {
 			newIndices := self.grid.Index(lindices[i*ni : (i+1)*ni])
 			indices = append(indices, newIndices...)
-			counts = append(counts, uint(len(newIndices))/ni)
+			counts[i] = uint(len(newIndices)) / ni
 		}
 
 		progress.Evaluations += uint(len(indices)) / ni
