@@ -79,7 +79,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	terminator.push(values, values, counts)
 
 	tracker := newTracker(ni, config)
-	tracker.push(lindices, assess(target, progress, values, counts, no))
+	tracker.push(lindices, assess(target, values, counts, no))
 
 	for !terminator.done(active) {
 		target.Monitor(progress)
@@ -117,7 +117,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		surrogate.push(indices, surpluses)
 		terminator.push(values, surpluses, counts)
-		tracker.push(nil, assess(target, progress, surpluses, counts, no))
+		tracker.push(nil, assess(target, surpluses, counts, no))
 	}
 
 	return surrogate

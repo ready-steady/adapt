@@ -1,14 +1,12 @@
 package global
 
-func assess(target Target, progress *Progress, surpluses []float64,
-	counts []uint, no uint) []float64 {
-
+func assess(target Target, surpluses []float64, counts []uint, no uint) []float64 {
 	scores := make([]float64, 0, len(counts))
 	for _, count := range counts {
 		location := Location{
 			Surpluses: surpluses[:count*no],
 		}
-		scores = append(scores, target.Score(&location, progress))
+		scores = append(scores, target.Score(&location))
 		surpluses = surpluses[count*no:]
 	}
 	return scores
