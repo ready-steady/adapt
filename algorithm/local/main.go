@@ -3,8 +3,6 @@
 package local
 
 import (
-	"fmt"
-
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -116,20 +114,4 @@ func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
 	integral := make([]float64, no)
 	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, integral)
 	return integral
-}
-
-// String returns a human-friendly representation.
-func (self *Progress) String() string {
-	phantom := struct {
-		level   uint
-		active  uint
-		passive uint
-		refined uint
-	}{
-		level:   self.Level,
-		active:  self.Active,
-		passive: self.Passive,
-		refined: self.Refined,
-	}
-	return fmt.Sprintf("%+v", phantom)
 }

@@ -3,7 +3,6 @@
 package global
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/ready-steady/adapt/algorithm/internal"
@@ -127,20 +126,4 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
-}
-
-// String returns a human-friendly representation.
-func (self *Progress) String() string {
-	phantom := struct {
-		level       uint8
-		active      uint
-		passive     uint
-		evaluations uint
-	}{
-		level:       self.Level,
-		active:      self.Active,
-		passive:     self.Passive,
-		evaluations: self.Evaluations,
-	}
-	return fmt.Sprintf("%+v", phantom)
 }
