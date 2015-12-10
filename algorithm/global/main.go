@@ -63,47 +63,14 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	lindices := make([]uint8, 1*ni)
 	indices := self.grid.Index(lindices)
 	counts := []uint{uint(len(indices)) / ni}
-	nodes := self.grid.Compute(indices)
 
-	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 	surrogate := newSurrogate(ni, no)
-	surrogate.push(indices, values)
-
 	accuracy := newAccuracy(no, config)
-	accuracy.push(values, values, counts)
-
 	tracker := newTracker(ni, config)
-	tracker.push(lindices, assess(target.Score, values, counts, no))
 
-	progress := &Progress{Active: 1, Evaluations: counts[0]}
-
-	for !accuracy.enough(tracker.active) {
+	progress := &Progress{Active: 1}
+	for {
 		target.Monitor(progress)
-
-		lindices = tracker.pull()
-		nn := uint(len(lindices)) / ni
-
-		progress.Active--
-		progress.Passive++
-		progress.Active += nn
-
-		indices, counts = indices[:0], counts[:0]
-		for i := uint(0); i < nn; i++ {
-			newIndices := self.grid.Index(lindices[i*ni : (i+1)*ni])
-			indices = append(indices, newIndices...)
-			counts = append(counts, uint(len(newIndices))/ni)
-		}
-
-		level := maxUint8(lindices)
-		if level > progress.Level {
-			progress.Level = level
-		}
-
-		nn = uint(len(indices)) / ni
-		progress.Evaluations += nn
-		if progress.Evaluations > config.MaxEvaluations {
-			break
-		}
 
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
@@ -112,7 +79,35 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		surrogate.push(indices, surpluses)
 		accuracy.push(values, surpluses, counts)
-		tracker.push(nil, assess(target.Score, surpluses, counts, no))
+		tracker.push(lindices, assess(target.Score, surpluses, counts, no))
+
+		if accuracy.enough(tracker.active) {
+			break
+		}
+
+		lindices = tracker.pull()
+
+		progress.Active--
+		progress.Passive++
+		progress.Active += uint(len(lindices)) / ni
+
+		indices, counts = indices[:0], counts[:0]
+		for len(lindices) > 0 {
+			newIndices := self.grid.Index(lindices[:ni])
+			indices = append(indices, newIndices...)
+			counts = append(counts, uint(len(newIndices))/ni)
+			lindices = lindices[ni:]
+		}
+
+		level := maxUint8(lindices)
+		if level > progress.Level {
+			progress.Level = level
+		}
+
+		progress.Evaluations += uint(len(indices)) / ni
+		if progress.Evaluations > config.MaxEvaluations {
+			break
+		}
 	}
 
 	return surrogate
