@@ -27,26 +27,37 @@ func newTracker(ni uint, config *Config) *tracker {
 		imax:       config.MaxIndices,
 		adaptivity: config.Adaptivity,
 
-		active:   make(cursor),
 		forward:  make(reference),
 		backward: make(reference),
 	}
 }
 
-func (self *tracker) choose() uint {
+func (self *tracker) pull() []uint8 {
+	if self.active == nil {
+		return self.pullFirst()
+	} else {
+		return self.pullSubsequent()
+	}
+}
+
+func (self *tracker) pullFirst() []uint8 {
+	self.lindices = make([]uint8, 1*self.ni)
+	self.norms = make([]uint, 1)
+	self.active = make(cursor)
+	self.active[0] = true
+	self.nn = 1
+	return self.lindices
+}
+
+func (self *tracker) pullSubsequent() (lindices []uint8) {
+	ni, nn := self.ni, self.nn
+	active, forward, backward := self.active, self.forward, self.backward
+
 	min, k := minUint(self.norms, self.active)
 	max := maxUint(self.norms)
 	if float64(min) > (1.0-self.adaptivity)*float64(max) {
 		_, k = maxFloat64(self.scores, self.active)
 	}
-	return k
-}
-
-func (self *tracker) pull() (lindices []uint8) {
-	ni, nn := self.ni, self.nn
-	active, forward, backward := self.active, self.forward, self.backward
-
-	k := self.choose()
 	delete(active, k)
 
 	lindex, norm := self.lindices[k*ni:(k+1)*ni], self.norms[k]+1
@@ -89,16 +100,6 @@ outer:
 	return
 }
 
-func (self *tracker) push(lindices []uint8, scores []float64) {
-	ni := self.ni
-	nn := uint(len(lindices)) / ni
-
-	self.lindices = append(self.lindices, lindices...)
-	for i := uint(0); i < nn; i++ {
-		self.active[self.nn+i] = true
-		self.norms = append(self.norms, sumUint8(lindices[i*ni:(i+1)*ni]))
-	}
+func (self *tracker) push(scores []float64) {
 	self.scores = append(self.scores, scores...)
-
-	self.nn += nn
 }

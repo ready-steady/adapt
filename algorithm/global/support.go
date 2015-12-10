@@ -67,11 +67,3 @@ func repeatUint(value uint, times uint) []uint {
 	}
 	return data
 }
-
-func sumUint8(data []uint8) uint {
-	result := uint(0)
-	for _, value := range data {
-		result += uint(value)
-	}
-	return result
-}

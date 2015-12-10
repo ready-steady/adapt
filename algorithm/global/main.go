@@ -60,17 +60,29 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	lindices := make([]uint8, 1*ni)
-	indices := self.grid.Index(lindices)
-	counts := []uint{uint(len(indices)) / ni}
-
 	surrogate := newSurrogate(ni, no)
 	accuracy := newAccuracy(no, config)
 	tracker := newTracker(ni, config)
 
-	progress := &Progress{Active: 1}
+	progress := &Progress{}
 	for {
+		lindices := tracker.pull()
+		nn := uint(len(lindices)) / ni
+
+		progress.Active = uint(len(tracker.active))
+		progress.Passive = tracker.nn - progress.Active
+		if level := maxUint8(lindices); level > progress.Level {
+			progress.Level = level
+		}
+
 		target.Monitor(progress)
+
+		indices, counts := make([]uint64, 0), make([]uint, 0, nn)
+		for i := uint(0); i < nn; i++ {
+			newIndices := self.grid.Index(lindices[i*ni : (i+1)*ni])
+			indices = append(indices, newIndices...)
+			counts = append(counts, uint(len(newIndices))/ni)
+		}
 
 		progress.Evaluations += uint(len(indices)) / ni
 		if progress.Evaluations > config.MaxEvaluations {
@@ -84,20 +96,10 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 		surrogate.push(indices, surpluses)
 		accuracy.push(values, surpluses, counts)
-		tracker.push(lindices, assess(target.Score, surpluses, counts, no))
+		tracker.push(assess(target.Score, surpluses, counts, no))
 
 		if accuracy.enough(tracker.active) {
 			break
-		}
-
-		lindices = tracker.pull()
-		progress.step(lindices, ni)
-
-		indices, counts = indices[:0], counts[:0]
-		for ; len(lindices) > 0; lindices = lindices[ni:] {
-			newIndices := self.grid.Index(lindices[:ni])
-			indices = append(indices, newIndices...)
-			counts = append(counts, uint(len(newIndices))/ni)
 		}
 	}
 
@@ -108,13 +110,4 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
-}
-
-func (self *Progress) step(lindices []uint8, ni uint) {
-	self.Active--
-	self.Passive++
-	self.Active += uint(len(lindices)) / ni
-	if level := maxUint8(lindices); level > self.Level {
-		self.Level = level
-	}
 }
