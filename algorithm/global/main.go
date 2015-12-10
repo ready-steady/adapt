@@ -45,8 +45,6 @@ type Progress struct {
 
 type cursor map[uint]bool
 
-type reference map[uint]uint
-
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -63,26 +61,18 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	surrogate := newSurrogate(ni, no)
-	progress := newProgress()
-
-	lindices := repeatUint8(0, 1*ni)
-	active := make(cursor)
-	forward := make(reference)
-	backward := make(reference)
-
-	active[0] = true
-	progress.Active++
-
+	lindices := make([]uint8, 1*ni)
 	indices := self.grid.Index(lindices)
-
-	nn := uint(len(indices)) / ni
+	counts := []uint{uint(len(indices)) / ni}
 	nodes := self.grid.Compute(indices)
-	counts := []uint{nn}
+
+	active := make(cursor)
+	active[0] = true
+
+	progress := &Progress{Active: 1, Evaluations: counts[0]}
 
 	values := internal.Invoke(target.Compute, nodes, ni, no, nw)
-	progress.Evaluations += nn
-
+	surrogate := newSurrogate(ni, no)
 	surrogate.push(indices, values)
 
 	terminator := newTerminator(no, config)
@@ -90,6 +80,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	selector := newSelector(ni, config)
 	selector.push(assess(target, progress, values, counts, no), 0)
+
+	tracker := newTracker(ni, config)
+	tracker.push(lindices)
 
 	for !terminator.done(active) {
 		target.Monitor(progress)
@@ -100,67 +93,35 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		progress.Active--
 		progress.Passive++
 
-		lindex := lindices[position*ni : (position+1)*ni]
+		lindices = tracker.pull(position, active)
+		nn := uint(len(lindices)) / ni
 
-		indices := make([]uint64, 0)
-		counts := make([]uint, 0)
-		total := progress.Active + progress.Passive
-
-	admissibility:
-		for i := uint(0); i < ni && total < config.MaxIndices; i++ {
-			if lindex[i] >= config.MaxLevel {
-				continue
-			}
-
-			newBackward := make(reference)
-			for j := uint(0); j < ni; j++ {
-				if i == j || lindex[j] == 0 {
-					continue
-				}
-				if l, ok := forward[backward[position*ni+j]*ni+i]; !ok || active[l] {
-					continue admissibility
-				} else {
-					newBackward[j] = l
-				}
-			}
-			newBackward[i] = position
-			for j, l := range newBackward {
-				forward[l*ni+j] = total
-				backward[total*ni+j] = l
-			}
-
-			lindices = append(lindices, lindex...)
-			lindex := lindices[total*ni:]
-			lindex[i]++
-
-			newIndices := self.grid.Index(lindex)
+		indices, counts = indices[:0], counts[:0]
+		for i, total := uint(0), progress.Active+progress.Passive; i < nn; i++ {
+			newIndices := self.grid.Index(lindices[i*ni : (i+1)*ni])
 			indices = append(indices, newIndices...)
 			counts = append(counts, uint(len(newIndices))/ni)
-
-			if lindex[i] > progress.Level {
-				progress.Level = lindex[i]
-			}
-
-			active[total] = true
-			progress.Active++
-			total++
+			active[total+i] = true
 		}
 
-		nn := uint(len(indices)) / ni
-		if progress.Evaluations+nn > config.MaxEvaluations {
+		progress.Active += nn
+		level := maxUint8(lindices)
+		if level > progress.Level {
+			progress.Level = level
+		}
+
+		nn = uint(len(indices)) / ni
+		progress.Evaluations += nn
+		if progress.Evaluations > config.MaxEvaluations {
 			break
 		}
 
 		nodes := self.grid.Compute(indices)
-
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
-		progress.Evaluations += nn
-
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.push(indices, surpluses)
-
 		terminator.push(values, surpluses, counts)
 		selector.push(assess(target, progress, surpluses, counts, no), depth+1)
 	}
@@ -172,10 +133,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
-}
-
-func newProgress() *Progress {
-	return &Progress{}
 }
 
 // String returns a human-friendly representation.

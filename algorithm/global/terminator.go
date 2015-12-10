@@ -21,10 +21,10 @@ func newTerminator(no uint, config *Config) *terminator {
 	}
 }
 
-func (self *terminator) done(cursor cursor) bool {
+func (self *terminator) done(active cursor) bool {
 	no, errors := self.no, self.errors
 	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
-	for i := range cursor {
+	for i := range active {
 		for j := uint(0); j < no; j++ {
 			if errors[i*no+j] > δ[j] {
 				return false

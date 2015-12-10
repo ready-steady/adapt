@@ -24,15 +24,24 @@ func maxFloat64(data []float64, cursor cursor) (float64, uint) {
 	return value, position
 }
 
-func maxUint(data []uint) (uint, uint) {
-	count := uint(len(data))
-	value, position := data[0], uint(0)
-	for i := uint(1); i < count; i++ {
-		if data[i] > value {
-			value, position = data[i], i
+func maxUint(data []uint) uint {
+	result := uint(0)
+	for _, value := range data {
+		if value > result {
+			result = value
 		}
 	}
-	return value, position
+	return result
+}
+
+func maxUint8(data []uint8) uint8 {
+	result := uint8(0)
+	for _, value := range data {
+		if result < value {
+			result = value
+		}
+	}
+	return result
 }
 
 func minUint(data []uint, cursor cursor) (uint, uint) {
@@ -55,14 +64,6 @@ func repeatFloat64(value float64, times uint) []float64 {
 
 func repeatUint(value uint, times uint) []uint {
 	data := make([]uint, times)
-	for i := uint(0); i < times; i++ {
-		data[i] = value
-	}
-	return data
-}
-
-func repeatUint8(value uint8, times uint) []uint8 {
-	data := make([]uint8, times)
 	for i := uint(0); i < times; i++ {
 		data[i] = value
 	}

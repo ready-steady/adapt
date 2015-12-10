@@ -15,11 +15,11 @@ func newSelector(ni uint, config *Config) *selector {
 	}
 }
 
-func (self *selector) pull(cursor cursor) (uint, uint) {
-	min, position := minUint(self.depths, cursor)
-	max, _ := maxUint(self.depths)
+func (self *selector) pull(active cursor) (uint, uint) {
+	min, position := minUint(self.depths, active)
+	max := maxUint(self.depths)
 	if float64(min) > (1.0-self.adaptivity)*float64(max) {
-		_, position = maxFloat64(self.scores, cursor)
+		_, position = maxFloat64(self.scores, active)
 	}
 	return position, self.depths[position]
 }
