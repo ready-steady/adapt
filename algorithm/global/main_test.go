@@ -10,7 +10,14 @@ func TestBranin(t *testing.T) {
 	fixture := &fixtureBranin
 	interpolator, target := prepare(fixture)
 
+	progresses := make([]Progress, 0)
+	target.MonitorHandler = func(progress *Progress) {
+		progresses = append(progresses, *progress)
+	}
+
 	surrogate := interpolator.Compute(target)
+
+	assert.Equal(progresses, fixture.progresses, t)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 	assert.EqualWithin(surrogate.Surpluses, fixture.surrogate.Surpluses, 1e-12, t)
 

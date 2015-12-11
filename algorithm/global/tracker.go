@@ -33,7 +33,7 @@ func newTracker(ni uint, config *Config) *tracker {
 }
 
 func (self *tracker) pull() []uint8 {
-	if self.active == nil {
+	if self.lindices == nil {
 		return self.pullFirst()
 	} else {
 		return self.pullSubsequent()

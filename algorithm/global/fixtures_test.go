@@ -10,7 +10,8 @@ import (
 type fixture struct {
 	compute func([]float64, []float64)
 
-	surrogate *Surrogate
+	progresses []Progress
+	surrogate  *Surrogate
 
 	points []float64
 	values []float64
@@ -21,6 +22,21 @@ var fixtureBranin = fixture{
 		x, y := 15.0*point[0]-5.0, 15.0*point[1]
 		z := 5.0/math.Pi*x - 5.1/(4.0*math.Pi*math.Pi)*x*x + y - 6.0
 		value[0] = z*z + 10.0*(1.0-1.0/(8.0*math.Pi))*math.Cos(x) + 10.0
+	},
+
+	progresses: []Progress{
+		{Level: 0, Active: 1, Passive: 0, Evaluations: 0},
+		{1, 2, 1, 1},
+		{2, 2, 2, 5},
+		{2, 3, 3, 7},
+		{2, 2, 4, 13},
+		{3, 3, 5, 13},
+		{3, 2, 6, 21},
+		{3, 3, 7, 21},
+		{4, 4, 8, 29},
+		{4, 3, 9, 45},
+		{5, 4, 10, 45},
+		{5, 4, 11, 77},
 	},
 
 	surrogate: &Surrogate{
@@ -2301,14 +2317,14 @@ var fixtureBranin = fixture{
 	},
 }
 
-func prepare(fixture *fixture) (*Interpolator, Target) {
+func prepare(fixture *fixture) (*Interpolator, *GenericTarget) {
 	config := NewConfig()
 	target := newTarget(fixture.surrogate.Inputs, fixture.surrogate.Outputs, fixture.compute)
 	ni, _ := target.Dimensions()
 	return New(equidistant.NewClosed(ni), linear.NewClosed(ni), config), target
 }
 
-func newTarget(ni, no uint, compute func([]float64, []float64)) Target {
+func newTarget(ni, no uint, compute func([]float64, []float64)) *GenericTarget {
 	target := NewTarget(ni, no)
 	target.ComputeHandler = compute
 	target.ScoreHandler = func(location *Location) float64 {
