@@ -21,7 +21,7 @@ func newAccuracy(no uint, config *Config) *accuracy {
 	}
 }
 
-func (self *accuracy) enough(active cursor) bool {
+func (self *accuracy) enough(active Set) bool {
 	no, errors := self.no, self.errors
 	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
 	for i := range active {

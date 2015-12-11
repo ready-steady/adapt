@@ -12,9 +12,9 @@ func assess(score func(*Location) float64, surpluses []float64, counts []uint, n
 	return scores
 }
 
-func maxFloat64(data []float64, cursor cursor) (float64, uint) {
+func maxFloat64(data []float64, set Set) (float64, uint) {
 	value, position := -infinity, ^uint(0)
-	for i := range cursor {
+	for i := range set {
 		if data[i] > value {
 			value, position = data[i], i
 		}
@@ -42,9 +42,9 @@ func maxUint8(data []uint8) uint8 {
 	return result
 }
 
-func minUint(data []uint, cursor cursor) (uint, uint) {
+func minUint(data []uint, set Set) (uint, uint) {
 	value, position := ^uint(0), ^uint(0)
-	for i := range cursor {
+	for i := range set {
 		if data[i] < value {
 			value, position = data[i], i
 		}

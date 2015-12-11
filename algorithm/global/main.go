@@ -42,7 +42,8 @@ type Progress struct {
 	Evaluations uint  // The number of function evaluations
 }
 
-type cursor map[uint]bool
+// Set is a set data structure.
+type Set map[uint]bool
 
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {

@@ -14,7 +14,7 @@ type tracker struct {
 	norms    []uint
 	scores   []float64
 
-	active   cursor
+	active   Set
 	forward  reference
 	backward reference
 }
@@ -43,7 +43,7 @@ func (self *tracker) pull() []uint8 {
 func (self *tracker) pullFirst() []uint8 {
 	self.lindices = make([]uint8, 1*self.ni)
 	self.norms = make([]uint, 1)
-	self.active = make(cursor)
+	self.active = make(Set)
 	self.active[0] = true
 	self.nn = 1
 	return self.lindices
