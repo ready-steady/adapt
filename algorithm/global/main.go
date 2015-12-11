@@ -55,14 +55,13 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target Target) *Surrogate {
+func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 	config := &self.config
 
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	accuracy := newAccuracy(no, config)
 	tracker := newTracker(ni, config)
 
 	progress := &Progress{}
@@ -96,10 +95,15 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.push(indices, surpluses)
-		accuracy.push(values, surpluses, counts)
-		tracker.push(assess(target.Score, surpluses, counts, no))
 
-		if accuracy.enough(tracker.active) {
+		for _, count := range counts {
+			offset := count * no
+			metric.Push(values[:offset], surpluses[:offset])
+			tracker.push(metric.Score(&Location{surpluses[:offset]}))
+			values, surpluses = values[offset:], surpluses[offset:]
+		}
+
+		if metric.Done(tracker.active) {
 			break
 		}
 	}

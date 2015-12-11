@@ -1,6 +1,6 @@
 package global
 
-// Target represents a function to be interpolated.
+// Target is a function to be interpolated.
 type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
@@ -10,9 +10,6 @@ type Target interface {
 
 	// Monitor gets called at the beginning of each iteration.
 	Monitor(*Progress)
-
-	// Score assigns a score to a dimensional location.
-	Score(*Location) float64
 }
 
 // Location contains information about a dimensional location.
@@ -30,7 +27,7 @@ type GenericTarget struct {
 	ScoreHandler   func(*Location) float64 // != nil
 }
 
-// NewTarget returns a new generic target.
+// NewTarget creates a generic target.
 func NewTarget(inputs, outputs uint) *GenericTarget {
 	return &GenericTarget{
 		Inputs:  inputs,
@@ -50,8 +47,4 @@ func (self *GenericTarget) Monitor(progress *Progress) {
 	if self.MonitorHandler != nil {
 		self.MonitorHandler(progress)
 	}
-}
-
-func (self *GenericTarget) Score(location *Location) float64 {
-	return self.ScoreHandler(location)
 }

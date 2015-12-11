@@ -1,17 +1,5 @@
 package global
 
-func assess(score func(*Location) float64, surpluses []float64, counts []uint, no uint) []float64 {
-	scores := make([]float64, 0, len(counts))
-	for _, count := range counts {
-		location := Location{
-			Surpluses: surpluses[:count*no],
-		}
-		scores = append(scores, score(&location))
-		surpluses = surpluses[count*no:]
-	}
-	return scores
-}
-
 func maxFloat64(data []float64, set Set) (float64, uint) {
 	value, position := -infinity, ^uint(0)
 	for i := range set {

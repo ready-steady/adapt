@@ -8,14 +8,14 @@ import (
 
 func TestBranin(t *testing.T) {
 	fixture := &fixtureBranin
-	interpolator, target := prepare(fixture)
+	interpolator, target, metric := prepare(fixture)
 
 	progresses := make([]Progress, 0)
 	target.MonitorHandler = func(progress *Progress) {
 		progresses = append(progresses, *progress)
 	}
 
-	surrogate := interpolator.Compute(target)
+	surrogate := interpolator.Compute(target, metric)
 
 	assert.Equal(progresses, fixture.progresses, t)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
@@ -27,8 +27,8 @@ func TestBranin(t *testing.T) {
 
 func BenchmarkBranin(b *testing.B) {
 	fixture := &fixtureBranin
-	interpolator, target := prepare(fixture)
+	interpolator, target, metric := prepare(fixture)
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(target)
+		interpolator.Compute(target, metric)
 	}
 }

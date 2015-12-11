@@ -2317,25 +2317,16 @@ var fixtureBranin = fixture{
 	},
 }
 
-func prepare(fixture *fixture) (*Interpolator, *GenericTarget) {
-	config := NewConfig()
-	target := newTarget(fixture.surrogate.Inputs, fixture.surrogate.Outputs, fixture.compute)
-	ni, _ := target.Dimensions()
-	return New(equidistant.NewClosed(ni), linear.NewClosed(ni), config), target
-}
+func prepare(fixture *fixture) (*Interpolator, *GenericTarget, *GenericMetric) {
+	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
-func newTarget(ni, no uint, compute func([]float64, []float64)) *GenericTarget {
+	config := NewConfig()
+
 	target := NewTarget(ni, no)
-	target.ComputeHandler = compute
-	target.ScoreHandler = func(location *Location) float64 {
-		score := 0.0
-		for _, value := range location.Surpluses {
-			if value < 0.0 {
-				value = -value
-			}
-			score += value
-		}
-		return score / float64(uint(len(location.Surpluses))/no)
-	}
-	return target
+	target.ComputeHandler = fixture.compute
+
+	interpolator := New(equidistant.NewClosed(ni), linear.NewClosed(ni), config)
+	metric := NewMetric(no, 1e-6, 1e-2)
+
+	return interpolator, target, metric
 }

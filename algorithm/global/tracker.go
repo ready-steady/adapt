@@ -100,6 +100,6 @@ outer:
 	return
 }
 
-func (self *tracker) push(scores []float64) {
-	self.scores = append(self.scores, scores...)
+func (self *tracker) push(score float64) {
+	self.scores = append(self.scores, score)
 }

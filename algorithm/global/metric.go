@@ -1,6 +1,19 @@
 package global
 
-type accuracy struct {
+// Metric is an accuracy metric.
+type Metric interface {
+	// Done checks if the accuracy requirements have been satiated.
+	Done(active Set) bool
+
+	// Push takes into account new information about the target function.
+	Push(values, surpluses []float64)
+
+	// Score assigns a score to a dimensional location.
+	Score(*Location) float64
+}
+
+// GenericMetric is a generic accuracy metric.
+type GenericMetric struct {
 	no       uint
 	absolute float64
 	relative float64
@@ -10,18 +23,19 @@ type accuracy struct {
 	upper  []float64
 }
 
-func newAccuracy(no uint, config *Config) *accuracy {
-	return &accuracy{
+// NewMetric creates a generic accuracy metric.
+func NewMetric(no uint, absolute, relative float64) *GenericMetric {
+	return &GenericMetric{
 		no:       no,
-		absolute: config.AbsTolerance,
-		relative: config.RelTolerance,
+		absolute: absolute,
+		relative: relative,
 
 		lower: repeatFloat64(infinity, no),
 		upper: repeatFloat64(-infinity, no),
 	}
 }
 
-func (self *accuracy) enough(active Set) bool {
+func (self *GenericMetric) Done(active Set) bool {
 	no, errors := self.no, self.errors
 	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
 	for i := range active {
@@ -34,7 +48,7 @@ func (self *accuracy) enough(active Set) bool {
 	return true
 }
 
-func (self *accuracy) push(values, surpluses []float64, counts []uint) {
+func (self *GenericMetric) Push(values, surpluses []float64) {
 	no := self.no
 	for i, point := range values {
 		j := uint(i) % no
@@ -45,10 +59,19 @@ func (self *accuracy) push(values, surpluses []float64, counts []uint) {
 			self.upper[j] = point
 		}
 	}
-	for _, count := range counts {
-		self.errors = append(self.errors, error(surpluses[:count*no], no)...)
-		surpluses = surpluses[count*no:]
+	self.errors = append(self.errors, error(surpluses, no)...)
+}
+
+func (self *GenericMetric) Score(location *Location) float64 {
+	no := self.no
+	score := 0.0
+	for _, value := range location.Surpluses {
+		if value < 0.0 {
+			value = -value
+		}
+		score += value
 	}
+	return score / float64(uint(len(location.Surpluses))/no)
 }
 
 func error(surpluses []float64, no uint) []float64 {

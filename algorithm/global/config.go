@@ -18,12 +18,6 @@ type Config struct {
 	// The degree of adaptivity.
 	Adaptivity float64
 
-	// The absolute-error tolerance.
-	AbsTolerance float64
-
-	// The relative-error tolerance.
-	RelTolerance float64
-
 	// The number of concurrent workers. The evaluation of the target function
 	// and the surrogate itself is distributed among this many goroutines.
 	Workers uint
@@ -36,9 +30,7 @@ func NewConfig() *Config {
 		MaxIndices:     ^uint(0),
 		MaxEvaluations: ^uint(0),
 
-		Adaptivity:   1.0,
-		AbsTolerance: 1e-6,
-		RelTolerance: 1e-2,
+		Adaptivity: 1.0,
 
 		Workers: uint(runtime.GOMAXPROCS(0)),
 	}
