@@ -1,5 +1,5 @@
-// Package global provides an algorithm for globally adaptive hierarchical
-// interpolation.
+// Package global provides an algorithm for hierarchical interpolation with
+// global adaptation.
 package global
 
 import (

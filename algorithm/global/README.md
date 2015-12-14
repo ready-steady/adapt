@@ -1,7 +1,7 @@
-# Globally Adaptive Interpolation
+# Hierarchical Interpolation with Global Adaptation
 
-The package provides an algorithm for globally adaptive hierarchical
-interpolation.
+The package provides an algorithm for hierarchical interpolation with global
+adaptation.
 
 ## [Documentation][doc]
 

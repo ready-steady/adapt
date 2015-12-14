@@ -1,5 +1,5 @@
-// Package local provides an algorithm for locally adaptive hierarchical
-// interpolation.
+// Package local provides an algorithm for hierarchical interpolation with local
+// adaptation.
 package local
 
 import (
