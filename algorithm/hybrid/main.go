@@ -16,6 +16,25 @@ type Grid interface {
 
 // Interpolator is an instance of the algorithm.
 type Interpolator struct {
-	basis Basis
-	grid  Grid
+	grid   Grid
+	basis  Basis
+	config Config
+}
+
+// New creates an interpolator.
+func New(grid Grid, basis Basis, config *Config) *Interpolator {
+	return &Interpolator{
+		grid:   grid,
+		basis:  basis,
+		config: *config,
+	}
+}
+
+// Compute constructs an interpolant for a function.
+func (self *Interpolator) Compute(target Target) *Surrogate {
+	ni, no := target.Dimensions()
+
+	surrogate := newSurrogate(ni, no)
+
+	return surrogate
 }
