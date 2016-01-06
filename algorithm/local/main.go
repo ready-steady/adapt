@@ -31,9 +31,9 @@ type Grid interface {
 
 // Interpolator is an instance of the algorithm.
 type Interpolator struct {
-	config Config
-	basis  Basis
 	grid   Grid
+	basis  Basis
+	config Config
 }
 
 // Progress contains information about the interpolation process.
@@ -51,9 +51,9 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 		panic("the number of workers should be positive")
 	}
 	return &Interpolator{
-		config: *config,
-		basis:  basis,
 		grid:   grid,
+		basis:  basis,
+		config: *config,
 	}
 }
 
