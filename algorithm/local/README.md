@@ -1,4 +1,4 @@
-# Interpolation with Global Adaptation
+# Interpolation with Local Adaptation
 
 The package provides an algorithm for hierarchical interpolation with local
 adaptation.
