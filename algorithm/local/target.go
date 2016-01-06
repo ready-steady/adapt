@@ -21,8 +21,8 @@ type Location struct {
 	Volume  float64   // Volume under the basis function
 }
 
-// GenericTarget is a generic target satisfying the Target interface.
-type GenericTarget struct {
+// BasicTarget is a basic target satisfying the Target interface.
+type BasicTarget struct {
 	Inputs  uint // > 0
 	Outputs uint // > 0
 
@@ -31,28 +31,28 @@ type GenericTarget struct {
 	ScoreHandler   func(*Location) float64 // != nil
 }
 
-// NewTarget returns a new generic target.
-func NewTarget(inputs, outputs uint) *GenericTarget {
-	return &GenericTarget{
+// NewTarget returns a basic target.
+func NewTarget(inputs, outputs uint) *BasicTarget {
+	return &BasicTarget{
 		Inputs:  inputs,
 		Outputs: outputs,
 	}
 }
 
-func (self *GenericTarget) Dimensions() (uint, uint) {
+func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.Inputs, self.Outputs
 }
 
-func (self *GenericTarget) Compute(node, value []float64) {
+func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *GenericTarget) Monitor(progress *Progress) {
+func (self *BasicTarget) Monitor(progress *Progress) {
 	if self.MonitorHandler != nil {
 		self.MonitorHandler(progress)
 	}
 }
 
-func (self *GenericTarget) Score(location *Location) float64 {
+func (self *BasicTarget) Score(location *Location) float64 {
 	return self.ScoreHandler(location)
 }

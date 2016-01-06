@@ -2317,7 +2317,7 @@ var fixtureBranin = fixture{
 	},
 }
 
-func prepare(fixture *fixture) (*Interpolator, *GenericTarget, *GenericMetric) {
+func prepare(fixture *fixture) (*Interpolator, *BasicTarget, *BasicMetric) {
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
 	config := NewConfig()

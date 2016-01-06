@@ -12,8 +12,8 @@ type Metric interface {
 	Score(*Location) float64
 }
 
-// GenericMetric is a generic accuracy metric.
-type GenericMetric struct {
+// BasicMetric is a basic accuracy metric.
+type BasicMetric struct {
 	no       uint
 	absolute float64
 	relative float64
@@ -23,9 +23,9 @@ type GenericMetric struct {
 	upper  []float64
 }
 
-// NewMetric creates a generic accuracy metric.
-func NewMetric(no uint, absolute, relative float64) *GenericMetric {
-	return &GenericMetric{
+// NewMetric creates a basic accuracy metric.
+func NewMetric(no uint, absolute, relative float64) *BasicMetric {
+	return &BasicMetric{
 		no:       no,
 		absolute: absolute,
 		relative: relative,
@@ -35,7 +35,7 @@ func NewMetric(no uint, absolute, relative float64) *GenericMetric {
 	}
 }
 
-func (self *GenericMetric) Done(active Set) bool {
+func (self *BasicMetric) Done(active Set) bool {
 	no, errors := self.no, self.errors
 	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
 	for i := range active {
@@ -48,7 +48,7 @@ func (self *GenericMetric) Done(active Set) bool {
 	return true
 }
 
-func (self *GenericMetric) Push(values, surpluses []float64) {
+func (self *BasicMetric) Push(values, surpluses []float64) {
 	no := self.no
 	for i, point := range values {
 		j := uint(i) % no
@@ -62,7 +62,7 @@ func (self *GenericMetric) Push(values, surpluses []float64) {
 	self.errors = append(self.errors, error(surpluses, no)...)
 }
 
-func (self *GenericMetric) Score(location *Location) float64 {
+func (self *BasicMetric) Score(location *Location) float64 {
 	no := self.no
 	score := 0.0
 	for _, value := range location.Surpluses {
