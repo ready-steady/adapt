@@ -25,7 +25,6 @@ type BasicTarget struct {
 
 	ComputeHandler func([]float64, []float64) // != nil
 	MonitorHandler func(*Progress)
-	ScoreHandler   func(*Location) float64 // != nil
 }
 
 // NewTarget creates a basic target.
