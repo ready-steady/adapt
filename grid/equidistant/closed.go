@@ -18,11 +18,11 @@ func NewClosed(dimensions uint) *Closed {
 func (_ *Closed) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		level := LEVEL_MASK & indices[i]
+		level := levelMask & indices[i]
 		if level == 0 {
 			nodes[i] = 0.5
 		} else {
-			order := indices[i] >> LEVEL_SIZE
+			order := indices[i] >> levelSize
 			nodes[i] = float64(order) / float64(uint64(2)<<(level-1))
 		}
 	}
@@ -38,17 +38,17 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 
 	nc := uint(0)
 	push := func(p, d uint, level, order uint64) {
-		if level>>LEVEL_SIZE != 0 || order>>ORDER_SIZE != 0 {
+		if level>>levelSize != 0 || order>>orderSize != 0 {
 			panic(fmt.Sprintf("the level %d or order %d is too large", level, order))
 		}
 		copy(children[nc*nd:], indices[p*nd:(p+1)*nd])
-		children[nc*nd+d] = level | order<<LEVEL_SIZE
+		children[nc*nd+d] = level | order<<levelSize
 		nc++
 	}
 
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < nd; j++ {
-			level := LEVEL_MASK & indices[i*nd+j]
+			level := levelMask & indices[i*nd+j]
 
 			if level == 0 {
 				push(i, j, 1, 0)
@@ -56,7 +56,7 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 				continue
 			}
 
-			order := indices[i*nd+j] >> LEVEL_SIZE
+			order := indices[i*nd+j] >> levelSize
 
 			if level == 1 {
 				push(i, j, 2, order+1)
@@ -76,19 +76,19 @@ func (self *Closed) Index(levels []uint8) []uint64 {
 }
 
 func indexClosed(level uint8) []uint64 {
-	if level>>LEVEL_MASK != 0 {
+	if level>>levelMask != 0 {
 		panic(fmt.Sprintf("the level %d is too large", level))
 	}
 	switch level {
 	case 0:
-		return []uint64{0 | 0<<LEVEL_SIZE}
+		return []uint64{0 | 0<<levelSize}
 	case 1:
-		return []uint64{1 | 0<<LEVEL_SIZE, 1 | 2<<LEVEL_SIZE}
+		return []uint64{1 | 0<<levelSize, 1 | 2<<levelSize}
 	default:
 		nn := uint(2) << uint(level-2)
 		indices := make([]uint64, nn)
 		for i := uint(0); i < nn; i++ {
-			indices[i] = uint64(level) | uint64(2*i+1)<<LEVEL_SIZE
+			indices[i] = uint64(level) | uint64(2*i+1)<<levelSize
 		}
 		return indices
 	}

@@ -26,9 +26,9 @@ func TestLevelize(t *testing.T) {
 	)
 
 	indices := []uint64{
-		1 | 1<<LEVEL_SIZE, 4 | 1<<LEVEL_SIZE, 7 | 1<<LEVEL_SIZE,
-		2 | 2<<LEVEL_SIZE, 5 | 2<<LEVEL_SIZE, 8 | 2<<LEVEL_SIZE,
-		3 | 3<<LEVEL_SIZE, 6 | 3<<LEVEL_SIZE, 9 | 3<<LEVEL_SIZE,
+		1 | 1<<levelSize, 4 | 1<<levelSize, 7 | 1<<levelSize,
+		2 | 2<<levelSize, 5 | 2<<levelSize, 8 | 2<<levelSize,
+		3 | 3<<levelSize, 6 | 3<<levelSize, 9 | 3<<levelSize,
 	}
 
 	assert.Equal(levelize(indices, ni), []uint{12, 15, 18}, t)

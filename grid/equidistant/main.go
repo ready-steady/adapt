@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	LEVEL_MASK = 0x3F
-	LEVEL_SIZE = 6
-	ORDER_SIZE = 64 - LEVEL_SIZE
+	levelMask = 0x3F
+	levelSize = 6
+	orderSize = 64 - levelSize
 )
 
 func index(levels []uint8, generate func(uint8) []uint64, nd uint) []uint64 {

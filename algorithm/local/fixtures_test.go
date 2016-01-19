@@ -38,7 +38,7 @@ type fixture struct {
 func (self *fixture) initialize() {
 	self.surrogate.Indices = make([]uint64, len(self.levels))
 	for i := range self.levels {
-		self.surrogate.Indices[i] = self.levels[i] | self.orders[i]<<LEVEL_SIZE
+		self.surrogate.Indices[i] = self.levels[i] | self.orders[i]<<levelSize
 	}
 }
 

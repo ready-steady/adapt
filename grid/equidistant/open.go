@@ -18,8 +18,8 @@ func NewOpen(dimensions uint) *Open {
 func (_ *Open) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		level := LEVEL_MASK & indices[i]
-		order := indices[i] >> LEVEL_SIZE
+		level := levelMask & indices[i]
+		order := indices[i] >> levelSize
 		nodes[i] = float64(order+1) / float64(uint64(2)<<level)
 	}
 	return nodes
@@ -34,18 +34,18 @@ func (self *Open) Children(indices []uint64) []uint64 {
 
 	nc := uint(0)
 	push := func(p, d uint, level, order uint64) {
-		if level>>LEVEL_SIZE != 0 || order>>ORDER_SIZE != 0 {
+		if level>>levelSize != 0 || order>>orderSize != 0 {
 			panic(fmt.Sprintf("the level %d or order %d is too large", level, order))
 		}
 		copy(children[nc*nd:], indices[p*nd:(p+1)*nd])
-		children[nc*nd+d] = level | order<<LEVEL_SIZE
+		children[nc*nd+d] = level | order<<levelSize
 		nc++
 	}
 
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < nd; j++ {
-			level := LEVEL_MASK & indices[i*nd+j]
-			order := indices[i*nd+j] >> LEVEL_SIZE
+			level := levelMask & indices[i*nd+j]
+			order := indices[i*nd+j] >> levelSize
 			push(i, j, level+1, 2*order)
 			push(i, j, level+1, 2*order+2)
 		}

@@ -54,7 +54,7 @@ func levelize(indices []uint64, ni uint) []uint {
 	levels := make([]uint, nn)
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < ni; j++ {
-			levels[i] += uint(LEVEL_MASK & indices[i*ni+j])
+			levels[i] += uint(levelMask & indices[i*ni+j])
 		}
 	}
 	return levels
