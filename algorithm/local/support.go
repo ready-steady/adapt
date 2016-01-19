@@ -1,12 +1,13 @@
 package local
 
 func assess(basis Basis, metric Metric, indices []uint64,
-	surpluses []float64, ni, no uint) []float64 {
+	values, surpluses []float64, ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
 	scores := measure(basis, indices, ni)
 	for i := uint(0); i < nn; i++ {
 		scores[i] = metric.Score(&Location{
+			Value:   values[i*no : (i+1)*no],
 			Surplus: surpluses[i*no : (i+1)*no],
 			Volume:  scores[i],
 		})

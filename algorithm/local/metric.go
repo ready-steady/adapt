@@ -2,6 +2,7 @@ package local
 
 // Location contains information about a spacial location.
 type Location struct {
+	Value   []float64 // Target-function value
 	Surplus []float64 // Hierarchical surplus
 	Volume  float64   // Volume under the basis function
 }
