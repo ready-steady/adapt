@@ -98,8 +98,7 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 
 		for _, count := range counts {
 			offset := count * no
-			metric.Push(values[:offset], surpluses[:offset])
-			tracker.push(metric.Score(&Location{surpluses[:offset]}))
+			tracker.push(metric.Score(&Location{values[:offset], surpluses[:offset]}))
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 

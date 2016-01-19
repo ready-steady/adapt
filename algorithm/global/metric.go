@@ -5,9 +5,6 @@ type Metric interface {
 	// Done checks if the accuracy requirements have been satiated.
 	Done(active Set) bool
 
-	// Push takes into account new information about the target function.
-	Push(values, surpluses []float64)
-
 	// Score assigns a score to a dimensional location.
 	Score(*Location) float64
 }
@@ -48,9 +45,11 @@ func (self *BasicMetric) Done(active Set) bool {
 	return true
 }
 
-func (self *BasicMetric) Push(values, surpluses []float64) {
+func (self *BasicMetric) Score(location *Location) float64 {
 	no := self.no
-	for i, point := range values {
+	nn := uint(len(location.Values)) / no
+
+	for i, point := range location.Values {
 		j := uint(i) % no
 		if self.lower[j] > point {
 			self.lower[j] = point
@@ -59,11 +58,8 @@ func (self *BasicMetric) Push(values, surpluses []float64) {
 			self.upper[j] = point
 		}
 	}
-	self.errors = append(self.errors, error(surpluses, no)...)
-}
+	self.errors = append(self.errors, error(location.Surpluses, no)...)
 
-func (self *BasicMetric) Score(location *Location) float64 {
-	no := self.no
 	score := 0.0
 	for _, value := range location.Surpluses {
 		if value < 0.0 {
@@ -71,7 +67,8 @@ func (self *BasicMetric) Score(location *Location) float64 {
 		}
 		score += value
 	}
-	return score / float64(uint(len(location.Surpluses))/no)
+
+	return score / float64(nn)
 }
 
 func error(surpluses []float64, no uint) []float64 {

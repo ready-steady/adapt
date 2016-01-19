@@ -14,6 +14,7 @@ type Target interface {
 
 // Location contains information about a dimensional location.
 type Location struct {
+	Values    []float64 // Target-function values
 	Surpluses []float64 // Hierarchical surpluses
 }
 
