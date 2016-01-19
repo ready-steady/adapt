@@ -1,5 +1,11 @@
 package global
 
+// Location contains information about a dimensional location.
+type Location struct {
+	Values    []float64 // Target-function values
+	Surpluses []float64 // Hierarchical surpluses
+}
+
 // Metric is an accuracy metric.
 type Metric interface {
 	// Done checks if the accuracy requirements have been satiated.

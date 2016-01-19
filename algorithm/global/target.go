@@ -12,12 +12,6 @@ type Target interface {
 	Monitor(*Progress)
 }
 
-// Location contains information about a dimensional location.
-type Location struct {
-	Values    []float64 // Target-function values
-	Surpluses []float64 // Hierarchical surpluses
-}
-
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
 	Inputs  uint // > 0
