@@ -10,15 +10,6 @@ type Target interface {
 
 	// Monitor gets called at the beginning of each iteration.
 	Monitor(*Progress)
-
-	// Score assigns a score to a location.
-	Score(*Location) float64
-}
-
-// Location contains information about a spacial location.
-type Location struct {
-	Surplus []float64 // Hierarchical surplus
-	Volume  float64   // Volume under the basis function
 }
 
 // BasicTarget is a basic target satisfying the Target interface.
@@ -28,14 +19,14 @@ type BasicTarget struct {
 
 	ComputeHandler func([]float64, []float64) // != nil
 	MonitorHandler func(*Progress)
-	ScoreHandler   func(*Location) float64 // != nil
 }
 
 // NewTarget creates a basic target.
-func NewTarget(inputs, outputs uint) *BasicTarget {
+func NewTarget(inputs, outputs uint, compute func([]float64, []float64)) *BasicTarget {
 	return &BasicTarget{
-		Inputs:  inputs,
-		Outputs: outputs,
+		Inputs:         inputs,
+		Outputs:        outputs,
+		ComputeHandler: compute,
 	}
 }
 
@@ -51,8 +42,4 @@ func (self *BasicTarget) Monitor(progress *Progress) {
 	if self.MonitorHandler != nil {
 		self.MonitorHandler(progress)
 	}
-}
-
-func (self *BasicTarget) Score(location *Location) float64 {
-	return self.ScoreHandler(location)
 }

@@ -58,7 +58,7 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target Target) *Surrogate {
+func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 	config := &self.config
 
 	ni, no := target.Dimensions()
@@ -81,7 +81,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surrogate.push(indices, surpluses)
 		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
-		scores := assess(self.basis, target, indices, surpluses, ni, no)
+		scores := assess(self.basis, metric, indices, surpluses, ni, no)
 		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
 
 		progress.Refined += uint(len(indices)) / ni

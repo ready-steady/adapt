@@ -1,16 +1,15 @@
 package local
 
-func assess(basis Basis, target Target, indices []uint64,
+func assess(basis Basis, metric Metric, indices []uint64,
 	surpluses []float64, ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
 	scores := measure(basis, indices, ni)
 	for i := uint(0); i < nn; i++ {
-		location := Location{
+		scores[i] = metric.Score(&Location{
 			Surplus: surpluses[i*no : (i+1)*no],
 			Volume:  scores[i],
-		}
-		scores[i] = target.Score(&location)
+		})
 	}
 	return scores
 }

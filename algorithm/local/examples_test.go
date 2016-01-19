@@ -19,23 +19,17 @@ func ExampleInterpolator_step() {
 	grid, basis := equidistant.NewClosed(inputs), linear.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewTarget(inputs, outputs)
-	target.ComputeHandler = func(x, y []float64) {
+	target := NewTarget(inputs, outputs, func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1.0
 		} else {
 			y[0] = 0.0
 		}
-	}
-	target.ScoreHandler = func(location *Location) float64 {
-		if math.Abs(location.Surplus[0]) > tolerance {
-			return 1.0
-		} else {
-			return 0.0
-		}
-	}
+	})
 
-	surrogate := interpolator.Compute(target)
+	metric := NewMetric(outputs, tolerance)
+
+	surrogate := interpolator.Compute(target, metric)
 
 	fmt.Println(surrogate)
 
@@ -54,23 +48,17 @@ func ExampleInterpolator_cube() {
 	grid, basis := equidistant.NewClosed(inputs), linear.NewClosed(inputs)
 	interpolator := New(grid, basis, NewConfig())
 
-	target := NewTarget(inputs, outputs)
-	target.ComputeHandler = func(x, y []float64) {
+	target := NewTarget(inputs, outputs, func(x, y []float64) {
 		if math.Abs(2.0*x[0]-1.0) < 0.45 && math.Abs(2.0*x[1]-1.0) < 0.45 {
 			y[0] = 1.0
 		} else {
 			y[0] = 0.0
 		}
-	}
-	target.ScoreHandler = func(location *Location) float64 {
-		if math.Abs(location.Surplus[0]) > tolerance {
-			return 1.0
-		} else {
-			return 0.0
-		}
-	}
+	})
 
-	surrogate := interpolator.Compute(target)
+	metric := NewMetric(outputs, tolerance)
+
+	surrogate := interpolator.Compute(target, metric)
 
 	fmt.Println(surrogate)
 
