@@ -1,6 +1,6 @@
 package local
 
-// Target represents a function to be interpolated.
+// Target is a function to be interpolated.
 type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
@@ -11,7 +11,7 @@ type Target interface {
 	// Monitor gets called at the beginning of each iteration.
 	Monitor(*Progress)
 
-	// Score assigns a score to a spacial local.
+	// Score assigns a score to a location.
 	Score(*Location) float64
 }
 
@@ -31,7 +31,7 @@ type BasicTarget struct {
 	ScoreHandler   func(*Location) float64 // != nil
 }
 
-// NewTarget returns a basic target.
+// NewTarget creates a basic target.
 func NewTarget(inputs, outputs uint) *BasicTarget {
 	return &BasicTarget{
 		Inputs:  inputs,

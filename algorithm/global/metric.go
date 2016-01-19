@@ -5,7 +5,7 @@ type Metric interface {
 	// Done checks if the accuracy requirements have been satiated.
 	Done(active Set) bool
 
-	// Score assigns a score to a dimensional location.
+	// Score assigns a score to a location.
 	Score(*Location) float64
 }
 
