@@ -47,9 +47,8 @@ type metric struct {
 }
 
 func (self *metric) Score(location *Location) float64 {
-	tolerance := self.tolerance
 	for _, ε := range location.Surplus {
-		if math.Abs(ε) > tolerance {
+		if math.Abs(ε) > self.tolerance {
 			return 1.0
 		}
 	}

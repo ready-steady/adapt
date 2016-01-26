@@ -1,5 +1,9 @@
 package local
 
+import (
+	"math"
+)
+
 // Location contains information about a spacial location.
 type Location struct {
 	Value   []float64 // Target-function value
@@ -27,12 +31,8 @@ func NewMetric(_ uint, tolerance float64) *BasicMetric {
 }
 
 func (self *BasicMetric) Score(location *Location) float64 {
-	tolerance := self.tolerance
 	for _, ε := range location.Surplus {
-		if ε < 0.0 {
-			ε = -ε
-		}
-		if ε > tolerance {
+		if math.Abs(ε*location.Volume) > self.tolerance {
 			return 1.0
 		}
 	}
