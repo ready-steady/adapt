@@ -9,7 +9,8 @@ type Location struct {
 
 // Metric is an accuracy metric.
 type Metric interface {
-	// Score assigns a score to a location.
+	// Score assigns a score to a location. If the score is positive, the
+	// corresponding node is refined; otherwise, no refinement is performed.
 	Score(*Location) float64
 }
 
