@@ -16,23 +16,23 @@ type Metric interface {
 
 // BasicMetric is a basic accuracy metric.
 type BasicMetric struct {
-	absolute float64
+	tolerance float64
 }
 
 // NewMetric creates a basic accuracy metric.
-func NewMetric(_ uint, absolute float64) *BasicMetric {
+func NewMetric(_ uint, tolerance float64) *BasicMetric {
 	return &BasicMetric{
-		absolute: absolute,
+		tolerance: tolerance,
 	}
 }
 
 func (self *BasicMetric) Score(location *Location) float64 {
-	absolute := self.absolute
+	tolerance := self.tolerance
 	for _, ε := range location.Surplus {
 		if ε < 0.0 {
 			ε = -ε
 		}
-		if ε > absolute {
+		if ε > tolerance {
 			return 1.0
 		}
 	}
