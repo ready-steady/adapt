@@ -42,6 +42,20 @@ func (self *fixture) initialize() {
 	}
 }
 
+type metric struct {
+	tolerance float64
+}
+
+func (self *metric) Score(location *Location) float64 {
+	tolerance := self.tolerance
+	for _, ε := range location.Surplus {
+		if math.Abs(ε) > tolerance {
+			return 1.0
+		}
+	}
+	return 0.0
+}
+
 func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target, Metric) {
 	const (
 		tolerance = 1e-4
@@ -86,8 +100,8 @@ func newTarget(ni, no uint, compute func([]float64, []float64)) Target {
 	return NewTarget(ni, no, compute)
 }
 
-func newMetric(no uint, absolute float64) Metric {
-	return NewMetric(no, absolute)
+func newMetric(no uint, tolerance float64) Metric {
+	return &metric{tolerance}
 }
 
 var fixtureStep = fixture{
