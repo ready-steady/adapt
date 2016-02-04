@@ -1,5 +1,5 @@
 // Package linear provides functions for working with the basis formed by
-// piecewise multi-linear functions.
+// piecewise linear functions.
 //
 // Each function in the basis is identified by a sequence of levels and orders.
 // Such a sequence is encoded as a sequence of uint64s where each uint64 is

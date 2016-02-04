@@ -1,4 +1,4 @@
-# Piecewise Linear Basis
+# Piecewise Polynomial Basis
 
 The package provides functions for working with the basis formed by the
 piecewise linear functions.
