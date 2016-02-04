@@ -5,4 +5,4 @@ piecewise linear functions.
 
 ## [Documentation][doc]
 
-[doc]: http://godoc.org/github.com/ready-steady/adapt/basis/linear
+[doc]: http://godoc.org/github.com/ready-steady/adapt/basis/polynomial
