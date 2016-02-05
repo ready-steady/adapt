@@ -1,11 +1,11 @@
 package linear
 
-// Open represents an instance of the basis in (0, 1)^n.
+// Open is a basis in (0, 1)^n.
 type Open struct {
 	nd int
 }
 
-// NewOpen creates an instance of the basis in (0, 1)^n.
+// NewOpen creates a basis in (0, 1)^n.
 func NewOpen(dimensions uint) *Open {
 	return &Open{int(dimensions)}
 }

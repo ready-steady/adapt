@@ -1,11 +1,11 @@
 package linear
 
-// Closed represents an instance of the basis in [0, 1]^n.
+// Closed is a basis in [0, 1]^n.
 type Closed struct {
 	nd int
 }
 
-// NewClosed creates an instance of the basis in [0, 1]^n.
+// NewClosed creates a basis in [0, 1]^n.
 func NewClosed(dimensions uint) *Closed {
 	return &Closed{int(dimensions)}
 }

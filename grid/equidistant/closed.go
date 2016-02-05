@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-// Closed represents an instance of the grid in [0, 1]^n.
+// Closed is a grid in [0, 1]^n.
 type Closed struct {
 	nd uint
 }
 
-// NewClosed creates an instance of the grid in [0, 1]^n.
+// NewClosed creates a grid in [0, 1]^n.
 func NewClosed(dimensions uint) *Closed {
 	return &Closed{dimensions}
 }
