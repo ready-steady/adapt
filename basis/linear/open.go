@@ -28,29 +28,26 @@ func (self *Open) Compute(index []uint64, point []float64) float64 {
 		switch order {
 		case 0:
 			scale := float64(count + 1)
-			if scale*point[i] < 2.0 {
-				value *= 2.0 - scale*point[i]
-			} else {
+			if scale*point[i] >= 2.0 {
 				return 0.0 // value *= 0.0
 			}
+			value *= 2.0 - scale*point[i]
 		case count - 1:
 			scale1, scale2 := float64(count-1), float64(count+1)
-			if scale2*point[i] > scale1 {
-				value *= scale2*point[i] - scale1
-			} else {
+			if scale2*point[i] <= scale1 {
 				return 0.0 // value *= 0.0
 			}
+			value *= scale2*point[i] - scale1
 		default:
 			scale := float64(count + 1)
 			distance := point[i] - float64(order+1)/scale
 			if distance < 0.0 {
 				distance = -distance
 			}
-			if scale*distance < 1.0 {
-				value *= 1.0 - scale*distance
-			} else {
+			if scale*distance >= 1.0 {
 				return 0.0 // value *= 0.0
 			}
+			value *= 1.0 - scale*distance
 		}
 	}
 

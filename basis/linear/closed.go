@@ -29,11 +29,10 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 		if distance < 0.0 {
 			distance = -distance
 		}
-		if scale*distance < 1.0 {
-			value *= 1.0 - scale*distance
-		} else {
+		if scale*distance >= 1.0 {
 			return 0.0 // value *= 0.0
 		}
+		value *= 1.0 - scale*distance
 	}
 
 	return value
