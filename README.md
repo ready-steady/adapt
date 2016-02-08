@@ -6,7 +6,6 @@ The package contains four subpackages:
 
 * algorithm/[global](algorithm/global),
 * algorithm/[local](algorithm/local),
-* basis/[linear](basis/linear),
 * basis/[polynomial](basis/polynomial), and
 * grid/[equidistant](grid/equidistant).
 

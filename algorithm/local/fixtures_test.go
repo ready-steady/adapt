@@ -3,7 +3,7 @@ package local
 import (
 	"math"
 
-	"github.com/ready-steady/adapt/basis/linear"
+	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/ode/rk4"
 )
@@ -89,9 +89,9 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target,
 
 	switch fixture.rule {
 	case "open":
-		return New(equidistant.NewOpen(ni), linear.NewOpen(ni), config), target, metric
+		return New(equidistant.NewOpen(ni), polynomial.NewOpen(ni, 1), config), target, metric
 	default:
-		return New(equidistant.NewClosed(ni), linear.NewClosed(ni), config), target, metric
+		return New(equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config), target, metric
 	}
 }
 

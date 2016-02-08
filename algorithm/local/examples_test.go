@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ready-steady/adapt/basis/linear"
+	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 )
 
@@ -16,7 +16,7 @@ func ExampleInterpolator_step() {
 		tolerance = 1e-4
 	)
 
-	grid, basis := equidistant.NewClosed(inputs), linear.NewClosed(inputs)
+	grid, basis := equidistant.NewClosed(inputs), polynomial.NewClosed(inputs, 1)
 	interpolator := New(grid, basis, NewConfig())
 
 	target := NewTarget(inputs, outputs, func(x, y []float64) {
@@ -45,7 +45,7 @@ func ExampleInterpolator_cube() {
 		tolerance = 1e-4
 	)
 
-	grid, basis := equidistant.NewClosed(inputs), linear.NewClosed(inputs)
+	grid, basis := equidistant.NewClosed(inputs), polynomial.NewClosed(inputs, 1)
 	interpolator := New(grid, basis, NewConfig())
 
 	target := NewTarget(inputs, outputs, func(x, y []float64) {

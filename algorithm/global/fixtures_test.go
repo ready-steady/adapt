@@ -3,7 +3,7 @@ package global
 import (
 	"math"
 
-	"github.com/ready-steady/adapt/basis/linear"
+	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 )
 
@@ -2325,7 +2325,7 @@ func prepare(fixture *fixture) (*Interpolator, *BasicTarget, *BasicMetric) {
 	target := NewTarget(ni, no)
 	target.ComputeHandler = fixture.compute
 
-	interpolator := New(equidistant.NewClosed(ni), linear.NewClosed(ni), config)
+	interpolator := New(equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config)
 	metric := NewMetric(no, 1e-6, 1e-2)
 
 	return interpolator, target, metric
