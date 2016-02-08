@@ -7,8 +7,8 @@ type Closed struct {
 }
 
 // NewClosed creates a basis in [0, 1]^n.
-func NewClosed(dimensions uint, polynomialOrder uint) *Closed {
-	return &Closed{dimensions, polynomialOrder}
+func NewClosed(dimensions uint, order uint) *Closed {
+	return &Closed{dimensions, order}
 }
 
 // Compute evaluates a basis function.
@@ -37,7 +37,17 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 			return 0.0 // value *= 0.0
 		}
 
-		for j := uint64(0); j < power; j++ {
+		if power == 1 {
+			value *= 1.0 - delta/step
+			continue
+		}
+
+		xl, xr := xi-step, xi+step
+		value *= (x - xl) / (xi - xl)
+		value *= (x - xr) / (xi - xr)
+
+		level, order = parent(level, order)
+		for j := uint64(3); j < power; j++ {
 			level, order = parent(level, order)
 			xj, _ := node(level, order)
 			value *= (x - xj) / (xi - xj)

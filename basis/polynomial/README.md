@@ -1,7 +1,7 @@
 # Piecewise Polynomial Basis
 
 The package provides functions for working with the basis formed by the
-piecewise linear functions.
+piecewise polynomial functions.
 
 ## [Documentation][doc]
 
