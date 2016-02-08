@@ -37,6 +37,17 @@ func TestClosedCompute(t *testing.T) {
 	}
 }
 
+func TestClosedIntegrate(t *testing.T) {
+	basis := NewClosed(1, 1)
+
+	levels := []uint64{0, 1, 2, 3}
+	values := []float64{1.0, 0.25, 1.0 / 2 / 2, 1.0 / 2 / 2 / 2}
+
+	for i := range levels {
+		assert.Equal(basis.Integrate([]uint64{compose(levels[i], 0)}), values[i], t)
+	}
+}
+
 func TestParent(t *testing.T) {
 	childLevels := []uint64{1, 1, 2, 2, 3, 3, 3, 3}
 	childOrders := []uint64{0, 2, 1, 3, 1, 3, 5, 7}

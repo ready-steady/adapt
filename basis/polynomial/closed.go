@@ -58,8 +58,27 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 }
 
 // Integrate computes the integral of a basis function.
-func (_ *Closed) Integrate(_ []uint64) float64 {
-	return 0.0
+func (self *Closed) Integrate(index []uint64) float64 {
+	nd := self.nd
+
+	if self.np != 1 {
+		panic("only the first-order basis is supported")
+	}
+
+	value := 1.0
+	for i := uint(0); i < nd; i++ {
+		level := levelMask & index[i]
+		switch level {
+		case 0:
+			// value *= 1.0
+		case 1:
+			value *= 0.25
+		default:
+			value *= 1.0 / float64(uint64(2)<<(level-1))
+		}
+	}
+
+	return value
 }
 
 func node(level, order uint64) (x, step float64) {
