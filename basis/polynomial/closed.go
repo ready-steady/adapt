@@ -27,20 +27,20 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 
 		order := index[i] >> levelSize
 
-		scale := float64(uint64(2) << (level - 1))
-		distance := point[i] - float64(order)/scale
-		if distance < 0.0 {
-			distance = -distance
+		x := point[i]
+		xi, h := node(level, order)
+		d := x - xi
+		if d < 0.0 {
+			d = -d
 		}
-		if scale*distance >= 1.0 {
+		if d >= h {
 			return 0.0 // value *= 0.0
 		}
 
-		switch power {
-		case 1:
-			value *= 1.0 - scale*distance
-		default:
-			panic("Not implemented yet")
+		for j := uint64(0); j < power; j++ {
+			level, order = parent(level, order)
+			xj, _ := node(level, order)
+			value *= (x - xj) / (xi - xj)
 		}
 	}
 
@@ -50,4 +50,35 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 // Integrate computes the integral of a basis function.
 func (_ *Closed) Integrate(_ []uint64) float64 {
 	return 0.0
+}
+
+func node(level, order uint64) (x, h float64) {
+	if level == 0 {
+		x, h = 0.5, 1.0
+	} else {
+		h = 1.0 / float64(uint64(2)<<(level-1))
+		x = h * float64(order)
+	}
+	return
+}
+
+func parent(level, order uint64) (uint64, uint64) {
+	switch level {
+	case 0:
+		panic("the root does not have a parent")
+	case 1:
+		level = 0
+		order = 0
+	case 2:
+		level = 1
+		order -= 1
+	default:
+		level -= 1
+		if ((order-1)/2)%2 == 0 {
+			order = (order + 1) / 2
+		} else {
+			order = (order - 1) / 2
+		}
+	}
+	return level, order
 }

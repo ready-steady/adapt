@@ -36,3 +36,17 @@ func TestCompute(t *testing.T) {
 		assert.Equal(values, cases[i].values, t)
 	}
 }
+
+func TestParent(t *testing.T) {
+	childLevels := []uint64{1, 1, 2, 2, 3, 3, 3, 3}
+	childOrders := []uint64{0, 2, 1, 3, 1, 3, 5, 7}
+
+	parentLevels := []uint64{0, 0, 1, 1, 2, 2, 2, 2}
+	parentOrders := []uint64{0, 0, 0, 2, 1, 1, 3, 3}
+
+	for i := range childLevels {
+		level, order := parent(childLevels[i], childOrders[i])
+		assert.Equal(level, parentLevels[i], t)
+		assert.Equal(order, parentOrders[i], t)
+	}
+}
