@@ -10,7 +10,7 @@ func NewClosed(dimensions uint) *Closed {
 	return &Closed{int(dimensions)}
 }
 
-// Compute evaluates the value of a basis function.
+// Compute evaluates a basis function.
 func (self *Closed) Compute(index []uint64, point []float64) float64 {
 	nd := self.nd
 
