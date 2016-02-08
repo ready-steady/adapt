@@ -17,10 +17,6 @@ func NewClosed(dimensions uint, order uint) *Closed {
 
 // Compute evaluates a basis function.
 func (self *Closed) Compute(index []uint64, point []float64) float64 {
-	const (
-		ε = 1e-14
-	)
-
 	nd, np := self.nd, uint64(self.np)
 
 	value := 1.0
@@ -64,7 +60,7 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 		for power > 0 {
 			level, order = parent(level, order)
 			xj, _ := node(level, order)
-			if math.Abs(xj-xl) < ε || math.Abs(xj-xr) < ε {
+			if equal(xj, xl) || equal(xj, xr) {
 				continue
 			}
 			value *= (x - xj) / (xi - xj)
@@ -97,6 +93,11 @@ func (self *Closed) Integrate(index []uint64) float64 {
 	}
 
 	return value
+}
+
+func equal(one, two float64) bool {
+	const ε = 1e-14 // ~= 2^(-46)
+	return one == two || math.Abs(one-two) < ε
 }
 
 func node(level, order uint64) (x, step float64) {
