@@ -6,8 +6,8 @@ type Closed struct {
 	np uint
 }
 
-// New creates a basis in [0, 1]^n.
-func New(dimensions uint, polynomialOrder uint) *Closed {
+// NewClosed creates a basis in [0, 1]^n.
+func NewClosed(dimensions uint, polynomialOrder uint) *Closed {
 	return &Closed{dimensions, polynomialOrder}
 }
 
@@ -28,12 +28,12 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 		order := index[i] >> levelSize
 
 		x := point[i]
-		xi, h := node(level, order)
-		d := x - xi
-		if d < 0.0 {
-			d = -d
+		xi, step := node(level, order)
+		delta := x - xi
+		if delta < 0.0 {
+			delta = -delta
 		}
-		if d >= h {
+		if delta >= step {
 			return 0.0 // value *= 0.0
 		}
 
@@ -52,12 +52,12 @@ func (_ *Closed) Integrate(_ []uint64) float64 {
 	return 0.0
 }
 
-func node(level, order uint64) (x, h float64) {
+func node(level, order uint64) (x, step float64) {
 	if level == 0 {
-		x, h = 0.5, 1.0
+		x, step = 0.5, 1.0
 	} else {
-		h = 1.0 / float64(uint64(2)<<(level-1))
-		x = h * float64(order)
+		step = 1.0 / float64(uint64(2)<<(level-1))
+		x = step * float64(order)
 	}
 	return
 }

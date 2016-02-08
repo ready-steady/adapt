@@ -15,7 +15,6 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 	nd := self.nd
 
 	value := 1.0
-
 	for i := 0; i < nd; i++ {
 		level := levelMask & index[i]
 		if level == 0 {
@@ -24,15 +23,17 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 
 		order := index[i] >> levelSize
 
-		scale := float64(uint64(2) << (level - 1))
-		distance := point[i] - float64(order)/scale
-		if distance < 0.0 {
-			distance = -distance
+		step := 1.0 / float64(uint64(2)<<(level-1))
+
+		delta := point[i] - float64(order)*step
+		if delta < 0.0 {
+			delta = -delta
 		}
-		if scale*distance >= 1.0 {
+		if delta >= step {
 			return 0.0 // value *= 0.0
 		}
-		value *= 1.0 - scale*distance
+
+		value *= 1.0 - delta/step
 	}
 
 	return value
@@ -43,7 +44,6 @@ func (self *Closed) Integrate(index []uint64) float64 {
 	nd := self.nd
 
 	value := 1.0
-
 	for i := 0; i < nd; i++ {
 		level := levelMask & index[i]
 		switch level {

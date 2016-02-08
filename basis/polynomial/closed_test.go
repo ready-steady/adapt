@@ -6,8 +6,8 @@ import (
 	"github.com/ready-steady/assert"
 )
 
-func TestCompute(t *testing.T) {
-	basis := New(1, 1)
+func TestClosedCompute(t *testing.T) {
+	basis := NewClosed(1, 1)
 
 	compute := func(level, order uint64, point float64) float64 {
 		return basis.Compute([]uint64{compose(level, order)}, []float64{point})
