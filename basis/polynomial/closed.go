@@ -38,18 +38,28 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 		}
 
 		if power == 1 {
+			// The liner polynomial is not uniquely defined since there are
+			// three nodes (including the endpoints), but only two are needed.
+			// With this in mind, two linear segments are used.
 			value *= 1.0 - delta/step
 			continue
 		}
 
-		xl, xr := xi-step, xi+step
-		value *= (x - xl) / (xi - xl)
-		value *= (x - xr) / (xi - xr)
+		// The left endpoint of the local support.
+		xj := xi - step
+		value *= (x - xj) / (xi - xj)
 
+		// The right endpoint of the local support.
+		xj = xi + step
+		value *= (x - xj) / (xi - xj)
+
+		// Skip the first ancestor since it is one of the endpoints.
 		level, order = parent(level, order)
+
+		// Use the rest (power - 3) ancestors.
 		for j := uint64(3); j < power; j++ {
 			level, order = parent(level, order)
-			xj, _ := node(level, order)
+			xj, _ = node(level, order)
 			value *= (x - xj) / (xi - xj)
 		}
 	}
