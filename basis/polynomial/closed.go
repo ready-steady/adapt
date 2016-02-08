@@ -32,7 +32,7 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 		order := index[i] >> levelSize
 
 		x := point[i]
-		xi, step := node(level, order)
+		xi, step := closedNode(level, order)
 		delta := math.Abs(x - xi)
 		if delta >= step {
 			return 0.0 // value *= 0.0
@@ -58,8 +58,8 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 
 		// Find the rest of the needed ancestors.
 		for power > 0 {
-			level, order = parent(level, order)
-			xj, _ := node(level, order)
+			level, order = closedParent(level, order)
+			xj, _ := closedNode(level, order)
 			if equal(xj, xl) || equal(xj, xr) {
 				continue
 			}
@@ -95,12 +95,7 @@ func (self *Closed) Integrate(index []uint64) float64 {
 	return value
 }
 
-func equal(one, two float64) bool {
-	const ε = 1e-14 // ~= 2^(-46)
-	return one == two || math.Abs(one-two) < ε
-}
-
-func node(level, order uint64) (x, step float64) {
+func closedNode(level, order uint64) (x, step float64) {
 	if level == 0 {
 		x, step = 0.5, 1.0
 	} else {
@@ -110,7 +105,7 @@ func node(level, order uint64) (x, step float64) {
 	return
 }
 
-func parent(level, order uint64) (uint64, uint64) {
+func closedParent(level, order uint64) (uint64, uint64) {
 	switch level {
 	case 0:
 		panic("the root does not have a parent")
