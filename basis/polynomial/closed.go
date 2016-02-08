@@ -1,5 +1,9 @@
 package polynomial
 
+import (
+	"math"
+)
+
 // Closed is a basis in [0, 1]^n.
 type Closed struct {
 	nd uint
@@ -13,6 +17,10 @@ func NewClosed(dimensions uint, order uint) *Closed {
 
 // Compute evaluates a basis function.
 func (self *Closed) Compute(index []uint64, point []float64) float64 {
+	const (
+		ε = 1e-14
+	)
+
 	nd, np := self.nd, uint64(self.np)
 
 	value := 1.0
@@ -29,10 +37,7 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 
 		x := point[i]
 		xi, step := node(level, order)
-		delta := x - xi
-		if delta < 0.0 {
-			delta = -delta
-		}
+		delta := math.Abs(x - xi)
 		if delta >= step {
 			return 0.0 // value *= 0.0
 		}
@@ -46,21 +51,24 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 		}
 
 		// The left endpoint of the local support.
-		xj := xi - step
-		value *= (x - xj) / (xi - xj)
+		xl := xi - step
+		value *= (x - xl) / (xi - xl)
+		power -= 1
 
 		// The right endpoint of the local support.
-		xj = xi + step
-		value *= (x - xj) / (xi - xj)
+		xr := xi + step
+		value *= (x - xr) / (xi - xr)
+		power -= 1
 
-		// Skip the first ancestor since it is one of the endpoints.
-		level, order = parent(level, order)
-
-		// Use the rest (power - 3) ancestors.
-		for j := uint64(3); j < power; j++ {
+		// Find the rest of the needed ancestors.
+		for power > 0 {
 			level, order = parent(level, order)
-			xj, _ = node(level, order)
+			xj, _ := node(level, order)
+			if math.Abs(xj-xl) < ε || math.Abs(xj-xr) < ε {
+				continue
+			}
 			value *= (x - xj) / (xi - xj)
+			power -= 1
 		}
 	}
 
