@@ -2,12 +2,12 @@ package linear
 
 // Closed is a basis in [0, 1]^n.
 type Closed struct {
-	nd int
+	nd uint
 }
 
 // NewClosed creates a basis in [0, 1]^n.
 func NewClosed(dimensions uint) *Closed {
-	return &Closed{int(dimensions)}
+	return &Closed{dimensions}
 }
 
 // Compute evaluates a basis function.
@@ -15,7 +15,7 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 	nd := self.nd
 
 	value := 1.0
-	for i := 0; i < nd; i++ {
+	for i := uint(0); i < nd; i++ {
 		level := levelMask & index[i]
 		if level == 0 {
 			continue // value *= 1.0
@@ -44,7 +44,7 @@ func (self *Closed) Integrate(index []uint64) float64 {
 	nd := self.nd
 
 	value := 1.0
-	for i := 0; i < nd; i++ {
+	for i := uint(0); i < nd; i++ {
 		level := levelMask & index[i]
 		switch level {
 		case 0:

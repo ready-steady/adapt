@@ -2,12 +2,12 @@ package linear
 
 // Open is a basis in (0, 1)^n.
 type Open struct {
-	nd int
+	nd uint
 }
 
 // NewOpen creates a basis in (0, 1)^n.
 func NewOpen(dimensions uint) *Open {
-	return &Open{int(dimensions)}
+	return &Open{dimensions}
 }
 
 // Compute evaluates a basis function.
@@ -15,7 +15,7 @@ func (self *Open) Compute(index []uint64, point []float64) float64 {
 	nd := self.nd
 
 	value := 1.0
-	for i := 0; i < nd; i++ {
+	for i := uint(0); i < nd; i++ {
 		level := levelMask & index[i]
 		if level == 0 {
 			continue // value *= 1.0
@@ -59,7 +59,7 @@ func (self *Open) Integrate(index []uint64) float64 {
 	nd := self.nd
 
 	value := 1.0
-	for i := 0; i < nd; i++ {
+	for i := uint(0); i < nd; i++ {
 		level := levelMask & index[i]
 		if level == 0 {
 			continue // value *= 1.0
