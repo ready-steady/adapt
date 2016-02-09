@@ -6,6 +6,10 @@ import (
 
 var ruleCache map[uint]*rule
 
+func init() {
+	ruleCache = make(map[uint]*rule)
+}
+
 type rule struct {
 	x []float64
 	w []float64
