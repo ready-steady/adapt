@@ -30,18 +30,18 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 		}
 
 		order := index[i] >> levelSize
+		xi, step := closedNode(level, order)
 
 		x := point[i]
-		xi, step := closedNode(level, order)
 		delta := math.Abs(x - xi)
 		if delta >= step {
 			return 0.0 // value *= 0.0
 		}
 
 		if power == 1 {
-			// The liner polynomial is not uniquely defined since there are
-			// three nodes (including the endpoints), but only two are needed.
-			// With this in mind, two linear segments are used.
+			// Use two linear segments. The reason is that there are three
+			// points (including the endpoints), but a first-order polynomial
+			// can satisfy only two of them in general.
 			value *= 1.0 - delta/step
 			continue
 		}
@@ -73,23 +73,32 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 
 // Integrate computes the integral of a basis function.
 func (self *Closed) Integrate(index []uint64) float64 {
-	nd := self.nd
-
-	if self.np != 1 {
-		panic("only the first-order basis is supported")
-	}
+	nd, np := self.nd, uint64(self.np)
 
 	value := 1.0
 	for i := uint(0); i < nd; i++ {
-		level := levelMask & index[i]
-		switch level {
-		case 0:
-			// value *= 1.0
-		case 1:
-			value *= 0.25
-		default:
-			value *= 1.0 / float64(uint64(2)<<(level-1))
+		level, power := levelMask&index[i], np
+		if level < power {
+			power = level
 		}
+		if power == 0 {
+			continue // value *= 1.0
+		}
+
+		order := index[i] >> levelSize
+		_, step := closedNode(level, order)
+
+		if power == 1 {
+			// Use two liner segments. See the corresponding comment in Compute.
+			if level == 1 {
+				value *= 0.25
+			} else {
+				value *= step
+			}
+			continue
+		}
+
+		panic("not implemented")
 	}
 
 	return value

@@ -12,7 +12,7 @@ type Open struct {
 // NewOpen creates a basis in (0, 1)^n.
 func NewOpen(dimensions, order uint) *Open {
 	if order != 1 {
-		panic("only the first-order basis is implemented")
+		panic("not implemented")
 	}
 	return &Open{dimensions}
 }
