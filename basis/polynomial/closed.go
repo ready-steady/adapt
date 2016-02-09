@@ -100,7 +100,7 @@ func closedNode(level, order uint64) (x, step float64) {
 		x, step = 0.5, 1.0
 	} else {
 		step = 1.0 / float64(uint64(2)<<(level-1))
-		x = step * float64(order)
+		x = float64(order) * step
 	}
 	return
 }

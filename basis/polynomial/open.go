@@ -1,5 +1,9 @@
 package polynomial
 
+import (
+	"math"
+)
+
 // Open is a basis in (0, 1)^n.
 type Open struct {
 	nd uint
@@ -42,11 +46,8 @@ func (self *Open) Compute(index []uint64, point []float64) float64 {
 			}
 			value *= x/step - left
 		default:
-			step := 1.0 / float64(count+1)
-			delta := x - float64(order+1)*step
-			if delta < 0.0 {
-				delta = -delta
-			}
+			xi, step := openNode(level, order)
+			delta := math.Abs(x - xi)
 			if delta >= step {
 				return 0.0 // value *= 0.0
 			}
@@ -80,4 +81,10 @@ func (self *Open) Integrate(index []uint64) float64 {
 	}
 
 	return value
+}
+
+func openNode(level, order uint64) (x, step float64) {
+	step = 1.0 / float64(uint64(2)<<level)
+	x = float64(order+1) * step
+	return
 }
