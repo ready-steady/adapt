@@ -4,11 +4,7 @@ import (
 	"github.com/ready-steady/quadrature"
 )
 
-var ruleCache map[uint]*rule
-
-func init() {
-	ruleCache = make(map[uint]*rule)
-}
+var ruleCache map[uint]*rule = make(map[uint]*rule)
 
 type rule struct {
 	x []float64
