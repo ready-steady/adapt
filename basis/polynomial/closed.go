@@ -89,7 +89,7 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 		return 1.0
 	}
 
-	_, step := closedNode(level, order)
+	x, step := closedNode(level, order)
 
 	if power == 1 {
 		// Use two liner segments. See the corresponding comment in
@@ -101,7 +101,10 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 		}
 	}
 
-	panic("not implemented")
+	nodes := uint(math.Ceil((float64(power) + 1.0) / 2.0))
+	return integrate(x-step, x+step, nodes, func(x float64) float64 {
+		return closedCompute(level, order, power, x)
+	})
 }
 
 func closedNode(level, order uint64) (x, step float64) {
