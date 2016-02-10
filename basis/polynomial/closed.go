@@ -94,7 +94,7 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 
 	if power == 1 {
 		// Use two liner segments. See the corresponding comment in
-		// computeClosed.
+		// closedCompute.
 		if level == 1 {
 			return 0.25
 		} else {
