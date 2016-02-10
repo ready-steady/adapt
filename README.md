@@ -1,4 +1,4 @@
-# Adaptive Hierarchical Interpolation [![Build Status][status-img]][status-url]
+# Adaptive Interpolation [![][status-img]][status-url]
 
 ## Subpackages
 
