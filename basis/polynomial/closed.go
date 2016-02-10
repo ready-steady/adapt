@@ -49,9 +49,10 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 	}
 
 	if power == 1 {
-		// Use two linear segments. The reason is that there are three points
-		// (including the endpoints), but a first-order polynomial can satisfy
-		// only two of them in general.
+		// Use two linear segments. The reason is that, taking into account the
+		// endpoints, there are three points available in order to construct a
+		// first-order polynomial; however, such a polynomial can satisfy only
+		// any two of them.
 		return 1.0 - delta/step
 	}
 
