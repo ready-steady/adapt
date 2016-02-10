@@ -102,6 +102,8 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 		}
 	}
 
+	// Use a Gauss–Legendre quadrature rule to integrate. Such a rule with n
+	// nodes integrates exactly polynomials up to order 2*n - 1.
 	nodes := uint(math.Ceil((float64(power) + 1.0) / 2.0))
 	return integrate(x-step, x+step, nodes, func(x float64) float64 {
 		return closedCompute(level, order, power, x)
