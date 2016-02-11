@@ -4,7 +4,28 @@ import (
 	"testing"
 
 	"github.com/ready-steady/assert"
+
+	grid "github.com/ready-steady/adapt/grid/equidistant"
 )
+
+func BenchmarkClosedCompute(b *testing.B) {
+	const (
+		nd = 10
+		ns = 10000
+	)
+
+	basis := NewClosed(nd, 1)
+	indices := generateIndices(nd, ns, grid.NewClosed(nd))
+	points := generatePoints(nd, ns)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < ns; j++ {
+			basis.Compute(indices[j*nd:(j+1)*nd], points[j*nd:(j+1)*nd])
+		}
+	}
+}
 
 func TestClosedCompute(t *testing.T) {
 	basis := NewClosed(1, 1)

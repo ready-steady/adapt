@@ -4,7 +4,28 @@ import (
 	"testing"
 
 	"github.com/ready-steady/assert"
+
+	grid "github.com/ready-steady/adapt/grid/equidistant"
 )
+
+func BenchmarkOpenCompute(b *testing.B) {
+	const (
+		nd = 10
+		ns = 10000
+	)
+
+	basis := NewOpen(nd, 1)
+	indices := generateIndices(nd, ns, grid.NewOpen(nd))
+	points := generatePoints(nd, ns)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < ns; j++ {
+			basis.Compute(indices[j*nd:(j+1)*nd], points[j*nd:(j+1)*nd])
+		}
+	}
+}
 
 func TestOpenCompute(t *testing.T) {
 	basis := NewOpen(1, 1)

@@ -2,10 +2,15 @@ package polynomial
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/ready-steady/assert"
 )
+
+type childrener interface {
+	Children([]uint64) []uint64
+}
 
 func f(x float64) float64 {
 	return 4.0*x*x*x - 3.0*x*x + 1.0
@@ -25,4 +30,22 @@ func TestIntegrate(t *testing.T) {
 	value := integrate(a, b, nodes, f)
 
 	assert.EqualWithin(value, F(b)-F(a), 1e-12, t)
+}
+
+func generateIndices(nd, ns uint, grid childrener) []uint64 {
+	parents := make([]uint64, nd)
+	indices := append([]uint64{}, parents...)
+	for uint(len(indices))/nd < ns {
+		parents = grid.Children(parents)
+		indices = append(indices, parents...)
+	}
+	return indices
+}
+
+func generatePoints(nd, ns uint) []float64 {
+	points := make([]float64, nd*ns)
+	for i := range points {
+		points[i] = rand.Float64()
+	}
+	return points
 }
