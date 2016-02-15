@@ -19,68 +19,65 @@ func NewOpen(dimensions, order uint) *Open {
 
 // Compute evaluates a basis function.
 func (self *Open) Compute(index []uint64, point []float64) float64 {
-	nd := self.nd
-
-	value := 1.0
-	for i := uint(0); i < nd; i++ {
-		level := levelMask & index[i]
-		if level == 0 {
-			continue // value *= 1.0
-		}
-
-		order := index[i] >> levelSize
-		count := uint64(2)<<level - 1
-
-		x := point[i]
-		switch order {
-		case 0:
-			step := 1.0 / float64(count+1)
-			if x >= 2.0*step {
-				return 0.0 // value *= 0.0
-			}
-			value *= 2.0 - x/step
-		case count - 1:
-			step, left := 1.0/float64(count+1), float64(count-1)
-			if x <= left*step {
-				return 0.0 // value *= 0.0
-			}
-			value *= x/step - left
-		default:
-			xi, step := openNode(level, order)
-			delta := math.Abs(x - xi)
-			if delta >= step {
-				return 0.0 // value *= 0.0
-			}
-			value *= 1.0 - delta/step
-		}
+	nd, value := self.nd, 1.0
+	for i := uint(0); i < nd && value != 0.0; i++ {
+		value *= openCompute(levelMask&index[i], index[i]>>levelSize, point[i])
 	}
-
 	return value
 }
 
 // Integrate computes the integral of a basis function.
 func (self *Open) Integrate(index []uint64) float64 {
-	nd := self.nd
+	nd, value := self.nd, 1.0
+	for i := uint(0); i < nd && value != 0.0; i++ {
+		value *= openIntegrate(levelMask&index[i], index[i]>>levelSize)
+	}
+	return value
+}
 
-	value := 1.0
-	for i := uint(0); i < nd; i++ {
-		level := levelMask & index[i]
-		if level == 0 {
-			continue // value *= 1.0
-		}
-
-		order := index[i] >> levelSize
-		count := uint64(2)<<level - 1
-
-		switch order {
-		case 0, count - 1:
-			value *= 2.0 / float64(count+1)
-		default:
-			value *= 1.0 / float64(count+1)
-		}
+func openCompute(level, order uint64, x float64) float64 {
+	if level == 0 {
+		return 1.0
 	}
 
-	return value
+	count := uint64(2)<<level - 1
+
+	switch order {
+	case 0:
+		step := 1.0 / float64(count+1)
+		if x >= 2.0*step {
+			return 0.0
+		}
+		return 2.0 - x/step
+	case count - 1:
+		step, left := 1.0/float64(count+1), float64(count-1)
+		if x <= left*step {
+			return 0.0
+		}
+		return x/step - left
+	default:
+		xi, step := openNode(level, order)
+		delta := math.Abs(x - xi)
+		if delta >= step {
+			return 0.0
+		}
+		return 1.0 - delta/step
+	}
+}
+
+func openIntegrate(level, order uint64) float64 {
+	if level == 0 {
+		return 1.0
+	}
+
+	count := uint64(2)<<level - 1
+
+	switch order {
+	case 0, count - 1:
+		return 2.0 / float64(count+1)
+	default:
+		return 1.0 / float64(count+1)
+	}
 }
 
 func openNode(level, order uint64) (x, step float64) {
