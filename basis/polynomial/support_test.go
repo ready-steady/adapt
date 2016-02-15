@@ -32,6 +32,10 @@ func TestIntegrate(t *testing.T) {
 	assert.EqualWithin(value, F(b)-F(a), 1e-12, t)
 }
 
+func compose(level, order uint64) uint64 {
+	return level | order<<levelSize
+}
+
 func generateIndices(nd, ns uint, grid childrener) []uint64 {
 	parents := make([]uint64, nd)
 	indices := append([]uint64{}, parents...)
