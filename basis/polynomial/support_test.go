@@ -36,6 +36,10 @@ func compose(level, order uint64) uint64 {
 	return level | order<<levelSize
 }
 
+func decompose(index uint64) (uint64, uint64) {
+	return levelMask & index, index >> levelSize
+}
+
 func generateIndices(nd, ns uint, grid childrener) []uint64 {
 	parents := make([]uint64, nd)
 	indices := append([]uint64{}, parents...)
