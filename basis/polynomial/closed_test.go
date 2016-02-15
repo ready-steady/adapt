@@ -15,13 +15,8 @@ func BenchmarkClosedCompute(b *testing.B) {
 	)
 
 	basis := NewClosed(nd, 1)
-	indices := generateIndices(nd, ns, grid.NewClosed(nd))
-	points := generatePoints(nd, ns)
-	for i := 0; i < ns; i++ {
-		level, order := decompose(indices[i])
-		x, step := closedNode(level, order)
-		points[i] = x - step + 2.0*step*points[i]
-	}
+	indices := generateIndices(nd, ns, grid.NewClosed(nd).Children)
+	points := generatePoints(nd, ns, indices, closedNode)
 
 	b.ResetTimer()
 

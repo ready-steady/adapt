@@ -8,10 +8,6 @@ import (
 	"github.com/ready-steady/assert"
 )
 
-type childrener interface {
-	Children([]uint64) []uint64
-}
-
 func f(x float64) float64 {
 	return 4.0*x*x*x - 3.0*x*x + 1.0
 }
@@ -40,20 +36,24 @@ func decompose(index uint64) (uint64, uint64) {
 	return levelMask & index, index >> levelSize
 }
 
-func generateIndices(nd, ns uint, grid childrener) []uint64 {
+func generateIndices(nd, ns uint, children func([]uint64) []uint64) []uint64 {
 	parents := make([]uint64, nd)
 	indices := append([]uint64{}, parents...)
 	for uint(len(indices))/nd < ns {
-		parents = grid.Children(parents)
+		parents = children(parents)
 		indices = append(indices, parents...)
 	}
 	return indices
 }
 
-func generatePoints(nd, ns uint) []float64 {
+func generatePoints(nd, ns uint, indices []uint64,
+	locate func(level, order uint64) (float64, float64)) []float64 {
+
 	points := make([]float64, nd*ns)
 	for i := range points {
-		points[i] = rand.Float64()
+		level, order := decompose(indices[i])
+		x, step := locate(level, order)
+		points[i] = x - step + 2.0*step*rand.Float64()
 	}
 	return points
 }
