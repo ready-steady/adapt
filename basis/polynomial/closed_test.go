@@ -8,13 +8,25 @@ import (
 	grid "github.com/ready-steady/adapt/grid/equidistant"
 )
 
-func BenchmarkClosedCompute(b *testing.B) {
+func BenchmarkClosedCompute1(b *testing.B) {
+	benchmarkClosedCompute(1, b)
+}
+
+func BenchmarkClosedCompute2(b *testing.B) {
+	benchmarkClosedCompute(2, b)
+}
+
+func BenchmarkClosedCompute3(b *testing.B) {
+	benchmarkClosedCompute(3, b)
+}
+
+func benchmarkClosedCompute(power uint, b *testing.B) {
 	const (
 		nd = 10
 		ns = 10000
 	)
 
-	basis := NewClosed(nd, 1)
+	basis := NewClosed(nd, power)
 	indices := generateIndices(nd, ns, grid.NewClosed(nd).Children)
 	points := generatePoints(nd, ns, indices, closedNode)
 

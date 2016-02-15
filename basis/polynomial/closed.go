@@ -11,8 +11,8 @@ type Closed struct {
 }
 
 // NewClosed creates a basis in [0, 1]^n.
-func NewClosed(dimensions uint, order uint) *Closed {
-	return &Closed{dimensions, order}
+func NewClosed(dimensions uint, power uint) *Closed {
+	return &Closed{dimensions, power}
 }
 
 // Compute evaluates a basis function.

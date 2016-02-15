@@ -8,13 +8,17 @@ import (
 	grid "github.com/ready-steady/adapt/grid/equidistant"
 )
 
-func BenchmarkOpenCompute(b *testing.B) {
+func BenchmarkOpenCompute1(b *testing.B) {
+	benchmarkOpenCompute(1, b)
+}
+
+func benchmarkOpenCompute(power uint, b *testing.B) {
 	const (
 		nd = 10
 		ns = 10000
 	)
 
-	basis := NewOpen(nd, 1)
+	basis := NewOpen(nd, power)
 	indices := generateIndices(nd, ns, grid.NewOpen(nd).Children)
 	points := generatePoints(nd, ns, indices, openNode)
 

@@ -10,8 +10,8 @@ type Open struct {
 }
 
 // NewOpen creates a basis in (0, 1)^n.
-func NewOpen(dimensions, order uint) *Open {
-	if order != 1 {
+func NewOpen(dimensions, power uint) *Open {
+	if power != 1 {
 		panic("not implemented")
 	}
 	return &Open{dimensions}
