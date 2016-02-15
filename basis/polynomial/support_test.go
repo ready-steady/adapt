@@ -53,7 +53,8 @@ func generatePoints(nd, ns uint, indices []uint64,
 	for i := range points {
 		level, order := decompose(indices[i])
 		x, step := locate(level, order)
-		points[i] = math.Min(math.Max(x-step+2.0*step*rand.Float64(), 0.0), 1.0)
+		a, b := math.Max(0.0, x-step), math.Min(1.0, x+step)
+		points[i] = a + (b-a)*rand.Float64()
 	}
 	return points
 }
