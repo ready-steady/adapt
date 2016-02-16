@@ -44,24 +44,24 @@ func openCompute(level, order uint64, x float64) float64 {
 
 	switch order {
 	case 0:
-		step := 1.0 / float64(count+1)
-		if x >= 2.0*step {
+		h := 1.0 / float64(count+1)
+		if x >= 2.0*h {
 			return 0.0
 		}
-		return 2.0 - x/step
+		return 2.0 - x/h
 	case count - 1:
-		step, left := 1.0/float64(count+1), float64(count-1)
-		if x <= left*step {
+		h, left := 1.0/float64(count+1), float64(count-1)
+		if x <= left*h {
 			return 0.0
 		}
-		return x/step - left
+		return x/h - left
 	default:
-		xi, step := openNode(level, order)
-		delta := math.Abs(x - xi)
-		if delta >= step {
+		xi, h := openNode(level, order)
+		Δ := math.Abs(x - xi)
+		if Δ >= h {
 			return 0.0
 		}
-		return 1.0 - delta/step
+		return 1.0 - Δ/h
 	}
 }
 
@@ -80,8 +80,8 @@ func openIntegrate(level, order uint64) float64 {
 	}
 }
 
-func openNode(level, order uint64) (x, step float64) {
-	step = 1.0 / float64(uint64(2)<<level)
-	x = float64(order+1) * step
+func openNode(level, order uint64) (x, h float64) {
+	h = 1.0 / float64(uint64(2)<<level)
+	x = float64(order+1) * h
 	return
 }

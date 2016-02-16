@@ -41,10 +41,10 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 		return 1.0
 	}
 
-	xi, step := closedNode(level, order)
+	xi, h := closedNode(level, order)
 
-	delta := math.Abs(x - xi)
-	if delta >= step {
+	Δ := math.Abs(x - xi)
+	if Δ >= h {
 		return 0.0
 	}
 
@@ -53,18 +53,18 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 		// endpoints, there are three points available in order to construct a
 		// first-order polynomial; however, such a polynomial can satisfy only
 		// any two of them.
-		return 1.0 - delta/step
+		return 1.0 - Δ/h
 	}
 
 	value := 1.0
 
 	// The left endpoint of the local support.
-	xl := xi - step
+	xl := xi - h
 	value *= (x - xl) / (xi - xl)
 	power -= 1
 
 	// The right endpoint of the local support.
-	xr := xi + step
+	xr := xi + h
 	value *= (x - xr) / (xi - xr)
 	power -= 1
 
@@ -90,7 +90,7 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 		return 1.0
 	}
 
-	x, step := closedNode(level, order)
+	x, h := closedNode(level, order)
 
 	if power == 1 {
 		// Use two liner segments. See the corresponding comment in
@@ -98,24 +98,24 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 		if level == 1 {
 			return 0.25
 		} else {
-			return step
+			return h
 		}
 	}
 
 	// Use a Gauss–Legendre quadrature rule to integrate. Such a rule with n
 	// nodes integrates exactly polynomials up to order 2*n - 1.
 	nodes := uint(math.Ceil((float64(power) + 1.0) / 2.0))
-	return integrate(x-step, x+step, nodes, func(x float64) float64 {
+	return integrate(x-h, x+h, nodes, func(x float64) float64 {
 		return closedCompute(level, order, power, x)
 	})
 }
 
-func closedNode(level, order uint64) (x, step float64) {
+func closedNode(level, order uint64) (x, h float64) {
 	if level == 0 {
-		x, step = 0.5, 0.5
+		x, h = 0.5, 0.5
 	} else {
-		step = 1.0 / float64(uint64(2)<<(level-1))
-		x = float64(order) * step
+		h = 1.0 / float64(uint64(2)<<(level-1))
+		x = float64(order) * h
 	}
 	return
 }
