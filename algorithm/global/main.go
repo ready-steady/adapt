@@ -60,7 +60,7 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 		lindices := tracker.Pull()
 
 		progress.Active = uint(len(tracker.Active))
-		progress.Passive = tracker.Length - progress.Active
+		progress.Passive = uint(len(tracker.Indices))/ni - progress.Active
 		if level := uint(internal.MaxUint64(lindices)); level > progress.Level {
 			progress.Level = level
 		}

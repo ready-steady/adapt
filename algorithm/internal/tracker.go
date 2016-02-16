@@ -8,28 +8,34 @@ var (
 	infinity = math.Inf(1.0)
 )
 
+// Reference is a relation on ordered elements.
 type Reference map[uint]uint
 
+// Set is a subset of ordered elements.
 type Set map[uint]bool
 
+// Tracker is a structure for keeping track of active level indices.
 type Tracker struct {
+	// All the level indices considered so far.
+	Indices []uint64
+	// The positions of the active level indices.
 	Active Set
-	Length uint
 
 	ni uint
+	nn uint
 
 	lmax uint
 	imax uint
 	rate float64
 
-	lindices []uint64
-	norms    []uint64
-	scores   []float64
+	norms  []uint64
+	scores []float64
 
 	forward  Reference
 	backward Reference
 }
 
+// NewTracker returns a tracker of active level indices.
 func NewTracker(ni, lmax, imax uint, rate float64) *Tracker {
 	return &Tracker{
 		ni: ni,
@@ -43,6 +49,7 @@ func NewTracker(ni, lmax, imax uint, rate float64) *Tracker {
 	}
 }
 
+// Pull fetches the next level index.
 func (self *Tracker) Pull() []uint64 {
 	if self.Active == nil {
 		return self.pullFirst()
@@ -51,21 +58,22 @@ func (self *Tracker) Pull() []uint64 {
 	}
 }
 
+// Push updates the tracker with the score of the previously pulled index.
 func (self *Tracker) Push(score float64) {
 	self.scores = append(self.scores, score)
 }
 
 func (self *Tracker) pullFirst() []uint64 {
+	self.Indices = make([]uint64, 1*self.ni)
 	self.Active = make(Set)
 	self.Active[0] = true
-	self.Length = 1
-	self.lindices = make([]uint64, 1*self.ni)
+	self.nn = 1
 	self.norms = make([]uint64, 1)
-	return self.lindices
+	return self.Indices
 }
 
-func (self *Tracker) pullSubsequent() (lindices []uint64) {
-	ni, nn := self.ni, self.Length
+func (self *Tracker) pullSubsequent() (indices []uint64) {
+	ni, nn := self.ni, self.nn
 	active, forward, backward := self.Active, self.forward, self.backward
 
 	min, k := minUint64Set(self.norms, active)
@@ -75,7 +83,7 @@ func (self *Tracker) pullSubsequent() (lindices []uint64) {
 	}
 	delete(active, k)
 
-	lindex, norm := self.lindices[k*ni:(k+1)*ni], self.norms[k]+1
+	lindex, norm := self.Indices[k*ni:(k+1)*ni], self.norms[k]+1
 
 outer:
 	for i := uint(0); i < ni && nn < self.imax; i++ {
@@ -100,8 +108,8 @@ outer:
 			backward[nn*ni+j] = l
 		}
 
-		self.lindices = append(self.lindices, lindex...)
-		self.lindices[nn*ni+i]++
+		self.Indices = append(self.Indices, lindex...)
+		self.Indices[nn*ni+i]++
 		self.norms = append(self.norms, norm)
 
 		active[nn] = true
@@ -109,8 +117,8 @@ outer:
 		nn++
 	}
 
-	lindices = self.lindices[self.Length*ni:]
-	self.Length = nn
+	indices = self.Indices[self.nn*ni:]
+	self.nn = nn
 
 	return
 }

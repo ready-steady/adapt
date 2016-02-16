@@ -4,6 +4,8 @@ import (
 	"sync"
 )
 
+// Approximate evaluates an interpolant at multiple points using multiple
+// goroutines.
 func Approximate(basis Basis, indices []uint64, surpluses, points []float64,
 	ni, no, nw uint) []float64 {
 
@@ -46,6 +48,7 @@ func Approximate(basis Basis, indices []uint64, surpluses, points []float64,
 	return values
 }
 
+// Invoke evaluates a function at multiple nodes using multiple goroutines.
 func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
 	nn := uint(len(nodes)) / ni
 
@@ -74,6 +77,7 @@ func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	return values
 }
 
+// Subtract returns the difference between two vectors.
 func Subtract(minuend, subtrahend []float64) []float64 {
 	difference := make([]float64, len(minuend))
 	for i := range minuend {
@@ -82,6 +86,7 @@ func Subtract(minuend, subtrahend []float64) []float64 {
 	return difference
 }
 
+// MaxUint64 returns the maximal element.
 func MaxUint64(data []uint64) uint64 {
 	result := uint64(0)
 	for _, value := range data {
