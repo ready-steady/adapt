@@ -23,7 +23,7 @@ func BenchmarkClosedCompute3(b *testing.B) {
 func benchmarkClosedCompute(power uint, b *testing.B) {
 	const (
 		nd = 10
-		ns = 10000
+		ns = 100000
 	)
 
 	basis := NewClosed(nd, power)

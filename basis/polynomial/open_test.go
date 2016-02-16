@@ -15,7 +15,7 @@ func BenchmarkOpenCompute1(b *testing.B) {
 func benchmarkOpenCompute(power uint, b *testing.B) {
 	const (
 		nd = 10
-		ns = 10000
+		ns = 100000
 	)
 
 	basis := NewOpen(nd, power)
