@@ -1,6 +1,6 @@
 package global
 
-func maxFloat64(data []float64, set Set) (float64, uint) {
+func maxFloat64Set(data []float64, set Set) (float64, uint) {
 	value, position := -infinity, ^uint(0)
 	for i := range set {
 		if data[i] > value {
@@ -10,8 +10,8 @@ func maxFloat64(data []float64, set Set) (float64, uint) {
 	return value, position
 }
 
-func maxUint(data []uint) uint {
-	result := uint(0)
+func maxUint64(data []uint64) uint64 {
+	result := uint64(0)
 	for _, value := range data {
 		if value > result {
 			result = value
@@ -20,18 +20,8 @@ func maxUint(data []uint) uint {
 	return result
 }
 
-func maxUint8(data []uint8) uint8 {
-	result := uint8(0)
-	for _, value := range data {
-		if result < value {
-			result = value
-		}
-	}
-	return result
-}
-
-func minUint(data []uint, set Set) (uint, uint) {
-	value, position := ^uint(0), ^uint(0)
+func minUint64Set(data []uint64, set Set) (uint64, uint) {
+	value, position := ^uint64(0), ^uint(0)
 	for i := range set {
 		if data[i] < value {
 			value, position = data[i], i

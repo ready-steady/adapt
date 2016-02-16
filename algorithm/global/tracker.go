@@ -6,12 +6,12 @@ type tracker struct {
 	ni uint
 	nn uint
 
-	lmax       uint8
+	lmax       uint
 	imax       uint
 	adaptivity float64
 
-	lindices []uint8
-	norms    []uint
+	lindices []uint64
+	norms    []uint64
 	scores   []float64
 
 	active   Set
@@ -32,7 +32,7 @@ func newTracker(ni uint, config *Config) *tracker {
 	}
 }
 
-func (self *tracker) pull() []uint8 {
+func (self *tracker) pull() []uint64 {
 	if self.lindices == nil {
 		return self.pullFirst()
 	} else {
@@ -40,23 +40,23 @@ func (self *tracker) pull() []uint8 {
 	}
 }
 
-func (self *tracker) pullFirst() []uint8 {
-	self.lindices = make([]uint8, 1*self.ni)
-	self.norms = make([]uint, 1)
+func (self *tracker) pullFirst() []uint64 {
+	self.lindices = make([]uint64, 1*self.ni)
+	self.norms = make([]uint64, 1)
 	self.active = make(Set)
 	self.active[0] = true
 	self.nn = 1
 	return self.lindices
 }
 
-func (self *tracker) pullSubsequent() (lindices []uint8) {
+func (self *tracker) pullSubsequent() (lindices []uint64) {
 	ni, nn := self.ni, self.nn
 	active, forward, backward := self.active, self.forward, self.backward
 
-	min, k := minUint(self.norms, self.active)
-	max := maxUint(self.norms)
+	min, k := minUint64Set(self.norms, self.active)
+	max := maxUint64(self.norms)
 	if float64(min) > (1.0-self.adaptivity)*float64(max) {
-		_, k = maxFloat64(self.scores, self.active)
+		_, k = maxFloat64Set(self.scores, self.active)
 	}
 	delete(active, k)
 
@@ -64,7 +64,7 @@ func (self *tracker) pullSubsequent() (lindices []uint8) {
 
 outer:
 	for i := uint(0); i < ni && nn < self.imax; i++ {
-		if lindex[i] >= self.lmax {
+		if lindex[i] >= uint64(self.lmax) {
 			continue
 		}
 

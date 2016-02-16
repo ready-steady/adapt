@@ -213,12 +213,12 @@ func TestClosedIndex(t *testing.T) {
 	grid := NewClosed(2)
 
 	cases := []struct {
-		level  []uint8
+		level  []uint64
 		levels []uint64
 		orders []uint64
 	}{
 		{
-			level: []uint8{0, 0},
+			level: []uint64{0, 0},
 			levels: []uint64{
 				0, 0,
 			},
@@ -227,7 +227,7 @@ func TestClosedIndex(t *testing.T) {
 			},
 		},
 		{
-			level: []uint8{0, 1},
+			level: []uint64{0, 1},
 			levels: []uint64{
 				0, 1,
 				0, 1,
@@ -238,7 +238,7 @@ func TestClosedIndex(t *testing.T) {
 			},
 		},
 		{
-			level: []uint8{1, 2},
+			level: []uint64{1, 2},
 			levels: []uint64{
 				1, 2,
 				1, 2,
@@ -253,7 +253,7 @@ func TestClosedIndex(t *testing.T) {
 			},
 		},
 		{
-			level: []uint8{2, 3},
+			level: []uint64{2, 3},
 			levels: []uint64{
 				2, 3,
 				2, 3,
@@ -284,7 +284,7 @@ func TestClosedIndex(t *testing.T) {
 
 func TestIndexClosed(t *testing.T) {
 	cases := []struct {
-		level  uint8
+		level  uint64
 		levels []uint64
 		orders []uint64
 	}{

@@ -24,7 +24,7 @@ type Grid interface {
 	Compute([]uint64) []float64
 
 	// Index returns the indices of a set of levels.
-	Index([]uint8) []uint64
+	Index([]uint64) []uint64
 }
 
 // Interpolator is an instance of the algorithm.
@@ -36,10 +36,10 @@ type Interpolator struct {
 
 // Progress contains information about the interpolation process.
 type Progress struct {
-	Level       uint8 // Reached level
-	Active      uint  // The number of active indices
-	Passive     uint  // The number of passive indices
-	Evaluations uint  // The number of function evaluations
+	Level       uint // Reached level
+	Active      uint // The number of active indices
+	Passive     uint // The number of passive indices
+	Evaluations uint // The number of function evaluations
 }
 
 // Set is a set data structure.
@@ -70,7 +70,7 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 
 		progress.Active = uint(len(tracker.active))
 		progress.Passive = tracker.nn - progress.Active
-		if level := maxUint8(lindices); level > progress.Level {
+		if level := uint(maxUint64(lindices)); level > progress.Level {
 			progress.Level = level
 		}
 

@@ -16,10 +16,10 @@ const (
 	orderSize = 64 - levelSize
 )
 
-func index(levels []uint8, generate func(uint8) []uint64, nd uint) []uint64 {
+func index(levels []uint64, generate func(uint64) []uint64, nd uint) []uint64 {
 	nn := uint(len(levels)) / nd
 
-	cache := make(map[uint8][]uint64)
+	cache := make(map[uint64][]uint64)
 
 	indices1D := make([][]uint64, nd)
 	indicesND := make([]uint64, 0)
