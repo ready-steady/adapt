@@ -31,9 +31,9 @@ type Interpolator struct {
 // Progress contains information about the interpolation process.
 type Progress struct {
 	Level       uint // Reached level
-	Active      uint // The number of active indices
-	Passive     uint // The number of passive indices
-	Evaluations uint // The number of function evaluations
+	Active      uint // Number of active indices
+	Passive     uint // Number of passive indices
+	Evaluations uint // Number of function evaluations
 }
 
 // New creates an interpolator.
