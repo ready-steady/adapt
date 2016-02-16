@@ -6,9 +6,9 @@ type tracker struct {
 	ni uint
 	nn uint
 
-	lmax       uint
-	imax       uint
-	adaptivity float64
+	lmax uint
+	imax uint
+	rate float64
 
 	lindices []uint64
 	norms    []uint64
@@ -23,9 +23,9 @@ func newTracker(ni uint, config *Config) *tracker {
 	return &tracker{
 		ni: ni,
 
-		lmax:       config.MaxLevel,
-		imax:       config.MaxIndices,
-		adaptivity: config.Adaptivity,
+		lmax: config.MaxLevel,
+		imax: config.MaxIndices,
+		rate: config.AdaptivityRate,
 
 		forward:  make(reference),
 		backward: make(reference),
@@ -55,7 +55,7 @@ func (self *tracker) pullSubsequent() (lindices []uint64) {
 
 	min, k := minUint64Set(self.norms, self.active)
 	max := maxUint64(self.norms)
-	if float64(min) > (1.0-self.adaptivity)*float64(max) {
+	if float64(min) > (1.0-self.rate)*float64(max) {
 		_, k = maxFloat64Set(self.scores, self.active)
 	}
 	delete(active, k)
