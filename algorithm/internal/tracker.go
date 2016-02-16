@@ -21,28 +21,27 @@ type Tracker struct {
 	// The positions of the active level indices.
 	Active Set
 
-	ni uint
-	nn uint
-
+	ni   uint
+	nn   uint
 	lmax uint
 	imax uint
-	rate float64
-
-	norms  []uint64
-	scores []float64
 
 	forward  Reference
 	backward Reference
+
+	initialized bool
 }
 
 // NewTracker returns a tracker of active level indices.
-func NewTracker(ni, lmax, imax uint, rate float64) *Tracker {
+func NewTracker(ni, lmax, imax uint) *Tracker {
 	return &Tracker{
-		ni: ni,
+		Indices: make([]uint64, 1*ni),
+		Active:  Set{0: true},
 
+		ni:   ni,
+		nn:   1,
 		lmax: lmax,
 		imax: imax,
-		rate: rate,
 
 		forward:  make(Reference),
 		backward: make(Reference),
@@ -50,40 +49,18 @@ func NewTracker(ni, lmax, imax uint, rate float64) *Tracker {
 }
 
 // Pull fetches the next level index.
-func (self *Tracker) Pull() []uint64 {
-	if self.Active == nil {
-		return self.pullFirst()
-	} else {
-		return self.pullSubsequent()
+func (self *Tracker) Pull(k uint) (indices []uint64) {
+	if !self.initialized {
+		self.initialized = true
+		indices = self.Indices
+		return
 	}
-}
 
-// Push updates the tracker with the score of the previously pulled index.
-func (self *Tracker) Push(score float64) {
-	self.scores = append(self.scores, score)
-}
-
-func (self *Tracker) pullFirst() []uint64 {
-	self.Indices = make([]uint64, 1*self.ni)
-	self.Active = make(Set)
-	self.Active[0] = true
-	self.nn = 1
-	self.norms = make([]uint64, 1)
-	return self.Indices
-}
-
-func (self *Tracker) pullSubsequent() (indices []uint64) {
 	ni, nn := self.ni, self.nn
 	active, forward, backward := self.Active, self.forward, self.backward
+	index := self.Indices[k*ni : (k+1)*ni]
 
-	min, k := minUint64Set(self.norms, active)
-	max := MaxUint64(self.norms)
-	if float64(min) > (1.0-self.rate)*float64(max) {
-		_, k = maxFloat64Set(self.scores, active)
-	}
 	delete(active, k)
-
-	index, norm := self.Indices[k*ni:(k+1)*ni], self.norms[k]+1
 
 outer:
 	for i := uint(0); i < ni && nn < self.imax; i++ {
@@ -110,7 +87,6 @@ outer:
 
 		self.Indices = append(self.Indices, index...)
 		self.Indices[nn*ni+i]++
-		self.norms = append(self.norms, norm)
 
 		active[nn] = true
 

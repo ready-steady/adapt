@@ -53,7 +53,7 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	tracker := internal.NewTracker(ni, config.MaxLevel, config.MaxIndices, config.AdaptivityRate)
+	tracker := newTracker(ni, config)
 
 	progress := &Progress{}
 	for {
@@ -61,7 +61,7 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 
 		progress.Active = uint(len(tracker.Active))
 		progress.Passive = uint(len(tracker.Indices))/ni - progress.Active
-		if level := uint(internal.MaxUint64(lindices)); level > progress.Level {
+		if level := uint(maxUint64(lindices)); level > progress.Level {
 			progress.Level = level
 		}
 
