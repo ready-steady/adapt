@@ -1,5 +1,15 @@
 package global
 
+import (
+	"math"
+
+	"github.com/ready-steady/adapt/algorithm/internal"
+)
+
+var (
+	infinity = math.Inf(1.0)
+)
+
 // Location contains information about a dimensional location.
 type Location struct {
 	Values    []float64 // Target-function values
@@ -9,7 +19,7 @@ type Location struct {
 // Metric is an accuracy metric.
 type Metric interface {
 	// Done checks if the accuracy requirements have been satiated.
-	Done(active Set) bool
+	Done(active internal.Set) bool
 
 	// Score assigns a score to a location.
 	Score(*Location) float64
@@ -38,7 +48,7 @@ func NewMetric(no uint, absolute, relative float64) *BasicMetric {
 	}
 }
 
-func (self *BasicMetric) Done(active Set) bool {
+func (self *BasicMetric) Done(active internal.Set) bool {
 	no, errors := self.no, self.errors
 	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
 	for i := range active {

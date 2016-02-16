@@ -1,4 +1,12 @@
-package global
+package internal
+
+import (
+	"math"
+)
+
+var (
+	infinity = math.Inf(1.0)
+)
 
 type Reference map[uint]uint
 
@@ -61,7 +69,7 @@ func (self *Tracker) pullSubsequent() (lindices []uint64) {
 	active, forward, backward := self.Active, self.forward, self.backward
 
 	min, k := minUint64Set(self.norms, active)
-	max := maxUint64(self.norms)
+	max := MaxUint64(self.norms)
 	if float64(min) > (1.0-self.rate)*float64(max) {
 		_, k = maxFloat64Set(self.scores, active)
 	}
