@@ -112,7 +112,7 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 
 func closedNode(level, order uint64) (x, step float64) {
 	if level == 0 {
-		x, step = 0.5, 1.0
+		x, step = 0.5, 0.5
 	} else {
 		step = 1.0 / float64(uint64(2)<<(level-1))
 		x = float64(order) * step
