@@ -83,17 +83,17 @@ func (self *Tracker) pullSubsequent() (indices []uint64) {
 	}
 	delete(active, k)
 
-	lindex, norm := self.Indices[k*ni:(k+1)*ni], self.norms[k]+1
+	index, norm := self.Indices[k*ni:(k+1)*ni], self.norms[k]+1
 
 outer:
 	for i := uint(0); i < ni && nn < self.imax; i++ {
-		if lindex[i] >= uint64(self.lmax) {
+		if index[i] >= uint64(self.lmax) {
 			continue
 		}
 
 		newBackward := make(Reference)
 		for j := uint(0); j < ni; j++ {
-			if i == j || lindex[j] == 0 {
+			if i == j || index[j] == 0 {
 				continue
 			}
 			if l, ok := forward[backward[k*ni+j]*ni+i]; !ok || active[l] {
@@ -108,7 +108,7 @@ outer:
 			backward[nn*ni+j] = l
 		}
 
-		self.Indices = append(self.Indices, lindex...)
+		self.Indices = append(self.Indices, index...)
 		self.Indices[nn*ni+i]++
 		self.norms = append(self.norms, norm)
 
