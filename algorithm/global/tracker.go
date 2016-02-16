@@ -1,10 +1,14 @@
 package global
 
-type reference map[uint]uint
+type Reference map[uint]uint
 
-type tracker struct {
+type Set map[uint]bool
+
+type Tracker struct {
+	Active Set
+	Length uint
+
 	ni uint
-	nn uint
 
 	lmax uint
 	imax uint
@@ -14,49 +18,52 @@ type tracker struct {
 	norms    []uint64
 	scores   []float64
 
-	active   Set
-	forward  reference
-	backward reference
+	forward  Reference
+	backward Reference
 }
 
-func newTracker(ni uint, config *Config) *tracker {
-	return &tracker{
+func NewTracker(ni, lmax, imax uint, rate float64) *Tracker {
+	return &Tracker{
 		ni: ni,
 
-		lmax: config.MaxLevel,
-		imax: config.MaxIndices,
-		rate: config.AdaptivityRate,
+		lmax: lmax,
+		imax: imax,
+		rate: rate,
 
-		forward:  make(reference),
-		backward: make(reference),
+		forward:  make(Reference),
+		backward: make(Reference),
 	}
 }
 
-func (self *tracker) pull() []uint64 {
-	if self.lindices == nil {
+func (self *Tracker) Pull() []uint64 {
+	if self.Active == nil {
 		return self.pullFirst()
 	} else {
 		return self.pullSubsequent()
 	}
 }
 
-func (self *tracker) pullFirst() []uint64 {
+func (self *Tracker) Push(score float64) {
+	self.scores = append(self.scores, score)
+}
+
+func (self *Tracker) pullFirst() []uint64 {
+	self.Active = make(Set)
+	self.Active[0] = true
+	self.Length = 1
 	self.lindices = make([]uint64, 1*self.ni)
 	self.norms = make([]uint64, 1)
-	self.active = make(Set)
-	self.active[0] = true
-	self.nn = 1
 	return self.lindices
 }
 
-func (self *tracker) pullSubsequent() (lindices []uint64) {
-	ni, nn := self.ni, self.nn
-	active, forward, backward := self.active, self.forward, self.backward
+func (self *Tracker) pullSubsequent() (lindices []uint64) {
+	ni, nn := self.ni, self.Length
+	active, forward, backward := self.Active, self.forward, self.backward
 
-	min, k := minUint64Set(self.norms, self.active)
+	min, k := minUint64Set(self.norms, active)
 	max := maxUint64(self.norms)
 	if float64(min) > (1.0-self.rate)*float64(max) {
-		_, k = maxFloat64Set(self.scores, self.active)
+		_, k = maxFloat64Set(self.scores, active)
 	}
 	delete(active, k)
 
@@ -68,7 +75,7 @@ outer:
 			continue
 		}
 
-		newBackward := make(reference)
+		newBackward := make(Reference)
 		for j := uint(0); j < ni; j++ {
 			if i == j || lindex[j] == 0 {
 				continue
@@ -94,12 +101,8 @@ outer:
 		nn++
 	}
 
-	lindices = self.lindices[self.nn*ni:]
-	self.nn = nn
+	lindices = self.lindices[self.Length*ni:]
+	self.Length = nn
 
 	return
-}
-
-func (self *tracker) push(score float64) {
-	self.scores = append(self.scores, score)
 }

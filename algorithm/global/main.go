@@ -42,9 +42,6 @@ type Progress struct {
 	Evaluations uint // The number of function evaluations
 }
 
-// Set is a set data structure.
-type Set map[uint]bool
-
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -62,14 +59,14 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 	nw := config.Workers
 
 	surrogate := newSurrogate(ni, no)
-	tracker := newTracker(ni, config)
+	tracker := NewTracker(ni, config.MaxLevel, config.MaxIndices, config.AdaptivityRate)
 
 	progress := &Progress{}
 	for {
-		lindices := tracker.pull()
+		lindices := tracker.Pull()
 
-		progress.Active = uint(len(tracker.active))
-		progress.Passive = tracker.nn - progress.Active
+		progress.Active = uint(len(tracker.Active))
+		progress.Passive = tracker.Length - progress.Active
 		if level := uint(maxUint64(lindices)); level > progress.Level {
 			progress.Level = level
 		}
@@ -98,11 +95,11 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 
 		for _, count := range counts {
 			offset := count * no
-			tracker.push(metric.Score(&Location{values[:offset], surpluses[:offset]}))
+			tracker.Push(metric.Score(&Location{values[:offset], surpluses[:offset]}))
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 
-		if metric.Done(tracker.active) {
+		if metric.Done(tracker.Active) {
 			break
 		}
 	}
