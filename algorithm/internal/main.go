@@ -1,3 +1,5 @@
+// Package internal contains types and functions shared by the interpolation
+// algorithms.
 package internal
 
 // Basis is a functional basis.
