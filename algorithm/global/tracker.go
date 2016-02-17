@@ -28,7 +28,7 @@ func newTracker(ni uint, config *Config) *tracker {
 	}
 }
 
-func (self *tracker) Pull() []uint64 {
+func (self *tracker) pull() []uint64 {
 	if !self.initialized {
 		self.initialized = true
 		return self.Forward(^uint(0))
@@ -51,6 +51,6 @@ func (self *tracker) Pull() []uint64 {
 	return indices
 }
 
-func (self *tracker) Push(score float64) {
+func (self *tracker) push(score float64) {
 	self.scores = append(self.scores, score)
 }

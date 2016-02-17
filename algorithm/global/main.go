@@ -57,7 +57,7 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 
 	progress := &Progress{}
 	for {
-		lindices := tracker.Pull()
+		lindices := tracker.pull()
 
 		progress.Active = uint(len(tracker.Active))
 		progress.Passive = uint(len(tracker.Indices))/ni - progress.Active
@@ -89,7 +89,7 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 
 		for _, count := range counts {
 			offset := count * no
-			tracker.Push(metric.Score(&Location{values[:offset], surpluses[:offset]}))
+			tracker.push(metric.Score(&Location{values[:offset], surpluses[:offset]}))
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 
