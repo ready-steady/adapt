@@ -20,7 +20,6 @@ type fixture struct {
 
 	config func() *Config
 	target func() Target
-	metric func() Metric
 
 	compute func([]float64, []float64)
 
@@ -42,20 +41,7 @@ func (self *fixture) initialize() {
 	}
 }
 
-type metric struct {
-	tolerance float64
-}
-
-func (self *metric) Score(location *Location) float64 {
-	for _, ε := range location.Surplus {
-		if math.Abs(ε) > self.tolerance {
-			return 1.0
-		}
-	}
-	return 0.0
-}
-
-func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target, Metric) {
+func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target) {
 	const (
 		tolerance = 1e-4
 	)
@@ -73,34 +59,24 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target,
 
 	var target Target
 	if fixture.target == nil {
-		target = newTarget(fixture.surrogate.Inputs, fixture.surrogate.Outputs, fixture.compute)
+		target = newTarget(fixture.surrogate.Inputs, fixture.surrogate.Outputs,
+			tolerance, fixture.compute)
 	} else {
 		target = fixture.target()
 	}
 
-	ni, no := target.Dimensions()
-
-	var metric Metric
-	if fixture.metric == nil {
-		metric = newMetric(no, tolerance)
-	} else {
-		metric = fixture.metric()
-	}
+	ni, _ := target.Dimensions()
 
 	switch fixture.rule {
 	case "open":
-		return New(equidistant.NewOpen(ni), polynomial.NewOpen(ni, 1), config), target, metric
+		return New(equidistant.NewOpen(ni), polynomial.NewOpen(ni, 1), config), target
 	default:
-		return New(equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config), target, metric
+		return New(equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config), target
 	}
 }
 
-func newTarget(ni, no uint, compute func([]float64, []float64)) Target {
-	return NewTarget(ni, no, compute)
-}
-
-func newMetric(no uint, tolerance float64) Metric {
-	return &metric{tolerance}
+func newTarget(ni, no uint, tolerance float64, compute func([]float64, []float64)) Target {
+	return NewTarget(ni, no, tolerance, compute)
 }
 
 var fixtureStep = fixture{
@@ -363,7 +339,7 @@ var fixtureHat = fixture{
 
 var fixtureCube = fixture{
 	target: func() Target {
-		return newTarget(2, 1, func(x, y []float64) {
+		return newTarget(2, 1, 1e-2, func(x, y []float64) {
 			x0, x1 := 2*x[0]-1, 2*x[1]-1
 			x02, x12 := x0*x0, x1*x1
 			x03, x13 := x02*x0, x12*x1
@@ -373,10 +349,6 @@ var fixtureCube = fixture{
 				y[0] += 1
 			}
 		})
-	},
-
-	metric: func() Metric {
-		return newMetric(1, 1e-2)
 	},
 
 	surrogate: &Surrogate{
@@ -740,7 +712,6 @@ const kraichnanOrszagInputs = 3
 const kraichnanOrszagOutputs = kraichnanOrszagLargeSteps * kraichnanOrszagInputs * 2
 
 type kraichnanOrszagTarget struct{}
-type kraichnanOrszagMetric struct{}
 
 func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
 	return kraichnanOrszagInputs, kraichnanOrszagOutputs
@@ -780,7 +751,7 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 
 func (_ *kraichnanOrszagTarget) Monitor(*Progress) {}
 
-func (self *kraichnanOrszagMetric) Score(location *Location) float64 {
+func (self *kraichnanOrszagTarget) Score(location *Location) float64 {
 	const (
 		tolerance = 1e-2
 	)
@@ -809,10 +780,6 @@ var fixtureKraichnanOrszag = fixture{
 
 	target: func() Target {
 		return &kraichnanOrszagTarget{}
-	},
-
-	metric: func() Metric {
-		return &kraichnanOrszagMetric{}
 	},
 
 	surrogate: &Surrogate{
@@ -2048,13 +2015,9 @@ var fixtureParabola = fixture{
 	},
 
 	target: func() Target {
-		return newTarget(1, 1, func(x, y []float64) {
+		return newTarget(1, 1, 1e-6, func(x, y []float64) {
 			y[0] = (x[0] - 0.5) * (x[0] - 0.5)
 		})
-	},
-
-	metric: func() Metric {
-		return newMetric(1, 1e-6)
 	},
 
 	points: []float64{0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00},
