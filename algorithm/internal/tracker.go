@@ -8,11 +8,11 @@ var (
 	infinity = math.Inf(1.0)
 )
 
-// Tracker is a structure for keeping track of active level indices.
+// Tracker is a book-keeper of level indices.
 type Tracker struct {
-	// All the level indices considered so far.
+	// All level indices considered so far.
 	Indices []uint64
-	// The positions of the active level indices.
+	// The positions of active level indices.
 	Active Set
 
 	ni   uint
@@ -31,7 +31,7 @@ type Set map[uint]bool
 
 type reference map[uint]uint
 
-// NewTracker returns a tracker of active level indices.
+// NewTracker creates a book-keeper of level indices.
 func NewTracker(ni, lmax, imax uint) *Tracker {
 	return &Tracker{
 		Indices: make([]uint64, 1*ni),
@@ -47,8 +47,9 @@ func NewTracker(ni, lmax, imax uint) *Tracker {
 	}
 }
 
-// Pull fetches the next level index.
-func (self *Tracker) Pull(k uint) (indices []uint64) {
+// Forward deactivates a level index and then identifies, activates, and returns
+// admissible level indices from its forward neighborhood.
+func (self *Tracker) Forward(k uint) (indices []uint64) {
 	if !self.initialized {
 		self.initialized = true
 		indices = self.Indices
@@ -57,9 +58,10 @@ func (self *Tracker) Pull(k uint) (indices []uint64) {
 
 	ni, nn := self.ni, self.nn
 	active, forward, backward := self.Active, self.forward, self.backward
-	index := self.Indices[k*ni : (k+1)*ni]
 
 	delete(active, k)
+
+	index := self.Indices[k*ni : (k+1)*ni]
 
 outer:
 	for i := uint(0); i < ni && nn < self.imax; i++ {

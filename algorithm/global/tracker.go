@@ -31,7 +31,7 @@ func newTracker(ni uint, config *Config) *tracker {
 func (self *tracker) Pull() []uint64 {
 	if !self.initialized {
 		self.initialized = true
-		return self.Tracker.Pull(^uint(0))
+		return self.Forward(^uint(0))
 	}
 
 	min, k := minUint64Set(self.norms, self.Active)
@@ -40,7 +40,7 @@ func (self *tracker) Pull() []uint64 {
 		_, k = maxFloat64Set(self.scores, self.Active)
 	}
 
-	indices := self.Tracker.Pull(k)
+	indices := self.Forward(k)
 
 	nn := uint(len(indices)) / self.ni
 	norm := self.norms[k] + 1
