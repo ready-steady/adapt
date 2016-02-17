@@ -36,15 +36,6 @@ type Interpolator struct {
 	config Config
 }
 
-// Progress contains information about the interpolation process.
-type Progress struct {
-	Level    uint      // Reached level
-	Active   uint      // Number of active nodes
-	Passive  uint      // Number of passive nodes
-	Refined  uint      // Number of refined nodes
-	Integral []float64 // Integral over the whole domain
-}
-
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	if config.Workers == 0 {

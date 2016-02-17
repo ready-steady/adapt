@@ -34,6 +34,14 @@ type Location struct {
 	Surpluses []float64 // Hierarchical surpluses
 }
 
+// Progress contains information about the interpolation process.
+type Progress struct {
+	Level       uint // Reached level
+	Active      uint // Number of active level indices
+	Passive     uint // Number of passive level indices
+	Evaluations uint // Number of function evaluations
+}
+
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
 	Inputs  uint // > 0

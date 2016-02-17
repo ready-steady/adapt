@@ -28,14 +28,6 @@ type Interpolator struct {
 	config Config
 }
 
-// Progress contains information about the interpolation process.
-type Progress struct {
-	Level       uint // Reached level
-	Active      uint // Number of active level indices
-	Passive     uint // Number of passive level indices
-	Evaluations uint // Number of function evaluations
-}
-
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
