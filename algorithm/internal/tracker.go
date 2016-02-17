@@ -1,13 +1,5 @@
 package internal
 
-import (
-	"math"
-)
-
-var (
-	infinity = math.Inf(1.0)
-)
-
 // Tracker is a book-keeper of level indices.
 type Tracker struct {
 	// All level indices considered so far.

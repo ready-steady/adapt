@@ -1,7 +1,12 @@
 package internal
 
 import (
+	"math"
 	"sync"
+)
+
+var (
+	infinity = math.Inf(1.0)
 )
 
 // Approximate evaluates an interpolant at multiple points using multiple
