@@ -48,7 +48,6 @@ func BenchmarkComputeMany(b *testing.B) {
 		surrogate: &Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
-			Level:   9,
 		},
 	})
 
@@ -114,7 +113,6 @@ func BenchmarkEvaluateMany(b *testing.B) {
 		surrogate: &Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
-			Level:   9,
 		},
 	})
 	surrogate := interpolator.Compute(target)

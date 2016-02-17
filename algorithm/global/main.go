@@ -28,6 +28,9 @@ type Interpolator struct {
 	config Config
 }
 
+// Surrogate is an interpolant for a function.
+type Surrogate internal.Surrogate
+
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -44,7 +47,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	surrogate := newSurrogate(ni, no)
+	surrogate := internal.NewSurrogate(ni, no)
 	tracker := newTracker(ni, config)
 
 	progress := &Progress{}
@@ -74,7 +77,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
-		surrogate.push(indices, surpluses)
+		surrogate.Push(indices, surpluses)
 
 		for _, count := range counts {
 			offset := count * no
@@ -87,11 +90,16 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		}
 	}
 
-	return surrogate
+	return (*Surrogate)(surrogate)
 }
 
 // Evaluate computes the values of an interpolant at a set of points.
 func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
+}
+
+// String returns a summary.
+func (self *Surrogate) String() string {
+	return (*internal.Surrogate)(self).String()
 }

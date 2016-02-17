@@ -36,6 +36,9 @@ type Interpolator struct {
 	config Config
 }
 
+// Surrogate is an interpolant for a function.
+type Surrogate internal.Surrogate
+
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	if config.Workers == 0 {
@@ -55,7 +58,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	surrogate := newSurrogate(ni, no)
+	surrogate := internal.NewSurrogate(ni, no)
 	hash := newHash(ni)
 
 	indices := make([]uint64, 1*ni)
@@ -69,7 +72,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
-		surrogate.push(indices, surpluses)
+		surrogate.Push(indices, surpluses)
 		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
 		scores := assess(self.basis, target, indices, values, surpluses, ni, no)
@@ -89,8 +92,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		progress.Level++
 	}
 
-	surrogate.Level = progress.Level
-	return surrogate
+	return (*Surrogate)(surrogate)
 }
 
 // Evaluate computes the values of an interpolant at a set of points.
@@ -105,4 +107,9 @@ func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
 	integral := make([]float64, no)
 	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, integral)
 	return integral
+}
+
+// String returns a summary.
+func (self *Surrogate) String() string {
+	return (*internal.Surrogate)(self).String()
 }

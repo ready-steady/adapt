@@ -39,7 +39,6 @@ func TestCube(t *testing.T) {
 	interpolator, target := prepare(fixture)
 
 	surrogate := interpolator.Compute(target)
-	assert.Equal(surrogate.Level, fixture.surrogate.Level, t)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
@@ -68,7 +67,6 @@ func TestKraichnanOrszag(t *testing.T) {
 	interpolator, target := prepare(fixture)
 
 	surrogate := interpolator.Compute(target)
-	assert.Equal(surrogate.Level, fixture.surrogate.Level, t)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)

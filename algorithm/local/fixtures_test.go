@@ -97,12 +97,9 @@ var fixtureStep = fixture{
 	surrogate: &Surrogate{
 		Inputs:  1,
 		Outputs: 1,
-
-		Level: 4,
-		Nodes: 8,
+		Nodes:   8,
 
 		Surpluses: []float64{1.0, 0.0, -1.0, -0.5, -0.5, 0.0, -0.5, 0.0},
-		Active:    []uint{1, 2, 1, 2, 2},
 	},
 
 	levels: []uint64{0, 1, 1, 2, 3, 3, 4, 4},
@@ -133,9 +130,7 @@ var fixtureHat = fixture{
 	surrogate: &Surrogate{
 		Inputs:  1,
 		Outputs: 1,
-
-		Level: 9,
-		Nodes: 305,
+		Nodes:   305,
 
 		Surpluses: []float64{
 			+7.50000000000000e-01, -7.50000000000000e-01, -7.50000000000000e-01,
@@ -241,7 +236,6 @@ var fixtureHat = fixture{
 			-4.76837158203125e-05, -4.76837158203125e-05, -4.76837158203125e-05,
 			-4.76837158203125e-05, -4.76837158203125e-05,
 		},
-		Active: []uint{1, 2, 2, 4, 8, 12, 20, 40, 72, 144},
 	},
 
 	levels: []uint64{
@@ -354,9 +348,7 @@ var fixtureCube = fixture{
 	surrogate: &Surrogate{
 		Inputs:  2,
 		Outputs: 1,
-
-		Level: 9,
-		Nodes: 437,
+		Nodes:   437,
 	},
 
 	points: []float64{
@@ -621,9 +613,7 @@ var fixtureBox = fixture{
 	surrogate: &Surrogate{
 		Inputs:  2,
 		Outputs: 3,
-
-		Level: 3,
-		Nodes: 20,
+		Nodes:   20,
 
 		Surpluses: []float64{
 			1.0, 0.0, 0.0, -1.0, 0.0, 0.0, +0.0, 0.0, 0.0, -1.0, 0.0, 0.0, +0.0, 0.0, 0.0,
@@ -631,7 +621,6 @@ var fixtureBox = fixture{
 			0.5, 0.0, 0.0, +0.0, 0.0, 0.0, -0.5, 0.0, 0.0, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0,
 			0.5, 0.0, 0.5, +0.5, 0.5, 0.0, -0.5, 0.5, 0.0, +0.5, 0.0, 0.0, +0.0, 0.0, 0.0,
 		},
-		Active: []uint{1, 4, 5, 10},
 	},
 
 	levels: []uint64{
@@ -785,9 +774,7 @@ var fixtureKraichnanOrszag = fixture{
 	surrogate: &Surrogate{
 		Inputs:  kraichnanOrszagInputs,
 		Outputs: kraichnanOrszagOutputs,
-
-		Level: 8,
-		Nodes: 3381,
+		Nodes:   3381,
 	},
 
 	points: []float64{
