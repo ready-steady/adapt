@@ -28,6 +28,9 @@ type Interpolator struct {
 	config Config
 }
 
+// Set is a subset of ordered elements.
+type Set internal.Set
+
 // Surrogate is an interpolant for a function.
 type Surrogate internal.Surrogate
 
@@ -85,7 +88,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 
-		if target.Done(tracker.Active) {
+		if target.Done(Set(tracker.Active)) {
 			break
 		}
 	}

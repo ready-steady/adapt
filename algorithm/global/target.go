@@ -2,8 +2,6 @@ package global
 
 import (
 	"math"
-
-	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 var (
@@ -22,7 +20,7 @@ type Target interface {
 	Score(*Location) float64
 
 	// Done checks if the accuracy requirements have been satiated.
-	Done(internal.Set) bool
+	Done(Set) bool
 
 	// Monitor gets called at the beginning of each iteration.
 	Monitor(*Progress)
@@ -52,7 +50,7 @@ type BasicTarget struct {
 
 	ComputeHandler func([]float64, []float64) // != nil
 	ScoreHandler   func(*Location) float64
-	DoneHandler    func(internal.Set) bool
+	DoneHandler    func(Set) bool
 	MonitorHandler func(*Progress)
 
 	errors []float64
@@ -94,7 +92,7 @@ func (self *BasicTarget) Score(location *Location) float64 {
 	}
 }
 
-func (self *BasicTarget) Done(active internal.Set) bool {
+func (self *BasicTarget) Done(active Set) bool {
 	if self.DoneHandler != nil {
 		return self.DoneHandler(active)
 	} else {
@@ -134,7 +132,7 @@ func (self *BasicTarget) defaultScore(location *Location) float64 {
 	return score / float64(nn)
 }
 
-func (self *BasicTarget) defaultDone(active internal.Set) bool {
+func (self *BasicTarget) defaultDone(active Set) bool {
 	no, errors := self.Outputs, self.errors
 	δ := threshold(self.lower, self.upper, self.Absolute, self.Relative)
 	for i := range active {
