@@ -8,12 +8,6 @@ var (
 	infinity = math.Inf(1.0)
 )
 
-// Reference is a relation on ordered elements.
-type Reference map[uint]uint
-
-// Set is a subset of ordered elements.
-type Set map[uint]bool
-
 // Tracker is a structure for keeping track of active level indices.
 type Tracker struct {
 	// All the level indices considered so far.
@@ -26,11 +20,16 @@ type Tracker struct {
 	lmax uint
 	imax uint
 
-	forward  Reference
-	backward Reference
+	forward  reference
+	backward reference
 
 	initialized bool
 }
+
+// Set is a subset of ordered elements.
+type Set map[uint]bool
+
+type reference map[uint]uint
 
 // NewTracker returns a tracker of active level indices.
 func NewTracker(ni, lmax, imax uint) *Tracker {
@@ -43,8 +42,8 @@ func NewTracker(ni, lmax, imax uint) *Tracker {
 		lmax: lmax,
 		imax: imax,
 
-		forward:  make(Reference),
-		backward: make(Reference),
+		forward:  make(reference),
+		backward: make(reference),
 	}
 }
 
@@ -68,7 +67,7 @@ outer:
 			continue
 		}
 
-		newBackward := make(Reference)
+		newBackward := make(reference)
 		for j := uint(0); j < ni; j++ {
 			if i == j || index[j] == 0 {
 				continue
