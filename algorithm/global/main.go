@@ -46,7 +46,7 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
+func (self *Interpolator) Compute(target Target) *Surrogate {
 	config := &self.config
 
 	ni, no := target.Dimensions()
@@ -86,11 +86,11 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 
 		for _, count := range counts {
 			offset := count * no
-			tracker.push(metric.Score(&Location{values[:offset], surpluses[:offset]}))
+			tracker.push(target.Score(&Location{values[:offset], surpluses[:offset]}))
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 
-		if metric.Done(tracker.Active) {
+		if target.Done(tracker.Active) {
 			break
 		}
 	}
