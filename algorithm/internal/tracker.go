@@ -99,3 +99,18 @@ outer:
 
 	return
 }
+
+// CountActive returns the number of active level indices.
+func (self *Tracker) CountActive() uint {
+	return uint(len(self.Active))
+}
+
+// CountPassive returns the number of passive level indices.
+func (self *Tracker) CountPassive() uint {
+	return self.CountTotal() - self.CountActive()
+}
+
+// CountTotal returns the total number of level indices.
+func (self *Tracker) CountTotal() uint {
+	return uint(len(self.Indices)) / self.ni
+}

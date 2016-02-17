@@ -31,8 +31,8 @@ type Interpolator struct {
 // Progress contains information about the interpolation process.
 type Progress struct {
 	Level       uint // Reached level
-	Active      uint // Number of active indices
-	Passive     uint // Number of passive indices
+	Active      uint // Number of active level indices
+	Passive     uint // Number of passive level indices
 	Evaluations uint // Number of function evaluations
 }
 
@@ -59,11 +59,8 @@ func (self *Interpolator) Compute(target Target, metric Metric) *Surrogate {
 	for {
 		lindices := tracker.pull()
 
-		progress.Active = uint(len(tracker.Active))
-		progress.Passive = uint(len(tracker.Indices))/ni - progress.Active
-		if level := uint(maxUint64(lindices)); level > progress.Level {
-			progress.Level = level
-		}
+		progress.Active, progress.Passive = tracker.CountActive(), tracker.CountPassive()
+		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
 
 		target.Monitor(progress)
 

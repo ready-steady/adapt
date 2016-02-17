@@ -77,6 +77,50 @@ func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	return values
 }
 
+// LocateMaxFloat64s returns the position of the maximal element among a subset
+// of a vector’s elements.
+func LocateMaxFloat64s(data []float64, set Set) uint {
+	value, position := -infinity, ^uint(0)
+	for i := range set {
+		if data[i] > value {
+			value, position = data[i], i
+		}
+	}
+	return position
+}
+
+// LocateMinUint64s returns the position of the maximal element among a subset
+// of a vector’s elements.
+func LocateMinUint64s(data []uint64, set Set) uint {
+	value, position := ^uint64(0), ^uint(0)
+	for i := range set {
+		if data[i] < value {
+			value, position = data[i], i
+		}
+	}
+	return position
+}
+
+// MaxUint returns the maximal element among two.
+func MaxUint(one uint, other uint) uint {
+	if one > other {
+		return one
+	} else {
+		return other
+	}
+}
+
+// MaxUint64s returns the maximal element of a vector.
+func MaxUint64s(data []uint64) uint64 {
+	result := uint64(0)
+	for _, value := range data {
+		if value > result {
+			result = value
+		}
+	}
+	return result
+}
+
 // Subtract returns the difference between two vectors.
 func Subtract(minuend, subtrahend []float64) []float64 {
 	difference := make([]float64, len(minuend))

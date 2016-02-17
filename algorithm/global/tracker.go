@@ -34,10 +34,10 @@ func (self *tracker) pull() []uint64 {
 		return self.Forward(^uint(0))
 	}
 
-	min, k := minUint64Set(self.norms, self.Active)
-	max := maxUint64(self.norms)
+	k := internal.LocateMinUint64s(self.norms, self.Active)
+	min, max := self.norms[k], internal.MaxUint64s(self.norms)
 	if float64(min) > (1.0-self.rate)*float64(max) {
-		_, k = maxFloat64Set(self.scores, self.Active)
+		k = internal.LocateMaxFloat64s(self.scores, self.Active)
 	}
 
 	indices := self.Forward(k)
