@@ -57,11 +57,6 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	for {
 		lindices := tracker.pull()
 
-		progress.Active, progress.Passive = tracker.CountActive(), tracker.CountPassive()
-		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
-
-		target.Monitor(progress)
-
 		nn := uint(len(lindices)) / ni
 		indices, counts := []uint64(nil), make([]uint, nn)
 		for i := uint(0); i < nn; i++ {
@@ -70,8 +65,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			counts[i] = uint(len(newIndices)) / ni
 		}
 
-		progress.Evaluations += uint(len(indices)) / ni
-		if progress.Evaluations > config.MaxEvaluations {
+		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
+		progress.Active, progress.Passive = tracker.CountActive(), tracker.CountPassive()
+		progress.Performed += progress.Requested
+		progress.Requested = uint(len(indices)) / ni
+
+		if !target.Before(progress) {
 			break
 		}
 
@@ -88,7 +87,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 
-		if target.Done(Set(tracker.Active)) {
+		if !target.After(Set(tracker.Active)) {
 			break
 		}
 	}

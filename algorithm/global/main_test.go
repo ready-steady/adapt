@@ -11,8 +11,9 @@ func TestBranin(t *testing.T) {
 	interpolator, target := prepare(fixture)
 
 	progresses := make([]Progress, 0)
-	target.MonitorHandler = func(progress *Progress) {
+	target.BeforeHandler = func(progress *Progress) bool {
 		progresses = append(progresses, *progress)
+		return true
 	}
 
 	surrogate := interpolator.Compute(target)

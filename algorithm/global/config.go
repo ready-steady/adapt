@@ -12,9 +12,6 @@ type Config struct {
 	// The maximum number of indices.
 	MaxIndices uint
 
-	// The maximum number of evaluations.
-	MaxEvaluations uint
-
 	// The degree of adaptivity.
 	AdaptivityRate float64
 
@@ -26,9 +23,8 @@ type Config struct {
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		MaxLevel:       9,
-		MaxIndices:     ^uint(0),
-		MaxEvaluations: ^uint(0),
+		MaxLevel:   9,
+		MaxIndices: ^uint(0),
 
 		AdaptivityRate: 1.0,
 
