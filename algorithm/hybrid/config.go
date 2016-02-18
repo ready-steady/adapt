@@ -7,7 +7,7 @@ import (
 // Config represents a configuration of the algorithm.
 type Config struct {
 	// The maximum level of interpolation.
-	MaxLevel uint8
+	MaxLevel uint
 
 	// The maximum number of indices.
 	MaxIndices uint
