@@ -22,33 +22,30 @@ func newTracker(ni uint, config *Config) *tracker {
 
 		ni:   ni,
 		rate: config.AdaptivityRate,
-
-		norms:  make([]uint64, 1),
-		scores: make([]float64, 0),
 	}
 }
 
-func (self *tracker) pull() []uint64 {
+func (self *tracker) pull() (indices []uint64) {
+	var norm uint64
+
 	if !self.initialized {
 		self.initialized = true
-		return self.Forward(^uint(0))
+		norm, indices = 0, self.Forward(^uint(0))
+	} else {
+		k := internal.LocateMinUint64s(self.norms, self.Active)
+		min, max := self.norms[k], internal.MaxUint64s(self.norms)
+		if float64(min) > (1.0-self.rate)*float64(max) {
+			k = internal.LocateMaxFloat64s(self.scores, self.Active)
+		}
+		norm, indices = self.norms[k]+1, self.Forward(k)
 	}
-
-	k := internal.LocateMinUint64s(self.norms, self.Active)
-	min, max := self.norms[k], internal.MaxUint64s(self.norms)
-	if float64(min) > (1.0-self.rate)*float64(max) {
-		k = internal.LocateMaxFloat64s(self.scores, self.Active)
-	}
-
-	indices := self.Forward(k)
 
 	nn := uint(len(indices)) / self.ni
-	norm := self.norms[k] + 1
 	for i := uint(0); i < nn; i++ {
 		self.norms = append(self.norms, norm)
 	}
 
-	return indices
+	return
 }
 
 func (self *tracker) push(score float64) {
