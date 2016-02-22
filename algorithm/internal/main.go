@@ -4,20 +4,13 @@ package internal
 
 import (
 	"sync"
+
+	"github.com/ready-steady/adapt/algorithm/external"
 )
-
-// Basis is a functional basis.
-type Basis interface {
-	// Compute evaluates the value of a basis function.
-	Compute([]uint64, []float64) float64
-
-	// Integrate computes the integral of a basis function.
-	Integrate([]uint64) float64
-}
 
 // Approximate evaluates an interpolant at multiple points using multiple
 // goroutines.
-func Approximate(basis Basis, indices []uint64, surpluses, points []float64,
+func Approximate(basis external.Basis, indices []uint64, surpluses, points []float64,
 	ni, no, nw uint) []float64 {
 
 	nn := uint(len(indices)) / ni
@@ -60,7 +53,7 @@ func Approximate(basis Basis, indices []uint64, surpluses, points []float64,
 }
 
 // Cumulate accumulates weighted integrals of basis functions.
-func Cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no uint,
+func Cumulate(basis external.Basis, indices []uint64, surpluses []float64, ni, no uint,
 	integral []float64) {
 
 	nn := uint(len(indices)) / ni
