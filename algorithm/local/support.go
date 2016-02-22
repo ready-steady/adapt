@@ -1,10 +1,6 @@
 package local
 
-import (
-	"github.com/ready-steady/adapt/algorithm/external"
-)
-
-func assess(basis external.Basis, target Target, indices []uint64,
+func assess(basis Basis, target Target, indices []uint64,
 	values, surpluses []float64, ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
@@ -52,7 +48,7 @@ func levelize(indices []uint64, ni uint) []uint {
 	return levels
 }
 
-func measure(basis external.Basis, indices []uint64, ni uint) []float64 {
+func measure(basis Basis, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni
 	volumes := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {

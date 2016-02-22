@@ -4,13 +4,16 @@ package internal
 
 import (
 	"sync"
-
-	"github.com/ready-steady/adapt/algorithm/external"
 )
+
+// Computer computes the value of a basis function.
+type Computer interface {
+	Compute([]uint64, []float64) float64
+}
 
 // Approximate evaluates an interpolant at multiple points using multiple
 // goroutines.
-func Approximate(basis external.Basis, indices []uint64, surpluses, points []float64,
+func Approximate(computer Computer, indices []uint64, surpluses, points []float64,
 	ni, no, nw uint) []float64 {
 
 	nn := uint(len(indices)) / ni
@@ -28,7 +31,7 @@ func Approximate(basis external.Basis, indices []uint64, surpluses, points []flo
 				value := values[j*no : (j+1)*no]
 
 				for k := uint(0); k < nn; k++ {
-					weight := basis.Compute(indices[k*ni:(k+1)*ni], point)
+					weight := computer.Compute(indices[k*ni:(k+1)*ni], point)
 					if weight == 0.0 {
 						continue
 					}
