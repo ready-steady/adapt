@@ -11,6 +11,7 @@ type Surrogate struct {
 	Nodes     uint      // Number of nodes
 	Indices   []uint64  // Indices of the nodes
 	Surpluses []float64 // Hierarchical surpluses
+	Integral  []float64 // Integral over the whole domain
 }
 
 // NewSurrogate create a empty surrogate.
@@ -20,6 +21,7 @@ func NewSurrogate(ni, no uint) *Surrogate {
 		Outputs:   no,
 		Indices:   make([]uint64, 0),
 		Surpluses: make([]float64, 0),
+		Integral:  make([]float64, no),
 	}
 }
 

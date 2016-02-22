@@ -52,7 +52,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 	indices := make([]uint64, 1*ni)
 
-	progress := &Progress{Active: 1, Integral: make([]float64, no)}
+	progress := &Progress{Active: 1}
 	for {
 		if !target.Before(progress) {
 			break
@@ -64,7 +64,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.Push(indices, surpluses)
-		internal.Cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
+		internal.Cumulate(self.basis, indices, surpluses, ni, no, surrogate.Integral)
 
 		scores := assess(self.basis, target, indices, values, surpluses, ni, no)
 		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
@@ -90,12 +90,4 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
-}
-
-// Integrate computes the integral of an interpolant over the whole domain.
-func (self *Interpolator) Integrate(surrogate *external.Surrogate) []float64 {
-	ni, no := surrogate.Inputs, surrogate.Outputs
-	integral := make([]float64, no)
-	internal.Cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, integral)
-	return integral
 }

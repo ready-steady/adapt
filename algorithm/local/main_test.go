@@ -15,9 +15,6 @@ func TestStep(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.Equal(values, fixture.values, t)
-
-	integral := interpolator.Integrate(surrogate)
-	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestHat(t *testing.T) {
@@ -29,9 +26,6 @@ func TestHat(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 1e-15, t)
-
-	integral := interpolator.Integrate(surrogate)
-	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestCube(t *testing.T) {
@@ -40,12 +34,10 @@ func TestCube(t *testing.T) {
 
 	surrogate := interpolator.Compute(target)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
+	assert.Equal(surrogate.Integral, fixture.surrogate.Integral, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 2e-15, t)
-
-	integral := interpolator.Integrate(surrogate)
-	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestBox(t *testing.T) {
@@ -57,9 +49,6 @@ func TestBox(t *testing.T) {
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 1e-15, t)
-
-	integral := interpolator.Integrate(surrogate)
-	assert.Equal(integral, fixture.integral, t)
 }
 
 func TestKraichnanOrszag(t *testing.T) {
@@ -68,12 +57,10 @@ func TestKraichnanOrszag(t *testing.T) {
 
 	surrogate := interpolator.Compute(target)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
+	assert.EqualWithin(surrogate.Integral, fixture.surrogate.Integral, 2e-14, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 6e-14, t)
-
-	integral := interpolator.Integrate(surrogate)
-	assert.EqualWithin(integral, fixture.integral, 2e-14, t)
 }
 
 func TestParabola(t *testing.T) {
@@ -81,10 +68,9 @@ func TestParabola(t *testing.T) {
 	interpolator, target := prepare(fixture)
 
 	surrogate := interpolator.Compute(target)
+	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
+	assert.EqualWithin(surrogate.Integral, fixture.surrogate.Integral, 1e-6, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 1e-6, t)
-
-	integral := interpolator.Integrate(surrogate)
-	assert.EqualWithin(integral, fixture.integral, 1e-6, t)
 }
