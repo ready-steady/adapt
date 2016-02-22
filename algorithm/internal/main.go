@@ -11,6 +11,11 @@ type Computer interface {
 	Compute([]uint64, []float64) float64
 }
 
+// Integrator computes the integral of a basis function.
+type Integrator interface {
+	Integrate([]uint64) float64
+}
+
 // Approximate evaluates an interpolant at multiple points using multiple
 // goroutines.
 func Approximate(computer Computer, indices []uint64, surpluses, points []float64,
@@ -53,4 +58,14 @@ func Approximate(computer Computer, indices []uint64, surpluses, points []float6
 	close(jobs)
 
 	return values
+}
+
+// Measure computes the integrals of a set of basis functions.
+func Measure(integrator Integrator, indices []uint64, ni uint) []float64 {
+	nn := uint(len(indices)) / ni
+	volumes := make([]float64, nn)
+	for i := uint(0); i < nn; i++ {
+		volumes[i] = integrator.Integrate(indices[i*ni : (i+1)*ni])
+	}
+	return volumes
 }

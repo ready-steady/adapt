@@ -4,11 +4,6 @@ import (
 	"fmt"
 )
 
-// Integrator computes the integral of a basis function.
-type Integrator interface {
-	Integrate([]uint64) float64
-}
-
 // Surrogate is an interpolant for a function.
 type Surrogate struct {
 	Inputs    uint      // Number of inputs
