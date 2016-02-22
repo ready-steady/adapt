@@ -12,8 +12,6 @@ type tracker struct {
 
 	norms  []uint64
 	scores []float64
-
-	initialized bool
 }
 
 func newTracker(ni uint, config *Config) *tracker {
@@ -28,8 +26,7 @@ func newTracker(ni uint, config *Config) *tracker {
 func (self *tracker) pull() (indices []uint64) {
 	var norm uint64
 
-	if !self.initialized {
-		self.initialized = true
+	if self.norms == nil {
 		norm, indices = 0, self.Forward(^uint(0))
 	} else {
 		k := internal.LocateMinUint64s(self.norms, self.Active)

@@ -18,8 +18,6 @@ type Tracker struct {
 
 	forward  reference
 	backward reference
-
-	initialized bool
 }
 
 type reference map[uint]uint
@@ -27,11 +25,7 @@ type reference map[uint]uint
 // NewTracker creates a book-keeper of level indices.
 func NewTracker(ni, lmax, imax uint) *Tracker {
 	return &Tracker{
-		Indices: make([]uint64, 1*ni),
-		Active:  external.Set{0: true},
-
 		ni:   ni,
-		nn:   1,
 		lmax: lmax,
 		imax: imax,
 
@@ -43,10 +37,11 @@ func NewTracker(ni, lmax, imax uint) *Tracker {
 // Forward deactivates a level index and then identifies, activates, and returns
 // admissible level indices from its forward neighborhood.
 func (self *Tracker) Forward(k uint) (indices []uint64) {
-	if !self.initialized {
-		self.initialized = true
-		indices = self.Indices
-		return
+	if self.Indices == nil {
+		self.Indices = make([]uint64, 1*self.ni)
+		self.Active = external.Set{0: true}
+		self.nn = 1
+		return self.Indices
 	}
 
 	ni, nn := self.ni, self.nn
