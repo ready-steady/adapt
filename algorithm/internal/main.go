@@ -51,16 +51,3 @@ func Approximate(basis external.Basis, indices []uint64, surpluses, points []flo
 
 	return values
 }
-
-// Cumulate accumulates weighted integrals of basis functions.
-func Cumulate(basis external.Basis, indices []uint64, surpluses []float64, ni, no uint,
-	integral []float64) {
-
-	nn := uint(len(indices)) / ni
-	for i := uint(0); i < nn; i++ {
-		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
-		for j := uint(0); j < no; j++ {
-			integral[j] += surpluses[i*no+j] * volume
-		}
-	}
-}

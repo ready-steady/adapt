@@ -26,11 +26,12 @@ func NewSurrogate(ni, no uint) *Surrogate {
 }
 
 // Push extends the surrogate with indices and surpluses.
-func (self *Surrogate) Push(indices []uint64, surpluses []float64) {
+func (self *Surrogate) Push(basis Basis, indices []uint64, surpluses []float64) {
 	na := uint(len(indices)) / self.Inputs
 	self.Nodes += na
 	self.Indices = append(self.Indices, indices...)
 	self.Surpluses = append(self.Surpluses, surpluses...)
+	cumulate(basis, indices, surpluses, self.Inputs, self.Outputs, self.Integral)
 }
 
 // String returns a summary.
@@ -45,4 +46,16 @@ func (self *Surrogate) String() string {
 		nodes:   self.Nodes,
 	}
 	return fmt.Sprintf("%+v", phantom)
+}
+
+func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no uint,
+	integral []float64) {
+
+	nn := uint(len(indices)) / ni
+	for i := uint(0); i < nn; i++ {
+		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
+		for j := uint(0); j < no; j++ {
+			integral[j] += surpluses[i*no+j] * volume
+		}
+	}
 }

@@ -68,8 +68,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
-		surrogate.Push(indices, surpluses)
-		internal.Cumulate(self.basis, indices, surpluses, ni, no, surrogate.Integral)
+		surrogate.Push(self.basis, indices, surpluses)
 
 		for _, count := range counts {
 			offset := count * no
