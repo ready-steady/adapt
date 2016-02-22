@@ -28,6 +28,12 @@ type Interpolator struct {
 	config Config
 }
 
+// Set is a subset of ordered elements.
+type Set internal.Set
+
+// Surrogate is an interpolant for a function.
+type Surrogate internal.Surrogate
+
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -44,17 +50,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	surrogate := newSurrogate(ni, no)
+	surrogate := internal.NewSurrogate(ni, no)
 	tracker := newTracker(ni, config)
 
 	progress := &Progress{}
 	for {
 		lindices := tracker.pull()
-
-		progress.Active, progress.Passive = tracker.CountActive(), tracker.CountPassive()
-		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
-
-		target.Monitor(progress)
 
 		nn := uint(len(lindices)) / ni
 		indices, counts := []uint64(nil), make([]uint, nn)
@@ -64,8 +65,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			counts[i] = uint(len(newIndices)) / ni
 		}
 
-		progress.Evaluations += uint(len(indices)) / ni
-		if progress.Evaluations > config.MaxEvaluations {
+		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
+		progress.Active, progress.Passive = tracker.CountActive(), tracker.CountPassive()
+		progress.Performed += progress.Requested
+		progress.Requested = uint(len(indices)) / ni
+
+		if !target.Before(progress) {
 			break
 		}
 
@@ -74,7 +79,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
-		surrogate.push(indices, surpluses)
+		surrogate.Push(indices, surpluses)
 
 		for _, count := range counts {
 			offset := count * no
@@ -82,12 +87,12 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 
-		if target.Done(tracker.Active) {
+		if !target.After(Set(tracker.Active)) {
 			break
 		}
 	}
 
-	return surrogate
+	return (*Surrogate)(surrogate)
 }
 
 // Evaluate computes the values of an interpolant at a set of points.
