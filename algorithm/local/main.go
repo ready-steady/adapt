@@ -73,7 +73,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.Push(indices, surpluses)
-		cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
+		internal.Cumulate(self.basis, indices, surpluses, ni, no, progress.Integral)
 
 		scores := assess(self.basis, target, indices, values, surpluses, ni, no)
 		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
@@ -105,6 +105,6 @@ func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float
 func (self *Interpolator) Integrate(surrogate *external.Surrogate) []float64 {
 	ni, no := surrogate.Inputs, surrogate.Outputs
 	integral := make([]float64, no)
-	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, integral)
+	internal.Cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, integral)
 	return integral
 }

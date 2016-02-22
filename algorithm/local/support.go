@@ -15,18 +15,6 @@ func assess(basis Basis, target Target, indices []uint64,
 	return scores
 }
 
-func cumulate(basis Basis, indices []uint64, surpluses []float64, ni, no uint,
-	integral []float64) {
-
-	nn := uint(len(indices)) / ni
-	for i := uint(0); i < nn; i++ {
-		volume := basis.Integrate(indices[i*ni : (i+1)*ni])
-		for j := uint(0); j < no; j++ {
-			integral[j] += surpluses[i*no+j] * volume
-		}
-	}
-}
-
 func filter(indices []uint64, scores []float64, lmin, lmax, ni uint) []uint64 {
 	nn := uint(len(scores))
 	levels := levelize(indices, ni)
