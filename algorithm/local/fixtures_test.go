@@ -762,6 +762,10 @@ func (self *kraichnanOrszagTarget) Score(location *Location) float64 {
 	return 0.0
 }
 
+func (_ *kraichnanOrszagTarget) After(_ *Progress) bool {
+	return true
+}
+
 var fixtureKraichnanOrszag = fixture{
 	config: func() *Config {
 		config := NewConfig()

@@ -87,7 +87,7 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		progress.Passive += progress.Active
 		progress.Active = uint(len(indices)) / ni
 
-		if progress.Active == 0 || progress.Active+progress.Passive > config.MaxEvaluations {
+		if !target.After(progress) || progress.Active == 0 {
 			break
 		}
 

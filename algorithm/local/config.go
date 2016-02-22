@@ -14,11 +14,6 @@ type Config struct {
 	// are never refined.
 	MaxLevel uint
 
-	// The maximum number of target-function evaluations. The limit is not
-	// enforced precisely. The process stops when undertaking the next iteration
-	// would violate the limit.
-	MaxEvaluations uint
-
 	// The number of concurrent workers. The evaluation of the target function
 	// and the surrogate itself is distributed among this many goroutines.
 	Workers uint
@@ -27,9 +22,8 @@ type Config struct {
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		MinLevel:       1,
-		MaxLevel:       9,
-		MaxEvaluations: ^uint(0),
-		Workers:        uint(runtime.GOMAXPROCS(0)),
+		MinLevel: 1,
+		MaxLevel: 9,
+		Workers:  uint(runtime.GOMAXPROCS(0)),
 	}
 }

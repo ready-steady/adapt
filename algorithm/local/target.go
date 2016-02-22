@@ -21,6 +21,10 @@ type Target interface {
 	// Compute, and it is called as many times as Compute. If the score is
 	// positive, the node is refined; otherwise, no refinement is performed.
 	Score(*Location) float64
+
+	// After gets called once per iteration after involving Compute and Score.
+	// If the function returns false, the interpolation process is terminated.
+	After(*Progress) bool
 }
 
 // Location contains information about a spacial location.
@@ -49,6 +53,7 @@ type BasicTarget struct {
 	BeforeHandler  func(*Progress) bool
 	ComputeHandler func([]float64, []float64) // != nil
 	ScoreHandler   func(*Location) float64
+	AfterHandler   func(*Progress) bool
 }
 
 // NewTarget creates a basic target.
@@ -86,6 +91,14 @@ func (self *BasicTarget) Score(location *Location) float64 {
 		return self.ScoreHandler(location)
 	} else {
 		return self.defaultScore(location)
+	}
+}
+
+func (self *BasicTarget) After(progress *Progress) bool {
+	if self.AfterHandler != nil {
+		return self.AfterHandler(progress)
+	} else {
+		return true
 	}
 }
 
