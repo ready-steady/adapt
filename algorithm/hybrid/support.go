@@ -1,4 +1,4 @@
-package global
+package hybrid
 
 func assess(basis Basis, target Target, counts []uint, indices []uint64,
 	values, surpluses []float64, ni, no uint) []float64 {
@@ -23,12 +23,4 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 		volumes[i] = basis.Integrate(indices[i*ni : (i+1)*ni])
 	}
 	return volumes
-}
-
-func repeatFloat64(value float64, times uint) []float64 {
-	data := make([]float64, times)
-	for i := uint(0); i < times; i++ {
-		data[i] = value
-	}
-	return data
 }

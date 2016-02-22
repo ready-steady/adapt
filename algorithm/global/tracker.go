@@ -45,6 +45,6 @@ func (self *tracker) pull() (indices []uint64) {
 	return
 }
 
-func (self *tracker) push(score float64) {
-	self.scores = append(self.scores, score)
+func (self *tracker) push(scores []float64) {
+	self.scores = append(self.scores, scores...)
 }

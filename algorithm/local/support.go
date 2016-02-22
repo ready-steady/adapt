@@ -1,7 +1,7 @@
 package local
 
-func assess(basis Basis, target Target, indices []uint64,
-	values, surpluses []float64, ni, no uint) []float64 {
+func assess(basis Basis, target Target, indices []uint64, values, surpluses []float64,
+	ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
 	scores := measure(basis, indices, ni)

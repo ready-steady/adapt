@@ -68,7 +68,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		progress.Performed += progress.Requested
 		progress.Requested = uint(len(indices)) / ni
 
-		if !target.Before(progress) {
+		if !target.Before(progress) || progress.Active == 0 {
 			break
 		}
 
@@ -78,12 +78,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.Push(self.basis, indices, surpluses)
-
-		for _, count := range counts {
-			offset := count * no
-			tracker.push(target.Score(&Location{values[:offset], surpluses[:offset]}))
-			values, surpluses = values[offset:], surpluses[offset:]
-		}
+		tracker.push(assess(self.basis, target, counts, indices, values, surpluses, ni, no))
 
 		if !target.After(tracker.Active) {
 			break

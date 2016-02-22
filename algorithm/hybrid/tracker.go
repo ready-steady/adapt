@@ -20,6 +20,6 @@ func (self *tracker) pull() []uint64 {
 	return self.Forward(internal.LocateMaxFloat64s(self.scores, self.Active))
 }
 
-func (self *tracker) push(score float64) {
-	self.scores = append(self.scores, score)
+func (self *tracker) push(scores []float64) {
+	self.scores = append(self.scores, scores...)
 }

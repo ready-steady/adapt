@@ -37,6 +37,7 @@ type Target interface {
 type Location struct {
 	Values    []float64 // Target-function values
 	Surpluses []float64 // Hierarchical surpluses
+	Volumes   []float64 // Volumes under the basis functions
 }
 
 // Progress contains information about the interpolation process.
