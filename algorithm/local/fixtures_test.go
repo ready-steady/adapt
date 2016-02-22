@@ -706,6 +706,10 @@ func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
 	return kraichnanOrszagInputs, kraichnanOrszagOutputs
 }
 
+func (_ *kraichnanOrszagTarget) Before(*Progress) bool {
+	return true
+}
+
 func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 	nt, ni, no := kraichnanOrszagStepThinning, kraichnanOrszagInputs, kraichnanOrszagOutputs
 
@@ -737,8 +741,6 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 		ys[ni*2*i+5] = y2 * y2
 	}
 }
-
-func (_ *kraichnanOrszagTarget) Monitor(*Progress) {}
 
 func (self *kraichnanOrszagTarget) Score(location *Location) float64 {
 	const (

@@ -22,7 +22,7 @@ type Target interface {
 	Compute(point, value []float64)
 
 	// Score assigns a score to a location. The function is called after
-	// Compute, and it is called as many times as Compute was.
+	// Compute, and it is called as many times as Compute.
 	Score(*Location) float64
 
 	// After gets called once per iteration after involving Compute and Score.

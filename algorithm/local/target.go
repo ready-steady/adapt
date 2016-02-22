@@ -9,15 +9,18 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Compute evaluates the target function at a point.
+	// Before gets called once per iteration before involving Compute. If the
+	// function returns false, the interpolation process is terminated.
+	Before(*Progress) bool
+
+	// Compute evaluates the target function at a point. The function is called
+	// multiple times per iteration, depending on the number of active nodes.
 	Compute(point, value []float64)
 
-	// Score assigns a score to a location. If the score is positive, the
-	// corresponding node is refined; otherwise, no refinement is performed.
+	// Score assigns a score to a location. The function is called after
+	// Compute, and it is called as many times as Compute. If the score is
+	// positive, the node is refined; otherwise, no refinement is performed.
 	Score(*Location) float64
-
-	// Monitor gets called at the beginning of each iteration.
-	Monitor(*Progress)
 }
 
 // Location contains information about a spacial location.
@@ -43,8 +46,8 @@ type BasicTarget struct {
 
 	Tolerance float64 // ≥ 0
 
+	BeforeHandler  func(*Progress) bool
 	ComputeHandler func([]float64, []float64) // != nil
-	MonitorHandler func(*Progress)
 	ScoreHandler   func(*Location) float64
 }
 
@@ -66,21 +69,23 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.Inputs, self.Outputs
 }
 
+func (self *BasicTarget) Before(progress *Progress) bool {
+	if self.BeforeHandler != nil {
+		return self.BeforeHandler(progress)
+	} else {
+		return true
+	}
+}
+
 func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
 func (self *BasicTarget) Score(location *Location) float64 {
-	if self.MonitorHandler != nil {
+	if self.ScoreHandler != nil {
 		return self.ScoreHandler(location)
 	} else {
 		return self.defaultScore(location)
-	}
-}
-
-func (self *BasicTarget) Monitor(progress *Progress) {
-	if self.MonitorHandler != nil {
-		self.MonitorHandler(progress)
 	}
 }
 

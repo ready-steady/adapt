@@ -65,7 +65,9 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 
 	progress := &Progress{Active: 1, Integral: make([]float64, no)}
 	for {
-		target.Monitor(progress)
+		if !target.Before(progress) {
+			break
+		}
 
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
