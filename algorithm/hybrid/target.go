@@ -1,5 +1,9 @@
 package hybrid
 
+import (
+	"github.com/ready-steady/adapt/algorithm/external"
+)
+
 // Target is a function to be interpolated.
 type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
@@ -20,7 +24,7 @@ type Target interface {
 	// After gets called once per iteration after involving Compute and Score.
 	// The argument of the function is the set of currently active indices. If
 	// the function returns false, the interpolation process is terminated.
-	After(Set) bool
+	After(external.Set) bool
 }
 
 // Location contains information about a dimensional location.

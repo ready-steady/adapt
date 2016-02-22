@@ -3,6 +3,7 @@
 package local
 
 import (
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -36,9 +37,6 @@ type Interpolator struct {
 	config Config
 }
 
-// Surrogate is an interpolant for a function.
-type Surrogate internal.Surrogate
-
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	if config.Workers == 0 {
@@ -52,13 +50,13 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target Target) *Surrogate {
+func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	config := &self.config
 
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	surrogate := internal.NewSurrogate(ni, no)
+	surrogate := external.NewSurrogate(ni, no)
 	hash := newHash(ni)
 
 	indices := make([]uint64, 1*ni)
@@ -94,24 +92,19 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 		progress.Level++
 	}
 
-	return (*Surrogate)(surrogate)
+	return surrogate
 }
 
 // Evaluate computes the values of an interpolant at a set of points.
-func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
+func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
 }
 
 // Integrate computes the integral of an interpolant over the whole domain.
-func (self *Interpolator) Integrate(surrogate *Surrogate) []float64 {
+func (self *Interpolator) Integrate(surrogate *external.Surrogate) []float64 {
 	ni, no := surrogate.Inputs, surrogate.Outputs
 	integral := make([]float64, no)
 	cumulate(self.basis, surrogate.Indices, surrogate.Surpluses, ni, no, integral)
 	return integral
-}
-
-// String returns a summary.
-func (self *Surrogate) String() string {
-	return (*internal.Surrogate)(self).String()
 }

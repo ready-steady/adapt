@@ -3,6 +3,7 @@
 package hybrid
 
 import (
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -28,12 +29,6 @@ type Interpolator struct {
 	config Config
 }
 
-// Set is a subset of ordered elements.
-type Set internal.Set
-
-// Surrogate is an interpolant for a function.
-type Surrogate internal.Surrogate
-
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -44,13 +39,13 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target Target) *Surrogate {
+func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	config := &self.config
 
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	surrogate := internal.NewSurrogate(ni, no)
+	surrogate := external.NewSurrogate(ni, no)
 	tracker := newTracker(ni, config)
 
 	progress := &Progress{}
@@ -87,16 +82,16 @@ func (self *Interpolator) Compute(target Target) *Surrogate {
 			values, surpluses = values[offset:], surpluses[offset:]
 		}
 
-		if !target.After(Set(tracker.Active)) {
+		if !target.After(tracker.Active) {
 			break
 		}
 	}
 
-	return (*Surrogate)(surrogate)
+	return surrogate
 }
 
 // Evaluate computes the values of an interpolant at a set of points.
-func (self *Interpolator) Evaluate(surrogate *Surrogate, points []float64) []float64 {
+func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
 }

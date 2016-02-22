@@ -1,11 +1,15 @@
 package internal
 
+import (
+	"github.com/ready-steady/adapt/algorithm/external"
+)
+
 // Tracker is a book-keeper of level indices.
 type Tracker struct {
 	// All level indices considered so far.
 	Indices []uint64
 	// The positions of active level indices.
-	Active Set
+	Active external.Set
 
 	ni   uint
 	nn   uint
@@ -18,16 +22,13 @@ type Tracker struct {
 	initialized bool
 }
 
-// Set is a subset of ordered elements.
-type Set map[uint]bool
-
 type reference map[uint]uint
 
 // NewTracker creates a book-keeper of level indices.
 func NewTracker(ni, lmax, imax uint) *Tracker {
 	return &Tracker{
 		Indices: make([]uint64, 1*ni),
-		Active:  Set{0: true},
+		Active:  external.Set{0: true},
 
 		ni:   ni,
 		nn:   1,

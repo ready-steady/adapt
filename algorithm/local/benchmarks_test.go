@@ -3,6 +3,8 @@ package local
 import (
 	"math/rand"
 	"testing"
+
+	"github.com/ready-steady/adapt/algorithm/external"
 )
 
 func BenchmarkComputeHat(b *testing.B) {
@@ -45,7 +47,7 @@ func BenchmarkComputeMany(b *testing.B) {
 		target: func() Target {
 			return newTarget(inputs, outputs, tolerance, many(inputs, outputs))
 		},
-		surrogate: &Surrogate{
+		surrogate: &external.Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
@@ -110,7 +112,7 @@ func BenchmarkEvaluateMany(b *testing.B) {
 		target: func() Target {
 			return newTarget(inputs, outputs, tolerance, many(inputs, outputs))
 		},
-		surrogate: &Surrogate{
+		surrogate: &external.Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
@@ -143,7 +145,7 @@ func many(ni, no int) func([]float64, []float64) {
 	}
 }
 
-func generate(surrogate *Surrogate) []float64 {
+func generate(surrogate *external.Surrogate) []float64 {
 	const (
 		count = 10000
 	)

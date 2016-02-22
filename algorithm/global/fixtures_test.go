@@ -3,6 +3,7 @@ package global
 import (
 	"math"
 
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 )
@@ -11,7 +12,7 @@ type fixture struct {
 	compute func([]float64, []float64)
 
 	progresses []Progress
-	surrogate  *Surrogate
+	surrogate  *external.Surrogate
 
 	points []float64
 	values []float64
@@ -39,7 +40,7 @@ var fixtureBranin = fixture{
 		{5, 4, 11, 8, 77},
 	},
 
-	surrogate: &Surrogate{
+	surrogate: &external.Surrogate{
 		Inputs:  2,
 		Outputs: 1,
 		Nodes:   85,

@@ -2,6 +2,8 @@ package global
 
 import (
 	"math"
+
+	"github.com/ready-steady/adapt/algorithm/external"
 )
 
 var (
@@ -28,7 +30,7 @@ type Target interface {
 	// After gets called once per iteration after involving Compute and Score.
 	// The argument of the function is the set of currently active indices. If
 	// the function returns false, the interpolation process is terminated.
-	After(Set) bool
+	After(external.Set) bool
 }
 
 // Location contains information about a dimensional location.
@@ -57,7 +59,7 @@ type BasicTarget struct {
 	BeforeHandler  func(*Progress) bool
 	ComputeHandler func([]float64, []float64) // != nil
 	ScoreHandler   func(*Location) float64
-	AfterHandler   func(Set) bool
+	AfterHandler   func(external.Set) bool
 
 	errors []float64
 	lower  []float64
@@ -106,7 +108,7 @@ func (self *BasicTarget) Score(location *Location) float64 {
 	}
 }
 
-func (self *BasicTarget) After(active Set) bool {
+func (self *BasicTarget) After(active external.Set) bool {
 	if self.AfterHandler != nil {
 		return self.AfterHandler(active)
 	} else {
@@ -140,7 +142,7 @@ func (self *BasicTarget) defaultScore(location *Location) float64 {
 	return score / float64(nn)
 }
 
-func (self *BasicTarget) defaultAfter(active Set) bool {
+func (self *BasicTarget) defaultAfter(active external.Set) bool {
 	no, errors := self.Outputs, self.errors
 	δ := threshold(self.lower, self.upper, self.Absolute, self.Relative)
 	for i := range active {

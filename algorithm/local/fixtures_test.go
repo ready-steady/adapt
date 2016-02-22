@@ -3,6 +3,7 @@ package local
 import (
 	"math"
 
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/ode/rk4"
@@ -23,7 +24,7 @@ type fixture struct {
 
 	compute func([]float64, []float64)
 
-	surrogate *Surrogate
+	surrogate *external.Surrogate
 
 	levels []uint64
 	orders []uint64
@@ -94,7 +95,7 @@ var fixtureStep = fixture{
 		}
 	},
 
-	surrogate: &Surrogate{
+	surrogate: &external.Surrogate{
 		Inputs:  1,
 		Outputs: 1,
 		Nodes:   8,
@@ -127,7 +128,7 @@ var fixtureHat = fixture{
 		}
 	},
 
-	surrogate: &Surrogate{
+	surrogate: &external.Surrogate{
 		Inputs:  1,
 		Outputs: 1,
 		Nodes:   305,
@@ -345,7 +346,7 @@ var fixtureCube = fixture{
 		})
 	},
 
-	surrogate: &Surrogate{
+	surrogate: &external.Surrogate{
 		Inputs:  2,
 		Outputs: 1,
 		Nodes:   437,
@@ -610,7 +611,7 @@ var fixtureBox = fixture{
 		}
 	},
 
-	surrogate: &Surrogate{
+	surrogate: &external.Surrogate{
 		Inputs:  2,
 		Outputs: 3,
 		Nodes:   20,
@@ -777,7 +778,7 @@ var fixtureKraichnanOrszag = fixture{
 		return &kraichnanOrszagTarget{}
 	},
 
-	surrogate: &Surrogate{
+	surrogate: &external.Surrogate{
 		Inputs:  kraichnanOrszagInputs,
 		Outputs: kraichnanOrszagOutputs,
 		Nodes:   3381,
