@@ -107,6 +107,9 @@ func (self *BasicTarget) Score(location *Location) float64 {
 func (self *BasicTarget) defaultContinue(active external.Set, progress *Progress) bool {
 	no, errors := self.Outputs, self.errors
 	ne := uint(len(errors)) / no
+	if ne == 0 {
+		return true
+	}
 	δ := threshold(self.lower, self.upper, self.Absolute, self.Relative)
 	for i := range active {
 		if i >= ne {
