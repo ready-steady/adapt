@@ -32,9 +32,8 @@ type Location struct {
 
 // Progress contains information about the interpolation process.
 type Progress struct {
-	Level   uint // Reached level
-	Active  uint // Number of active nodes
-	Passive uint // Number of passive nodes
+	More uint // Number of nodes to be evaluated
+	Done uint // Number of nodes evaluated so far
 }
 
 // BasicTarget is a basic target satisfying the Target interface.

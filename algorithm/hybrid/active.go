@@ -29,7 +29,3 @@ func (self *Active) push(scores []float64) {
 	self.Forget(self.k)
 	self.scores = append(self.scores, scores...)
 }
-
-func (self *Active) stats() (uint, uint) {
-	return self.Current() - 1, self.Previous() + 1
-}

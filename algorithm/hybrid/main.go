@@ -52,7 +52,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	active := newActive(ni, config)
 
 	indices, counts := make([]uint64, 1*ni), []uint{1}
-	progress := &Progress{Active: 1, Requested: 1}
+	progress := &Progress{More: 1}
 	for target.Continue(active, progress) {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
@@ -62,12 +62,10 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surrogate.Push(self.basis, indices, surpluses)
 		active.push(assess(self.basis, target, counts, indices, values, surpluses, ni, no))
 
-		lindices := active.pull()
+		_ = active.pull()
 
-		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
-		progress.Active, progress.Passive = active.stats()
-		progress.Performed += progress.Requested
-		progress.Requested = uint(len(indices)) / ni
+		progress.Done += progress.More
+		progress.More = uint(len(indices)) / ni
 	}
 
 	return surrogate

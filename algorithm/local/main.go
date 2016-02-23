@@ -60,8 +60,8 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	unique := internal.NewUnique(ni)
 
 	indices := make([]uint64, 1*ni)
-	progress := &Progress{Active: 1}
-	for target.Continue(progress) && progress.Active > 0 {
+	progress := &Progress{More: 1}
+	for target.Continue(progress) && progress.More > 0 {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
@@ -73,9 +73,8 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
 		indices = unique.Distil(self.grid.Children(indices))
 
-		progress.Passive += progress.Active
-		progress.Active = uint(len(indices)) / ni
-		progress.Level++
+		progress.Done += progress.More
+		progress.More = uint(len(indices)) / ni
 	}
 
 	return surrogate

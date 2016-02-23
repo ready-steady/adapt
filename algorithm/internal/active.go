@@ -87,13 +87,3 @@ outer:
 func (self *Active) Forget(k uint) {
 	delete(self.Positions, k)
 }
-
-// Current returns the number of active indices.
-func (self *Active) Current() uint {
-	return uint(len(self.Positions))
-}
-
-// Previous returns the number of passive indices.
-func (self *Active) Previous() uint {
-	return uint(len(self.Indices))/self.ni - self.Current()
-}
