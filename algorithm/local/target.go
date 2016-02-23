@@ -9,9 +9,9 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Before gets called once per iteration before involving Compute. If the
-	// function returns false, the interpolation process is terminated.
-	Before(*Progress) bool
+	// Continue gets called at the beginning of each iteration. If the function
+	// returns false, the interpolation process is terminated.
+	Continue(*Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
 	// multiple times per iteration, depending on the number of active nodes.
@@ -44,9 +44,9 @@ type BasicTarget struct {
 
 	Tolerance float64 // ≥ 0
 
-	BeforeHandler  func(*Progress) bool
-	ComputeHandler func([]float64, []float64) // != nil
-	ScoreHandler   func(*Location) float64
+	ContinueHandler func(*Progress) bool
+	ComputeHandler  func([]float64, []float64) // != nil
+	ScoreHandler    func(*Location) float64
 }
 
 // NewTarget creates a basic target.
@@ -67,9 +67,9 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.Inputs, self.Outputs
 }
 
-func (self *BasicTarget) Before(progress *Progress) bool {
-	if self.BeforeHandler != nil {
-		return self.BeforeHandler(progress)
+func (self *BasicTarget) Continue(progress *Progress) bool {
+	if self.ContinueHandler != nil {
+		return self.ContinueHandler(progress)
 	} else {
 		return true
 	}

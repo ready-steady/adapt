@@ -698,7 +698,7 @@ func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
 	return kraichnanOrszagInputs, kraichnanOrszagOutputs
 }
 
-func (_ *kraichnanOrszagTarget) Before(*Progress) bool {
+func (_ *kraichnanOrszagTarget) Continue(*Progress) bool {
 	return true
 }
 
