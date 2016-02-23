@@ -9,22 +9,22 @@ const (
 	sizeOfUint64 = 8
 )
 
-// Hash is a structure for keeping track of unique indices.
-type Hash struct {
+// Unique is a book-keeper of unique indices.
+type Unique struct {
 	ni      uint
 	mapping map[string]bool
 }
 
-// NewHash creates an index hash.
-func NewHash(ni uint) *Hash {
-	return &Hash{
+// NewUnique creates a book-keeper.
+func NewUnique(ni uint) *Unique {
+	return &Unique{
 		ni:      ni,
 		mapping: make(map[string]bool),
 	}
 }
 
-// Filter eliminates the indices that have already been seen.
-func (self *Hash) Filter(indices []uint64) []uint64 {
+// Distil eliminates in place the indices that have already been seen.
+func (self *Unique) Distil(indices []uint64) []uint64 {
 	ni := self.ni
 	nn := uint(len(indices)) / ni
 	nb := ni * sizeOfUint64
