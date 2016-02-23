@@ -64,7 +64,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		}
 
 		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
-		progress.Active, progress.Passive = tracker.CountActive(), tracker.CountPassive()
+		progress.Active, progress.Passive = tracker.Current(), tracker.Previous()
 		progress.Performed += progress.Requested
 		progress.Requested = uint(len(indices)) / ni
 
@@ -80,7 +80,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surrogate.Push(self.basis, indices, surpluses)
 		tracker.push(assess(self.basis, target, counts, indices, values, surpluses, ni, no))
 
-		if !target.After(tracker.Active) {
+		if !target.After(tracker.Positions) {
 			break
 		}
 	}

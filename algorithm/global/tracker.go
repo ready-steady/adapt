@@ -5,7 +5,7 @@ import (
 )
 
 type tracker struct {
-	internal.Tracker
+	internal.Active
 
 	ni   uint
 	rate float64
@@ -16,7 +16,7 @@ type tracker struct {
 
 func newTracker(ni uint, config *Config) *tracker {
 	return &tracker{
-		Tracker: *internal.NewTracker(ni, config.MaxLevel, config.MaxIndices),
+		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		ni:   ni,
 		rate: config.AdaptivityRate,
@@ -29,10 +29,10 @@ func (self *tracker) pull() (indices []uint64) {
 	if self.norms == nil {
 		norm, indices = 0, self.Forward(^uint(0))
 	} else {
-		k := internal.LocateMinUint64s(self.norms, self.Active)
+		k := internal.LocateMinUint64s(self.norms, self.Positions)
 		min, max := self.norms[k], internal.MaxUint64s(self.norms)
 		if float64(min) > (1.0-self.rate)*float64(max) {
-			k = internal.LocateMaxFloat64s(self.scores, self.Active)
+			k = internal.LocateMaxFloat64s(self.scores, self.Positions)
 		}
 		norm, indices = self.norms[k]+1, self.Forward(k)
 	}

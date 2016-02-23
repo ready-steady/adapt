@@ -5,19 +5,19 @@ import (
 )
 
 type tracker struct {
-	internal.Tracker
+	internal.Active
 
 	scores []float64
 }
 
 func newTracker(ni uint, config *Config) *tracker {
 	return &tracker{
-		Tracker: *internal.NewTracker(ni, config.MaxLevel, config.MaxIndices),
+		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 	}
 }
 
 func (self *tracker) pull() []uint64 {
-	return self.Forward(internal.LocateMaxFloat64s(self.scores, self.Active))
+	return self.Forward(internal.LocateMaxFloat64s(self.scores, self.Positions))
 }
 
 func (self *tracker) push(scores []float64) {

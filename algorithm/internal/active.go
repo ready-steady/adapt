@@ -4,12 +4,12 @@ import (
 	"github.com/ready-steady/adapt/algorithm/external"
 )
 
-// Tracker is a book-keeper of level indices.
-type Tracker struct {
+// Active is a book-keeper of active level indices.
+type Active struct {
 	// All level indices considered so far.
 	Indices []uint64
 	// The positions of active level indices.
-	Active external.Set
+	Positions external.Set
 
 	ni   uint
 	nn   uint
@@ -22,9 +22,9 @@ type Tracker struct {
 
 type reference map[uint]uint
 
-// NewTracker creates a book-keeper of level indices.
-func NewTracker(ni, lmax, imax uint) *Tracker {
-	return &Tracker{
+// NewActive creates a book-keeper.
+func NewActive(ni, lmax, imax uint) *Active {
+	return &Active{
 		ni:   ni,
 		lmax: lmax,
 		imax: imax,
@@ -36,18 +36,18 @@ func NewTracker(ni, lmax, imax uint) *Tracker {
 
 // Forward deactivates a level index and then identifies, activates, and returns
 // admissible level indices from its forward neighborhood.
-func (self *Tracker) Forward(k uint) (indices []uint64) {
+func (self *Active) Forward(k uint) (indices []uint64) {
 	if self.Indices == nil {
 		self.Indices = make([]uint64, 1*self.ni)
-		self.Active = external.Set{0: true}
+		self.Positions = external.Set{0: true}
 		self.nn = 1
 		return self.Indices
 	}
 
 	ni, nn := self.ni, self.nn
-	active, forward, backward := self.Active, self.forward, self.backward
+	positions, forward, backward := self.Positions, self.forward, self.backward
 
-	delete(active, k)
+	delete(positions, k)
 
 	index := self.Indices[k*ni : (k+1)*ni]
 
@@ -62,7 +62,7 @@ outer:
 			if i == j || index[j] == 0 {
 				continue
 			}
-			if l, ok := forward[backward[k*ni+j]*ni+i]; !ok || active[l] {
+			if l, ok := forward[backward[k*ni+j]*ni+i]; !ok || positions[l] {
 				continue outer
 			} else {
 				newBackward[j] = l
@@ -77,7 +77,7 @@ outer:
 		self.Indices = append(self.Indices, index...)
 		self.Indices[nn*ni+i]++
 
-		active[nn] = true
+		positions[nn] = true
 
 		nn++
 	}
@@ -88,17 +88,12 @@ outer:
 	return
 }
 
-// CountActive returns the number of active level indices.
-func (self *Tracker) CountActive() uint {
-	return uint(len(self.Active))
+// Current returns the number of active level indices.
+func (self *Active) Current() uint {
+	return uint(len(self.Positions))
 }
 
-// CountPassive returns the number of passive level indices.
-func (self *Tracker) CountPassive() uint {
-	return self.CountTotal() - self.CountActive()
-}
-
-// CountTotal returns the total number of level indices.
-func (self *Tracker) CountTotal() uint {
-	return uint(len(self.Indices)) / self.ni
+// Previous returns the number of passive level indices.
+func (self *Active) Previous() uint {
+	return uint(len(self.Indices))/self.ni - self.Current()
 }
