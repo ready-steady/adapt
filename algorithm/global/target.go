@@ -15,9 +15,10 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Before gets called once per iteration before involving Compute. If the
-	// function returns false, the interpolation process is terminated.
-	Before(*Progress) bool
+	// Continue gets called at the end of each iteration. If the function
+	// returns false, the interpolation process is terminated. The first
+	// argument is the set of currently active indices.
+	Continue(external.Set, *Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
 	// multiple times per iteration, depending on the number of active nodes.
@@ -26,11 +27,6 @@ type Target interface {
 	// Score assigns a score to a location. The function is called after
 	// Compute, and it is called as many times as Compute.
 	Score(*Location) float64
-
-	// After gets called once per iteration after involving Compute and Score.
-	// The argument of the function is the set of currently active indices. If
-	// the function returns false, the interpolation process is terminated.
-	After(external.Set) bool
 }
 
 // Location contains information about a dimensional location.
@@ -57,10 +53,9 @@ type BasicTarget struct {
 	Absolute float64 // ≥ 0
 	Relative float64 // ≥ 0
 
-	BeforeHandler  func(*Progress) bool
-	ComputeHandler func([]float64, []float64) // != nil
-	ScoreHandler   func(*Location) float64
-	AfterHandler   func(external.Set) bool
+	ContinueHandler func(external.Set, *Progress) bool
+	ComputeHandler  func([]float64, []float64) // != nil
+	ScoreHandler    func(*Location) float64
 
 	errors []float64
 	lower  []float64
@@ -89,11 +84,11 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.Inputs, self.Outputs
 }
 
-func (self *BasicTarget) Before(progress *Progress) bool {
-	if self.BeforeHandler != nil {
-		return self.BeforeHandler(progress)
+func (self *BasicTarget) Continue(active external.Set, progress *Progress) bool {
+	if self.ContinueHandler != nil {
+		return self.ContinueHandler(active, progress)
 	} else {
-		return true
+		return self.defaultContinue(active, progress)
 	}
 }
 
@@ -109,12 +104,21 @@ func (self *BasicTarget) Score(location *Location) float64 {
 	}
 }
 
-func (self *BasicTarget) After(active external.Set) bool {
-	if self.AfterHandler != nil {
-		return self.AfterHandler(active)
-	} else {
-		return self.defaultAfter(active)
+func (self *BasicTarget) defaultContinue(active external.Set, progress *Progress) bool {
+	no, errors := self.Outputs, self.errors
+	ne := uint(len(errors)) / no
+	δ := threshold(self.lower, self.upper, self.Absolute, self.Relative)
+	for i := range active {
+		if i >= ne {
+			continue
+		}
+		for j := uint(0); j < no; j++ {
+			if errors[i*no+j] > δ[j] {
+				return true
+			}
+		}
 	}
+	return false
 }
 
 func (self *BasicTarget) defaultScore(location *Location) float64 {
@@ -141,19 +145,6 @@ func (self *BasicTarget) defaultScore(location *Location) float64 {
 	}
 
 	return score / float64(nn)
-}
-
-func (self *BasicTarget) defaultAfter(active external.Set) bool {
-	no, errors := self.Outputs, self.errors
-	δ := threshold(self.lower, self.upper, self.Absolute, self.Relative)
-	for i := range active {
-		for j := uint(0); j < no; j++ {
-			if errors[i*no+j] > δ[j] {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func error(surpluses []float64, no uint) []float64 {

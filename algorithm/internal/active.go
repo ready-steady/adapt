@@ -25,7 +25,11 @@ type reference map[uint]uint
 // NewActive creates a book-keeper.
 func NewActive(ni, lmax, imax uint) *Active {
 	return &Active{
+		Indices:   make([]uint64, 1*ni),
+		Positions: external.Set{0: true},
+
 		ni:   ni,
+		nn:   1,
 		lmax: lmax,
 		imax: imax,
 
@@ -34,20 +38,11 @@ func NewActive(ni, lmax, imax uint) *Active {
 	}
 }
 
-// Forward deactivates a level index and then identifies, activates, and returns
-// admissible level indices from its forward neighborhood.
-func (self *Active) Forward(k uint) (indices []uint64) {
-	if self.Indices == nil {
-		self.Indices = make([]uint64, 1*self.ni)
-		self.Positions = external.Set{0: true}
-		self.nn = 1
-		return self.Indices
-	}
-
+// Advance identifies, activates, and returns admissible indices from the
+// forward neighborhood of a level index.
+func (self *Active) Advance(k uint) (indices []uint64) {
 	ni, nn := self.ni, self.nn
 	positions, forward, backward := self.Positions, self.forward, self.backward
-
-	delete(positions, k)
 
 	index := self.Indices[k*ni : (k+1)*ni]
 
@@ -88,12 +83,17 @@ outer:
 	return
 }
 
-// Current returns the number of active level indices.
+// Forget deactivates a level index.
+func (self *Active) Forget(k uint) {
+	delete(self.Positions, k)
+}
+
+// Current returns the number of active indices.
 func (self *Active) Current() uint {
 	return uint(len(self.Positions))
 }
 
-// Previous returns the number of passive level indices.
+// Previous returns the number of passive indices.
 func (self *Active) Previous() uint {
 	return uint(len(self.Indices))/self.ni - self.Current()
 }

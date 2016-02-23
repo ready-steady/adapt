@@ -38,6 +38,7 @@ var fixtureBranin = fixture{
 		{4, 3, 9, 0, 45},
 		{5, 4, 10, 32, 45},
 		{5, 4, 11, 8, 77},
+		{5, 3, 12, 0, 85},
 	},
 
 	surrogate: &external.Surrogate{

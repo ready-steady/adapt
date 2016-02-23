@@ -3,6 +3,7 @@ package global
 import (
 	"testing"
 
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/assert"
 )
 
@@ -11,9 +12,9 @@ func TestBranin(t *testing.T) {
 	interpolator, target := prepare(fixture)
 
 	progresses := make([]Progress, 0)
-	target.BeforeHandler = func(progress *Progress) bool {
+	target.ContinueHandler = func(active external.Set, progress *Progress) bool {
 		progresses = append(progresses, *progress)
-		return true
+		return target.defaultContinue(active, progress)
 	}
 
 	surrogate := interpolator.Compute(target)

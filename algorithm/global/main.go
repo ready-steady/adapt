@@ -51,27 +51,9 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	surrogate := external.NewSurrogate(ni, no)
 	tracker := newTracker(ni, config)
 
-	progress := &Progress{}
-	for {
-		lindices := tracker.pull()
-
-		nn := uint(len(lindices)) / ni
-		indices, counts := []uint64(nil), make([]uint, nn)
-		for i := uint(0); i < nn; i++ {
-			newIndices := self.grid.Index(lindices[i*ni : (i+1)*ni])
-			indices = append(indices, newIndices...)
-			counts[i] = uint(len(newIndices)) / ni
-		}
-
-		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
-		progress.Active, progress.Passive = tracker.Current(), tracker.Previous()
-		progress.Performed += progress.Requested
-		progress.Requested = uint(len(indices)) / ni
-
-		if !target.Before(progress) || progress.Active == 0 {
-			break
-		}
-
+	indices, counts := make([]uint64, 1*ni), []uint{1}
+	progress := &Progress{Active: 1, Requested: 1}
+	for target.Continue(tracker.Positions, progress) || progress.Level == 0 {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
@@ -80,9 +62,13 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surrogate.Push(self.basis, indices, surpluses)
 		tracker.push(assess(self.basis, target, counts, indices, values, surpluses, ni, no))
 
-		if !target.After(tracker.Positions) {
-			break
-		}
+		lindices := tracker.pull()
+		indices, counts = index(self.grid, lindices, ni)
+
+		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
+		progress.Active, progress.Passive = tracker.stats()
+		progress.Performed += progress.Requested
+		progress.Requested = uint(len(indices)) / ni
 	}
 
 	return surrogate
@@ -92,4 +78,15 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
+}
+
+func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
+	nn := uint(len(lindices)) / ni
+	indices, counts := []uint64(nil), make([]uint, nn)
+	for i := uint(0); i < nn; i++ {
+		newIndices := grid.Index(lindices[i*ni : (i+1)*ni])
+		indices = append(indices, newIndices...)
+		counts[i] = uint(len(newIndices)) / ni
+	}
+	return indices, counts
 }
