@@ -4,7 +4,7 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-type tracker struct {
+type active struct {
 	internal.Active
 
 	k    uint
@@ -15,8 +15,8 @@ type tracker struct {
 	scores []float64
 }
 
-func newTracker(ni uint, config *Config) *tracker {
-	return &tracker{
+func newActive(ni uint, config *Config) *active {
+	return &active{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		k:    ^uint(0),
@@ -27,7 +27,7 @@ func newTracker(ni uint, config *Config) *tracker {
 	}
 }
 
-func (self *tracker) pull() []uint64 {
+func (self *active) pull() []uint64 {
 	k := internal.LocateMinUint64s(self.norms, self.Positions)
 	min, max := self.norms[k], internal.MaxUint64s(self.norms)
 	if float64(min) > (1.0-self.rate)*float64(max) {
@@ -46,11 +46,11 @@ func (self *tracker) pull() []uint64 {
 	return indices
 }
 
-func (self *tracker) push(scores []float64) {
+func (self *active) push(scores []float64) {
 	self.Forget(self.k)
 	self.scores = append(self.scores, scores...)
 }
 
-func (self *tracker) stats() (uint, uint) {
+func (self *active) stats() (uint, uint) {
 	return self.Current() - 1, self.Previous() + 1
 }

@@ -49,23 +49,23 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	nw := config.Workers
 
 	surrogate := external.NewSurrogate(ni, no)
-	tracker := newTracker(ni, config)
+	active := newActive(ni, config)
 
 	indices, counts := make([]uint64, 1*ni), []uint{1}
 	progress := &Progress{Active: 1, Requested: 1}
-	for target.Continue(tracker.Positions, progress) {
+	for target.Continue(active.Positions, progress) {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.Push(self.basis, indices, surpluses)
-		tracker.push(assess(self.basis, target, counts, indices, values, surpluses, ni, no))
+		active.push(assess(self.basis, target, counts, indices, values, surpluses, ni, no))
 
-		lindices := tracker.pull()
+		lindices := active.pull()
 
 		progress.Level = internal.MaxUint(progress.Level, uint(internal.MaxUint64s(lindices)))
-		progress.Active, progress.Passive = tracker.stats()
+		progress.Active, progress.Passive = active.stats()
 		progress.Performed += progress.Requested
 		progress.Requested = uint(len(indices)) / ni
 	}
