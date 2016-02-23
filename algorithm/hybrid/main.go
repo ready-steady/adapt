@@ -61,7 +61,6 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 		surrogate.Push(self.basis, indices, surpluses)
 		active.push(assess(self.basis, target, counts, indices, values, surpluses, ni, no))
-
 		_ = active.pull()
 
 		progress.Done += progress.More
