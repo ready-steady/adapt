@@ -4,7 +4,8 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-type active struct {
+// Active is a book-keeper of active level indices.
+type Active struct {
 	internal.Active
 
 	k    uint
@@ -15,8 +16,8 @@ type active struct {
 	scores []float64
 }
 
-func newActive(ni uint, config *Config) *active {
-	return &active{
+func newActive(ni uint, config *Config) *Active {
+	return &Active{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		k:    ^uint(0),
@@ -27,7 +28,7 @@ func newActive(ni uint, config *Config) *active {
 	}
 }
 
-func (self *active) pull() []uint64 {
+func (self *Active) pull() []uint64 {
 	k := internal.LocateMinUint64s(self.norms, self.Positions)
 	min, max := self.norms[k], internal.MaxUint64s(self.norms)
 	if float64(min) > (1.0-self.rate)*float64(max) {
@@ -46,11 +47,11 @@ func (self *active) pull() []uint64 {
 	return indices
 }
 
-func (self *active) push(scores []float64) {
+func (self *Active) push(scores []float64) {
 	self.Forget(self.k)
 	self.scores = append(self.scores, scores...)
 }
 
-func (self *active) stats() (uint, uint) {
+func (self *Active) stats() (uint, uint) {
 	return self.Current() - 1, self.Previous() + 1
 }

@@ -1,9 +1,5 @@
 package hybrid
 
-import (
-	"github.com/ready-steady/adapt/algorithm/external"
-)
-
 // Target is a function to be interpolated.
 type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
@@ -12,7 +8,7 @@ type Target interface {
 	// Continue gets called at the end of each iteration. If the function
 	// returns false, the interpolation process is terminated. The first
 	// argument is the set of currently active indices.
-	Continue(external.Set, *Progress) bool
+	Continue(*Active, *Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
 	// multiple times per iteration, depending on the number of active nodes.
