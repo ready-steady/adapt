@@ -1,4 +1,4 @@
-package local
+package internal
 
 import (
 	"reflect"
@@ -9,19 +9,20 @@ const (
 	sizeOfUint64 = 8
 )
 
-type hash struct {
+// Hash is a structure for keeping track of unique indices.
+type Hash struct {
 	ni      uint
 	mapping map[string]bool
 }
 
-func newHash(ni uint) *hash {
-	return &hash{
+func NewHash(ni uint) *Hash {
+	return &Hash{
 		ni:      ni,
 		mapping: make(map[string]bool),
 	}
 }
 
-func (self *hash) filter(indices []uint64) []uint64 {
+func (self *Hash) Filter(indices []uint64) []uint64 {
 	ni := self.ni
 	nn := uint(len(indices)) / ni
 	nb := ni * sizeOfUint64

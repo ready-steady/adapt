@@ -1,4 +1,4 @@
-package local
+package internal
 
 import (
 	"math/rand"
@@ -10,11 +10,11 @@ import (
 )
 
 func TestHashFilter(t *testing.T) {
-	hash := newHash(2)
+	hash := NewHash(2)
 
-	assert.Equal(hash.filter([]uint64{4, 2}), []uint64{4, 2}, t)
-	assert.Equal(hash.filter([]uint64{6, 9}), []uint64{6, 9}, t)
-	assert.Equal(hash.filter([]uint64{4, 2}), []uint64{}, t)
+	assert.Equal(hash.Filter([]uint64{4, 2}), []uint64{4, 2}, t)
+	assert.Equal(hash.Filter([]uint64{6, 9}), []uint64{6, 9}, t)
+	assert.Equal(hash.Filter([]uint64{4, 2}), []uint64{}, t)
 
 	keys := make([]string, 0)
 	for k, _ := range hash.mapping {
@@ -38,13 +38,13 @@ func TestHashFilter(t *testing.T) {
 }
 
 func TestHashFilterRewrite(t *testing.T) {
-	hash := newHash(2)
+	hash := NewHash(2)
 
 	key := []uint64{4, 2}
-	assert.Equal(hash.filter(key), []uint64{4, 2}, t)
+	assert.Equal(hash.Filter(key), []uint64{4, 2}, t)
 
 	key[0], key[1] = 6, 9
-	assert.Equal(hash.filter([]uint64{4, 2}), []uint64{}, t)
+	assert.Equal(hash.Filter([]uint64{4, 2}), []uint64{}, t)
 }
 
 func BenchmarkHashFilter(b *testing.B) {
@@ -53,7 +53,7 @@ func BenchmarkHashFilter(b *testing.B) {
 		nn = 1000
 	)
 
-	hash := newHash(ni)
+	hash := NewHash(ni)
 
 	generator := rand.New(rand.NewSource(0))
 	indices := make([]uint64, 2*nn*ni)
@@ -64,7 +64,7 @@ func BenchmarkHashFilter(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		hash.filter(indices)
+		hash.Filter(indices)
 	}
 }
 

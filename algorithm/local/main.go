@@ -57,7 +57,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	nw := config.Workers
 
 	surrogate := external.NewSurrogate(ni, no)
-	hash := newHash(ni)
+	hash := internal.NewHash(ni)
 
 	indices := make([]uint64, 1*ni)
 
@@ -79,7 +79,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 		progress.Refined += uint(len(indices)) / ni
 
-		indices = hash.filter(self.grid.Children(indices))
+		indices = hash.Filter(self.grid.Children(indices))
 
 		progress.Passive += progress.Active
 		progress.Active = uint(len(indices)) / ni
