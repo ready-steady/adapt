@@ -15,6 +15,7 @@ type Hash struct {
 	mapping map[string]bool
 }
 
+// NewHash creates an index hash.
 func NewHash(ni uint) *Hash {
 	return &Hash{
 		ni:      ni,
@@ -22,6 +23,7 @@ func NewHash(ni uint) *Hash {
 	}
 }
 
+// Filter eliminates the indices that have already been seen.
 func (self *Hash) Filter(indices []uint64) []uint64 {
 	ni := self.ni
 	nn := uint(len(indices)) / ni
