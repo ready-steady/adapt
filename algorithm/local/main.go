@@ -60,7 +60,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	unique := internal.NewUnique(ni)
 
 	indices := make([]uint64, 1*ni)
-	progress := &Progress{More: 1}
+	progress := &external.Progress{More: 1}
 	for target.Continue(progress) && progress.More > 0 {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)

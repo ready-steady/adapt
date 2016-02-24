@@ -19,7 +19,7 @@ type Target interface {
 	// Continue is called at the end of each iteration. If the function returns
 	// false, the interpolation process is terminated. The first argument is the
 	// set of currently active indices.
-	Continue(*external.Active, *Progress) bool
+	Continue(*external.Active, *external.Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
 	// once for each node of the admissible neighbors.
@@ -37,12 +37,6 @@ type Location struct {
 	Volumes   []float64 // Volumes under the basis functions
 }
 
-// Progress contains information about the interpolation process.
-type Progress struct {
-	More uint // Number of nodes to be evaluated
-	Done uint // Number of nodes evaluated so far
-}
-
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
 	Inputs  uint // > 0
@@ -51,7 +45,7 @@ type BasicTarget struct {
 	Absolute float64 // ≥ 0
 	Relative float64 // ≥ 0
 
-	ContinueHandler func(*external.Active, *Progress) bool
+	ContinueHandler func(*external.Active, *external.Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
 	ScoreHandler    func(*Location) float64
 
@@ -82,7 +76,7 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.Inputs, self.Outputs
 }
 
-func (self *BasicTarget) Continue(active *external.Active, progress *Progress) bool {
+func (self *BasicTarget) Continue(active *external.Active, progress *external.Progress) bool {
 	if self.ContinueHandler != nil {
 		return self.ContinueHandler(active, progress)
 	} else {
@@ -102,7 +96,9 @@ func (self *BasicTarget) Score(location *Location) float64 {
 	}
 }
 
-func (self *BasicTarget) defaultContinue(active *external.Active, progress *Progress) bool {
+func (self *BasicTarget) defaultContinue(active *external.Active,
+	progress *external.Progress) bool {
+
 	no, errors := self.Outputs, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {
