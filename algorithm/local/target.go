@@ -9,17 +9,16 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Continue gets called at the beginning of each iteration. If the function
+	// Continue is called at the beginning of each iteration. If the function
 	// returns false, the interpolation process is terminated.
 	Continue(*Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
-	// multiple times per iteration, depending on the number of active nodes.
+	// once for each active node.
 	Compute([]float64, []float64)
 
-	// Score assigns a score to a location. The function is called after
-	// Compute, and it is called as many times as Compute. If the score is
-	// positive, the node is refined; otherwise, no refinement is performed.
+	// Score assigns a score to a location. The function is called once for each
+	// active node. If the score is positive, the node is refined.
 	Score(*Location) float64
 }
 

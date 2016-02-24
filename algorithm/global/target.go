@@ -15,17 +15,17 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Continue gets called at the end of each iteration. If the function
-	// returns false, the interpolation process is terminated. The first
-	// argument is the set of currently active indices.
+	// Continue is called at the end of each iteration. If the function returns
+	// false, the interpolation process is terminated. The first argument is the
+	// set of currently active indices.
 	Continue(*Active, *Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
-	// multiple times per iteration, depending on the number of active nodes.
+	// once for each node of the admissible neighbors.
 	Compute([]float64, []float64)
 
-	// Score assigns a score to a location. The function is called after
-	// Compute, and it is called as many times as Compute.
+	// Score assigns a score to a location. The function is called once for each
+	// admissible neighbor.
 	Score(*Location) float64
 }
 
