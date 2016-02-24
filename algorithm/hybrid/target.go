@@ -2,6 +2,8 @@ package hybrid
 
 import (
 	"math"
+
+	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 var (
@@ -13,18 +15,18 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Continue gets called at the end of each iteration. If the function
-	// returns false, the interpolation process is terminated. The first
-	// argument is the set of currently active indices.
+	// Continue is called at the end of each iteration. If the function returns
+	// false, the interpolation process is terminated. The first argument is the
+	// set of currently active indices.
 	Continue(*Active, *Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
-	// multiple times per iteration, depending on the number of active nodes.
+	// once for each admissible node of the admissible neighbors.
 	Compute([]float64, []float64)
 
-	// Score assigns a score to a location. The function is called after
-	// Compute, and it is called as many times as Compute.
-	Score(*Location) float64
+	// Score assigns a global score and a set of local scores to a location. The
+	// function is called once for each admissible neighbor.
+	Score(*Location) (float64, []float64)
 }
 
 // Location contains information about a dimensional location.
@@ -45,18 +47,26 @@ type BasicTarget struct {
 	Inputs  uint // > 0
 	Outputs uint // > 0
 
+	Global float64 // ≥ 0
+	Local  float64 // ≥ 0
+
 	ContinueHandler func(*Active, *Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
-	ScoreHandler    func(*Location) float64
+	ScoreHandler    func(*Location) (float64, []float64)
 
 	scores []float64
 }
 
 // NewTarget creates a basic target.
-func NewTarget(inputs, outputs uint, compute func([]float64, []float64)) *BasicTarget {
+func NewTarget(inputs, outputs uint, global, local float64,
+	compute func([]float64, []float64)) *BasicTarget {
+
 	return &BasicTarget{
 		Inputs:  inputs,
 		Outputs: outputs,
+
+		Global: global,
+		Local:  local,
 
 		ComputeHandler: compute,
 	}
@@ -78,7 +88,7 @@ func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *BasicTarget) Score(location *Location) float64 {
+func (self *BasicTarget) Score(location *Location) (float64, []float64) {
 	if self.ScoreHandler != nil {
 		return self.ScoreHandler(location)
 	} else {
@@ -90,19 +100,21 @@ func (self *BasicTarget) defaultContinue(active *Active, progress *Progress) boo
 	return true
 }
 
-func (self *BasicTarget) defaultScore(location *Location) float64 {
+func (self *BasicTarget) defaultScore(location *Location) (float64, []float64) {
 	no := self.Outputs
 	nn := uint(len(location.Volumes))
 
-	score := -infinity
+	global := -infinity
+	local := internal.RepeatFloat64(-infinity, nn)
 	for i := uint(0); i < no; i++ {
-		value := 0.0
+		Γ := 0.0
 		for j := uint(0); j < nn; j++ {
-			value += location.Volumes[j] * location.Surpluses[j*no+i]
+			γ := location.Volumes[j] * location.Surpluses[j*no+i]
+			local[j] = math.Max(local[j], math.Abs(γ))
+			Γ += γ
 		}
-		score = math.Max(score, math.Abs(value))
+		global = math.Max(global, math.Abs(Γ))
 	}
-	self.scores = append(self.scores, score)
 
-	return score
+	return global, local
 }
