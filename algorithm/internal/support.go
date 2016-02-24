@@ -92,3 +92,12 @@ func Subtract(minuend, subtrahend []float64) []float64 {
 	}
 	return difference
 }
+
+// RepeatFloat64 returns a vector filled out with a particular value.
+func RepeatFloat64(value float64, times uint) []float64 {
+	data := make([]float64, times)
+	for i := uint(0); i < times; i++ {
+		data[i] = value
+	}
+	return data
+}

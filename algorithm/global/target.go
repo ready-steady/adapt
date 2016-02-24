@@ -2,6 +2,8 @@ package global
 
 import (
 	"math"
+
+	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 var (
@@ -70,8 +72,8 @@ func NewTarget(inputs, outputs uint, absolute, relative float64,
 
 		ComputeHandler: compute,
 
-		lower: repeatFloat64(infinity, outputs),
-		upper: repeatFloat64(-infinity, outputs),
+		lower: internal.RepeatFloat64(infinity, outputs),
+		upper: internal.RepeatFloat64(-infinity, outputs),
 	}
 }
 
@@ -146,7 +148,7 @@ func (self *BasicTarget) defaultScore(location *Location) float64 {
 }
 
 func error(surpluses []float64, no uint) []float64 {
-	error := repeatFloat64(-infinity, no)
+	error := internal.RepeatFloat64(-infinity, no)
 	for i, value := range surpluses {
 		j := uint(i) % no
 		if value < 0.0 {
