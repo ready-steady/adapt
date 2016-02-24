@@ -1,15 +1,11 @@
-package internal
-
-import (
-	"github.com/ready-steady/adapt/algorithm/external"
-)
+package external
 
 // Active is a book-keeper of active level indices.
 type Active struct {
 	// All level indices considered so far.
 	Indices []uint64
 	// The positions of active level indices.
-	Positions external.Set
+	Positions Set
 
 	ni   uint
 	nn   uint
@@ -26,7 +22,7 @@ type reference map[uint]uint
 func NewActive(ni, lmax, imax uint) *Active {
 	return &Active{
 		Indices:   make([]uint64, 1*ni),
-		Positions: external.Set{0: true},
+		Positions: Set{0: true},
 
 		ni:   ni,
 		nn:   1,

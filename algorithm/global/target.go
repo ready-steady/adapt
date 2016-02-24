@@ -3,6 +3,7 @@ package global
 import (
 	"math"
 
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -18,7 +19,7 @@ type Target interface {
 	// Continue is called at the end of each iteration. If the function returns
 	// false, the interpolation process is terminated. The first argument is the
 	// set of currently active indices.
-	Continue(*Active, *Progress) bool
+	Continue(*external.Active, *Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
 	// once for each node of the admissible neighbors.
@@ -50,7 +51,7 @@ type BasicTarget struct {
 	Absolute float64 // ≥ 0
 	Relative float64 // ≥ 0
 
-	ContinueHandler func(*Active, *Progress) bool
+	ContinueHandler func(*external.Active, *Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
 	ScoreHandler    func(*Location) float64
 
@@ -81,7 +82,7 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.Inputs, self.Outputs
 }
 
-func (self *BasicTarget) Continue(active *Active, progress *Progress) bool {
+func (self *BasicTarget) Continue(active *external.Active, progress *Progress) bool {
 	if self.ContinueHandler != nil {
 		return self.ContinueHandler(active, progress)
 	} else {
@@ -101,7 +102,7 @@ func (self *BasicTarget) Score(location *Location) float64 {
 	}
 }
 
-func (self *BasicTarget) defaultContinue(active *Active, progress *Progress) bool {
+func (self *BasicTarget) defaultContinue(active *external.Active, progress *Progress) bool {
 	no, errors := self.Outputs, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {

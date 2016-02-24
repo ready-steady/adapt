@@ -1,11 +1,12 @@
 package hybrid
 
 import (
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 type Active struct {
-	internal.Active
+	external.Active
 
 	k uint
 
@@ -14,7 +15,7 @@ type Active struct {
 
 func newActive(ni uint, config *Config) *Active {
 	return &Active{
-		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
+		Active: *external.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		k: ^uint(0),
 	}
