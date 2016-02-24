@@ -15,7 +15,7 @@ type Target interface {
 
 	// Compute evaluates the target function at a point. The function is called
 	// multiple times per iteration, depending on the number of active nodes.
-	Compute(point, value []float64)
+	Compute([]float64, []float64)
 
 	// Score assigns a score to a location. The function is called after
 	// Compute, and it is called as many times as Compute. If the score is
