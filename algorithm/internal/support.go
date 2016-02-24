@@ -3,8 +3,6 @@ package internal
 import (
 	"math"
 	"sync"
-
-	"github.com/ready-steady/adapt/algorithm/external"
 )
 
 var (
@@ -42,7 +40,7 @@ func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 
 // LocateMaxFloat64s returns the position of the maximal element among a subset
 // of a vector’s elements.
-func LocateMaxFloat64s(data []float64, set external.Set) uint {
+func LocateMaxFloat64s(data []float64, set map[uint]bool) uint {
 	value, position := -infinity, ^uint(0)
 	for i := range set {
 		if data[i] > value {
@@ -54,7 +52,7 @@ func LocateMaxFloat64s(data []float64, set external.Set) uint {
 
 // LocateMinUint64s returns the position of the maximal element among a subset
 // of a vector’s elements.
-func LocateMinUint64s(data []uint64, set external.Set) uint {
+func LocateMinUint64s(data []uint64, set map[uint]bool) uint {
 	value, position := ^uint64(0), ^uint(0)
 	for i := range set {
 		if data[i] < value {

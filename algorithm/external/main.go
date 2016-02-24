@@ -12,6 +12,3 @@ type Progress struct {
 	More uint // Number of nodes to be evaluated
 	Done uint // Number of nodes evaluated so far
 }
-
-// Set is a subset of ordered elements.
-type Set map[uint]bool

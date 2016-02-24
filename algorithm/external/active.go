@@ -5,7 +5,7 @@ type Active struct {
 	// All level indices considered so far.
 	Indices []uint64
 	// The positions of active level indices.
-	Positions Set
+	Positions map[uint]bool
 
 	ni   uint
 	nn   uint
@@ -22,7 +22,7 @@ type reference map[uint]uint
 func NewActive(ni, lmax, imax uint) *Active {
 	return &Active{
 		Indices:   make([]uint64, 1*ni),
-		Positions: Set{0: true},
+		Positions: map[uint]bool{0: true},
 
 		ni:   ni,
 		nn:   1,
