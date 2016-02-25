@@ -104,9 +104,10 @@ func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
 	nn := uint(len(lindices)) / ni
 	indices, counts := []uint64(nil), make([]uint, nn)
 	for i := uint(0); i < nn; i++ {
-		newIndices := grid.Index(lindices[i*ni : (i+1)*ni])
+		newIndices := grid.Index(lindices[:ni])
 		indices = append(indices, newIndices...)
 		counts[i] = uint(len(newIndices)) / ni
+		lindices = lindices[ni:]
 	}
 	return indices, counts
 }
