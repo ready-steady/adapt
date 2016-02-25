@@ -12,9 +12,6 @@ type Config struct {
 	// The maximum number of indices.
 	MaxIndices uint
 
-	// The degree of adaptivity.
-	AdaptivityRate float64
-
 	// The number of concurrent workers. The evaluation of the target function
 	// and the surrogate itself is distributed among this many goroutines.
 	Workers uint
@@ -25,9 +22,6 @@ func NewConfig() *Config {
 	return &Config{
 		MaxLevel:   9,
 		MaxIndices: ^uint(0),
-
-		AdaptivityRate: 1.0,
-
-		Workers: uint(runtime.GOMAXPROCS(0)),
+		Workers:    uint(runtime.GOMAXPROCS(0)),
 	}
 }

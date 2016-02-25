@@ -11,18 +11,16 @@ type Active struct {
 
 	Scores []float64 // Scores of level indices
 
-	k    uint
-	ni   uint
-	rate float64
+	k  uint
+	ni uint
 }
 
 func newActive(ni uint, config *Config) *Active {
 	return &Active{
 		Active: *external.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
-		k:    ^uint(0),
-		ni:   ni,
-		rate: config.AdaptivityRate,
+		k:  ^uint(0),
+		ni: ni,
 
 		Scores: []float64{0.0},
 	}
