@@ -1,13 +1,7 @@
 package global
 
 import (
-	"math"
-
 	"github.com/ready-steady/adapt/algorithm/internal"
-)
-
-var (
-	infinity = math.Inf(1.0)
 )
 
 // Target is a function to be interpolated.

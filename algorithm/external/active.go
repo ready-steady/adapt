@@ -2,10 +2,8 @@ package external
 
 // Active is a book-keeper of active level indices.
 type Active struct {
-	// All level indices considered so far.
-	Indices []uint64
-	// The positions of active level indices.
-	Positions map[uint]bool
+	Indices   []uint64      // Level indices considered so far
+	Positions map[uint]bool // Positions of active level indices
 
 	ni   uint
 	nn   uint

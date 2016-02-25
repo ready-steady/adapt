@@ -6,10 +6,6 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-var (
-	infinity = math.Inf(1)
-)
-
 // Target is a function to be interpolated.
 type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
@@ -53,8 +49,6 @@ type BasicTarget struct {
 	ContinueHandler func(*Active, *Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
 	ScoreHandler    func(*Location) (float64, []float64)
-
-	scores []float64
 }
 
 // NewTarget creates a basic target.
@@ -97,7 +91,11 @@ func (self *BasicTarget) Score(location *Location) (float64, []float64) {
 }
 
 func (self *BasicTarget) defaultContinue(active *Active, progress *Progress) bool {
-	return true
+	Σ := 0.0
+	for i := range active.Positions {
+		Σ += active.Global[i]
+	}
+	return Σ > self.Global
 }
 
 func (self *BasicTarget) defaultScore(location *Location) (float64, []float64) {

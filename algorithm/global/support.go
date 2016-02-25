@@ -1,7 +1,13 @@
 package global
 
 import (
+	"math"
+
 	"github.com/ready-steady/adapt/algorithm/internal"
+)
+
+var (
+	infinity = math.Inf(1.0)
 )
 
 func assess(basis Basis, target Target, counts []uint, indices []uint64,

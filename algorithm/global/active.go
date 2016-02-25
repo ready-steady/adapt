@@ -9,10 +9,8 @@ import (
 type Active struct {
 	external.Active
 
-	// Norms contains the norms of the indices.
-	Norms []uint64
-	// Scores contains the scores of the indices.
-	Scores []float64
+	Norms  []uint64  // Norms of level indices
+	Scores []float64 // Scores of level indices
 
 	k    uint
 	ni   uint
@@ -46,7 +44,7 @@ func (self *Active) pull() []uint64 {
 	nn := uint(len(indices)) / self.ni
 	for i := uint(0); i < nn; i++ {
 		self.Norms = append(self.Norms, norm)
-		self.Scores = append(self.Scores, 0.0)
+		self.Scores = append(self.Scores, infinity)
 	}
 
 	return indices
