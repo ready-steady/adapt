@@ -15,13 +15,14 @@ func assess(basis Basis, target Target, counts []uint, indices []uint64,
 
 	scores := make([]float64, len(counts))
 	for i, count := range counts {
-		offset := count * no
+		oi, oo := count*ni, count*no
 		scores[i] = target.Score(&Location{
-			Values:    values[:offset],
-			Surpluses: surpluses[:offset],
-			Volumes:   internal.Measure(basis, indices[:offset], ni),
+			Indices:   indices[:oi],
+			Volumes:   internal.Measure(basis, indices[:oo], ni),
+			Values:    values[:oo],
+			Surpluses: surpluses[:oo],
 		})
-		indices, values, surpluses = indices[count:], values[offset:], surpluses[offset:]
+		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
 	}
 	return scores
 }
