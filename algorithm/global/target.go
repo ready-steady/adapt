@@ -3,6 +3,7 @@ package global
 import (
 	"math"
 
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -11,18 +12,21 @@ type Target interface {
 	// Dimensions returns the number of inputs and the number of outputs.
 	Dimensions() (uint, uint)
 
-	// Continue is called at the end of each iteration. If the function returns
-	// false, the interpolation process is terminated. The first argument is the
-	// set of currently active indices.
-	Continue(*Active, *Progress) bool
+	// Continue decides if the interpolation process should go on. The function
+	// is called at the beginning of each iteration.
+	Continue(*external.Active, *Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
-	// once for each node of the admissible neighbors.
+	// for each node of the admissible neighbors of the currently refined index.
 	Compute([]float64, []float64)
 
-	// Score assigns a score to a location. The function is called once for each
-	// admissible neighbor.
-	Score(*Location) float64
+	// Score assesses a location. The function is called for each admissible
+	// neighbor of the currently refined index.
+	Score(*Location)
+
+	// Select decides which of the active indices should be refined next. The
+	// function is called at the end of each iteration.
+	Select(*external.Active) uint
 }
 
 // Location contains information about a dimensional location.
@@ -41,9 +45,10 @@ type Progress struct {
 
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
-	ContinueHandler func(*Active, *Progress) bool
+	ContinueHandler func(*external.Active, *Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
-	ScoreHandler    func(*Location) float64
+	ScoreHandler    func(*Location)
+	SelectHandler   func(*external.Active) uint
 
 	ni uint
 	no uint
@@ -51,6 +56,7 @@ type BasicTarget struct {
 	absolute float64
 	relative float64
 
+	scores []float64
 	errors []float64
 	lower  []float64
 	upper  []float64
@@ -78,7 +84,7 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.ni, self.no
 }
 
-func (self *BasicTarget) Continue(active *Active, progress *Progress) bool {
+func (self *BasicTarget) Continue(active *external.Active, progress *Progress) bool {
 	if self.ContinueHandler != nil {
 		return self.ContinueHandler(active, progress)
 	} else {
@@ -90,15 +96,23 @@ func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *BasicTarget) Score(location *Location) float64 {
+func (self *BasicTarget) Score(location *Location) {
 	if self.ScoreHandler != nil {
-		return self.ScoreHandler(location)
+		self.ScoreHandler(location)
 	} else {
-		return self.defaultScore(location)
+		self.defaultScore(location)
 	}
 }
 
-func (self *BasicTarget) defaultContinue(active *Active, progress *Progress) bool {
+func (self *BasicTarget) Select(active *external.Active) uint {
+	if self.SelectHandler != nil {
+		return self.SelectHandler(active)
+	} else {
+		return self.defaultSelect(active)
+	}
+}
+
+func (self *BasicTarget) defaultContinue(active *external.Active, progress *Progress) bool {
 	no, errors := self.no, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {
@@ -118,11 +132,8 @@ func (self *BasicTarget) defaultContinue(active *Active, progress *Progress) boo
 	return false
 }
 
-func (self *BasicTarget) defaultScore(location *Location) float64 {
+func (self *BasicTarget) defaultScore(location *Location) {
 	no := self.no
-
-	self.updateBounds(location.Values)
-	self.errors = append(self.errors, error(location.Surpluses, no)...)
 
 	score := 0.0
 	for _, value := range location.Surpluses {
@@ -130,7 +141,14 @@ func (self *BasicTarget) defaultScore(location *Location) float64 {
 	}
 	score /= float64(uint(len(location.Values)) / no)
 
-	return score
+	self.scores = append(self.scores, score)
+	self.errors = append(self.errors, error(location.Surpluses, no)...)
+
+	self.updateBounds(location.Values)
+}
+
+func (self *BasicTarget) defaultSelect(active *external.Active) uint {
+	return internal.LocateMaxFloat64s(self.scores, active.Positions)
 }
 
 func (self *BasicTarget) updateBounds(values []float64) {

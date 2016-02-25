@@ -11,12 +11,11 @@ var (
 )
 
 func assess(basis Basis, target Target, counts []uint, indices []uint64,
-	values, surpluses []float64, ni, no uint) []float64 {
+	values, surpluses []float64, ni, no uint) {
 
-	scores := make([]float64, len(counts))
-	for i, count := range counts {
+	for _, count := range counts {
 		oi, oo := count*ni, count*no
-		scores[i] = target.Score(&Location{
+		target.Score(&Location{
 			Indices:   indices[:oi],
 			Volumes:   internal.Measure(basis, indices[:oo], ni),
 			Values:    values[:oo],
@@ -24,5 +23,4 @@ func assess(basis Basis, target Target, counts []uint, indices []uint64,
 		})
 		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
 	}
-	return scores
 }
