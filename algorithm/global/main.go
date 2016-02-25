@@ -3,8 +3,14 @@
 package global
 
 import (
+	"math"
+
 	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
+)
+
+var (
+	infinity = math.Inf(1.0)
 )
 
 // Basis is a functional basis.
@@ -77,6 +83,21 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
+}
+
+func assess(basis Basis, target Target, counts []uint, indices []uint64,
+	values, surpluses []float64, ni, no uint) {
+
+	for _, count := range counts {
+		oi, oo := count*ni, count*no
+		target.Score(&Location{
+			Indices:   indices[:oi],
+			Volumes:   internal.Measure(basis, indices[:oo], ni),
+			Values:    values[:oo],
+			Surpluses: surpluses[:oo],
+		})
+		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
+	}
 }
 
 func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
