@@ -1,6 +1,8 @@
 package global
 
 import (
+	"math"
+
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -38,15 +40,15 @@ type Progress struct {
 
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
-	Inputs  uint // > 0
-	Outputs uint // > 0
-
-	Absolute float64 // ≥ 0
-	Relative float64 // ≥ 0
-
 	ContinueHandler func(*Active, *Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
 	ScoreHandler    func(*Location) float64
+
+	ni uint
+	no uint
+
+	absolute float64
+	relative float64
 
 	errors []float64
 	lower  []float64
@@ -58,11 +60,11 @@ func NewTarget(inputs, outputs uint, absolute, relative float64,
 	compute func([]float64, []float64)) *BasicTarget {
 
 	return &BasicTarget{
-		Inputs:  inputs,
-		Outputs: outputs,
+		ni: inputs,
+		no: outputs,
 
-		Absolute: absolute,
-		Relative: relative,
+		absolute: absolute,
+		relative: relative,
 
 		ComputeHandler: compute,
 
@@ -72,7 +74,7 @@ func NewTarget(inputs, outputs uint, absolute, relative float64,
 }
 
 func (self *BasicTarget) Dimensions() (uint, uint) {
-	return self.Inputs, self.Outputs
+	return self.ni, self.no
 }
 
 func (self *BasicTarget) Continue(active *Active, progress *Progress) bool {
@@ -96,12 +98,12 @@ func (self *BasicTarget) Score(location *Location) float64 {
 }
 
 func (self *BasicTarget) defaultContinue(active *Active, progress *Progress) bool {
-	no, errors := self.Outputs, self.errors
+	no, errors := self.no, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {
 		return true
 	}
-	δ := threshold(self.lower, self.upper, self.Absolute, self.Relative)
+	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
 	for i := range active.Positions {
 		if i >= ne {
 			continue
@@ -116,53 +118,42 @@ func (self *BasicTarget) defaultContinue(active *Active, progress *Progress) boo
 }
 
 func (self *BasicTarget) defaultScore(location *Location) float64 {
-	no := self.Outputs
-	nn := uint(len(location.Values)) / no
+	no := self.no
 
-	for i, point := range location.Values {
-		j := uint(i) % no
-		if self.lower[j] > point {
-			self.lower[j] = point
-		}
-		if self.upper[j] < point {
-			self.upper[j] = point
-		}
-	}
+	self.updateBounds(location.Values)
 	self.errors = append(self.errors, error(location.Surpluses, no)...)
 
 	score := 0.0
 	for _, value := range location.Surpluses {
-		if value < 0.0 {
-			value = -value
-		}
-		score += value
+		score += math.Abs(value)
 	}
+	score /= float64(uint(len(location.Values)) / no)
 
-	return score / float64(nn)
+	return score
+}
+
+func (self *BasicTarget) updateBounds(values []float64) {
+	no := self.no
+	for i, point := range values {
+		j := uint(i) % no
+		self.lower[j] = math.Min(self.lower[j], point)
+		self.upper[j] = math.Max(self.upper[j], point)
+	}
 }
 
 func error(surpluses []float64, no uint) []float64 {
 	error := internal.RepeatFloat64(-infinity, no)
 	for i, value := range surpluses {
 		j := uint(i) % no
-		if value < 0.0 {
-			value = -value
-		}
-		if value > error[j] {
-			error[j] = value
-		}
+		error[j] = math.Max(error[j], math.Abs(value))
 	}
 	return error
 }
 
 func threshold(lower, upper []float64, absolute, relative float64) []float64 {
-	no := uint(len(lower))
-	threshold := make([]float64, no)
-	for i := uint(0); i < no; i++ {
-		threshold[i] = relative * (upper[i] - lower[i])
-		if threshold[i] < absolute {
-			threshold[i] = absolute
-		}
+	threshold := make([]float64, len(lower))
+	for i := range threshold {
+		threshold[i] = math.Max(relative*(upper[i]-lower[i]), absolute)
 	}
 	return threshold
 }
