@@ -24,9 +24,10 @@ type Target interface {
 
 // Location contains information about a spacial location.
 type Location struct {
+	Index   []uint64  // Index of the grid node
+	Volume  float64   // Volume of the basis function
 	Value   []float64 // Target-function value
 	Surplus []float64 // Hierarchical surplus
-	Volume  float64   // Volume under the basis function
 }
 
 // Progress contains information about the interpolation process.

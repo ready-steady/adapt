@@ -7,10 +7,12 @@ func assess(basis Basis, target Target, indices []uint64, values, surpluses []fl
 	scores := measure(basis, indices, ni)
 	for i := uint(0); i < nn; i++ {
 		scores[i] = target.Score(&Location{
-			Value:   values[i*no : (i+1)*no],
-			Surplus: surpluses[i*no : (i+1)*no],
+			Index:   indices[:ni],
 			Volume:  scores[i],
+			Value:   values[:no],
+			Surplus: surpluses[:no],
 		})
+		indices, values, surpluses = indices[ni:], values[no:], surpluses[no:]
 	}
 	return scores
 }
