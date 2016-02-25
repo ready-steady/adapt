@@ -2,8 +2,6 @@ package local
 
 import (
 	"math"
-
-	"github.com/ready-steady/adapt/algorithm/external"
 )
 
 // Target is a function to be interpolated.
@@ -13,7 +11,7 @@ type Target interface {
 
 	// Continue is called at the beginning of each iteration. If the function
 	// returns false, the interpolation process is terminated.
-	Continue(*external.Progress) bool
+	Continue(*Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
 	// once for each active node.
@@ -31,6 +29,12 @@ type Location struct {
 	Volume  float64   // Volume under the basis function
 }
 
+// Progress contains information about the interpolation process.
+type Progress struct {
+	More uint // Number of nodes to be evaluated
+	Done uint // Number of nodes evaluated so far
+}
+
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
 	Inputs  uint // > 0
@@ -38,7 +42,7 @@ type BasicTarget struct {
 
 	Tolerance float64 // ≥ 0
 
-	ContinueHandler func(*external.Progress) bool
+	ContinueHandler func(*Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
 	ScoreHandler    func(*Location) float64
 }
@@ -61,7 +65,7 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.Inputs, self.Outputs
 }
 
-func (self *BasicTarget) Continue(progress *external.Progress) bool {
+func (self *BasicTarget) Continue(progress *Progress) bool {
 	if self.ContinueHandler != nil {
 		return self.ContinueHandler(progress)
 	} else {

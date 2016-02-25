@@ -52,8 +52,8 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	active := newActive(ni, config)
 
 	indices, counts := make([]uint64, 1*ni), []uint{1}
-	progress := &external.Progress{More: 1}
-	for target.Continue(&active.Active, progress) {
+	progress := &Progress{More: 1}
+	for target.Continue(active, progress) {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,

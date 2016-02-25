@@ -698,7 +698,7 @@ func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
 	return kraichnanOrszagInputs, kraichnanOrszagOutputs
 }
 
-func (_ *kraichnanOrszagTarget) Continue(*external.Progress) bool {
+func (_ *kraichnanOrszagTarget) Continue(*Progress) bool {
 	return true
 }
 
@@ -754,7 +754,7 @@ func (self *kraichnanOrszagTarget) Score(location *Location) float64 {
 	return 0.0
 }
 
-func (_ *kraichnanOrszagTarget) After(_ *external.Progress) bool {
+func (_ *kraichnanOrszagTarget) After(_ *Progress) bool {
 	return true
 }
 

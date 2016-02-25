@@ -6,9 +6,3 @@ package external
 type Integrator interface {
 	Integrate([]uint64) float64
 }
-
-// Progress contains information about the interpolation process.
-type Progress struct {
-	More uint // Number of nodes to be evaluated
-	Done uint // Number of nodes evaluated so far
-}
