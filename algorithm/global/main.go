@@ -3,14 +3,8 @@
 package global
 
 import (
-	"math"
-
 	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
-)
-
-var (
-	infinity = math.Inf(1.0)
 )
 
 // Basis is a functional basis.
@@ -57,21 +51,22 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
 	active := external.NewActive(ni, config.MaxLevel, config.MaxIndices)
+	strategy := newStrategy(ni, no, config.AbsoluteError, config.RelativeError)
 
 	k := ^uint(0)
 	indices, counts := index(self.grid, active.Begin(), ni)
 	progress.Push(indices, ni)
-	for target.Continue(active, progress) {
+	for target.Continue(progress) && strategy.Continue(active) {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.Push(self.basis, indices, surpluses)
-		score(self.basis, target, counts, indices, values, surpluses, ni, no)
+		score(self.basis, strategy, target, counts, indices, values, surpluses, ni, no)
 
 		active.Remove(k)
-		k = target.Select(active)
+		k = strategy.Select(active)
 
 		indices, counts = index(self.grid, active.Forward(k), ni)
 		progress.Push(indices, ni)

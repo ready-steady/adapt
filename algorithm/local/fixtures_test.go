@@ -42,7 +42,7 @@ func (self *fixture) initialize() {
 
 func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target) {
 	const (
-		tolerance = 1e-4
+		absolute = 1e-4
 	)
 
 	var config *Config
@@ -59,7 +59,7 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 	var target Target
 	if fixture.target == nil {
 		target = newTarget(fixture.surrogate.Inputs, fixture.surrogate.Outputs,
-			tolerance, fixture.compute)
+			absolute, fixture.compute)
 	} else {
 		target = fixture.target()
 	}
@@ -74,8 +74,8 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 	}
 }
 
-func newTarget(ni, no uint, tolerance float64, compute func([]float64, []float64)) Target {
-	return NewTarget(ni, no, tolerance, compute)
+func newTarget(ni, no uint, absolute float64, compute func([]float64, []float64)) Target {
+	return NewTarget(ni, no, absolute, compute)
 }
 
 var fixtureStep = fixture{
@@ -736,26 +736,22 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 
 func (self *kraichnanOrszagTarget) Score(location *Location) float64 {
 	const (
-		tolerance = 1e-2
+		absolute = 1e-2
 	)
 
 	no := kraichnanOrszagOutputs
 
-	if math.Abs(location.Surplus[no-5]) > tolerance {
+	if math.Abs(location.Surplus[no-5]) > absolute {
 		return 1.0
 	}
-	if math.Abs(location.Surplus[no-3]) > tolerance {
+	if math.Abs(location.Surplus[no-3]) > absolute {
 		return 1.0
 	}
-	if math.Abs(location.Surplus[no-1]) > tolerance {
+	if math.Abs(location.Surplus[no-1]) > absolute {
 		return 1.0
 	}
 
 	return 0.0
-}
-
-func (_ *kraichnanOrszagTarget) After(_ *external.Progress) bool {
-	return true
 }
 
 var fixtureKraichnanOrszag = fixture{

@@ -39,9 +39,6 @@ type Interpolator struct {
 
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
-	if config.Workers == 0 {
-		panic("the number of workers should be positive")
-	}
 	return &Interpolator{
 		grid:   grid,
 		basis:  basis,

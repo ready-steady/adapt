@@ -6,22 +6,24 @@ import (
 
 // Config represents a configuration of the algorithm.
 type Config struct {
-	// The maximum level of interpolation.
-	MaxLevel uint
+	MaxLevel   uint // Maximum level of interpolation
+	MaxIndices uint // Maximum number of indices
 
-	// The maximum number of indices.
-	MaxIndices uint
+	AbsoluteError float64 // Tolerance on the absolute error
+	RelativeError float64 // Tolerance on the relative error
 
-	// The number of concurrent workers. The evaluation of the target function
-	// and the surrogate itself is distributed among this many goroutines.
-	Workers uint
+	Workers uint // Number of concurrent workers
 }
 
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		MaxLevel:   9,
+		MaxLevel:   10,
 		MaxIndices: ^uint(0),
-		Workers:    uint(runtime.GOMAXPROCS(0)),
+
+		AbsoluteError: 1e-6,
+		RelativeError: 1e-2,
+
+		Workers: uint(runtime.GOMAXPROCS(0)),
 	}
 }

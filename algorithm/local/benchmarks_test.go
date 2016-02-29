@@ -38,14 +38,14 @@ func BenchmarkComputeBox(b *testing.B) {
 
 func BenchmarkComputeMany(b *testing.B) {
 	const (
-		inputs    = 2
-		outputs   = 1000
-		tolerance = 1e-4
+		inputs   = 2
+		outputs  = 1000
+		absolute = 1e-4
 	)
 
 	interpolator, target := prepare(&fixture{
 		target: func() Target {
-			return newTarget(inputs, outputs, tolerance, many(inputs, outputs))
+			return newTarget(inputs, outputs, absolute, many(inputs, outputs))
 		},
 		surrogate: &external.Surrogate{
 			Inputs:  inputs,
@@ -103,14 +103,14 @@ func BenchmarkEvaluateBox(b *testing.B) {
 
 func BenchmarkEvaluateMany(b *testing.B) {
 	const (
-		inputs    = 2
-		outputs   = 1000
-		tolerance = 1e-4
+		inputs   = 2
+		outputs  = 1000
+		absolute = 1e-4
 	)
 
 	interpolator, target := prepare(&fixture{
 		target: func() Target {
-			return newTarget(inputs, outputs, tolerance, many(inputs, outputs))
+			return newTarget(inputs, outputs, absolute, many(inputs, outputs))
 		},
 		surrogate: &external.Surrogate{
 			Inputs:  inputs,

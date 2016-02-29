@@ -2320,16 +2320,11 @@ var fixtureBranin = fixture{
 }
 
 func prepare(fixture *fixture) (*Interpolator, *BasicTarget) {
-	const (
-		absolute = 1e-6
-		relative = 1e-2
-	)
-
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
 	config := NewConfig()
 
-	target := NewTarget(ni, no, absolute, relative, fixture.compute)
+	target := NewTarget(ni, no, fixture.compute)
 	interpolator := New(equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config)
 
 	return interpolator, target

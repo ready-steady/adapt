@@ -12,9 +12,9 @@ func TestBranin(t *testing.T) {
 	interpolator, target := prepare(fixture)
 
 	progresses := make([]external.Progress, 0)
-	target.ContinueHandler = func(active *external.Active, progress *external.Progress) bool {
+	target.ContinueHandler = func(progress *external.Progress) bool {
 		progresses = append(progresses, *progress)
-		return target.defaultContinue(active, progress)
+		return true
 	}
 
 	surrogate := interpolator.Compute(target)
