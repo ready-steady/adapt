@@ -46,12 +46,12 @@ func NewTarget(inputs, outputs uint, absolute float64,
 	compute func([]float64, []float64)) *BasicTarget {
 
 	return &BasicTarget{
+		ComputeHandler: compute,
+
 		ni: inputs,
 		no: outputs,
 
 		absolute: absolute,
-
-		ComputeHandler: compute,
 	}
 }
 
