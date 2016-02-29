@@ -328,6 +328,12 @@ var fixtureHat = fixture{
 }
 
 var fixtureCube = fixture{
+	config: func() *Config {
+		config := NewConfig()
+		config.MaxLevel = 9
+		return config
+	},
+
 	target: func() Target {
 		return newTarget(2, 1, 1e-2, func(x, y []float64) {
 			x0, x1 := 2*x[0]-1, 2*x[1]-1
