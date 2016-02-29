@@ -66,7 +66,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.Push(self.basis, indices, surpluses)
-		assess(self.basis, target, counts, indices, values, surpluses, ni, no)
+		score(self.basis, target, counts, indices, values, surpluses, ni, no)
 
 		active.Forget(k)
 		k = target.Select(active)
@@ -85,7 +85,7 @@ func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
 }
 
-func assess(basis Basis, target Target, counts []uint, indices []uint64,
+func score(basis Basis, target Target, counts []uint, indices []uint64,
 	values, surpluses []float64, ni, no uint) {
 
 	for _, count := range counts {

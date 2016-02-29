@@ -1,22 +1,5 @@
 package local
 
-func assess(basis Basis, target Target, indices []uint64, values, surpluses []float64,
-	ni, no uint) []float64 {
-
-	nn := uint(len(indices)) / ni
-	scores := measure(basis, indices, ni)
-	for i := uint(0); i < nn; i++ {
-		scores[i] = target.Score(&Location{
-			Index:   indices[:ni],
-			Volume:  scores[i],
-			Value:   values[:no],
-			Surplus: surpluses[:no],
-		})
-		indices, values, surpluses = indices[ni:], values[no:], surpluses[no:]
-	}
-	return scores
-}
-
 func filter(indices []uint64, scores []float64, lmin, lmax, ni uint) []uint64 {
 	nn := uint(len(scores))
 	levels := levelize(indices, ni)
@@ -57,4 +40,21 @@ func measure(basis Basis, indices []uint64, ni uint) []float64 {
 		volumes[i] = basis.Integrate(indices[i*ni : (i+1)*ni])
 	}
 	return volumes
+}
+
+func score(basis Basis, target Target, indices []uint64, values, surpluses []float64,
+	ni, no uint) []float64 {
+
+	nn := uint(len(indices)) / ni
+	scores := measure(basis, indices, ni)
+	for i := uint(0); i < nn; i++ {
+		scores[i] = target.Score(&Location{
+			Index:   indices[:ni],
+			Volume:  scores[i],
+			Value:   values[:no],
+			Surplus: surpluses[:no],
+		})
+		indices, values, surpluses = indices[ni:], values[no:], surpluses[no:]
+	}
+	return scores
 }

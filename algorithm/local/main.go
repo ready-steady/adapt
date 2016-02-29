@@ -69,7 +69,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 		surrogate.Push(self.basis, indices, surpluses)
 
-		scores := assess(self.basis, target, indices, values, surpluses, ni, no)
+		scores := score(self.basis, target, indices, values, surpluses, ni, no)
 		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
 		indices = unique.Distil(self.grid.Children(indices))
 
