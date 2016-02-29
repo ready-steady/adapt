@@ -18,7 +18,7 @@ type Target interface {
 	Compute([]float64, []float64)
 
 	// Score assigns a score to a location.
-	Score(*Location) float64
+	Score(*Location) (float64, []float64)
 }
 
 // Location contains information about a dimensional location.
@@ -33,7 +33,7 @@ type Location struct {
 type BasicTarget struct {
 	ContinueHandler func(*external.Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
-	ScoreHandler    func(*Location) float64
+	ScoreHandler    func(*Location) (float64, []float64)
 
 	ni uint
 	no uint
@@ -65,14 +65,21 @@ func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *BasicTarget) Score(location *Location) (score float64) {
+func (self *BasicTarget) Score(location *Location) (global float64, local []float64) {
 	if self.ScoreHandler != nil {
-		score = self.ScoreHandler(location)
+		return self.ScoreHandler(location)
 	} else {
-		for _, value := range location.Surpluses {
-			score += math.Abs(value)
+		no, nn := self.no, uint(len(location.Volumes))
+		local = make([]float64, nn)
+		for i := uint(0); i < no; i++ {
+			Γ := 0.0
+			for j := uint(0); j < nn; j++ {
+				γ := location.Volumes[j] * location.Surpluses[j*no+i]
+				local[j] = math.Max(local[j], math.Abs(γ))
+				Γ += γ
+			}
+			global = math.Max(global, math.Abs(Γ))
 		}
-		score /= float64(uint(len(location.Values)) / self.no)
 	}
 	return
 }

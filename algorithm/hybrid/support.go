@@ -1,13 +1,7 @@
 package hybrid
 
 import (
-	"math"
-
 	"github.com/ready-steady/adapt/algorithm/internal"
-)
-
-var (
-	infinity = math.Inf(1.0)
 )
 
 func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
@@ -33,7 +27,8 @@ func score(basis Basis, strategy Strategy, target Target, counts []uint, indices
 			Values:    values[:oo],
 			Surpluses: surpluses[:oo],
 		}
-		strategy.Push(&location, target.Score(&location))
+		global, local := target.Score(&location)
+		strategy.Push(&location, global, local)
 		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
 	}
 }

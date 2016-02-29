@@ -38,7 +38,7 @@ type BasicTarget struct {
 	ni uint
 	no uint
 
-	absolute float64
+	ε float64
 }
 
 // NewTarget creates a basic target.
@@ -51,7 +51,7 @@ func NewTarget(inputs, outputs uint, absolute float64,
 		ni: inputs,
 		no: outputs,
 
-		absolute: absolute,
+		ε: absolute,
 	}
 }
 
@@ -76,7 +76,7 @@ func (self *BasicTarget) Score(location *Location) (score float64) {
 		score = self.ScoreHandler(location)
 	} else {
 		for _, ε := range location.Surplus {
-			if math.Abs(ε) > self.absolute {
+			if math.Abs(ε) > self.ε {
 				score = 1.0
 				break
 			}

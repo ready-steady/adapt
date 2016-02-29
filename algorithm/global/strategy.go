@@ -23,8 +23,8 @@ type defaultStrategy struct {
 	ni uint
 	no uint
 
-	absolute float64
-	relative float64
+	εa float64
+	εr float64
 
 	scores []float64
 	errors []float64
@@ -38,11 +38,11 @@ func newStrategy(ni, no uint, absolute, relative float64) *defaultStrategy {
 		ni: ni,
 		no: no,
 
-		absolute: absolute,
-		relative: relative,
+		εa: absolute,
+		εr: relative,
 
-		lower: internal.RepeatFloat64(infinity, no),
-		upper: internal.RepeatFloat64(-infinity, no),
+		lower: internal.RepeatFloat64(math.Inf(1.0), no),
+		upper: internal.RepeatFloat64(math.Inf(-1.0), no),
 	}
 }
 
@@ -52,7 +52,7 @@ func (self *defaultStrategy) Continue(active *external.Active) bool {
 	if ne == 0 {
 		return true
 	}
-	δ := threshold(self.lower, self.upper, self.absolute, self.relative)
+	δ := threshold(self.lower, self.upper, self.εa, self.εr)
 	for i := range active.Positions {
 		if i >= ne {
 			continue
@@ -86,7 +86,7 @@ func (self *defaultStrategy) updateBounds(values []float64) {
 }
 
 func error(surpluses []float64, no uint) []float64 {
-	error := internal.RepeatFloat64(-infinity, no)
+	error := make([]float64, no)
 	for i, value := range surpluses {
 		j := uint(i) % no
 		error[j] = math.Max(error[j], math.Abs(value))
@@ -94,10 +94,10 @@ func error(surpluses []float64, no uint) []float64 {
 	return error
 }
 
-func threshold(lower, upper []float64, absolute, relative float64) []float64 {
+func threshold(lower, upper []float64, εa, εr float64) []float64 {
 	threshold := make([]float64, len(lower))
 	for i := range threshold {
-		threshold[i] = math.Max(relative*(upper[i]-lower[i]), absolute)
+		threshold[i] = math.Max(εr*(upper[i]-lower[i]), εa)
 	}
 	return threshold
 }

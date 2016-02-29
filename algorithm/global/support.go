@@ -1,13 +1,7 @@
 package global
 
 import (
-	"math"
-
 	"github.com/ready-steady/adapt/algorithm/internal"
-)
-
-var (
-	infinity = math.Inf(1.0)
 )
 
 func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
