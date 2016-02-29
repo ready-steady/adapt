@@ -56,11 +56,12 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
+	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
 	unique := internal.NewUnique(ni)
 
 	indices := make([]uint64, 1*ni)
-	progress := &Progress{More: 1}
+	progress.Push(indices, ni)
 	for target.Continue(progress) && progress.More > 0 {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
@@ -68,13 +69,10 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
 
 		surrogate.Push(self.basis, indices, surpluses)
-
 		scores := score(self.basis, target, indices, values, surpluses, ni, no)
 		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
 		indices = unique.Distil(self.grid.Children(indices))
-
-		progress.Done += progress.More
-		progress.More = uint(len(indices)) / ni
+		progress.Push(indices, ni)
 	}
 
 	return surrogate

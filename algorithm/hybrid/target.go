@@ -14,7 +14,7 @@ type Target interface {
 
 	// Continue decides if the interpolation process should go on. The function
 	// is called at the beginning of each iteration.
-	Continue(*external.Active, *Progress) bool
+	Continue(*external.Active, *external.Progress) bool
 
 	// Compute evaluates the target function at a point. The function is called
 	// for each node of the admissible neighbors of the currently refined index.
@@ -37,15 +37,9 @@ type Location struct {
 	Surpluses []float64 // Hierarchical surpluses
 }
 
-// Progress contains information about the interpolation process.
-type Progress struct {
-	More uint // Number of nodes to be evaluated
-	Done uint // Number of nodes evaluated so far
-}
-
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
-	ContinueHandler func(*external.Active, *Progress) bool
+	ContinueHandler func(*external.Active, *external.Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
 	ScoreHandler    func(*Location)
 	SelectHandler   func(*external.Active) uint
@@ -78,7 +72,7 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.ni, self.no
 }
 
-func (self *BasicTarget) Continue(active *external.Active, progress *Progress) bool {
+func (self *BasicTarget) Continue(active *external.Active, progress *external.Progress) bool {
 	if self.ContinueHandler != nil {
 		return self.ContinueHandler(active, progress)
 	} else {
@@ -106,7 +100,9 @@ func (self *BasicTarget) Select(active *external.Active) uint {
 	}
 }
 
-func (self *BasicTarget) defaultContinue(active *external.Active, progress *Progress) bool {
+func (self *BasicTarget) defaultContinue(active *external.Active,
+	progress *external.Progress) bool {
+
 	Σ := 0.0
 	for i := range active.Positions {
 		Σ += self.global[i]

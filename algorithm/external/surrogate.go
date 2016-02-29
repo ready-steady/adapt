@@ -14,7 +14,7 @@ type Surrogate struct {
 	Integral  []float64 // Integral over the whole domain
 }
 
-// NewSurrogate create a empty surrogate.
+// NewSurrogate returns an empty surrogate.
 func NewSurrogate(ni, no uint) *Surrogate {
 	return &Surrogate{
 		Inputs:    ni,
@@ -25,7 +25,7 @@ func NewSurrogate(ni, no uint) *Surrogate {
 	}
 }
 
-// Push extends the surrogate with indices and surpluses.
+// Push takes into account new indices and surpluses.
 func (self *Surrogate) Push(integrator Integrator, indices []uint64, surpluses []float64) {
 	na := uint(len(indices)) / self.Inputs
 	self.Nodes += na

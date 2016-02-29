@@ -54,12 +54,13 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	surrogate := external.NewSurrogate(ni, no)
 	active := external.NewActive(ni, config.MaxLevel, config.MaxIndices)
+	progress := external.NewProgress()
+	surrogate := external.NewSurrogate(ni, no)
 
 	k := ^uint(0)
 	indices, counts := index(self.grid, active.Begin(), ni)
-	progress := &Progress{More: uint(len(indices)) / ni}
+	progress.Push(indices, ni)
 	for target.Continue(active, progress) {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
@@ -71,10 +72,9 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 		active.Remove(k)
 		k = target.Select(active)
-		indices, counts = index(self.grid, active.Forward(k), ni)
 
-		progress.Done += progress.More
-		progress.More = uint(len(indices)) / ni
+		indices, counts = index(self.grid, active.Forward(k), ni)
+		progress.Push(indices, ni)
 	}
 
 	return surrogate
