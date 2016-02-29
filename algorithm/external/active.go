@@ -19,22 +19,25 @@ type reference map[uint]uint
 // NewActive creates a book-keeper.
 func NewActive(ni, lmax, imax uint) *Active {
 	return &Active{
-		Indices:   make([]uint64, 1*ni),
-		Positions: map[uint]bool{0: true},
-
 		ni:   ni,
-		nn:   1,
 		lmax: lmax,
 		imax: imax,
-
-		forward:  make(reference),
-		backward: make(reference),
 	}
 }
 
-// Advance identifies, activates, and returns admissible indices from the
+// Begin resets the internal state and returns the root level index.
+func (self *Active) Begin() (indices []uint64) {
+	self.Indices = make([]uint64, 1*self.ni)
+	self.Positions = map[uint]bool{0: true}
+	self.nn = 1
+	self.forward = make(reference)
+	self.backward = make(reference)
+	return self.Indices
+}
+
+// Forward identifies, activates, and returns admissible indices from the
 // forward neighborhood of a level index.
-func (self *Active) Advance(k uint) (indices []uint64) {
+func (self *Active) Forward(k uint) (indices []uint64) {
 	ni, nn := self.ni, self.nn
 	positions, forward, backward := self.Positions, self.forward, self.backward
 
@@ -77,7 +80,7 @@ outer:
 	return
 }
 
-// Forget deactivates a level index.
-func (self *Active) Forget(k uint) {
+// Remove deactivates a level index.
+func (self *Active) Remove(k uint) {
 	delete(self.Positions, k)
 }

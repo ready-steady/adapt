@@ -57,8 +57,9 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	surrogate := external.NewSurrogate(ni, no)
 	active := external.NewActive(ni, config.MaxLevel, config.MaxIndices)
 
-	k, indices, counts := ^uint(0), make([]uint64, 1*ni), []uint{1}
-	progress := &Progress{More: 1}
+	k := ^uint(0)
+	indices, counts := index(self.grid, active.Begin(), ni)
+	progress := &Progress{More: uint(len(indices)) / ni}
 	for target.Continue(active, progress) {
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
@@ -68,9 +69,9 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surrogate.Push(self.basis, indices, surpluses)
 		score(self.basis, target, counts, indices, values, surpluses, ni, no)
 
-		active.Forget(k)
+		active.Remove(k)
 		k = target.Select(active)
-		indices, counts = index(self.grid, active.Advance(k), ni)
+		indices, counts = index(self.grid, active.Forward(k), ni)
 
 		progress.Done += progress.More
 		progress.More = uint(len(indices)) / ni
@@ -83,6 +84,18 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
+}
+
+func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
+	nn := uint(len(lindices)) / ni
+	indices, counts := []uint64(nil), make([]uint, nn)
+	for i := uint(0); i < nn; i++ {
+		newIndices := grid.Index(lindices[:ni])
+		indices = append(indices, newIndices...)
+		counts[i] = uint(len(newIndices)) / ni
+		lindices = lindices[ni:]
+	}
+	return indices, counts
 }
 
 func score(basis Basis, target Target, counts []uint, indices []uint64,
@@ -98,16 +111,4 @@ func score(basis Basis, target Target, counts []uint, indices []uint64,
 		})
 		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
 	}
-}
-
-func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
-	nn := uint(len(lindices)) / ni
-	indices, counts := []uint64(nil), make([]uint, nn)
-	for i := uint(0); i < nn; i++ {
-		newIndices := grid.Index(lindices[:ni])
-		indices = append(indices, newIndices...)
-		counts[i] = uint(len(newIndices)) / ni
-		lindices = lindices[ni:]
-	}
-	return indices, counts
 }
