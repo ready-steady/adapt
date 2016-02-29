@@ -54,9 +54,9 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	ni, no := target.Dimensions()
 	nw := config.Workers
 
-	active := external.NewActive(ni, config.MaxLevel, config.MaxIndices)
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
+	active := external.NewActive(ni, config.MaxLevel, config.MaxIndices)
 
 	k := ^uint(0)
 	indices, counts := index(self.grid, active.Begin(), ni)
@@ -84,31 +84,4 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs, self.config.Workers)
-}
-
-func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
-	nn := uint(len(lindices)) / ni
-	indices, counts := []uint64(nil), make([]uint, nn)
-	for i := uint(0); i < nn; i++ {
-		newIndices := grid.Index(lindices[:ni])
-		indices = append(indices, newIndices...)
-		counts[i] = uint(len(newIndices)) / ni
-		lindices = lindices[ni:]
-	}
-	return indices, counts
-}
-
-func score(basis Basis, target Target, counts []uint, indices []uint64,
-	values, surpluses []float64, ni, no uint) {
-
-	for _, count := range counts {
-		oi, oo := count*ni, count*no
-		target.Score(&Location{
-			Indices:   indices[:oi],
-			Volumes:   internal.Measure(basis, indices[:oo], ni),
-			Values:    values[:oo],
-			Surpluses: surpluses[:oo],
-		})
-		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
-	}
 }
