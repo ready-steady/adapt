@@ -17,7 +17,7 @@ type Target interface {
 	// Compute evaluates the target function at a point.
 	Compute([]float64, []float64)
 
-	// Score assigns a score to an interpolation element
+	// Score assigns a score to an interpolation element.
 	Score(*Element) []float64
 }
 
