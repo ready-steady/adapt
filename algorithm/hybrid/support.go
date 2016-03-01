@@ -21,13 +21,13 @@ func score(basis Basis, strategy Strategy, target Target, counts []uint, indices
 
 	for _, count := range counts {
 		oi, oo := count*ni, count*no
-		location := Location{
+		element := Element{
 			Indices:   indices[:oi],
 			Volumes:   internal.Measure(basis, indices[:oo], ni),
 			Values:    values[:oo],
 			Surpluses: surpluses[:oo],
 		}
-		strategy.Push(&location, target.Score(&location))
+		strategy.Push(&element, target.Score(&element))
 		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
 	}
 }

@@ -48,7 +48,7 @@ func score(basis Basis, target Target, indices []uint64, values, surpluses []flo
 	nn := uint(len(indices)) / ni
 	scores := measure(basis, indices, ni)
 	for i := uint(0); i < nn; i++ {
-		scores[i] = target.Score(&Location{
+		scores[i] = target.Score(&Element{
 			Index:   indices[:ni],
 			Volume:  scores[i],
 			Value:   values[:no],

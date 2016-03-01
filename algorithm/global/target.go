@@ -17,12 +17,12 @@ type Target interface {
 	// Compute evaluates the target function at a point.
 	Compute([]float64, []float64)
 
-	// Score assigns a score to a location.
-	Score(*Location) float64
+	// Score assigns a score to an interpolation element.
+	Score(*Element) float64
 }
 
-// Location contains information about a dimensional location.
-type Location struct {
+// Element contains information about an interpolation element.
+type Element struct {
 	Indices   []uint64  // Indices of the grid nodes
 	Volumes   []float64 // Volumes of the basis functions
 	Values    []float64 // Target-function values
@@ -33,7 +33,7 @@ type Location struct {
 type BasicTarget struct {
 	ContinueHandler func(*external.Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
-	ScoreHandler    func(*Location) float64
+	ScoreHandler    func(*Element) float64
 
 	ni uint
 	no uint
@@ -65,14 +65,14 @@ func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *BasicTarget) Score(location *Location) (score float64) {
+func (self *BasicTarget) Score(element *Element) (score float64) {
 	if self.ScoreHandler != nil {
-		score = self.ScoreHandler(location)
+		score = self.ScoreHandler(element)
 	} else {
-		for _, value := range location.Surpluses {
+		for _, value := range element.Surpluses {
 			score += math.Abs(value)
 		}
-		score /= float64(uint(len(location.Values)) / self.no)
+		score /= float64(uint(len(element.Values)) / self.no)
 	}
 	return
 }

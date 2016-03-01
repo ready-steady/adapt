@@ -10,8 +10,8 @@ type Strategy interface {
 	// Continue decides if the interpolation process should go on.
 	Continue(*external.Active) bool
 
-	// Push takes into account a new location and its score.
-	Push(*Location, []float64)
+	// Push takes into account a new interpolation element and its score.
+	Push(*Element, []float64)
 
 	// Select chooses an active index for refinement.
 	Select(*external.Active) uint
@@ -46,7 +46,7 @@ func (self *defaultStrategy) Continue(active *external.Active) bool {
 	return total > self.εt
 }
 
-func (self *defaultStrategy) Push(location *Location, local []float64) {
+func (self *defaultStrategy) Push(element *Element, local []float64) {
 	global := 0.0
 	for i := range local {
 		global += local[i]

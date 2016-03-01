@@ -17,12 +17,12 @@ type Target interface {
 	// Compute evaluates the target function at a point.
 	Compute([]float64, []float64)
 
-	// Score assigns a score to a location.
-	Score(*Location) []float64
+	// Score assigns a score to an interpolation element
+	Score(*Element) []float64
 }
 
-// Location contains information about a dimensional location.
-type Location struct {
+// Element contains information about an interpolation element
+type Element struct {
 	Indices   []uint64  // Indices of the grid nodes
 	Volumes   []float64 // Volumes of the basis functions
 	Values    []float64 // Target-function values
@@ -33,7 +33,7 @@ type Location struct {
 type BasicTarget struct {
 	ContinueHandler func(*external.Progress) bool
 	ComputeHandler  func([]float64, []float64) // != nil
-	ScoreHandler    func(*Location) []float64
+	ScoreHandler    func(*Element) []float64
 
 	ni uint
 	no uint
@@ -65,14 +65,14 @@ func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *BasicTarget) Score(location *Location) []float64 {
+func (self *BasicTarget) Score(element *Element) []float64 {
 	if self.ScoreHandler != nil {
-		return self.ScoreHandler(location)
+		return self.ScoreHandler(element)
 	} else {
-		no, local := self.no, make([]float64, len(location.Volumes))
-		for i, surplus := range location.Surpluses {
+		no, local := self.no, make([]float64, len(element.Volumes))
+		for i, surplus := range element.Surpluses {
 			j := uint(i) % no
-			local[j] = math.Max(local[j], math.Abs(location.Volumes[j]*surplus))
+			local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*surplus))
 		}
 		return local
 	}

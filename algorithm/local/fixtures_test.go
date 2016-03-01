@@ -740,20 +740,20 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 	}
 }
 
-func (self *kraichnanOrszagTarget) Score(location *Location) float64 {
+func (self *kraichnanOrszagTarget) Score(element *Element) float64 {
 	const (
 		absolute = 1e-2
 	)
 
 	no := kraichnanOrszagOutputs
 
-	if math.Abs(location.Surplus[no-5]) > absolute {
+	if math.Abs(element.Surplus[no-5]) > absolute {
 		return 1.0
 	}
-	if math.Abs(location.Surplus[no-3]) > absolute {
+	if math.Abs(element.Surplus[no-3]) > absolute {
 		return 1.0
 	}
-	if math.Abs(location.Surplus[no-1]) > absolute {
+	if math.Abs(element.Surplus[no-1]) > absolute {
 		return 1.0
 	}
 
