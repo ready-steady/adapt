@@ -6,8 +6,8 @@ import (
 
 // Strategy guides the interpolation process.
 type strategy interface {
-	// Begin returns the initial order indices.
-	Begin() ([]uint64, []uint)
+	// Start returns the initial order indices.
+	Start() ([]uint64, []uint)
 
 	// Check decides if the interpolation process should go on.
 	Check() bool
@@ -55,7 +55,7 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	}
 }
 
-func (self *basicStrategy) Begin() ([]uint64, []uint) {
+func (self *basicStrategy) Start() ([]uint64, []uint) {
 	return index(self.grid, self.Active.Initialize(), self.ni)
 }
 
