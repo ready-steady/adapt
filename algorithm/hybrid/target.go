@@ -11,8 +11,8 @@ type Target interface {
 	// Dimensions returns the number of inputs and outputs.
 	Dimensions() (uint, uint)
 
-	// Continue decides if the interpolation process should go on.
-	Continue(*external.Progress) bool
+	// Check decides if the interpolation process should go on.
+	Check(*external.Progress) bool
 
 	// Compute evaluates the target function at a point.
 	Compute([]float64, []float64)
@@ -53,7 +53,7 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.ni, self.no
 }
 
-func (self *BasicTarget) Continue(progress *external.Progress) bool {
+func (self *BasicTarget) Check(progress *external.Progress) bool {
 	if self.ContinueHandler != nil {
 		return self.ContinueHandler(progress)
 	} else {

@@ -6,15 +6,20 @@ import (
 
 // Strategy guides the interpolation process.
 type strategy interface {
-	// Continue decides if the interpolation process should go on.
-	Continue() bool
+	// Begin returns the initial order indices.
+	Begin() ([]uint64, []uint)
+
+	// Check decides if the interpolation process should go on.
+	Check() bool
 
 	// Push takes into account a new interpolation element and its score.
 	Push(*Element, []float64)
 
-	// Forward selects an active index for refinement and returns its admissible
-	// neighbors from the forward neighborhood.
-	Forward() []uint64
+	// Move selects an active level index, searches admissible level indices in
+	// the forward neighborhood of the selected level index, searches admissible
+	// order indices with respect to each admissible level index, and returns
+	// all the identified order indices.
+	Move() ([]uint64, []uint)
 }
 
 type defaultStrategy struct {
@@ -22,6 +27,8 @@ type defaultStrategy struct {
 
 	ni uint
 	no uint
+
+	grid Grid
 
 	εt float64
 	εl float64
@@ -32,12 +39,14 @@ type defaultStrategy struct {
 	local  []float64
 }
 
-func newStrategy(ni, no uint, config *Config) *defaultStrategy {
+func newStrategy(ni, no uint, grid Grid, config *Config) *defaultStrategy {
 	return &defaultStrategy{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		ni: ni,
 		no: no,
+
+		grid: grid,
 
 		εt: config.TotalError,
 		εl: config.LocalError,
@@ -46,7 +55,11 @@ func newStrategy(ni, no uint, config *Config) *defaultStrategy {
 	}
 }
 
-func (self *defaultStrategy) Continue() bool {
+func (self *defaultStrategy) Begin() ([]uint64, []uint) {
+	return index(self.grid, self.Active.Initialize(), self.ni)
+}
+
+func (self *defaultStrategy) Check() bool {
 	total := 0.0
 	for i := range self.Positions {
 		total += self.global[i]
@@ -63,8 +76,8 @@ func (self *defaultStrategy) Push(element *Element, local []float64) {
 	self.local = append(self.local, local...)
 }
 
-func (self *defaultStrategy) Forward() []uint64 {
+func (self *defaultStrategy) Move() ([]uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
-	return self.Active.Forward(self.k)
+	return index(self.grid, self.Active.Forward(self.k), self.ni)
 }

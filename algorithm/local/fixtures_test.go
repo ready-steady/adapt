@@ -704,7 +704,7 @@ func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
 	return kraichnanOrszagInputs, kraichnanOrszagOutputs
 }
 
-func (_ *kraichnanOrszagTarget) Continue(*external.Progress) bool {
+func (_ *kraichnanOrszagTarget) Check(*external.Progress) bool {
 	return true
 }
 
