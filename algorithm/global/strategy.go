@@ -14,8 +14,8 @@ type Strategy interface {
 	// Push takes into account a new interpolation element and its score.
 	Push(*Element, float64)
 
-	// Forward selects an active index for refinement and returns its forward
-	// neighborhood.
+	// Forward selects an active index for refinement and returns its admissible
+	// neighbors from the forward neighborhood.
 	Forward(*internal.Active) []uint64
 }
 
