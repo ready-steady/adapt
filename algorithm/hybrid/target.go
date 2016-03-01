@@ -21,7 +21,7 @@ type Target interface {
 	Score(*Element) []float64
 }
 
-// Element contains information about an interpolation element
+// Element contains information about an interpolation element.
 type Element struct {
 	Indices   []uint64  // Indices of the grid nodes
 	Volumes   []float64 // Volumes of the basis functions
