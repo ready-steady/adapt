@@ -1,4 +1,4 @@
-package external
+package internal
 
 // Active is a book-keeper of active level indices.
 type Active struct {

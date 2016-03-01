@@ -50,7 +50,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
-	active := external.NewActive(ni, config.MaxLevel, config.MaxIndices)
+	active := internal.NewActive(ni, config.MaxLevel, config.MaxIndices)
 	strategy := newStrategy(ni, no, config.TotalError, config.LocalError)
 
 	indices, counts := index(self.grid, active.Begin(), ni)

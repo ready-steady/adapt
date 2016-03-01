@@ -3,21 +3,20 @@ package global
 import (
 	"math"
 
-	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 // Strategy guides the interpolation process.
 type Strategy interface {
 	// Continue decides if the interpolation process should go on.
-	Continue(*external.Active) bool
+	Continue(*internal.Active) bool
 
 	// Push takes into account a new interpolation element and its score.
 	Push(*Element, float64)
 
 	// Forward selects an active index for refinement and returns its forward
 	// neighborhood.
-	Forward(*external.Active) []uint64
+	Forward(*internal.Active) []uint64
 }
 
 type defaultStrategy struct {
@@ -51,7 +50,7 @@ func newStrategy(ni, no uint, absolute, relative float64) *defaultStrategy {
 	}
 }
 
-func (self *defaultStrategy) Continue(active *external.Active) bool {
+func (self *defaultStrategy) Continue(active *internal.Active) bool {
 	no, errors := self.no, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {
@@ -77,7 +76,7 @@ func (self *defaultStrategy) Push(element *Element, score float64) {
 	self.errors = append(self.errors, error(element.Surpluses, self.no)...)
 }
 
-func (self *defaultStrategy) Forward(active *external.Active) []uint64 {
+func (self *defaultStrategy) Forward(active *internal.Active) []uint64 {
 	active.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.scores, active.Positions)
 	return active.Forward(self.k)
