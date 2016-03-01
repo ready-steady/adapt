@@ -52,7 +52,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	surrogate := external.NewSurrogate(ni, no)
 	strategy := newStrategy(ni, no, config)
 
-	indices, counts := index(self.grid, strategy.Begin(), ni)
+	indices, counts := index(self.grid, strategy.Initialize(), ni)
 	progress.Push(indices, ni)
 	for target.Continue(progress) && strategy.Continue() {
 		nodes := self.grid.Compute(indices)

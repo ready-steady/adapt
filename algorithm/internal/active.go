@@ -25,8 +25,8 @@ func NewActive(ni, lmax, imax uint) *Active {
 	}
 }
 
-// Begin resets the internal state and returns the root level index.
-func (self *Active) Begin() (indices []uint64) {
+// Initialize resets the internal state and returns the root level index.
+func (self *Active) Initialize() (indices []uint64) {
 	self.Indices = make([]uint64, 1*self.ni)
 	self.Positions = map[uint]bool{0: true}
 	self.nn = 1
