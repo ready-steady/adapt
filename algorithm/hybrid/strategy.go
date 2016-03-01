@@ -5,7 +5,7 @@ import (
 )
 
 // Strategy guides the interpolation process.
-type Strategy interface {
+type strategy interface {
 	// Continue decides if the interpolation process should go on.
 	Continue() bool
 

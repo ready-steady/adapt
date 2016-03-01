@@ -16,7 +16,7 @@ func index(grid Grid, lindices []uint64, ni uint) ([]uint64, []uint) {
 	return indices, counts
 }
 
-func score(basis Basis, strategy Strategy, target Target, counts []uint, indices []uint64,
+func score(basis Basis, strategy strategy, target Target, counts []uint, indices []uint64,
 	values, surpluses []float64, ni, no uint) {
 
 	for _, count := range counts {
