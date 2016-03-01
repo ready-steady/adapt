@@ -9,17 +9,19 @@ import (
 // Strategy guides the interpolation process.
 type Strategy interface {
 	// Continue decides if the interpolation process should go on.
-	Continue(*internal.Active) bool
+	Continue() bool
 
 	// Push takes into account a new interpolation element and its score.
 	Push(*Element, float64)
 
 	// Forward selects an active index for refinement and returns its admissible
 	// neighbors from the forward neighborhood.
-	Forward(*internal.Active) []uint64
+	Forward() []uint64
 }
 
 type defaultStrategy struct {
+	internal.Active
+
 	ni uint
 	no uint
 
@@ -35,13 +37,15 @@ type defaultStrategy struct {
 	upper []float64
 }
 
-func newStrategy(ni, no uint, absolute, relative float64) *defaultStrategy {
+func newStrategy(ni, no uint, config *Config) *defaultStrategy {
 	return &defaultStrategy{
+		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
+
 		ni: ni,
 		no: no,
 
-		εa: absolute,
-		εr: relative,
+		εa: config.AbsoluteError,
+		εr: config.RelativeError,
 
 		k: ^uint(0),
 
@@ -50,14 +54,14 @@ func newStrategy(ni, no uint, absolute, relative float64) *defaultStrategy {
 	}
 }
 
-func (self *defaultStrategy) Continue(active *internal.Active) bool {
+func (self *defaultStrategy) Continue() bool {
 	no, errors := self.no, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {
 		return true
 	}
 	δ := threshold(self.lower, self.upper, self.εa, self.εr)
-	for i := range active.Positions {
+	for i := range self.Positions {
 		if i >= ne {
 			continue
 		}
@@ -76,10 +80,10 @@ func (self *defaultStrategy) Push(element *Element, score float64) {
 	self.errors = append(self.errors, error(element.Surpluses, self.no)...)
 }
 
-func (self *defaultStrategy) Forward(active *internal.Active) []uint64 {
-	active.Remove(self.k)
-	self.k = internal.LocateMaxFloat64s(self.scores, active.Positions)
-	return active.Forward(self.k)
+func (self *defaultStrategy) Forward() []uint64 {
+	self.Remove(self.k)
+	self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
+	return self.Active.Forward(self.k)
 }
 
 func (self *defaultStrategy) updateBounds(values []float64) {

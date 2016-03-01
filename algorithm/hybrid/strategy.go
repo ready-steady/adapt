@@ -7,17 +7,19 @@ import (
 // Strategy guides the interpolation process.
 type Strategy interface {
 	// Continue decides if the interpolation process should go on.
-	Continue(*internal.Active) bool
+	Continue() bool
 
 	// Push takes into account a new interpolation element and its score.
 	Push(*Element, []float64)
 
 	// Forward selects an active index for refinement and returns its admissible
 	// neighbors from the forward neighborhood.
-	Forward(*internal.Active) []uint64
+	Forward() []uint64
 }
 
 type defaultStrategy struct {
+	internal.Active
+
 	ni uint
 	no uint
 
@@ -30,21 +32,23 @@ type defaultStrategy struct {
 	local  []float64
 }
 
-func newStrategy(ni, no uint, total, local float64) *defaultStrategy {
+func newStrategy(ni, no uint, config *Config) *defaultStrategy {
 	return &defaultStrategy{
+		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
+
 		ni: ni,
 		no: no,
 
-		εt: total,
-		εl: local,
+		εt: config.TotalError,
+		εl: config.LocalError,
 
 		k: ^uint(0),
 	}
 }
 
-func (self *defaultStrategy) Continue(active *internal.Active) bool {
+func (self *defaultStrategy) Continue() bool {
 	total := 0.0
-	for i := range active.Positions {
+	for i := range self.Positions {
 		total += self.global[i]
 	}
 	return total > self.εt
@@ -59,8 +63,8 @@ func (self *defaultStrategy) Push(element *Element, local []float64) {
 	self.local = append(self.local, local...)
 }
 
-func (self *defaultStrategy) Forward(active *internal.Active) []uint64 {
-	active.Remove(self.k)
-	self.k = internal.LocateMaxFloat64s(self.global, active.Positions)
-	return active.Forward(self.k)
+func (self *defaultStrategy) Forward() []uint64 {
+	self.Remove(self.k)
+	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+	return self.Active.Forward(self.k)
 }
