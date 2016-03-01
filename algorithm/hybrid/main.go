@@ -53,7 +53,6 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	active := external.NewActive(ni, config.MaxLevel, config.MaxIndices)
 	strategy := newStrategy(ni, no, config.TotalError, config.LocalError)
 
-	k := ^uint(0)
 	indices, counts := index(self.grid, active.Begin(), ni)
 	progress.Push(indices, ni)
 	for target.Continue(progress) && strategy.Continue(active) {
@@ -65,10 +64,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surrogate.Push(self.basis, indices, surpluses)
 		score(self.basis, strategy, target, counts, indices, values, surpluses, ni, no)
 
-		active.Remove(k)
-		k = strategy.Select(active)
-
-		indices, counts = index(self.grid, active.Forward(k), ni)
+		indices, counts = index(self.grid, strategy.Forward(active), ni)
 		progress.Push(indices, ni)
 	}
 

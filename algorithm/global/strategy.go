@@ -15,8 +15,9 @@ type Strategy interface {
 	// Push takes into account a new interpolation element and its score.
 	Push(*Element, float64)
 
-	// Select chooses an active index for refinement.
-	Select(*external.Active) uint
+	// Forward selects an active index for refinement and returns its forward
+	// neighborhood.
+	Forward(*external.Active) []uint64
 }
 
 type defaultStrategy struct {
@@ -25,6 +26,8 @@ type defaultStrategy struct {
 
 	εa float64
 	εr float64
+
+	k uint
 
 	scores []float64
 	errors []float64
@@ -40,6 +43,8 @@ func newStrategy(ni, no uint, absolute, relative float64) *defaultStrategy {
 
 		εa: absolute,
 		εr: relative,
+
+		k: ^uint(0),
 
 		lower: internal.RepeatFloat64(math.Inf(1.0), no),
 		upper: internal.RepeatFloat64(math.Inf(-1.0), no),
@@ -72,8 +77,10 @@ func (self *defaultStrategy) Push(element *Element, score float64) {
 	self.errors = append(self.errors, error(element.Surpluses, self.no)...)
 }
 
-func (self *defaultStrategy) Select(active *external.Active) uint {
-	return internal.LocateMaxFloat64s(self.scores, active.Positions)
+func (self *defaultStrategy) Forward(active *external.Active) []uint64 {
+	active.Remove(self.k)
+	self.k = internal.LocateMaxFloat64s(self.scores, active.Positions)
+	return active.Forward(self.k)
 }
 
 func (self *defaultStrategy) updateBounds(values []float64) {
