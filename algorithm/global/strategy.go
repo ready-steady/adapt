@@ -24,7 +24,7 @@ type strategy interface {
 	Move() ([]uint64, []uint)
 }
 
-type defaultStrategy struct {
+type basicStrategy struct {
 	internal.Active
 
 	ni uint
@@ -44,8 +44,8 @@ type defaultStrategy struct {
 	upper []float64
 }
 
-func newStrategy(ni, no uint, grid Grid, config *Config) *defaultStrategy {
-	return &defaultStrategy{
+func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
+	return &basicStrategy{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		ni: ni,
@@ -63,11 +63,11 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *defaultStrategy {
 	}
 }
 
-func (self *defaultStrategy) Begin() ([]uint64, []uint) {
+func (self *basicStrategy) Begin() ([]uint64, []uint) {
 	return index(self.grid, self.Active.Initialize(), self.ni)
 }
 
-func (self *defaultStrategy) Check() bool {
+func (self *basicStrategy) Check() bool {
 	no, errors := self.no, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {
@@ -87,19 +87,19 @@ func (self *defaultStrategy) Check() bool {
 	return false
 }
 
-func (self *defaultStrategy) Push(element *Element, score float64) {
+func (self *basicStrategy) Push(element *Element, score float64) {
 	self.updateBounds(element.Values)
 	self.scores = append(self.scores, score)
 	self.errors = append(self.errors, error(element.Surpluses, self.no)...)
 }
 
-func (self *defaultStrategy) Move() ([]uint64, []uint) {
+func (self *basicStrategy) Move() ([]uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
 	return index(self.grid, self.Active.Forward(self.k), self.ni)
 }
 
-func (self *defaultStrategy) updateBounds(values []float64) {
+func (self *basicStrategy) updateBounds(values []float64) {
 	no := self.no
 	for i, point := range values {
 		j := uint(i) % no

@@ -22,7 +22,7 @@ type strategy interface {
 	Move() ([]uint64, []uint)
 }
 
-type defaultStrategy struct {
+type basicStrategy struct {
 	internal.Active
 
 	ni uint
@@ -39,8 +39,8 @@ type defaultStrategy struct {
 	local  []float64
 }
 
-func newStrategy(ni, no uint, grid Grid, config *Config) *defaultStrategy {
-	return &defaultStrategy{
+func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
+	return &basicStrategy{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		ni: ni,
@@ -55,11 +55,11 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *defaultStrategy {
 	}
 }
 
-func (self *defaultStrategy) Begin() ([]uint64, []uint) {
+func (self *basicStrategy) Begin() ([]uint64, []uint) {
 	return index(self.grid, self.Active.Initialize(), self.ni)
 }
 
-func (self *defaultStrategy) Check() bool {
+func (self *basicStrategy) Check() bool {
 	total := 0.0
 	for i := range self.Positions {
 		total += self.global[i]
@@ -67,7 +67,7 @@ func (self *defaultStrategy) Check() bool {
 	return total > self.εt
 }
 
-func (self *defaultStrategy) Push(element *Element, local []float64) {
+func (self *basicStrategy) Push(element *Element, local []float64) {
 	global := 0.0
 	for i := range local {
 		global += local[i]
@@ -76,7 +76,7 @@ func (self *defaultStrategy) Push(element *Element, local []float64) {
 	self.local = append(self.local, local...)
 }
 
-func (self *defaultStrategy) Move() ([]uint64, []uint) {
+func (self *basicStrategy) Move() ([]uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
 	return index(self.grid, self.Active.Forward(self.k), self.ni)
