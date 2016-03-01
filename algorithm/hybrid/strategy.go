@@ -11,7 +11,7 @@ type Strategy interface {
 	Continue(*external.Active) bool
 
 	// Push takes into account a new location and its score.
-	Push(*Location, float64, []float64)
+	Push(*Location, []float64)
 
 	// Select chooses an active index for refinement.
 	Select(*external.Active) uint
@@ -21,32 +21,36 @@ type defaultStrategy struct {
 	ni uint
 	no uint
 
-	εg float64
+	εt float64
 	εl float64
 
 	global []float64
 	local  []float64
 }
 
-func newStrategy(ni, no uint, global, local float64) *defaultStrategy {
+func newStrategy(ni, no uint, total, local float64) *defaultStrategy {
 	return &defaultStrategy{
 		ni: ni,
 		no: no,
 
-		εg: global,
+		εt: total,
 		εl: local,
 	}
 }
 
 func (self *defaultStrategy) Continue(active *external.Active) bool {
-	Σ := 0.0
+	total := 0.0
 	for i := range active.Positions {
-		Σ += self.global[i]
+		total += self.global[i]
 	}
-	return Σ > self.εg
+	return total > self.εt
 }
 
-func (self *defaultStrategy) Push(location *Location, global float64, local []float64) {
+func (self *defaultStrategy) Push(location *Location, local []float64) {
+	global := 0.0
+	for i := range local {
+		global += local[i]
+	}
 	self.global = append(self.global, global)
 	self.local = append(self.local, local...)
 }

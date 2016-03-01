@@ -27,8 +27,7 @@ func score(basis Basis, strategy Strategy, target Target, counts []uint, indices
 			Values:    values[:oo],
 			Surpluses: surpluses[:oo],
 		}
-		global, local := target.Score(&location)
-		strategy.Push(&location, global, local)
+		strategy.Push(&location, target.Score(&location))
 		indices, values, surpluses = indices[oi:], values[oo:], surpluses[oo:]
 	}
 }
