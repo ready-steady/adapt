@@ -56,7 +56,7 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 }
 
 func (self *basicStrategy) Start() ([]uint64, []uint) {
-	return index(self.grid, self.Active.Initialize(), self.ni)
+	return index(self.grid, self.Active.Start(), self.ni)
 }
 
 func (self *basicStrategy) Check() bool {
@@ -79,5 +79,5 @@ func (self *basicStrategy) Push(element *Element, local []float64) {
 func (self *basicStrategy) Move() ([]uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
-	return index(self.grid, self.Active.Forward(self.k), self.ni)
+	return index(self.grid, self.Active.Move(self.k), self.ni)
 }

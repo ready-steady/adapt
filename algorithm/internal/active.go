@@ -25,8 +25,8 @@ func NewActive(ni, lmax, imax uint) *Active {
 	}
 }
 
-// Initialize resets the internal state and returns the root level index.
-func (self *Active) Initialize() (indices []uint64) {
+// Start resets the internal state and returns the root level index.
+func (self *Active) Start() (indices []uint64) {
 	self.Indices = make([]uint64, 1*self.ni)
 	self.Positions = map[uint]bool{0: true}
 	self.nn = 1
@@ -35,9 +35,9 @@ func (self *Active) Initialize() (indices []uint64) {
 	return self.Indices
 }
 
-// Forward identifies, activates, and returns admissible indices from the
-// forward neighborhood of a level index.
-func (self *Active) Forward(k uint) (indices []uint64) {
+// Move identifies, activates, and returns admissible indices from the forward
+// neighborhood of a level index.
+func (self *Active) Move(k uint) (indices []uint64) {
 	ni, nn := self.ni, self.nn
 	positions, forward, backward := self.Positions, self.forward, self.backward
 
