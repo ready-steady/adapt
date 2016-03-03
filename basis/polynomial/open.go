@@ -9,7 +9,7 @@ type Open struct {
 	nd uint
 }
 
-// NewOpen creates a basis in (0, 1)^n.
+// NewOpen creates a basis.
 func NewOpen(dimensions, power uint) *Open {
 	if power != 1 {
 		panic("not implemented")

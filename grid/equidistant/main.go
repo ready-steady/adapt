@@ -1,9 +1,9 @@
 // Package equidistant provides means for working with the Newton–Cotes grid.
 //
-// Each node in the grid is identified by a sequence of levels and orders. Such
-// a sequence is encoded as a sequence of uint64s where each uint64 is
-// (level|order<<6). Consequently, the maximal level is 2^6, and the maximal
-// order is 2^58.
+// Each node of an nd-dimensional grid is given by nd pairs (level, order). Each
+// pair is given as a uint64 equal to (level|order<<levelSize) where levelSize
+// is set to 6. In this encoding, the maximal level is 2^levelSize, and the
+// maximal order is 2^(64-levelSize).
 package equidistant
 
 import (
@@ -16,8 +16,8 @@ const (
 	orderSize = 64 - levelSize
 )
 
-func index(levels []uint64, generate func(uint64) []uint64, nd uint) []uint64 {
-	nn := uint(len(levels)) / nd
+func index(lindices []uint64, generate func(uint64) []uint64, nd uint) []uint64 {
+	nn := uint(len(lindices)) / nd
 
 	cache := make(map[uint64][]uint64)
 
@@ -25,7 +25,7 @@ func index(levels []uint64, generate func(uint64) []uint64, nd uint) []uint64 {
 	indicesND := make([]uint64, 0)
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < nd; j++ {
-			level := levels[i*nd+j]
+			level := lindices[i*nd+j]
 			indices, ok := cache[level]
 			if !ok {
 				indices = generate(level)

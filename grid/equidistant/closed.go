@@ -9,7 +9,7 @@ type Closed struct {
 	nd uint
 }
 
-// NewClosed creates a grid in [0, 1]^n.
+// NewClosed creates a grid.
 func NewClosed(dimensions uint) *Closed {
 	return &Closed{dimensions}
 }
@@ -29,7 +29,7 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
-// Children returns the child indices corresponding to a set of indices.
+// Children returns the child indices of a set of indices.
 func (self *Closed) Children(indices []uint64) []uint64 {
 	nd := self.nd
 	nn := uint(len(indices)) / nd
@@ -70,9 +70,9 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 	return children[:nc*nd]
 }
 
-// Index returns the indices of a set of levels.
-func (self *Closed) Index(levels []uint64) []uint64 {
-	return index(levels, indexClosed, self.nd)
+// Index returns the order indices of a set of level indices.
+func (self *Closed) Index(lindices []uint64) []uint64 {
+	return index(lindices, indexClosed, self.nd)
 }
 
 func indexClosed(level uint64) []uint64 {

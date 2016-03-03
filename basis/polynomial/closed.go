@@ -10,7 +10,7 @@ type Closed struct {
 	np uint
 }
 
-// NewClosed creates a basis in [0, 1]^n.
+// NewClosed creates a basis.
 func NewClosed(dimensions uint, power uint) *Closed {
 	return &Closed{dimensions, power}
 }

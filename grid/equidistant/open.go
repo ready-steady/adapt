@@ -9,7 +9,7 @@ type Open struct {
 	nd uint
 }
 
-// NewOpen creates a grid in (0, 1)^n.
+// NewOpen creates a grid.
 func NewOpen(dimensions uint) *Open {
 	return &Open{dimensions}
 }
@@ -25,7 +25,7 @@ func (_ *Open) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
-// Children returns the child indices corresponding to a set of indices.
+// Children returns the child indices of a set of indices.
 func (self *Open) Children(indices []uint64) []uint64 {
 	nd := self.nd
 	nn := uint(len(indices)) / nd
