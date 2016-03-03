@@ -20,7 +20,6 @@ func NewUnique(ni uint) *Unique {
 func (self *Unique) Distil(indices []uint64) []uint64 {
 	ni := self.ni
 	nn := uint(len(indices)) / ni
-
 	na, ne := uint(0), nn
 	for i, j := uint(0), uint(0); i < nn; i++ {
 		key := self.hash.Key(indices[j*ni:])
@@ -37,6 +36,5 @@ func (self *Unique) Distil(indices []uint64) []uint64 {
 		na++
 		j++
 	}
-
 	return indices[:na*ni]
 }
