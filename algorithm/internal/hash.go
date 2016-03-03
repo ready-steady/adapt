@@ -9,7 +9,7 @@ const (
 	sizeOfUint64 = 8
 )
 
-// Hash is a means of converting indices into strings.
+// Hash is a means of creating hash keys from indices.
 type Hash struct {
 	bytes  []byte
 	header *reflect.SliceHeader
@@ -24,7 +24,7 @@ func NewHash(ni uint) *Hash {
 	return hash
 }
 
-// Key converts an index into a string.
+// Key creates a hash key from an index.
 func (self *Hash) Key(index []uint64) string {
 	self.header.Data = uintptr(((*reflect.SliceHeader)(unsafe.Pointer(&index))).Data)
 	key := string(self.bytes)
