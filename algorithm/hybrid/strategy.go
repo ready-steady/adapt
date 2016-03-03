@@ -29,6 +29,8 @@ type basicStrategy struct {
 	no uint
 
 	grid Grid
+	hash *internal.Hash
+	link map[string]uint
 
 	εt float64
 	εl float64
@@ -47,6 +49,8 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 		no: no,
 
 		grid: grid,
+		hash: internal.NewHash(ni),
+		link: make(map[string]uint),
 
 		εt: config.TotalError,
 		εl: config.LocalError,
@@ -56,7 +60,7 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 }
 
 func (self *basicStrategy) Start() ([]uint64, []uint) {
-	return index(self.grid, self.Active.Start(), self.ni)
+	return internal.Index(self.grid, self.Active.Start(), self.ni)
 }
 
 func (self *basicStrategy) Check() bool {
@@ -79,5 +83,14 @@ func (self *basicStrategy) Push(element *Element, local []float64) {
 func (self *basicStrategy) Move() ([]uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
-	return index(self.grid, self.Active.Move(self.k), self.ni)
+	lindices := self.Active.Move(self.k)
+
+	ni := self.ni
+	nn := uint(len(lindices)) / ni
+
+	indices, counts := []uint64(nil), make([]uint, nn)
+	for i := uint(0); i < nn; i++ {
+	}
+
+	return indices, counts
 }

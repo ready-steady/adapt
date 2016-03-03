@@ -9,6 +9,18 @@ var (
 	infinity = math.Inf(1.0)
 )
 
+func Index(indexer Indexer, lindices []uint64, ni uint) ([]uint64, []uint) {
+	nn := uint(len(lindices)) / ni
+	indices, counts := []uint64(nil), make([]uint, nn)
+	for i := uint(0); i < nn; i++ {
+		newIndices := indexer.Index(lindices[:ni])
+		indices = append(indices, newIndices...)
+		counts[i] = uint(len(newIndices)) / ni
+		lindices = lindices[ni:]
+	}
+	return indices, counts
+}
+
 // Invoke evaluates a function at multiple nodes using multiple goroutines.
 func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
 	nn := uint(len(nodes)) / ni

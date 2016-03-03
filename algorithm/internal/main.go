@@ -11,6 +11,11 @@ type Computer interface {
 	Compute([]uint64, []float64) float64
 }
 
+// Indexer computes the indices of a set of level indices.
+type Indexer interface {
+	Index([]uint64) []uint64
+}
+
 // Integrator computes the integral of a basis function.
 type Integrator interface {
 	Integrate([]uint64) float64
