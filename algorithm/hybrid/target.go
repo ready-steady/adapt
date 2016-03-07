@@ -23,6 +23,7 @@ type Target interface {
 
 // Element contains information about an interpolation element.
 type Element struct {
+	Lindex    []uint64  // Level index of the grid
 	Indices   []uint64  // Indices of the grid nodes
 	Volumes   []float64 // Volumes of the basis functions
 	Values    []float64 // Target-function values

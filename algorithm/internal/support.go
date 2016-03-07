@@ -9,14 +9,14 @@ var (
 	infinity = math.Inf(1.0)
 )
 
+// Index returns the nodal indices of a set of level indices.
 func Index(indexer Indexer, lindices []uint64, ni uint) ([]uint64, []uint) {
 	nn := uint(len(lindices)) / ni
 	indices, counts := []uint64(nil), make([]uint, nn)
 	for i := uint(0); i < nn; i++ {
-		newIndices := indexer.Index(lindices[:ni])
+		newIndices := indexer.Index(lindices[i*ni : (i+1)*ni])
 		indices = append(indices, newIndices...)
 		counts[i] = uint(len(newIndices)) / ni
-		lindices = lindices[ni:]
 	}
 	return indices, counts
 }

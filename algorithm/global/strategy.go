@@ -8,8 +8,8 @@ import (
 
 // Strategy guides the interpolation process.
 type strategy interface {
-	// Start returns the initial order indices.
-	Start() ([]uint64, []uint)
+	// Start returns the initial level and nodal indices.
+	Start() ([]uint64, []uint64, []uint)
 
 	// Check decides if the interpolation process should go on.
 	Check() bool
@@ -19,9 +19,9 @@ type strategy interface {
 
 	// Move selects an active level index, searches admissible level indices in
 	// the forward neighborhood of the selected level index, searches admissible
-	// order indices with respect to each admissible level index, and returns
-	// all the identified order indices.
-	Move() ([]uint64, []uint)
+	// nodal indices with respect to each admissible level index, and returns
+	// all the identified level and nodal indices.
+	Move() ([]uint64, []uint64, []uint)
 }
 
 type basicStrategy struct {
@@ -63,8 +63,10 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	}
 }
 
-func (self *basicStrategy) Start() ([]uint64, []uint) {
-	return internal.Index(self.grid, self.Active.Start(), self.ni)
+func (self *basicStrategy) Start() ([]uint64, []uint64, []uint) {
+	lindices := self.Active.Start()
+	indices, counts := internal.Index(self.grid, lindices, self.ni)
+	return lindices, indices, counts
 }
 
 func (self *basicStrategy) Check() bool {
@@ -93,10 +95,12 @@ func (self *basicStrategy) Push(element *Element, score float64) {
 	self.errors = append(self.errors, error(element.Surpluses, self.no)...)
 }
 
-func (self *basicStrategy) Move() ([]uint64, []uint) {
+func (self *basicStrategy) Move() ([]uint64, []uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
-	return internal.Index(self.grid, self.Active.Move(self.k), self.ni)
+	lindices := self.Active.Move(self.k)
+	indices, counts := internal.Index(self.grid, lindices, self.ni)
+	return lindices, indices, counts
 }
 
 func (self *basicStrategy) updateBounds(values []float64) {

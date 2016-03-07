@@ -70,7 +70,7 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 	return children[:nc*nd]
 }
 
-// Index returns the indices of a set of level indices.
+// Index returns the nodal indices of a set of level indices.
 func (self *Closed) Index(lindices []uint64) []uint64 {
 	return index(lindices, indexClosed, self.nd)
 }
