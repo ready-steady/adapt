@@ -29,8 +29,9 @@ type basicStrategy struct {
 	no uint
 
 	grid Grid
+
 	hash *internal.Hash
-	link map[string]uint
+	find map[string]uint
 
 	εt float64
 	εl float64
@@ -49,8 +50,9 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 		no: no,
 
 		grid: grid,
+
 		hash: internal.NewHash(ni),
-		link: make(map[string]uint),
+		find: make(map[string]uint),
 
 		εt: config.TotalError,
 		εl: config.LocalError,
@@ -72,10 +74,15 @@ func (self *basicStrategy) Check() bool {
 }
 
 func (self *basicStrategy) Push(element *Element, local []float64) {
+	ni, ne := self.ni, uint(len(self.local))
+	nn := uint(len(element.Indices)) / self.ni
+
 	global := 0.0
-	for i := range local {
+	for i := uint(0); i < nn; i++ {
 		global += local[i]
+		self.find[self.hash.Key(element.Indices[i*ni:(i+1)*ni])] = ne + i
 	}
+
 	self.global = append(self.global, global)
 	self.local = append(self.local, local...)
 }
@@ -90,6 +97,19 @@ func (self *basicStrategy) Move() ([]uint64, []uint) {
 
 	indices, counts := []uint64(nil), make([]uint, nn)
 	for i := uint(0); i < nn; i++ {
+		lindex := lindices[i*ni : (i+1)*ni]
+		for j := uint(0); j < ni; j++ {
+			l := lindex[j]
+			if l == 0 {
+				continue
+			}
+			lindex[j] = l - 1
+			_, ok := self.find[self.hash.Key(lindex)]
+			lindex[j] = l
+			if !ok {
+				continue
+			}
+		}
 	}
 
 	return indices, counts
