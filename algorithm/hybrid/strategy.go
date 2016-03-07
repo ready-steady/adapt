@@ -30,16 +30,17 @@ type basicStrategy struct {
 
 	grid Grid
 
-	hash *internal.Hash
-	find map[string]uint
-
 	εt float64
 	εl float64
 
 	k uint
 
+	hash *internal.Hash
+	find map[string]uint
+
+	offset []uint
 	global []float64
-	local  [][]float64
+	local  []float64
 }
 
 func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
@@ -51,13 +52,13 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 
 		grid: grid,
 
-		hash: internal.NewHash(ni),
-		find: make(map[string]uint),
-
 		εt: config.TotalError,
 		εl: config.LocalError,
 
 		k: ^uint(0),
+
+		hash: internal.NewHash(ni),
+		find: make(map[string]uint),
 	}
 }
 
@@ -82,8 +83,9 @@ func (self *basicStrategy) Push(element *Element, local []float64) {
 	}
 
 	self.find[self.hash.Key(element.Lindex)] = uint(len(self.global))
+	self.offset = append(self.offset, uint(len(self.local))/self.ni)
 	self.global = append(self.global, global)
-	self.local = append(self.local, local)
+	self.local = append(self.local, local...)
 }
 
 func (self *basicStrategy) Move() ([]uint64, []uint64, []uint) {
