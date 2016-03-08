@@ -34,6 +34,12 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 	return closedChildren(indices, self.nd, 0, self.nd)
 }
 
+// ChildrenToward returns the child indices of a set of indices with respect to
+// a particular dimension.
+func (self *Closed) ChildrenToward(indices []uint64, i uint) []uint64 {
+	return closedChildren(indices, self.nd, i, i+1)
+}
+
 // Index returns the nodal indices of a set of level indices.
 func (self *Closed) Index(lindices []uint64) []uint64 {
 	return index(lindices, closedIndex, self.nd)
