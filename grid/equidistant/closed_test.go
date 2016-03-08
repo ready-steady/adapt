@@ -311,7 +311,7 @@ func TestIndexClosed(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		assert.Equal(indexClosed(c.level), compose(c.levels, c.orders), t)
+		assert.Equal(closedIndex(c.level), compose(c.levels, c.orders), t)
 	}
 }
 

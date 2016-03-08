@@ -31,10 +31,18 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 
 // Children returns the child indices of a set of indices.
 func (self *Closed) Children(indices []uint64) []uint64 {
-	nd := self.nd
+	return closedChildren(indices, self.nd, 0, self.nd)
+}
+
+// Index returns the nodal indices of a set of level indices.
+func (self *Closed) Index(lindices []uint64) []uint64 {
+	return index(lindices, closedIndex, self.nd)
+}
+
+func closedChildren(indices []uint64, nd, fd, ld uint) []uint64 {
 	nn := uint(len(indices)) / nd
 
-	children := make([]uint64, 2*nn*nd*nd)
+	children := make([]uint64, 2*nn*nd*(ld-fd))
 
 	nc := uint(0)
 	push := func(p, d uint, level, order uint64) {
@@ -47,7 +55,7 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 	}
 
 	for i := uint(0); i < nn; i++ {
-		for j := uint(0); j < nd; j++ {
+		for j := fd; j < ld; j++ {
 			level := levelMask & indices[i*nd+j]
 
 			if level == 0 {
@@ -70,12 +78,7 @@ func (self *Closed) Children(indices []uint64) []uint64 {
 	return children[:nc*nd]
 }
 
-// Index returns the nodal indices of a set of level indices.
-func (self *Closed) Index(lindices []uint64) []uint64 {
-	return index(lindices, indexClosed, self.nd)
-}
-
-func indexClosed(level uint64) []uint64 {
+func closedIndex(level uint64) []uint64 {
 	if level>>levelMask != 0 {
 		panic(fmt.Sprintf("the level %d is too large", level))
 	}
