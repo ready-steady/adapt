@@ -4,20 +4,22 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-func score(basis Basis, strategy strategy, target Target, lindices, indices []uint64,
-	counts []uint, values, surpluses []float64, ni, no uint) {
+func score(basis Basis, target Target, indices []uint64, counts []uint,
+	values, surpluses []float64, ni, no uint) []float64 {
 
-	for _, count := range counts {
-		oi, oo := count*ni, count*no
+	nn := uint(len(counts))
+	scores := make([]float64, 0, no)
+	for i, offset := uint(0), uint(0); i < nn; i++ {
+		fi, fo := offset*ni, offset*no
+		li, lo := fi+counts[i]*ni, fo+counts[i]*no
 		element := Element{
-			Lindex:    lindices[:ni],
-			Indices:   indices[:oi],
-			Volumes:   internal.Measure(basis, indices[:oo], ni),
-			Values:    values[:oo],
-			Surpluses: surpluses[:oo],
+			Indices:   indices[fi:li],
+			Volumes:   internal.Measure(basis, indices[fo:lo], ni),
+			Values:    values[fo:lo],
+			Surpluses: surpluses[fo:lo],
 		}
-		strategy.Push(&element, target.Score(&element))
-		lindices, indices = lindices[ni:], indices[oi:]
-		values, surpluses = values[oo:], surpluses[oo:]
+		scores = append(scores, target.Score(&element)...)
+		offset += counts[i]
 	}
+	return scores
 }

@@ -48,13 +48,14 @@ func score(basis Basis, target Target, indices []uint64, values, surpluses []flo
 	nn := uint(len(indices)) / ni
 	scores := measure(basis, indices, ni)
 	for i := uint(0); i < nn; i++ {
+		fi, fo := i*ni, i*no
+		li, lo := (i+1)*ni, (i+1)*no
 		scores[i] = target.Score(&Element{
-			Index:   indices[:ni],
+			Index:   indices[fi:li],
 			Volume:  scores[i],
-			Value:   values[:no],
-			Surplus: surpluses[:no],
+			Value:   values[fo:lo],
+			Surplus: surpluses[fo:lo],
 		})
-		indices, values, surpluses = indices[ni:], values[no:], surpluses[no:]
 	}
 	return scores
 }

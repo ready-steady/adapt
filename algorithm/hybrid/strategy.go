@@ -12,13 +12,14 @@ type strategy interface {
 	// Check decides if the interpolation process should go on.
 	Check() bool
 
-	// Push takes into account a new interpolation element and its score.
-	Push(*Element, []float64)
+	// Push takes into account new level indices, nodal indices, function
+	// values, hierarchical surpluses, and scores.
+	Push([]uint64, []uint64, []float64, []float64, []float64, []uint)
 
 	// Move selects an active level index, searches admissible level indices in
 	// the forward neighborhood of the selected level index, searches admissible
 	// nodal indices with respect to each admissible level index, and returns
-	// the identified level and nodal indices.
+	// all the identified level and nodal indices.
 	Move() ([]uint64, []uint64, []uint)
 }
 
@@ -76,15 +77,19 @@ func (self *basicStrategy) Check() bool {
 	return total > self.εt
 }
 
-func (self *basicStrategy) Push(element *Element, local []float64) {
-	global := 0.0
-	for i := range local {
-		global += local[i]
+func (self *basicStrategy) Push(lindices, _ []uint64, _, _, local []float64, counts []uint) {
+	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
+	nn := uint(len(counts))
+	for i, offset := uint(0), uint(0); i < nn; i++ {
+		global := 0.0
+		for _, ε := range local[offset:(offset + counts[i])] {
+			global += ε
+		}
+		self.find[self.hash.Key(lindices[i*ni:(i+1)*ni])] = ng + i
+		self.offset = append(self.offset, nl+offset)
+		self.global = append(self.global, global)
+		offset += counts[i]
 	}
-
-	self.find[self.hash.Key(element.Lindex)] = uint(len(self.global))
-	self.offset = append(self.offset, uint(len(self.local))/self.ni)
-	self.global = append(self.global, global)
 	self.local = append(self.local, local...)
 }
 
@@ -100,15 +105,30 @@ func (self *basicStrategy) Move() ([]uint64, []uint64, []uint) {
 	for i := uint(0); i < nn; i++ {
 		lindex := lindices[i*ni : (i+1)*ni]
 		for j := uint(0); j < ni; j++ {
-			l := lindex[j]
-			if l == 0 {
+			level := lindex[j]
+			if level == 0 {
 				continue
 			}
-			lindex[j] = l - 1
-			_, ok := self.find[self.hash.Key(lindex)]
-			lindex[j] = l
+
+			lindex[j] = level - 1
+			k, ok := self.find[self.hash.Key(lindex)]
+			lindex[j] = level
 			if !ok {
 				continue
+			}
+
+			var from, till uint
+			from = self.offset[k]
+			if uint(len(self.offset)) > k+1 {
+				till = self.offset[k+1]
+			} else {
+				till = uint(len(self.local))
+			}
+
+			for _, ε := range self.local[from:till] {
+				if ε < self.εl {
+					continue
+				}
 			}
 		}
 	}

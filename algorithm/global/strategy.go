@@ -14,8 +14,9 @@ type strategy interface {
 	// Check decides if the interpolation process should go on.
 	Check() bool
 
-	// Push takes into account a new interpolation element and its score.
-	Push(*Element, float64)
+	// Push takes into account new level indices, nodal indices, function
+	// values, hierarchical surpluses, and scores.
+	Push([]uint64, []uint64, []float64, []float64, []float64, []uint)
 
 	// Move selects an active level index, searches admissible level indices in
 	// the forward neighborhood of the selected level index, searches admissible
@@ -89,10 +90,12 @@ func (self *basicStrategy) Check() bool {
 	return false
 }
 
-func (self *basicStrategy) Push(element *Element, score float64) {
-	self.updateBounds(element.Values)
-	self.scores = append(self.scores, score)
-	self.errors = append(self.errors, error(element.Surpluses, self.no)...)
+func (self *basicStrategy) Push(lindices, indices []uint64,
+	values, surpluses, scores []float64, counts []uint) {
+
+	self.updateBounds(values)
+	self.scores = append(self.scores, scores...)
+	self.errors = append(self.errors, error(surpluses, counts, self.no)...)
 }
 
 func (self *basicStrategy) Move() ([]uint64, []uint64, []uint) {
@@ -112,13 +115,18 @@ func (self *basicStrategy) updateBounds(values []float64) {
 	}
 }
 
-func error(surpluses []float64, no uint) []float64 {
-	error := make([]float64, no)
-	for i, value := range surpluses {
-		j := uint(i) % no
-		error[j] = math.Max(error[j], math.Abs(value))
+func error(surpluses []float64, counts []uint, no uint) []float64 {
+	nn := uint(len(counts))
+	errors := make([]float64, nn*no)
+	for i := uint(0); i < nn; i++ {
+		ns := counts[i] * no
+		for j := uint(0); j < ns; j++ {
+			k := i*no + j%no
+			errors[k] = math.Max(errors[k], math.Abs(surpluses[j]))
+		}
+		surpluses = surpluses[ns:]
 	}
-	return error
+	return errors
 }
 
 func threshold(lower, upper []float64, εa, εr float64) []float64 {

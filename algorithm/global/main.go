@@ -59,9 +59,10 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
+		scores := score(self.basis, target, indices, counts, values, surpluses, ni, no)
 
 		surrogate.Push(self.basis, indices, surpluses)
-		score(self.basis, strategy, target, lindices, indices, counts, values, surpluses, ni, no)
+		strategy.Push(lindices, indices, values, surpluses, scores, counts)
 
 		lindices, indices, counts = strategy.Move()
 		progress.Push(indices, ni)
