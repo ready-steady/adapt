@@ -14,15 +14,10 @@ type strategy interface {
 	// Check returns true if the interpolation process should continue.
 	Check() bool
 
-	// Push takes into account new information, namely, level indices, nodal
-	// indices, basis-function volumes, target-function values, hierarchical
-	// surpluses, and scores.
-	Push([]uint64, []uint64, []float64, []float64, []float64, []uint)
+	// Push takes into account new information.
+	Push(*state)
 
-	// Next returns the level and nodal indices for the next iteration by
-	// selecting an active level index, searching admissible level indices in
-	// the forward neighborhood of the selected level index, and identifying
-	// admissible nodal indices with respect to each admissible level index.
+	// Next returns the level and nodal indices for the next iteration.
 	Next() ([]uint64, []uint64, []uint)
 }
 
@@ -91,12 +86,10 @@ func (self *basicStrategy) Check() bool {
 	return false
 }
 
-func (self *basicStrategy) Push(_, indices []uint64, _, values, surpluses, scores []float64,
-	counts []uint) {
-
-	self.updateBounds(values)
-	self.scores = append(self.scores, scores...)
-	self.errors = append(self.errors, error(surpluses, counts, self.no)...)
+func (self *basicStrategy) Push(state *state) {
+	self.updateBounds(state.observations)
+	self.scores = append(self.scores, state.scores...)
+	self.errors = append(self.errors, error(state.surpluses, state.counts, self.no)...)
 }
 
 func (self *basicStrategy) Next() ([]uint64, []uint64, []uint) {
@@ -107,9 +100,9 @@ func (self *basicStrategy) Next() ([]uint64, []uint64, []uint) {
 	return lindices, indices, counts
 }
 
-func (self *basicStrategy) updateBounds(values []float64) {
+func (self *basicStrategy) updateBounds(observations []float64) {
 	no := self.no
-	for i, point := range values {
+	for i, point := range observations {
 		j := uint(i) % no
 		self.lower[j] = math.Min(self.lower[j], point)
 		self.upper[j] = math.Max(self.upper[j], point)

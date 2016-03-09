@@ -37,6 +37,17 @@ type Interpolator struct {
 	config Config
 }
 
+type state struct {
+	indices []uint64
+	nodes   []float64
+	volumes []float64
+
+	observations []float64
+	predictions  []float64
+	surpluses    []float64
+	scores       []float64
+}
+
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -57,21 +68,24 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	surrogate := external.NewSurrogate(ni, no)
 	unique := internal.NewUnique(ni)
 
-	indices := make([]uint64, 1*ni)
-	progress.Push(indices, ni)
+	state := state{}
+	state.indices = make([]uint64, 1*ni)
+	progress.Push(state.indices, ni)
 	for target.Check(progress) && progress.More > 0 {
-		volumes := internal.Measure(self.basis, indices, ni)
-		nodes := self.grid.Compute(indices)
-		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
-		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
-			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
-		scores := score(target, indices, volumes, values, surpluses, ni, no)
+		state.volumes = internal.Measure(self.basis, state.indices, ni)
+		state.nodes = self.grid.Compute(state.indices)
+		state.observations = internal.Invoke(target.Compute, state.nodes, ni, no, nw)
+		state.predictions = internal.Approximate(self.basis, surrogate.Indices,
+			surrogate.Surpluses, state.nodes, ni, no, nw)
+		state.surpluses = internal.Subtract(state.observations, state.predictions)
+		state.scores = score(target, state.indices, state.volumes, state.observations,
+			state.surpluses, ni, no)
 
-		surrogate.Push(indices, surpluses, volumes)
+		surrogate.Push(state.indices, state.surpluses, state.volumes)
 
-		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
-		indices = unique.Distil(self.grid.Children(indices))
-		progress.Push(indices, ni)
+		state.indices = unique.Distil(self.grid.Children(filter(state.indices, state.scores,
+			config.MinLevel, config.MaxLevel, ni)))
+		progress.Push(state.indices, ni)
 	}
 
 	return surrogate

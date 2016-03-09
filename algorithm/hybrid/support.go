@@ -1,7 +1,7 @@
 package hybrid
 
-func score(target Target, indices []uint64, counts []uint, volumes, values, surpluses []float64,
-	ni, no uint) []float64 {
+func score(target Target, indices []uint64, volumes, observations, surpluses []float64,
+	counts []uint, ni, no uint) []float64 {
 
 	nn := uint(len(counts))
 	scores := make([]float64, 0, no)
@@ -11,7 +11,7 @@ func score(target Target, indices []uint64, counts []uint, volumes, values, surp
 		element := Element{
 			Indices:   indices[fi:li],
 			Volumes:   volumes[offset:(offset + counts[i])],
-			Values:    values[fo:lo],
+			Values:    observations[fo:lo],
 			Surpluses: surpluses[fo:lo],
 		}
 		scores = append(scores, target.Score(&element)...)

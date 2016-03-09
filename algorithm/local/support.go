@@ -33,7 +33,7 @@ func levelize(indices []uint64, ni uint) []uint {
 	return levels
 }
 
-func score(target Target, indices []uint64, volumes, values, surpluses []float64,
+func score(target Target, indices []uint64, volumes, observations, surpluses []float64,
 	ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
@@ -44,7 +44,7 @@ func score(target Target, indices []uint64, volumes, values, surpluses []float64
 		scores[i] = target.Score(&Element{
 			Index:   indices[fi:li],
 			Volume:  volumes[i],
-			Value:   values[fo:lo],
+			Value:   observations[fo:lo],
 			Surplus: surpluses[fo:lo],
 		})
 	}

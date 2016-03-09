@@ -13,15 +13,10 @@ type strategy interface {
 	// Check returns true if the interpolation process should continue.
 	Check() bool
 
-	// Push takes into account new information, namely, level indices, nodal
-	// indices, basis-function volumes, target-function values, hierarchical
-	// surpluses, and scores.
-	Push([]uint64, []uint64, []float64, []float64, []float64, []uint)
+	// Push takes into account new information.
+	Push(*state)
 
-	// Next returns the level and nodal indices for the next iteration by
-	// selecting an active level index, searching admissible level indices in
-	// the forward neighborhood of the selected level index, and identifying
-	// admissible nodal indices with respect to each admissible level index.
+	// Next returns the level and nodal indices for the next iteration.
 	Next() ([]uint64, []uint64, []uint)
 }
 
@@ -83,20 +78,20 @@ func (self *basicStrategy) Check() bool {
 	return total > self.εt
 }
 
-func (self *basicStrategy) Push(lindices, _ []uint64, _, _, _, local []float64, counts []uint) {
+func (self *basicStrategy) Push(state *state) {
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
-	nn := uint(len(counts))
+	nn := uint(len(state.counts))
 	for i, offset := uint(0), uint(0); i < nn; i++ {
 		global := 0.0
-		for _, ε := range local[offset:(offset + counts[i])] {
+		for _, ε := range state.scores[offset:(offset + state.counts[i])] {
 			global += ε
 		}
-		self.find[self.hash.Key(lindices[i*ni:(i+1)*ni])] = ng + i
+		self.find[self.hash.Key(state.lindices[i*ni:(i+1)*ni])] = ng + i
 		self.offset = append(self.offset, nl+offset)
 		self.global = append(self.global, global)
-		offset += counts[i]
+		offset += state.counts[i]
 	}
-	self.local = append(self.local, local...)
+	self.local = append(self.local, state.scores...)
 }
 
 func (self *basicStrategy) Next() ([]uint64, []uint64, []uint) {

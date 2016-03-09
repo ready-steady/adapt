@@ -36,6 +36,20 @@ type Interpolator struct {
 	config Config
 }
 
+type state struct {
+	lindices []uint64
+	indices  []uint64
+	nodes    []float64
+	volumes  []float64
+
+	observations []float64
+	predictions  []float64
+	surpluses    []float64
+	scores       []float64
+
+	counts []uint
+}
+
 // New creates an interpolator.
 func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
@@ -56,21 +70,24 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	surrogate := external.NewSurrogate(ni, no)
 	strategy := newStrategy(ni, no, self.grid, surrogate, config)
 
-	lindices, indices, counts := strategy.Start()
-	progress.Push(indices, ni)
+	state := state{}
+	state.lindices, state.indices, state.counts = strategy.Start()
+	progress.Push(state.indices, ni)
 	for target.Check(progress) && strategy.Check() {
-		volumes := internal.Measure(self.basis, indices, ni)
-		nodes := self.grid.Compute(indices)
-		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
-		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
-			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
-		scores := score(target, indices, counts, volumes, values, surpluses, ni, no)
+		state.volumes = internal.Measure(self.basis, state.indices, ni)
+		state.nodes = self.grid.Compute(state.indices)
+		state.observations = internal.Invoke(target.Compute, state.nodes, ni, no, nw)
+		state.predictions = internal.Approximate(self.basis, surrogate.Indices,
+			surrogate.Surpluses, state.nodes, ni, no, nw)
+		state.surpluses = internal.Subtract(state.observations, state.predictions)
+		state.scores = score(target, state.indices, state.volumes, state.observations,
+			state.surpluses, state.counts, ni, no)
 
-		surrogate.Push(indices, surpluses, volumes)
-		strategy.Push(lindices, indices, volumes, values, surpluses, scores, counts)
+		surrogate.Push(state.indices, state.surpluses, state.volumes)
+		strategy.Push(&state)
 
-		lindices, indices, counts = strategy.Next()
-		progress.Push(indices, ni)
+		state.lindices, state.indices, state.counts = strategy.Next()
+		progress.Push(state.indices, ni)
 	}
 
 	return surrogate
