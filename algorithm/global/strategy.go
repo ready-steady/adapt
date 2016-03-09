@@ -6,23 +6,23 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-// Strategy guides the interpolation process.
+// Strategy controls the interpolation process.
 type strategy interface {
 	// Start returns the initial level and nodal indices.
 	Start() ([]uint64, []uint64, []uint)
 
-	// Check decides if the interpolation process should go on.
+	// Check returns true if the interpolation process should continue.
 	Check() bool
 
-	// Push takes into account new level indices, nodal indices, function
-	// values, hierarchical surpluses, and scores.
+	// Push takes into account new information, namely, level indices, nodal
+	// indices, function values, hierarchical surpluses, and scores.
 	Push([]uint64, []uint64, []float64, []float64, []float64, []uint)
 
-	// Move selects an active level index, searches admissible level indices in
-	// the forward neighborhood of the selected level index, searches admissible
-	// nodal indices with respect to each admissible level index, and returns
-	// all the identified level and nodal indices.
-	Move() ([]uint64, []uint64, []uint)
+	// Next returns the level and nodal indices for the next iteration by
+	// selecting an active level index, searching admissible level indices in
+	// the forward neighborhood of the selected level index, and identifying
+	// admissible nodal indices with respect to each admissible level index.
+	Next() ([]uint64, []uint64, []uint)
 }
 
 type basicStrategy struct {
@@ -90,18 +90,18 @@ func (self *basicStrategy) Check() bool {
 	return false
 }
 
-func (self *basicStrategy) Push(lindices, indices []uint64,
-	values, surpluses, scores []float64, counts []uint) {
+func (self *basicStrategy) Push(_, indices []uint64, _, values, surpluses, scores []float64,
+	counts []uint) {
 
 	self.updateBounds(values)
 	self.scores = append(self.scores, scores...)
 	self.errors = append(self.errors, error(surpluses, counts, self.no)...)
 }
 
-func (self *basicStrategy) Move() ([]uint64, []uint64, []uint) {
+func (self *basicStrategy) Next() ([]uint64, []uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
-	lindices := self.Active.Move(self.k)
+	lindices := self.Active.Next(self.k)
 	indices, counts := internal.Index(self.grid, lindices, self.ni)
 	return lindices, indices, counts
 }

@@ -69,7 +69,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surrogate.Push(indices, surpluses, volumes)
 		strategy.Push(lindices, indices, values, surpluses, scores, counts)
 
-		lindices, indices, counts = strategy.Move()
+		lindices, indices, counts = strategy.Next()
 		progress.Push(indices, ni)
 	}
 
