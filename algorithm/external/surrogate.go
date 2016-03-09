@@ -6,9 +6,10 @@ import (
 
 // Surrogate is an interpolant for a function.
 type Surrogate struct {
-	Inputs    uint      // Number of inputs
-	Outputs   uint      // Number of outputs
-	Nodes     uint      // Number of nodes
+	Inputs  uint // Number of inputs
+	Outputs uint // Number of outputs
+	Nodes   uint // Number of nodes
+
 	Indices   []uint64  // Indices of the nodes
 	Surpluses []float64 // Hierarchical surpluses
 	Integral  []float64 // Integral over the whole domain
@@ -17,8 +18,9 @@ type Surrogate struct {
 // NewSurrogate returns an empty surrogate.
 func NewSurrogate(ni, no uint) *Surrogate {
 	return &Surrogate{
-		Inputs:    ni,
-		Outputs:   no,
+		Inputs:  ni,
+		Outputs: no,
+
 		Indices:   make([]uint64, 0),
 		Surpluses: make([]float64, 0),
 		Integral:  make([]float64, no),
@@ -27,8 +29,7 @@ func NewSurrogate(ni, no uint) *Surrogate {
 
 // Push takes into account new indices and surpluses.
 func (self *Surrogate) Push(integrator Integrator, indices []uint64, surpluses []float64) {
-	na := uint(len(indices)) / self.Inputs
-	self.Nodes += na
+	self.Nodes += uint(len(indices)) / self.Inputs
 	self.Indices = append(self.Indices, indices...)
 	self.Surpluses = append(self.Surpluses, surpluses...)
 	cumulate(integrator, indices, surpluses, self.Inputs, self.Outputs, self.Integral)
