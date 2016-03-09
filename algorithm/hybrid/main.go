@@ -54,7 +54,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
-	strategy := newStrategy(ni, no, self.grid, config)
+	strategy := newStrategy(ni, no, self.grid, surrogate, config)
 
 	lindices, indices, counts := strategy.Start()
 	progress.Push(indices, ni)
@@ -67,7 +67,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		scores := score(target, indices, counts, volumes, values, surpluses, ni, no)
 
 		surrogate.Push(indices, surpluses, volumes)
-		strategy.Push(lindices, indices, values, surpluses, scores, counts)
+		strategy.Push(lindices, indices, volumes, values, surpluses, scores, counts)
 
 		lindices, indices, counts = strategy.Next()
 		progress.Push(indices, ni)

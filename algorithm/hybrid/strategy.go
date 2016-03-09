@@ -1,10 +1,11 @@
 package hybrid
 
 import (
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-// Strategy guides the interpolation process.
+// Strategy controls the interpolation process.
 type strategy interface {
 	// Start returns the initial level and nodal indices.
 	Start() ([]uint64, []uint64, []uint)
@@ -13,7 +14,8 @@ type strategy interface {
 	Check() bool
 
 	// Push takes into account new information, namely, level indices, nodal
-	// indices, function values, hierarchical surpluses, and scores.
+	// indices, basis-function volumes, target-function values, hierarchical
+	// surpluses, and scores.
 	Push([]uint64, []uint64, []float64, []float64, []float64, []uint)
 
 	// Next returns the level and nodal indices for the next iteration by
@@ -29,7 +31,8 @@ type basicStrategy struct {
 	ni uint
 	no uint
 
-	grid Grid
+	grid      Grid
+	surrogate *external.Surrogate
 
 	εt float64
 	εl float64
@@ -44,14 +47,17 @@ type basicStrategy struct {
 	local  []float64
 }
 
-func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
+func newStrategy(ni, no uint, grid Grid, surrogate *external.Surrogate,
+	config *Config) *basicStrategy {
+
 	return &basicStrategy{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		ni: ni,
 		no: no,
 
-		grid: grid,
+		grid:      grid,
+		surrogate: surrogate,
 
 		εt: config.TotalError,
 		εl: config.LocalError,
@@ -63,10 +69,10 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	}
 }
 
-func (self *basicStrategy) Start() ([]uint64, []uint64, []uint) {
-	lindices := self.Active.Start()
-	indices, counts := internal.Index(self.grid, lindices, self.ni)
-	return lindices, indices, counts
+func (self *basicStrategy) Start() (lindices []uint64, indices []uint64, counts []uint) {
+	lindices = self.Active.Start()
+	indices, counts = internal.Index(self.grid, lindices, self.ni)
+	return
 }
 
 func (self *basicStrategy) Check() bool {
@@ -77,7 +83,7 @@ func (self *basicStrategy) Check() bool {
 	return total > self.εt
 }
 
-func (self *basicStrategy) Push(lindices, _ []uint64, _, _, local []float64, counts []uint) {
+func (self *basicStrategy) Push(lindices, _ []uint64, _, _, _, local []float64, counts []uint) {
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
 	nn := uint(len(counts))
 	for i, offset := uint(0), uint(0); i < nn; i++ {

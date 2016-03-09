@@ -15,7 +15,8 @@ type strategy interface {
 	Check() bool
 
 	// Push takes into account new information, namely, level indices, nodal
-	// indices, function values, hierarchical surpluses, and scores.
+	// indices, basis-function volumes, target-function values, hierarchical
+	// surpluses, and scores.
 	Push([]uint64, []uint64, []float64, []float64, []float64, []uint)
 
 	// Next returns the level and nodal indices for the next iteration by
@@ -64,10 +65,10 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	}
 }
 
-func (self *basicStrategy) Start() ([]uint64, []uint64, []uint) {
-	lindices := self.Active.Start()
-	indices, counts := internal.Index(self.grid, lindices, self.ni)
-	return lindices, indices, counts
+func (self *basicStrategy) Start() (lindices []uint64, indices []uint64, counts []uint) {
+	lindices = self.Active.Start()
+	indices, counts = internal.Index(self.grid, lindices, self.ni)
+	return
 }
 
 func (self *basicStrategy) Check() bool {
