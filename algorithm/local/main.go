@@ -60,13 +60,15 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	indices := make([]uint64, 1*ni)
 	progress.Push(indices, ni)
 	for target.Check(progress) && progress.More > 0 {
+		volumes := internal.Measure(self.basis, indices, ni)
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
+		scores := score(target, indices, volumes, values, surpluses, ni, no)
 
-		surrogate.Push(self.basis, indices, surpluses)
-		scores := score(self.basis, target, indices, values, surpluses, ni, no)
+		surrogate.Push(indices, surpluses, volumes)
+
 		indices = filter(indices, scores, config.MinLevel, config.MaxLevel, ni)
 		indices = unique.Distil(self.grid.Children(indices))
 		progress.Push(indices, ni)

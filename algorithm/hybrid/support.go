@@ -1,11 +1,7 @@
 package hybrid
 
-import (
-	"github.com/ready-steady/adapt/algorithm/internal"
-)
-
-func score(basis Basis, target Target, indices []uint64, counts []uint,
-	values, surpluses []float64, ni, no uint) []float64 {
+func score(target Target, indices []uint64, counts []uint, volumes, values, surpluses []float64,
+	ni, no uint) []float64 {
 
 	nn := uint(len(counts))
 	scores := make([]float64, 0, no)
@@ -14,7 +10,7 @@ func score(basis Basis, target Target, indices []uint64, counts []uint,
 		li, lo := fi+counts[i]*ni, fo+counts[i]*no
 		element := Element{
 			Indices:   indices[fi:li],
-			Volumes:   internal.Measure(basis, indices[fo:lo], ni),
+			Volumes:   volumes[offset:(offset + counts[i])],
 			Values:    values[fo:lo],
 			Surpluses: surpluses[fo:lo],
 		}

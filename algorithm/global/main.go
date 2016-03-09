@@ -21,7 +21,7 @@ type Grid interface {
 	// Compute returns the nodes corresponding to a set of indices.
 	Compute([]uint64) []float64
 
-	// Index returns the indices of a set of levels.
+	// Index returns the nodal indices of a set of level indices.
 	Index([]uint64) []uint64
 }
 
@@ -55,13 +55,14 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	lindices, indices, counts := strategy.Start()
 	progress.Push(indices, ni)
 	for target.Check(progress) && strategy.Check() {
+		volumes := internal.Measure(self.basis, indices, ni)
 		nodes := self.grid.Compute(indices)
 		values := internal.Invoke(target.Compute, nodes, ni, no, nw)
 		surpluses := internal.Subtract(values, internal.Approximate(self.basis,
 			surrogate.Indices, surrogate.Surpluses, nodes, ni, no, nw))
-		scores := score(self.basis, target, indices, counts, values, surpluses, ni, no)
+		scores := score(target, indices, counts, volumes, values, surpluses, ni, no)
 
-		surrogate.Push(self.basis, indices, surpluses)
+		surrogate.Push(indices, surpluses, volumes)
 		strategy.Push(lindices, indices, values, surpluses, scores, counts)
 
 		lindices, indices, counts = strategy.Move()

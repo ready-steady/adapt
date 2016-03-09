@@ -129,6 +129,9 @@ func (self *basicStrategy) Move() ([]uint64, []uint64, []uint) {
 				if ε < self.εl {
 					continue
 				}
+				newIndices := self.grid.ChildrenToward(indices[42:69], j)
+				indices = append(indices, newIndices...)
+				counts[i] += uint(len(newIndices)) / ni
 			}
 		}
 	}

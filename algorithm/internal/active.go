@@ -35,8 +35,8 @@ func (self *Active) Start() (indices []uint64) {
 	return self.Indices
 }
 
-// Move identifies, activates, and returns admissible indices from the forward
-// neighborhood of a level index.
+// Move identifies, activates, and returns admissible level indices from the
+// forward neighborhood of a level index.
 func (self *Active) Move(k uint) (indices []uint64) {
 	ni, nn := self.ni, self.nn
 	positions, forward, backward := self.Positions, self.forward, self.backward

@@ -33,26 +33,17 @@ func levelize(indices []uint64, ni uint) []uint {
 	return levels
 }
 
-func measure(basis Basis, indices []uint64, ni uint) []float64 {
-	nn := uint(len(indices)) / ni
-	volumes := make([]float64, nn)
-	for i := uint(0); i < nn; i++ {
-		volumes[i] = basis.Integrate(indices[i*ni : (i+1)*ni])
-	}
-	return volumes
-}
-
-func score(basis Basis, target Target, indices []uint64, values, surpluses []float64,
+func score(target Target, indices []uint64, volumes, values, surpluses []float64,
 	ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
-	scores := measure(basis, indices, ni)
+	scores := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {
 		fi, fo := i*ni, i*no
 		li, lo := (i+1)*ni, (i+1)*no
 		scores[i] = target.Score(&Element{
 			Index:   indices[fi:li],
-			Volume:  scores[i],
+			Volume:  volumes[i],
 			Value:   values[fo:lo],
 			Surplus: surpluses[fo:lo],
 		})
