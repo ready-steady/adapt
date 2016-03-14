@@ -68,10 +68,10 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	surrogate := external.NewSurrogate(ni, no)
 	unique := internal.NewUnique(ni)
 
-	state := state{}
+	state := &state{}
 	state.indices = make([]uint64, 1*ni)
 	progress.Push(state.indices, ni)
-	for target.Check(progress) && progress.More > 0 {
+	for !target.Done(progress) && progress.More > 0 {
 		state.volumes = internal.Measure(self.basis, state.indices, ni)
 		state.nodes = self.grid.Compute(state.indices)
 		state.observations = internal.Invoke(target.Compute, state.nodes, ni, no, nw)

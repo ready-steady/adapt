@@ -3,22 +3,20 @@ package global
 import (
 	"math"
 
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 // Strategy controls the interpolation process.
 type strategy interface {
-	// Start returns the initial level and nodal indices.
-	Start() ([]uint64, []uint64, []uint)
+	// Done checks if the stopping criteria have been satisfied.
+	Done() bool
 
-	// Check returns true if the interpolation process should continue.
-	Check() bool
+	// Next sets up the level and nodal indices for the next iteration.
+	Next(*state)
 
-	// Push takes into account new information.
+	// Push consumes the result of the current iteration.
 	Push(*state)
-
-	// Next returns the level and nodal indices for the next iteration.
-	Next() ([]uint64, []uint64, []uint)
 }
 
 type basicStrategy struct {
@@ -27,7 +25,8 @@ type basicStrategy struct {
 	ni uint
 	no uint
 
-	grid Grid
+	grid      Grid
+	surrogate *external.Surrogate
 
 	εa float64
 	εr float64
@@ -41,14 +40,17 @@ type basicStrategy struct {
 	upper []float64
 }
 
-func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
+func newStrategy(ni, no uint, grid Grid, surrogate *external.Surrogate,
+	config *Config) *basicStrategy {
+
 	return &basicStrategy{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		ni: ni,
 		no: no,
 
-		grid: grid,
+		grid:      grid,
+		surrogate: surrogate,
 
 		εa: config.AbsoluteError,
 		εr: config.RelativeError,
@@ -60,17 +62,11 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	}
 }
 
-func (self *basicStrategy) Start() (lindices []uint64, indices []uint64, counts []uint) {
-	lindices = self.Active.Start()
-	indices, counts = internal.Index(self.grid, lindices, self.ni)
-	return
-}
-
-func (self *basicStrategy) Check() bool {
+func (self *basicStrategy) Done() bool {
 	no, errors := self.no, self.errors
 	ne := uint(len(errors)) / no
 	if ne == 0 {
-		return true
+		return false
 	}
 	δ := threshold(self.lower, self.upper, self.εa, self.εr)
 	for i := range self.Positions {
@@ -79,25 +75,30 @@ func (self *basicStrategy) Check() bool {
 		}
 		for j := uint(0); j < no; j++ {
 			if errors[i*no+j] > δ[j] {
-				return true
+				return false
 			}
 		}
 	}
-	return false
+	return true
+}
+
+func (self *basicStrategy) Next(state *state) {
+	if state.lindices == nil {
+		state.lindices = self.Active.Start()
+		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
+	} else {
+		self.Remove(self.k)
+		self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
+		state.lindices = self.Active.Next(self.k)
+		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
+	}
 }
 
 func (self *basicStrategy) Push(state *state) {
+	self.surrogate.Push(state.indices, state.surpluses, state.volumes)
 	self.updateBounds(state.observations)
 	self.scores = append(self.scores, state.scores...)
 	self.errors = append(self.errors, error(state.surpluses, state.counts, self.no)...)
-}
-
-func (self *basicStrategy) Next() ([]uint64, []uint64, []uint) {
-	self.Remove(self.k)
-	self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
-	lindices := self.Active.Next(self.k)
-	indices, counts := internal.Index(self.grid, lindices, self.ni)
-	return lindices, indices, counts
 }
 
 func (self *basicStrategy) updateBounds(observations []float64) {

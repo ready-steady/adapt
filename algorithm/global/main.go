@@ -35,15 +35,14 @@ type Interpolator struct {
 type state struct {
 	lindices []uint64
 	indices  []uint64
-	nodes    []float64
-	volumes  []float64
+	counts   []uint
 
+	nodes        []float64
+	volumes      []float64
 	observations []float64
 	predictions  []float64
 	surpluses    []float64
 	scores       []float64
-
-	counts []uint
 }
 
 // New creates an interpolator.
@@ -64,12 +63,12 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
-	strategy := newStrategy(ni, no, self.grid, config)
+	strategy := newStrategy(ni, no, self.grid, surrogate, config)
 
-	state := state{}
-	state.lindices, state.indices, state.counts = strategy.Start()
+	state := &state{}
+	strategy.Next(state)
 	progress.Push(state.indices, ni)
-	for target.Check(progress) && strategy.Check() {
+	for !target.Done(progress) && !strategy.Done() {
 		state.volumes = internal.Measure(self.basis, state.indices, ni)
 		state.nodes = self.grid.Compute(state.indices)
 		state.observations = internal.Invoke(target.Compute, state.nodes, ni, no, nw)
@@ -79,10 +78,8 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		state.scores = score(target, state.indices, state.volumes, state.observations,
 			state.surpluses, state.counts, ni, no)
 
-		surrogate.Push(state.indices, state.surpluses, state.volumes)
-		strategy.Push(&state)
-
-		state.lindices, state.indices, state.counts = strategy.Next()
+		strategy.Push(state)
+		strategy.Next(state)
 		progress.Push(state.indices, ni)
 	}
 

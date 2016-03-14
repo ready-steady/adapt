@@ -7,17 +7,14 @@ import (
 
 // Strategy controls the interpolation process.
 type strategy interface {
-	// Start returns the initial level and nodal indices.
-	Start() ([]uint64, []uint64, []uint)
+	// Done checks if the stopping criteria have been satisfied.
+	Done() bool
 
-	// Check returns true if the interpolation process should continue.
-	Check() bool
+	// Next sets up the level and nodal indices for the next iteration.
+	Next(*state)
 
-	// Push takes into account new information.
+	// Push consumes the result of the current iteration.
 	Push(*state)
-
-	// Next returns the level and nodal indices for the next iteration.
-	Next() ([]uint64, []uint64, []uint)
 }
 
 type basicStrategy struct {
@@ -64,37 +61,21 @@ func newStrategy(ni, no uint, grid Grid, surrogate *external.Surrogate,
 	}
 }
 
-func (self *basicStrategy) Start() (lindices []uint64, indices []uint64, counts []uint) {
-	lindices = self.Active.Start()
-	indices, counts = internal.Index(self.grid, lindices, self.ni)
-	return
-}
-
-func (self *basicStrategy) Check() bool {
+func (self *basicStrategy) Done() bool {
 	total := 0.0
 	for i := range self.Positions {
 		total += self.global[i]
 	}
-	return total > self.εt
+	return total <= self.εt
 }
 
-func (self *basicStrategy) Push(state *state) {
-	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
-	nn := uint(len(state.counts))
-	for i, offset := uint(0), uint(0); i < nn; i++ {
-		global := 0.0
-		for _, ε := range state.scores[offset:(offset + state.counts[i])] {
-			global += ε
-		}
-		self.find[self.hash.Key(state.lindices[i*ni:(i+1)*ni])] = ng + i
-		self.offset = append(self.offset, nl+offset)
-		self.global = append(self.global, global)
-		offset += state.counts[i]
+func (self *basicStrategy) Next(state *state) {
+	if state.lindices == nil {
+		state.lindices = self.Active.Start()
+		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
+		return
 	}
-	self.local = append(self.local, state.scores...)
-}
 
-func (self *basicStrategy) Next() ([]uint64, []uint64, []uint) {
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
 	lindices := self.Active.Next(self.k)
@@ -137,5 +118,23 @@ func (self *basicStrategy) Next() ([]uint64, []uint64, []uint) {
 		}
 	}
 
-	return lindices, indices, counts
+	state.lindices, state.indices, state.counts = lindices, indices, counts
+}
+
+func (self *basicStrategy) Push(state *state) {
+	self.surrogate.Push(state.indices, state.surpluses, state.volumes)
+
+	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
+	nn := uint(len(state.counts))
+	for i, offset := uint(0), uint(0); i < nn; i++ {
+		global := 0.0
+		for _, ε := range state.scores[offset:(offset + state.counts[i])] {
+			global += ε
+		}
+		self.find[self.hash.Key(state.lindices[i*ni:(i+1)*ni])] = ng + i
+		self.offset = append(self.offset, nl+offset)
+		self.global = append(self.global, global)
+		offset += state.counts[i]
+	}
+	self.local = append(self.local, state.scores...)
 }

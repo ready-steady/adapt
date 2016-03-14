@@ -704,8 +704,8 @@ func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
 	return kraichnanOrszagInputs, kraichnanOrszagOutputs
 }
 
-func (_ *kraichnanOrszagTarget) Check(*external.Progress) bool {
-	return true
+func (_ *kraichnanOrszagTarget) Done(*external.Progress) bool {
+	return false
 }
 
 func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {

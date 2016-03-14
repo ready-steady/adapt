@@ -11,8 +11,8 @@ type Target interface {
 	// Dimensions returns the number of inputs and outputs.
 	Dimensions() (uint, uint)
 
-	// Check decides if the interpolation process should go on.
-	Check(*external.Progress) bool
+	// Done checks if the stopping criteria have been satisfied.
+	Done(*external.Progress) bool
 
 	// Compute evaluates the target function at a point.
 	Compute([]float64, []float64)
@@ -31,9 +31,9 @@ type Element struct {
 
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
-	ContinueHandler func(*external.Progress) bool
-	ComputeHandler  func([]float64, []float64) // != nil
-	ScoreHandler    func(*Element) float64
+	DoneHandler    func(*external.Progress) bool
+	ComputeHandler func([]float64, []float64) // != nil
+	ScoreHandler   func(*Element) float64
 
 	ni uint
 	no uint
@@ -59,11 +59,11 @@ func (self *BasicTarget) Dimensions() (uint, uint) {
 	return self.ni, self.no
 }
 
-func (self *BasicTarget) Check(progress *external.Progress) bool {
-	if self.ContinueHandler != nil {
-		return self.ContinueHandler(progress)
+func (self *BasicTarget) Done(progress *external.Progress) bool {
+	if self.DoneHandler != nil {
+		return self.DoneHandler(progress)
 	} else {
-		return true
+		return false
 	}
 }
 
