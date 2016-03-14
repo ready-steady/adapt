@@ -84,12 +84,12 @@ func (self *basicStrategy) Done() bool {
 
 func (self *basicStrategy) Next(state *state) {
 	if state.lindices == nil {
-		state.lindices = self.Active.Start()
+		state.lindices = self.Start()
 		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
 	} else {
 		self.Remove(self.k)
 		self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
-		state.lindices = self.Active.Next(self.k)
+		state.lindices = self.Advance(self.k)
 		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
 	}
 }
