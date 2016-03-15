@@ -13,7 +13,7 @@ type strategy interface {
 	Done() bool
 
 	// Next sets up the level and nodal indices for the next iteration.
-	Next(*state)
+	Next(*state) *state
 
 	// Push consumes the result of the current iteration.
 	Push(*state)
@@ -82,15 +82,20 @@ func (self *basicStrategy) Done() bool {
 	return true
 }
 
-func (self *basicStrategy) Next(state *state) {
-	if state.lindices == nil {
-		state.lindices = self.Start()
-		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
+func (self *basicStrategy) Next(current *state) *state {
+	var lindices []uint64
+	if current == nil {
+		lindices = self.Start()
 	} else {
 		self.Remove(self.k)
 		self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
-		state.lindices = self.Advance(self.k)
-		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
+		lindices = self.Advance(self.k)
+	}
+	indices, counts := internal.Index(self.grid, lindices, self.ni)
+	return &state{
+		lindices: lindices,
+		indices:  indices,
+		counts:   counts,
 	}
 }
 

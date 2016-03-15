@@ -11,7 +11,7 @@ type strategy interface {
 	Done() bool
 
 	// Next sets up the level and nodal indices for the next iteration.
-	Next(*state)
+	Next(*state) *state
 
 	// Push consumes the result of the current iteration.
 	Push(*state)
@@ -69,11 +69,15 @@ func (self *basicStrategy) Done() bool {
 	return total <= self.εt
 }
 
-func (self *basicStrategy) Next(state *state) {
-	if state.lindices == nil {
-		state.lindices = self.Start()
-		state.indices, state.counts = internal.Index(self.grid, state.lindices, self.ni)
-		return
+func (self *basicStrategy) Next(current *state) *state {
+	if current == nil {
+		lindices := self.Start()
+		indices, counts := internal.Index(self.grid, lindices, self.ni)
+		return &state{
+			lindices: lindices,
+			indices:  indices,
+			counts:   counts,
+		}
 	}
 
 	self.Remove(self.k)
@@ -118,7 +122,11 @@ func (self *basicStrategy) Next(state *state) {
 		}
 	}
 
-	state.lindices, state.indices, state.counts = lindices, indices, counts
+	return &state{
+		lindices: lindices,
+		indices:  indices,
+		counts:   counts,
+	}
 }
 
 func (self *basicStrategy) Push(state *state) {
