@@ -10,11 +10,9 @@ type strategy interface {
 	// Done checks if the stopping criteria have been satisfied.
 	Done() bool
 
-	// Next sets up the level and nodal indices for the next iteration.
+	// Push consumes the result of the current iteration and configures the
+	// level and nodal indices for the next iteration.
 	Next(*state) *state
-
-	// Push consumes the result of the current iteration.
-	Push(*state)
 }
 
 type basicStrategy struct {
@@ -69,15 +67,13 @@ func (self *basicStrategy) Done() bool {
 	return total <= self.εt
 }
 
-func (self *basicStrategy) Next(current *state) *state {
+func (self *basicStrategy) Next(current *state) (next *state) {
+	next = &state{}
+
 	if current == nil {
-		lindices := self.Start()
-		indices, counts := internal.Index(self.grid, lindices, self.ni)
-		return &state{
-			lindices: lindices,
-			indices:  indices,
-			counts:   counts,
-		}
+		next.lindices = self.Start()
+		next.indices, next.counts = internal.Index(self.grid, next.lindices, self.ni)
+		return
 	}
 
 	self.Remove(self.k)
@@ -122,14 +118,11 @@ func (self *basicStrategy) Next(current *state) *state {
 		}
 	}
 
-	return &state{
-		lindices: lindices,
-		indices:  indices,
-		counts:   counts,
-	}
+	next.lindices, next.indices, next.counts = lindices, indices, counts
+	return
 }
 
-func (self *basicStrategy) Push(state *state) {
+func (self *basicStrategy) consume(state *state) {
 	self.surrogate.Push(state.indices, state.surpluses, state.volumes)
 
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))

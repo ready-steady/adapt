@@ -77,8 +77,6 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		state.scores = score(target, state.indices, state.volumes, state.observations,
 			state.surpluses, state.counts, ni, no)
 
-		strategy.Push(state)
-
 		state = strategy.Next(state)
 		progress.Push(state.indices, ni)
 	}
