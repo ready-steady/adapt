@@ -12,7 +12,7 @@ type strategy interface {
 	// Done checks if the stopping criteria have been satisfied.
 	Done() bool
 
-	// Push consumes the result of the current iteration and configures the
+	// Next consumes the result of the current iteration and configures the
 	// level and nodal indices for the next iteration.
 	Next(*state) *state
 }
