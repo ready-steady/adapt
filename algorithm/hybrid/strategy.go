@@ -76,6 +76,7 @@ func (self *basicStrategy) Next(current *state) (next *state) {
 		return
 	}
 
+	self.consume(current)
 	self.Remove(self.k)
 	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
 	lindices := self.Advance(self.k)
