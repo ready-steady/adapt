@@ -82,7 +82,6 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 			state.Surpluses, ni, no)
 
 		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
-
 		state.Indices = unique.Distil(self.grid.Children(filter(state.Indices, state.Scores,
 			config.MinLevel, config.MaxLevel, ni)))
 		progress.Push(state.Indices, ni)

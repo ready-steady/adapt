@@ -14,7 +14,7 @@ type strategy interface {
 
 	// Next consumes the result of the current iteration and configures the
 	// level and nodal indices for the next iteration.
-	Next(*state) *state
+	Next(*state, *external.Surrogate) *state
 }
 
 type basicStrategy struct {
@@ -23,8 +23,7 @@ type basicStrategy struct {
 	ni uint
 	no uint
 
-	grid      Grid
-	surrogate *external.Surrogate
+	grid Grid
 
 	εa float64
 	εr float64
@@ -38,17 +37,14 @@ type basicStrategy struct {
 	upper []float64
 }
 
-func newStrategy(ni, no uint, grid Grid, surrogate *external.Surrogate,
-	config *Config) *basicStrategy {
-
+func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	return &basicStrategy{
 		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
 
 		ni: ni,
 		no: no,
 
-		grid:      grid,
-		surrogate: surrogate,
+		grid: grid,
 
 		εa: config.AbsoluteError,
 		εr: config.RelativeError,
@@ -80,7 +76,7 @@ func (self *basicStrategy) Done() bool {
 	return true
 }
 
-func (self *basicStrategy) Next(current *state) (next *state) {
+func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *state) {
 	next = &state{}
 	if current == nil {
 		next.Lindices = self.Start()
