@@ -38,14 +38,14 @@ type Interpolator struct {
 }
 
 type state struct {
-	indices []uint64
-	nodes   []float64
-	volumes []float64
+	Indices []uint64
+	Nodes   []float64
+	Volumes []float64
 
-	observations []float64
-	predictions  []float64
-	surpluses    []float64
-	scores       []float64
+	Observations []float64
+	Predictions  []float64
+	Surpluses    []float64
+	Scores       []float64
 }
 
 // New creates an interpolator.
@@ -69,23 +69,23 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	unique := internal.NewUnique(ni)
 
 	state := &state{}
-	state.indices = make([]uint64, 1*ni)
-	progress.Push(state.indices, ni)
+	state.Indices = make([]uint64, 1*ni)
+	progress.Push(state.Indices, ni)
 	for !target.Done(progress) && progress.More > 0 {
-		state.volumes = internal.Measure(self.basis, state.indices, ni)
-		state.nodes = self.grid.Compute(state.indices)
-		state.observations = internal.Invoke(target.Compute, state.nodes, ni, no, nw)
-		state.predictions = internal.Approximate(self.basis, surrogate.Indices,
-			surrogate.Surpluses, state.nodes, ni, no, nw)
-		state.surpluses = internal.Subtract(state.observations, state.predictions)
-		state.scores = score(target, state.indices, state.volumes, state.observations,
-			state.surpluses, ni, no)
+		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
+		state.Nodes = self.grid.Compute(state.Indices)
+		state.Observations = internal.Invoke(target.Compute, state.Nodes, ni, no, nw)
+		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
+			surrogate.Surpluses, state.Nodes, ni, no, nw)
+		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
+		state.Scores = score(target, state.Indices, state.Volumes, state.Observations,
+			state.Surpluses, ni, no)
 
-		surrogate.Push(state.indices, state.surpluses, state.volumes)
+		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
 
-		state.indices = unique.Distil(self.grid.Children(filter(state.indices, state.scores,
+		state.Indices = unique.Distil(self.grid.Children(filter(state.Indices, state.Scores,
 			config.MinLevel, config.MaxLevel, ni)))
-		progress.Push(state.indices, ni)
+		progress.Push(state.Indices, ni)
 	}
 
 	return surrogate

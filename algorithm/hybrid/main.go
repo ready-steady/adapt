@@ -37,16 +37,16 @@ type Interpolator struct {
 }
 
 type state struct {
-	lindices []uint64
-	indices  []uint64
-	counts   []uint
+	Lindices []uint64
+	Indices  []uint64
+	Counts   []uint
 
-	nodes        []float64
-	volumes      []float64
-	observations []float64
-	predictions  []float64
-	surpluses    []float64
-	scores       []float64
+	Nodes        []float64
+	Volumes      []float64
+	Observations []float64
+	Predictions  []float64
+	Surpluses    []float64
+	Scores       []float64
 }
 
 // New creates an interpolator.
@@ -70,19 +70,20 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	strategy := newStrategy(ni, no, self.grid, surrogate, config)
 
 	state := strategy.Next(nil)
-	progress.Push(state.indices, ni)
+	progress.Push(state.Indices, ni)
 	for !target.Done(progress) && !strategy.Done() {
-		state.volumes = internal.Measure(self.basis, state.indices, ni)
-		state.nodes = self.grid.Compute(state.indices)
-		state.observations = internal.Invoke(target.Compute, state.nodes, ni, no, nw)
-		state.predictions = internal.Approximate(self.basis, surrogate.Indices,
-			surrogate.Surpluses, state.nodes, ni, no, nw)
-		state.surpluses = internal.Subtract(state.observations, state.predictions)
-		state.scores = score(target, state.indices, state.volumes, state.observations,
-			state.surpluses, state.counts, ni, no)
+		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
+		state.Nodes = self.grid.Compute(state.Indices)
+		state.Observations = internal.Invoke(target.Compute, state.Nodes, ni, no, nw)
+		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
+			surrogate.Surpluses, state.Nodes, ni, no, nw)
+		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
+		state.Scores = score(target, state.Indices, state.Volumes, state.Observations,
+			state.Surpluses, state.Counts, ni, no)
 
+		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
 		state = strategy.Next(state)
-		progress.Push(state.indices, ni)
+		progress.Push(state.Indices, ni)
 	}
 
 	return surrogate

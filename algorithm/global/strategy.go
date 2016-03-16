@@ -83,22 +83,21 @@ func (self *basicStrategy) Done() bool {
 func (self *basicStrategy) Next(current *state) (next *state) {
 	next = &state{}
 	if current == nil {
-		next.lindices = self.Start()
+		next.Lindices = self.Start()
 	} else {
 		self.consume(current)
 		self.Remove(self.k)
 		self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
-		next.lindices = self.Advance(self.k)
+		next.Lindices = self.Advance(self.k)
 	}
-	next.indices, next.counts = internal.Index(self.grid, next.lindices, self.ni)
+	next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
 	return
 }
 
 func (self *basicStrategy) consume(state *state) {
-	self.surrogate.Push(state.indices, state.surpluses, state.volumes)
-	self.updateBounds(state.observations)
-	self.scores = append(self.scores, state.scores...)
-	self.errors = append(self.errors, error(state.surpluses, state.counts, self.no)...)
+	self.updateBounds(state.Observations)
+	self.scores = append(self.scores, state.Scores...)
+	self.errors = append(self.errors, error(state.Surpluses, state.Counts, self.no)...)
 }
 
 func (self *basicStrategy) updateBounds(observations []float64) {

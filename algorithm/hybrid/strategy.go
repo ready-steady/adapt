@@ -71,8 +71,8 @@ func (self *basicStrategy) Next(current *state) (next *state) {
 	next = &state{}
 
 	if current == nil {
-		next.lindices = self.Start()
-		next.indices, next.counts = internal.Index(self.grid, next.lindices, self.ni)
+		next.Lindices = self.Start()
+		next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
 		return
 	}
 
@@ -119,24 +119,22 @@ func (self *basicStrategy) Next(current *state) (next *state) {
 		}
 	}
 
-	next.lindices, next.indices, next.counts = lindices, indices, counts
+	next.Lindices, next.Indices, next.Counts = lindices, indices, counts
 	return
 }
 
 func (self *basicStrategy) consume(state *state) {
-	self.surrogate.Push(state.indices, state.surpluses, state.volumes)
-
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
-	nn := uint(len(state.counts))
+	nn := uint(len(state.Counts))
 	for i, offset := uint(0), uint(0); i < nn; i++ {
 		global := 0.0
-		for _, ε := range state.scores[offset:(offset + state.counts[i])] {
+		for _, ε := range state.Scores[offset:(offset + state.Counts[i])] {
 			global += ε
 		}
-		self.find[self.hash.Key(state.lindices[i*ni:(i+1)*ni])] = ng + i
+		self.find[self.hash.Key(state.Lindices[i*ni:(i+1)*ni])] = ng + i
 		self.offset = append(self.offset, nl+offset)
 		self.global = append(self.global, global)
-		offset += state.counts[i]
+		offset += state.Counts[i]
 	}
-	self.local = append(self.local, state.scores...)
+	self.local = append(self.local, state.Scores...)
 }
