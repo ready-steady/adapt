@@ -65,18 +65,36 @@ func (self *basicStrategy) Done() bool {
 
 func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *state) {
 	next = &state{}
-
 	if current == nil {
 		next.Lindices = self.Start()
 		next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
-		return
+	} else {
+		self.consume(current)
+		self.Remove(self.k)
+		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+		next.Lindices = self.Advance(self.k)
+		next.Indices, next.Counts = self.index(next.Lindices)
 	}
+	return
+}
 
-	self.consume(current)
-	self.Remove(self.k)
-	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
-	lindices := self.Advance(self.k)
+func (self *basicStrategy) consume(state *state) {
+	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
+	nn := uint(len(state.Counts))
+	for i, offset := uint(0), uint(0); i < nn; i++ {
+		global := 0.0
+		for _, ε := range state.Scores[offset:(offset + state.Counts[i])] {
+			global += ε
+		}
+		self.find[self.hash.Key(state.Lindices[i*ni:(i+1)*ni])] = ng + i
+		self.offset = append(self.offset, nl+offset)
+		self.global = append(self.global, global)
+		offset += state.Counts[i]
+	}
+	self.local = append(self.local, state.Scores...)
+}
 
+func (self *basicStrategy) index(lindices []uint64) ([]uint64, []uint) {
 	ni := self.ni
 	nn := uint(len(lindices)) / ni
 
@@ -115,22 +133,5 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *st
 		}
 	}
 
-	next.Lindices, next.Indices, next.Counts = lindices, indices, counts
-	return
-}
-
-func (self *basicStrategy) consume(state *state) {
-	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
-	nn := uint(len(state.Counts))
-	for i, offset := uint(0), uint(0); i < nn; i++ {
-		global := 0.0
-		for _, ε := range state.Scores[offset:(offset + state.Counts[i])] {
-			global += ε
-		}
-		self.find[self.hash.Key(state.Lindices[i*ni:(i+1)*ni])] = ng + i
-		self.offset = append(self.offset, nl+offset)
-		self.global = append(self.global, global)
-		offset += state.Counts[i]
-	}
-	self.local = append(self.local, state.Scores...)
+	return indices, counts
 }
