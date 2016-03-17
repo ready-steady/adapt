@@ -30,11 +30,10 @@ type basicStrategy struct {
 
 	k uint
 
-	scores []float64
-	errors []float64
-
-	lower []float64
-	upper []float64
+	global []float64
+	local  []float64
+	lower  []float64
+	upper  []float64
 }
 
 func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
@@ -57,8 +56,8 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 }
 
 func (self *basicStrategy) Done() bool {
-	no, errors := self.no, self.errors
-	ne := uint(len(errors)) / no
+	no, local := self.no, self.local
+	ne := uint(len(local)) / no
 	if ne == 0 {
 		return false
 	}
@@ -68,7 +67,7 @@ func (self *basicStrategy) Done() bool {
 			continue
 		}
 		for j := uint(0); j < no; j++ {
-			if errors[i*no+j] > δ[j] {
+			if local[i*no+j] > δ[j] {
 				return false
 			}
 		}
@@ -83,7 +82,7 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *st
 	} else {
 		self.consume(current)
 		self.Remove(self.k)
-		self.k = internal.LocateMaxFloat64s(self.scores, self.Positions)
+		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
 		next.Lindices = self.Advance(self.k)
 	}
 	next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
@@ -91,32 +90,23 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *st
 }
 
 func (self *basicStrategy) consume(state *state) {
-	self.updateBounds(state.Observations)
-	self.scores = append(self.scores, state.Scores...)
-	self.errors = append(self.errors, error(state.Surpluses, state.Counts, self.no)...)
-}
-
-func (self *basicStrategy) updateBounds(observations []float64) {
-	no := self.no
-	for i, point := range observations {
+	no, nn := self.no, uint(len(state.Counts))
+	local := make([]float64, nn*no)
+	for i, offset := uint(0), uint(0); i < nn; i++ {
+		ns := state.Counts[i] * no
+		for j := uint(0); j < ns; j++ {
+			k := i*no + j%no
+			local[k] = math.Max(local[k], math.Abs(state.Surpluses[offset+j]))
+		}
+		offset += state.Counts[i]
+	}
+	self.global = append(self.global, state.Scores...)
+	self.local = append(self.local, local...)
+	for i, point := range state.Observations {
 		j := uint(i) % no
 		self.lower[j] = math.Min(self.lower[j], point)
 		self.upper[j] = math.Max(self.upper[j], point)
 	}
-}
-
-func error(surpluses []float64, counts []uint, no uint) []float64 {
-	nn := uint(len(counts))
-	errors := make([]float64, nn*no)
-	for i := uint(0); i < nn; i++ {
-		ns := counts[i] * no
-		for j := uint(0); j < ns; j++ {
-			k := i*no + j%no
-			errors[k] = math.Max(errors[k], math.Abs(surpluses[j]))
-		}
-		surpluses = surpluses[ns:]
-	}
-	return errors
 }
 
 func threshold(lower, upper []float64, εa, εr float64) []float64 {
