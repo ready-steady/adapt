@@ -56,18 +56,18 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 }
 
 func (self *basicStrategy) Done() bool {
-	no, local := self.no, self.local
-	ne := uint(len(local)) / no
-	if ne == 0 {
+	no := self.no
+	nl := uint(len(self.local)) / no
+	if nl == 0 {
 		return false
 	}
 	δ := threshold(self.lower, self.upper, self.εa, self.εr)
 	for i := range self.Positions {
-		if i >= ne {
+		if i >= nl {
 			continue
 		}
 		for j := uint(0); j < no; j++ {
-			if local[i*no+j] > δ[j] {
+			if self.local[i*no+j] > δ[j] {
 				return false
 			}
 		}

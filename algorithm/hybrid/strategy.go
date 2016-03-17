@@ -56,8 +56,15 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 }
 
 func (self *basicStrategy) Done() bool {
+	ng := uint(len(self.global))
+	if ng == 0 {
+		return false
+	}
 	total := 0.0
 	for i := range self.Positions {
+		if i >= ng {
+			continue
+		}
 		total += self.global[i]
 	}
 	return total <= self.εt
@@ -124,7 +131,7 @@ func (self *basicStrategy) index(lindices []uint64,
 				till = uint(len(self.local))
 			}
 
-			for l := from; l < till; i++ {
+			for l := from; l < till; l++ {
 				if self.local[l] < self.εl {
 					continue
 				}
