@@ -63,7 +63,7 @@ func (self *basicStrategy) Done() bool {
 	return total <= self.εt
 }
 
-func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *state) {
+func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) (next *state) {
 	next = &state{}
 	if current == nil {
 		next.Lindices = self.Start()
@@ -73,7 +73,7 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *st
 		self.Remove(self.k)
 		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
 		next.Lindices = self.Advance(self.k)
-		next.Indices, next.Counts = self.index(next.Lindices)
+		next.Indices, next.Counts = self.index(next.Lindices, surrogate)
 	}
 	return
 }
@@ -94,7 +94,9 @@ func (self *basicStrategy) consume(state *state) {
 	self.local = append(self.local, state.Scores...)
 }
 
-func (self *basicStrategy) index(lindices []uint64) ([]uint64, []uint) {
+func (self *basicStrategy) index(lindices []uint64,
+	surrogate *external.Surrogate) ([]uint64, []uint) {
+
 	ni := self.ni
 	nn := uint(len(lindices)) / ni
 
@@ -122,11 +124,11 @@ func (self *basicStrategy) index(lindices []uint64) ([]uint64, []uint) {
 				till = uint(len(self.local))
 			}
 
-			for _, ε := range self.local[from:till] {
-				if ε < self.εl {
+			for l := from; l < till; i++ {
+				if self.local[l] < self.εl {
 					continue
 				}
-				newIndices := self.grid.ChildrenToward(indices[42:69], j)
+				newIndices := self.grid.ChildrenToward(surrogate.Indices[l*ni:(l+1)*ni], j)
 				indices = append(indices, newIndices...)
 				counts[i] += uint(len(newIndices)) / ni
 			}
