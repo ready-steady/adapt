@@ -284,10 +284,7 @@ var fixtureBranin = fixture{
 }
 
 func prepare(fixture *fixture) (*Interpolator, *BasicTarget) {
-	const (
-		ni = 2
-		no = 1
-	)
+	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
 	config := NewConfig()
 
