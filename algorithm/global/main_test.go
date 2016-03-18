@@ -3,7 +3,6 @@ package global
 import (
 	"testing"
 
-	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/assert"
 )
 
@@ -11,20 +10,11 @@ func TestBranin(t *testing.T) {
 	fixture := &fixtureBranin
 	interpolator, target := prepare(fixture)
 
-	progresses := make([]external.Progress, 0)
-	target.DoneHandler = func(progress *external.Progress) bool {
-		progresses = append(progresses, *progress)
-		return false
-	}
-
 	surrogate := interpolator.Compute(target)
-
-	assert.Equal(progresses, fixture.progresses, t)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
-	assert.EqualWithin(surrogate.Surpluses, fixture.surrogate.Surpluses, 1e-12, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
-	assert.EqualWithin(values, fixture.values, 1e-12, t)
+	assert.EqualWithin(values, fixture.values, 0.1, t)
 }
 
 func BenchmarkBranin(b *testing.B) {

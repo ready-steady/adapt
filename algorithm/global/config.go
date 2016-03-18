@@ -22,7 +22,7 @@ func NewConfig() *Config {
 		MaxIndices: ^uint(0),
 
 		AbsoluteError: 1e-6,
-		RelativeError: 1e-2,
+		RelativeError: 1e-3,
 
 		Workers: uint(runtime.GOMAXPROCS(0)),
 	}
