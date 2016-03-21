@@ -38,3 +38,16 @@ func (self *Unique) Distil(indices []uint64) []uint64 {
 	}
 	return indices[:na*ni]
 }
+
+// IsUnique checks if a set of indices has no repetitions.
+func IsUnique(indices []uint64, ni uint) bool {
+	unique := NewUnique(ni)
+
+	indices = append([]uint64{}, indices...)
+	before := uint(len(indices)) / ni
+
+	indices = unique.Distil(indices)
+	after := uint(len(indices)) / ni
+
+	return before == after
+}
