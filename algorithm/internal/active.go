@@ -3,10 +3,10 @@ package internal
 // Active is a book-keeper of active level indices.
 type Active struct {
 	Indices   []uint64      // Level indices considered so far
+	Norms     []uint64      // Manhattan norms of level indices
 	Positions map[uint]bool // Positions of active level indices
 
 	ni   uint
-	nn   uint
 	lmax uint
 
 	forward  reference
@@ -27,18 +27,19 @@ func NewActive(ni, lmax uint) *Active {
 // forward neighborhood of a level index.
 func (self *Active) Next(k uint) (indices []uint64) {
 	if self.Indices == nil {
-		self.Indices, self.Positions = make([]uint64, 1*self.ni), map[uint]bool{0: true}
-		self.nn, self.forward, self.backward = 1, make(reference), make(reference)
+		self.Indices, self.Norms = make([]uint64, 1*self.ni), []uint64{0}
+		self.Positions = map[uint]bool{0: true}
+		self.forward, self.backward = make(reference), make(reference)
 		return self.Indices
 	}
 
-	ni, nn := self.ni, self.nn
+	ni, no := self.ni, uint(len(self.Norms))
 	positions, forward, backward := self.Positions, self.forward, self.backward
 
-	index := self.Indices[k*ni : (k+1)*ni]
+	index, norm := self.Indices[k*ni:(k+1)*ni], self.Norms[k]
 
 outer:
-	for i := uint(0); i < ni; i++ {
+	for i, nn := uint(0), no; i < ni; i++ {
 		if index[i] >= uint64(self.lmax) {
 			continue
 		}
@@ -62,15 +63,14 @@ outer:
 
 		self.Indices = append(self.Indices, index...)
 		self.Indices[nn*ni+i]++
+		self.Norms = append(self.Norms, norm+1)
 
 		positions[nn] = true
 
 		nn++
 	}
 
-	indices = self.Indices[self.nn*ni:]
-	self.nn = nn
-
+	indices = self.Indices[no*ni:]
 	return
 }
 
