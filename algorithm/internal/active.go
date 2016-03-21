@@ -6,8 +6,7 @@ type Active struct {
 	Norms     []uint64      // Manhattan norms of level indices
 	Positions map[uint]bool // Positions of active level indices
 
-	ni   uint
-	lmax uint
+	ni uint
 
 	forward  reference
 	backward reference
@@ -16,10 +15,9 @@ type Active struct {
 type reference map[uint]uint
 
 // NewActive creates a book-keeper.
-func NewActive(ni, lmax uint) *Active {
+func NewActive(ni uint) *Active {
 	return &Active{
-		ni:   ni,
-		lmax: lmax,
+		ni: ni,
 	}
 }
 
@@ -40,10 +38,6 @@ func (self *Active) Next(k uint) (indices []uint64) {
 
 outer:
 	for i, nn := uint(0), no; i < ni; i++ {
-		if index[i] >= uint64(self.lmax) {
-			continue
-		}
-
 		newBackward := make(reference)
 		for j := uint(0); j < ni; j++ {
 			if i == j || index[j] == 0 {

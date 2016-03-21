@@ -23,6 +23,9 @@ type basicStrategy struct {
 
 	grid Grid
 
+	lmin uint
+	lmax uint
+
 	εt float64
 	εl float64
 
@@ -39,12 +42,15 @@ type basicStrategy struct {
 
 func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	return &basicStrategy{
-		Active: *internal.NewActive(ni, config.MaxLevel),
+		Active: *internal.NewActive(ni),
 
 		ni: ni,
 		no: no,
 
 		grid: grid,
+
+		lmin: config.MinLevel,
+		lmax: config.MaxLevel,
 
 		εt: config.TotalError,
 		εl: config.LocalError,
@@ -72,19 +78,33 @@ func (self *basicStrategy) Done() bool {
 	return total <= self.εt
 }
 
-func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) (next *state) {
-	next = &state{}
+func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *state {
+	next := &state{}
 	if current == nil {
 		next.Lindices = self.Active.Next(self.k)
 		next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
 	} else {
 		self.consume(current)
-		self.Active.Drop(self.k)
-		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+		if !self.advance() {
+			return nil
+		}
 		next.Lindices = self.Active.Next(self.k)
 		next.Indices, next.Counts = self.indexSet(next.Lindices, surrogate)
 	}
-	return
+	return next
+}
+
+func (self *basicStrategy) advance() bool {
+	for {
+		self.Active.Drop(self.k)
+		if len(self.Positions) == 0 {
+			return false
+		}
+		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+		if self.Norms[self.k] < uint64(self.lmax) {
+			return true
+		}
+	}
 }
 
 func (self *basicStrategy) consume(state *state) {

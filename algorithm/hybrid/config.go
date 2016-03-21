@@ -18,11 +18,11 @@ type Config struct {
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		MinLevel: 2,
-		MaxLevel: 20,
+		MinLevel: 1,
+		MaxLevel: 10,
 
 		TotalError: 1e-6,
-		LocalError: 1e-200,
+		LocalError: 1e-6,
 
 		Workers: uint(runtime.GOMAXPROCS(0)),
 	}
