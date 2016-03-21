@@ -6,8 +6,8 @@ import (
 
 // Config represents a configuration of the algorithm.
 type Config struct {
-	MaxLevel   uint // Maximum level of interpolation
-	MaxIndices uint // Maximum number of indices
+	MinLevel uint // Minimal level of interpolation
+	MaxLevel uint // Maximum level of interpolation
 
 	TotalError float64 // Tolerance on the total error
 	LocalError float64 // Tolerance on the local error
@@ -18,11 +18,11 @@ type Config struct {
 // NewConfig returns a new configuration with default values.
 func NewConfig() *Config {
 	return &Config{
-		MaxLevel:   10,
-		MaxIndices: ^uint(0),
+		MinLevel: 2,
+		MaxLevel: 20,
 
-		TotalError: 1e-2,
-		LocalError: 1e-2,
+		TotalError: 1e-6,
+		LocalError: 1e-200,
 
 		Workers: uint(runtime.GOMAXPROCS(0)),
 	}

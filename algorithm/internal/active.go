@@ -8,7 +8,6 @@ type Active struct {
 	ni   uint
 	nn   uint
 	lmax uint
-	imax uint
 
 	forward  reference
 	backward reference
@@ -17,34 +16,29 @@ type Active struct {
 type reference map[uint]uint
 
 // NewActive creates a book-keeper.
-func NewActive(ni, lmax, imax uint) *Active {
+func NewActive(ni, lmax uint) *Active {
 	return &Active{
 		ni:   ni,
 		lmax: lmax,
-		imax: imax,
 	}
 }
 
-// Start resets the internal state and returns the root level index.
-func (self *Active) Start() (indices []uint64) {
-	self.Indices = make([]uint64, 1*self.ni)
-	self.Positions = map[uint]bool{0: true}
-	self.nn = 1
-	self.forward = make(reference)
-	self.backward = make(reference)
-	return self.Indices
-}
-
-// Advance identifies, activates, and returns admissible level indices from the
+// Next identifies, activates, and returns admissible level indices from the
 // forward neighborhood of a level index.
-func (self *Active) Advance(k uint) (indices []uint64) {
+func (self *Active) Next(k uint) (indices []uint64) {
+	if self.Indices == nil {
+		self.Indices, self.Positions = make([]uint64, 1*self.ni), map[uint]bool{0: true}
+		self.nn, self.forward, self.backward = 1, make(reference), make(reference)
+		return self.Indices
+	}
+
 	ni, nn := self.ni, self.nn
 	positions, forward, backward := self.Positions, self.forward, self.backward
 
 	index := self.Indices[k*ni : (k+1)*ni]
 
 outer:
-	for i := uint(0); i < ni && nn < self.imax; i++ {
+	for i := uint(0); i < ni; i++ {
 		if index[i] >= uint64(self.lmax) {
 			continue
 		}
@@ -80,7 +74,7 @@ outer:
 	return
 }
 
-// Remove deactivates a level index.
-func (self *Active) Remove(k uint) {
+// Drop deactivates a level index.
+func (self *Active) Drop(k uint) {
 	delete(self.Positions, k)
 }

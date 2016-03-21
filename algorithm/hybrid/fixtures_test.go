@@ -11,8 +11,7 @@ import (
 type fixture struct {
 	compute func([]float64, []float64)
 
-	progresses []external.Progress
-	surrogate  *external.Surrogate
+	surrogate *external.Surrogate
 
 	points []float64
 	values []float64
@@ -23,10 +22,6 @@ var fixtureBranin = fixture{
 		x, y := 15.0*point[0]-5.0, 15.0*point[1]
 		z := 5.0/math.Pi*x - 5.1/(4.0*math.Pi*math.Pi)*x*x + y - 6.0
 		value[0] = z*z + 10.0*(1.0-1.0/(8.0*math.Pi))*math.Cos(x) + 10.0
-	},
-
-	progresses: []external.Progress{
-		{More: 1, Done: 0},
 	},
 
 	surrogate: &external.Surrogate{

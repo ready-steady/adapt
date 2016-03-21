@@ -38,7 +38,7 @@ type basicStrategy struct {
 
 func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 	return &basicStrategy{
-		Active: *internal.NewActive(ni, config.MaxLevel, config.MaxIndices),
+		Active: *internal.NewActive(ni, config.MaxLevel),
 
 		ni: ni,
 		no: no,
@@ -77,14 +77,12 @@ func (self *basicStrategy) Done() bool {
 
 func (self *basicStrategy) Next(current *state, _ *external.Surrogate) (next *state) {
 	next = &state{}
-	if current == nil {
-		next.Lindices = self.Start()
-	} else {
+	if current != nil {
 		self.consume(current)
-		self.Remove(self.k)
+		self.Active.Drop(self.k)
 		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
-		next.Lindices = self.Advance(self.k)
 	}
+	next.Lindices = self.Active.Next(self.k)
 	next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
 	return
 }
