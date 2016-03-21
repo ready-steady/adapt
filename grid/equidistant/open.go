@@ -2,6 +2,8 @@ package equidistant
 
 import (
 	"fmt"
+
+	"github.com/ready-steady/adapt/internal"
 )
 
 // Open is a grid in (0, 1)^n.
@@ -18,8 +20,8 @@ func NewOpen(dimensions uint) *Open {
 func (_ *Open) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		level := levelMask & indices[i]
-		order := indices[i] >> levelSize
+		level := internal.LEVEL_MASK & indices[i]
+		order := indices[i] >> internal.LEVEL_SIZE
 		nodes[i] = float64(order+1) / float64(uint64(2)<<level)
 	}
 	return nodes
@@ -34,18 +36,18 @@ func (self *Open) Children(indices []uint64) []uint64 {
 
 	nc := uint(0)
 	push := func(p, d uint, level, order uint64) {
-		if level>>levelSize != 0 || order>>orderSize != 0 {
+		if level>>internal.LEVEL_SIZE != 0 || order>>internal.ORDER_SIZE != 0 {
 			panic(fmt.Sprintf("the level %d or order %d is too large", level, order))
 		}
 		copy(children[nc*nd:], indices[p*nd:(p+1)*nd])
-		children[nc*nd+d] = level | order<<levelSize
+		children[nc*nd+d] = level | order<<internal.LEVEL_SIZE
 		nc++
 	}
 
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < nd; j++ {
-			level := levelMask & indices[i*nd+j]
-			order := indices[i*nd+j] >> levelSize
+			level := internal.LEVEL_MASK & indices[i*nd+j]
+			order := indices[i*nd+j] >> internal.LEVEL_SIZE
 			push(i, j, level+1, 2*order)
 			push(i, j, level+1, 2*order+2)
 		}

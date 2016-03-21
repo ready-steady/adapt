@@ -6,6 +6,7 @@ import (
 	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
+	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/ode/rk4"
 )
 
@@ -36,7 +37,7 @@ type fixture struct {
 func (self *fixture) initialize() {
 	self.surrogate.Indices = make([]uint64, len(self.levels))
 	for i := range self.levels {
-		self.surrogate.Indices[i] = self.levels[i] | self.orders[i]<<levelSize
+		self.surrogate.Indices[i] = self.levels[i] | self.orders[i]<<internal.LEVEL_SIZE
 	}
 }
 

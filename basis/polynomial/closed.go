@@ -2,6 +2,8 @@ package polynomial
 
 import (
 	"math"
+
+	"github.com/ready-steady/adapt/internal"
 )
 
 // Closed is a basis in [0, 1]^n.
@@ -19,7 +21,8 @@ func NewClosed(dimensions uint, power uint) *Closed {
 func (self *Closed) Compute(index []uint64, point []float64) float64 {
 	nd, np, value := self.nd, self.np, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= closedCompute(levelMask&index[i], index[i]>>levelSize, np, point[i])
+		value *= closedCompute(internal.LEVEL_MASK&index[i],
+			index[i]>>internal.LEVEL_SIZE, np, point[i])
 	}
 	return value
 }
@@ -28,7 +31,8 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 func (self *Closed) Integrate(index []uint64) float64 {
 	nd, np, value := self.nd, self.np, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= closedIntegrate(levelMask&index[i], index[i]>>levelSize, np)
+		value *= closedIntegrate(internal.LEVEL_MASK&index[i],
+			index[i]>>internal.LEVEL_SIZE, np)
 	}
 	return value
 }

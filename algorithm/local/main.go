@@ -7,11 +7,6 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-const (
-	levelMask = 0x3F
-	levelSize = 6
-)
-
 // Basis is a functional basis.
 type Basis interface {
 	// Compute evaluates the value of a basis function.

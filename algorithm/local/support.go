@@ -1,5 +1,9 @@
 package local
 
+import (
+	"github.com/ready-steady/adapt/internal"
+)
+
 func filter(indices []uint64, scores []float64, lmin, lmax, ni uint) []uint64 {
 	nn := uint(len(scores))
 	levels := levelize(indices, ni)
@@ -27,7 +31,7 @@ func levelize(indices []uint64, ni uint) []uint {
 	levels := make([]uint, nn)
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < ni; j++ {
-			levels[i] += uint(levelMask & indices[i*ni+j])
+			levels[i] += uint(internal.LEVEL_MASK & indices[i*ni+j])
 		}
 	}
 	return levels

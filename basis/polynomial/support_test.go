@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/assert"
 )
 
@@ -29,11 +30,11 @@ func TestIntegrate(t *testing.T) {
 }
 
 func compose(level, order uint64) uint64 {
-	return level | order<<levelSize
+	return level | order<<internal.LEVEL_SIZE
 }
 
 func decompose(index uint64) (uint64, uint64) {
-	return levelMask & index, index >> levelSize
+	return internal.LEVEL_MASK & index, index >> internal.LEVEL_SIZE
 }
 
 func generateIndices(nd, ns uint, children func([]uint64) []uint64) []uint64 {

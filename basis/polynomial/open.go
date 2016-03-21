@@ -2,6 +2,8 @@ package polynomial
 
 import (
 	"math"
+
+	"github.com/ready-steady/adapt/internal"
 )
 
 // Open is a basis in (0, 1)^n.
@@ -21,7 +23,8 @@ func NewOpen(dimensions, power uint) *Open {
 func (self *Open) Compute(index []uint64, point []float64) float64 {
 	nd, value := self.nd, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= openCompute(levelMask&index[i], index[i]>>levelSize, point[i])
+		value *= openCompute(internal.LEVEL_MASK&index[i],
+			index[i]>>internal.LEVEL_SIZE, point[i])
 	}
 	return value
 }
@@ -30,7 +33,8 @@ func (self *Open) Compute(index []uint64, point []float64) float64 {
 func (self *Open) Integrate(index []uint64) float64 {
 	nd, value := self.nd, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= openIntegrate(levelMask&index[i], index[i]>>levelSize)
+		value *= openIntegrate(internal.LEVEL_MASK&index[i],
+			index[i]>>internal.LEVEL_SIZE)
 	}
 	return value
 }

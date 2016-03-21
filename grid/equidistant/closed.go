@@ -2,6 +2,8 @@ package equidistant
 
 import (
 	"fmt"
+
+	"github.com/ready-steady/adapt/internal"
 )
 
 // Closed is a grid in [0, 1]^n.
@@ -18,11 +20,11 @@ func NewClosed(dimensions uint) *Closed {
 func (_ *Closed) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		level := levelMask & indices[i]
+		level := internal.LEVEL_MASK & indices[i]
 		if level == 0 {
 			nodes[i] = 0.5
 		} else {
-			order := indices[i] >> levelSize
+			order := indices[i] >> internal.LEVEL_SIZE
 			nodes[i] = float64(order) / float64(uint64(2)<<(level-1))
 		}
 	}
@@ -52,17 +54,17 @@ func closedChildren(indices []uint64, nd, fd, ld uint) []uint64 {
 
 	nc := uint(0)
 	push := func(p, d uint, level, order uint64) {
-		if level>>levelSize != 0 || order>>orderSize != 0 {
+		if level>>internal.LEVEL_SIZE != 0 || order>>internal.ORDER_SIZE != 0 {
 			panic(fmt.Sprintf("the level %d or order %d is too large", level, order))
 		}
 		copy(children[nc*nd:], indices[p*nd:(p+1)*nd])
-		children[nc*nd+d] = level | order<<levelSize
+		children[nc*nd+d] = level | order<<internal.LEVEL_SIZE
 		nc++
 	}
 
 	for i := uint(0); i < nn; i++ {
 		for j := fd; j < ld; j++ {
-			level := levelMask & indices[i*nd+j]
+			level := internal.LEVEL_MASK & indices[i*nd+j]
 
 			if level == 0 {
 				push(i, j, 1, 0)
@@ -70,7 +72,7 @@ func closedChildren(indices []uint64, nd, fd, ld uint) []uint64 {
 				continue
 			}
 
-			order := indices[i*nd+j] >> levelSize
+			order := indices[i*nd+j] >> internal.LEVEL_SIZE
 
 			if level == 1 {
 				push(i, j, 2, order+1)
@@ -85,19 +87,19 @@ func closedChildren(indices []uint64, nd, fd, ld uint) []uint64 {
 }
 
 func closedIndex(level uint64) []uint64 {
-	if level>>levelMask != 0 {
+	if level>>internal.LEVEL_MASK != 0 {
 		panic(fmt.Sprintf("the level %d is too large", level))
 	}
 	switch level {
 	case 0:
-		return []uint64{0 | 0<<levelSize}
+		return []uint64{0 | 0<<internal.LEVEL_SIZE}
 	case 1:
-		return []uint64{1 | 0<<levelSize, 1 | 2<<levelSize}
+		return []uint64{1 | 0<<internal.LEVEL_SIZE, 1 | 2<<internal.LEVEL_SIZE}
 	default:
 		nn := uint(2) << uint(level-2)
 		indices := make([]uint64, nn)
 		for i := uint(0); i < nn; i++ {
-			indices[i] = level | uint64(2*i+1)<<levelSize
+			indices[i] = level | uint64(2*i+1)<<internal.LEVEL_SIZE
 		}
 		return indices
 	}
