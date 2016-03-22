@@ -80,29 +80,31 @@ func (self *basicStrategy) Done() bool {
 }
 
 func (self *basicStrategy) Next(current *state, _ *external.Surrogate) *state {
-	if current != nil {
-		self.consume(current)
-		if !self.advance() {
-			return nil
-		}
+	if current == nil {
+		next := &state{}
+		next.Lindices = self.Active.Next(self.k)
+		next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
+		return next
 	}
-	next := &state{}
-	next.Lindices = self.Active.Next(self.k)
-	next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
-	return next
-}
 
-func (self *basicStrategy) advance() bool {
+	self.consume(current)
+
 	for {
 		self.Active.Drop(self.k)
 		if len(self.Positions) == 0 {
-			return false
+			return nil
 		}
 		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
 		if self.Norms[self.k] < uint64(self.lmax) {
-			return true
+			break
 		}
 	}
+
+	next := &state{}
+	next.Lindices = self.Active.Next(self.k)
+	next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
+
+	return next
 }
 
 func (self *basicStrategy) consume(state *state) {
