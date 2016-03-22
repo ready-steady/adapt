@@ -1,5 +1,4 @@
-// Package internal contains types and functions that are shared by the
-// interpolation algorithm and are used only internally.
+// Package internal contains code shared by the neighbor packages.
 package internal
 
 import (

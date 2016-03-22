@@ -1,4 +1,4 @@
-// Package internal contains constants shared by the subpackages.
+// Package internal contains code shared by the neighbor packages.
 package internal
 
 // An element of an nd-dimensional space is encoded by nd pairs (level, order).

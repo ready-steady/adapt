@@ -1,3 +1,2 @@
-// Package external contains types and functions that are shared by the
-// interpolation algorithm and appear in public interfaces.
+// Package external contains code shared by the neighbor packages.
 package external
