@@ -40,25 +40,40 @@ outer:
 	for i, nn := uint(0), no; i < ni; i++ {
 		newBackward := make(reference)
 		for j := uint(0); j < ni; j++ {
-			if i == j || index[j] == 0 {
+			if index[j] == 0 {
+				// It is the lowest possible level, so there is no ancestor.
 				continue
 			}
-			if l, ok := forward[backward[k*ni+j]*ni+i]; !ok || positions[l] {
-				continue outer
-			} else {
-				newBackward[j] = l
+			if i == j {
+				// It is the dimension along which we would like move forward,
+				// so `index` is the ancestor, and it obviously exists.
+				continue
 			}
+			l, ok := forward[backward[k*ni+j]*ni+i]
+			if !ok {
+				// The ancestor in the jth dimension has not been bumped up in
+				// the ith dimension. So the candidate index has no ancestor in
+				// the jth dimension and, hence, is not admissible.
+				continue outer
+			}
+			if positions[l] {
+				// The candidate index has an ancestor in the jth dimension;
+				// however, this ancestor is still active, and, hence, the
+				// candidate index is not admissible.
+				continue outer
+			}
+			newBackward[j] = l
 		}
 		newBackward[i] = k
-		for j, l := range newBackward {
-			forward[l*ni+j] = nn
-			backward[nn*ni+j] = l
-		}
 
 		self.Indices = append(self.Indices, index...)
 		self.Indices[nn*ni+i]++
 		self.Norms = append(self.Norms, norm+1)
 
+		for j, l := range newBackward {
+			forward[l*ni+j] = nn
+			backward[nn*ni+j] = l
+		}
 		positions[nn] = true
 
 		nn++
