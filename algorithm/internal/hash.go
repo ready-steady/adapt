@@ -11,13 +11,14 @@ const (
 
 // Hash is a means of creating hash keys from indices.
 type Hash struct {
+	ni     uint
 	bytes  []byte
 	header *reflect.SliceHeader
 }
 
 // NewHash creates a hash.
 func NewHash(ni uint) *Hash {
-	hash := &Hash{bytes: make([]byte, 0)}
+	hash := &Hash{ni: ni, bytes: make([]byte, 0)}
 	hash.header = (*reflect.SliceHeader)(unsafe.Pointer(&hash.bytes))
 	hash.header.Cap = int(ni * sizeOfUint64)
 	hash.header.Len = hash.header.Cap
