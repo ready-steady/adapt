@@ -3,6 +3,7 @@ package equidistant
 import (
 	"testing"
 
+	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/assert"
 )
 
@@ -17,7 +18,7 @@ func TestOpenCompute1D(t *testing.T) {
 		0.4375, 0.5625, 0.6875, 0.8125, 0.9375,
 	}
 
-	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
+	assert.Equal(grid.Compute(internal.Compose(levels, orders)), nodes, t)
 }
 
 func TestOpenCompute2D(t *testing.T) {
@@ -200,7 +201,7 @@ func TestOpenCompute2D(t *testing.T) {
 		0.875, 0.875,
 	}
 
-	assert.Equal(grid.Compute(compose(levels, orders)), nodes, t)
+	assert.Equal(grid.Compute(internal.Compose(levels, orders)), nodes, t)
 }
 
 func TestOpenChildren1D(t *testing.T) {
@@ -221,7 +222,7 @@ func TestOpenChildren1D(t *testing.T) {
 		0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
 	}
 
-	indices := grid.Children(compose(levels, orders))
+	indices := grid.Children(internal.Compose(levels, orders))
 
-	assert.Equal(indices, compose(childLevels, childOrders), t)
+	assert.Equal(indices, internal.Compose(childLevels, childOrders), t)
 }

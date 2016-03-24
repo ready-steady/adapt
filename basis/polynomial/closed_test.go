@@ -3,6 +3,7 @@ package polynomial
 import (
 	"testing"
 
+	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/assert"
 
 	grid "github.com/ready-steady/adapt/grid/equidistant"
@@ -43,7 +44,7 @@ func TestClosedCompute(t *testing.T) {
 	basis := NewClosed(1, 1)
 
 	compute := func(level, order uint64, point float64) float64 {
-		return basis.Compute([]uint64{compose(level, order)}, []float64{point})
+		return basis.Compute(internal.Compose([]uint64{level}, []uint64{order}), []float64{point})
 	}
 
 	points := []float64{0.0, 0.25, 0.5, 0.75, 1.0}
@@ -77,7 +78,8 @@ func TestClosedIntegrate(t *testing.T) {
 	values := []float64{1.0, 0.25, 1.0 / 2 / 2, 1.0 / 2 / 2 / 2}
 
 	for i := range levels {
-		assert.Equal(basis.Integrate([]uint64{compose(levels[i], 0)}), values[i], t)
+		indices := internal.Compose([]uint64{levels[i]}, []uint64{0})
+		assert.Equal(basis.Integrate(indices), values[i], t)
 	}
 }
 

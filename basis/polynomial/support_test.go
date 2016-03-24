@@ -29,14 +29,6 @@ func TestIntegrate(t *testing.T) {
 	assert.EqualWithin(value, F(b)-F(a), 1e-12, t)
 }
 
-func compose(level, order uint64) uint64 {
-	return level | order<<internal.LEVEL_SIZE
-}
-
-func decompose(index uint64) (uint64, uint64) {
-	return internal.LEVEL_MASK & index, index >> internal.LEVEL_SIZE
-}
-
 func generateIndices(nd, ns uint, children func([]uint64) []uint64) []uint64 {
 	parents := make([]uint64, nd)
 	indices := append([]uint64{}, parents...)
@@ -50,10 +42,10 @@ func generateIndices(nd, ns uint, children func([]uint64) []uint64) []uint64 {
 func generatePoints(nd, ns uint, indices []uint64,
 	locate func(level, order uint64) (float64, float64)) []float64 {
 
+	levels, orders := internal.Decompose(indices)
 	points := make([]float64, nd*ns)
 	for i := range points {
-		level, order := decompose(indices[i])
-		x, h := locate(level, order)
+		x, h := locate(levels[i], orders[i])
 		a, b := math.Max(0.0, x-h), math.Min(1.0, x+h)
 		points[i] = a + (b-a)*rand.Float64()
 	}
