@@ -1,15 +1,19 @@
-package equidistant
+package internal
 
-import (
-	"github.com/ready-steady/adapt/internal"
-)
-
-func compose(levels []uint64, orders []uint64) []uint64 {
-	indices := make([]uint64, len(levels))
-
+// Compose encodes levels and orders.
+func Compose(levels []uint64, orders []uint64) (indices []uint64) {
+	indices = make([]uint64, len(levels))
 	for i := range levels {
-		indices[i] = uint64(levels[i]) | uint64(orders[i])<<internal.LEVEL_SIZE
+		indices[i] = uint64(levels[i]) | uint64(orders[i])<<LEVEL_SIZE
 	}
+	return
+}
 
-	return indices
+// Decompose decodes levels and orders.
+func Decompose(indices []uint64) (levels []uint64, orders []uint64) {
+	levels, orders = make([]uint64, len(indices)), make([]uint64, len(indices))
+	for i := range indices {
+		levels[i], orders[i] = LEVEL_MASK&indices[i], indices[i]>>LEVEL_SIZE
+	}
+	return
 }
