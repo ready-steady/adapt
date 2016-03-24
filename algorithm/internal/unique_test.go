@@ -9,7 +9,28 @@ import (
 	"github.com/ready-steady/assert"
 )
 
-func TestUniqueFilter(t *testing.T) {
+func BenchmarkUniqueDistil(b *testing.B) {
+	const (
+		ni = 20
+		nn = 1000
+	)
+
+	unique := NewUnique(ni)
+
+	generator := rand.New(rand.NewSource(0))
+	indices := make([]uint64, 2*nn*ni)
+	for _, i := range indices {
+		indices[i] = uint64(generator.Int63())
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		unique.Distil(indices)
+	}
+}
+
+func TestUniqueDistil(t *testing.T) {
 	unique := NewUnique(2)
 
 	assert.Equal(unique.Distil([]uint64{4, 2}), []uint64{4, 2}, t)
@@ -37,7 +58,7 @@ func TestUniqueFilter(t *testing.T) {
 	}
 }
 
-func TestUniqueFilterRewrite(t *testing.T) {
+func TestUniqueDistilRewrite(t *testing.T) {
 	unique := NewUnique(2)
 
 	key := []uint64{4, 2}
@@ -45,27 +66,6 @@ func TestUniqueFilterRewrite(t *testing.T) {
 
 	key[0], key[1] = 6, 9
 	assert.Equal(unique.Distil([]uint64{4, 2}), []uint64{}, t)
-}
-
-func BenchmarkUniqueFilter(b *testing.B) {
-	const (
-		ni = 20
-		nn = 1000
-	)
-
-	unique := NewUnique(ni)
-
-	generator := rand.New(rand.NewSource(0))
-	indices := make([]uint64, 2*nn*ni)
-	for _, i := range indices {
-		indices[i] = uint64(generator.Int63())
-	}
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		unique.Distil(indices)
-	}
 }
 
 func isLittleEndian() bool {

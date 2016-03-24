@@ -3,6 +3,8 @@ package internal
 import (
 	"math"
 	"sync"
+
+	"github.com/ready-steady/adapt/internal"
 )
 
 var (
@@ -48,6 +50,53 @@ func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	close(jobs)
 
 	return values
+}
+
+// IsAdmissible checks if a set of indices is admissible.
+func IsAdmissible(indices []uint64, ni uint) bool {
+	nn := uint(len(indices)) / ni
+
+	indices = append([]uint64{}, indices...)
+	for i := range indices {
+		indices[i] = internal.LEVEL_MASK & indices[i]
+	}
+
+	hash := NewHash(ni)
+	mapping := make(map[string]bool)
+	for i := uint(0); i < nn; i++ {
+		index := indices[i*ni : (i+1)*ni]
+		mapping[hash.Key(index)] = true
+	}
+
+	for i := uint(0); i < nn; i++ {
+		index := indices[i*ni : (i+1)*ni]
+		for j := uint(0); j < ni; j++ {
+			if index[j] == 0 {
+				continue
+			}
+			index[j] -= 1
+			_, ok := mapping[hash.Key(index)]
+			index[j] += 1
+			if !ok {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+// IsUnique checks if a set of indices has no repetitions.
+func IsUnique(indices []uint64, ni uint) bool {
+	unique := NewUnique(ni)
+
+	indices = append([]uint64{}, indices...)
+	before := uint(len(indices)) / ni
+
+	indices = unique.Distil(indices)
+	after := uint(len(indices)) / ni
+
+	return before == after
 }
 
 // LocateMaxFloat64s returns the position of the maximal element among a subset

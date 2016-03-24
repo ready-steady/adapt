@@ -22,7 +22,7 @@ func (self *Unique) Distil(indices []uint64) []uint64 {
 	nn := uint(len(indices)) / ni
 	na, ne := uint(0), nn
 	for i, j := uint(0), uint(0); i < nn; i++ {
-		key := self.hash.Key(indices[j*ni:])
+		key := self.hash.Key(indices[j*ni : (j+1)*ni])
 		if _, ok := self.mapping[key]; ok {
 			j++
 			continue
@@ -37,17 +37,4 @@ func (self *Unique) Distil(indices []uint64) []uint64 {
 		j++
 	}
 	return indices[:na*ni]
-}
-
-// IsUnique checks if a set of indices has no repetitions.
-func IsUnique(indices []uint64, ni uint) bool {
-	unique := NewUnique(ni)
-
-	indices = append([]uint64{}, indices...)
-	before := uint(len(indices)) / ni
-
-	indices = unique.Distil(indices)
-	after := uint(len(indices)) / ni
-
-	return before == after
 }
