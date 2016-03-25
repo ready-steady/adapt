@@ -14,13 +14,23 @@ func NewHistory(ni uint) *History {
 	}
 }
 
-// GetSet looks up the position of an index and, if not found, assigns one.
-func (self *History) GetSet(index []uint64) (position uint, found bool) {
+// Get looks up the value of an index.
+func (self *History) Get(index []uint64) (uint, bool) {
+	current, found := self.mapping[self.Key(index)]
+	return current, found
+}
+
+// GetSet looks up the value of an index and, if not found, assigns one.
+func (self *History) GetSet(index []uint64, value uint) (uint, bool) {
 	key := self.Key(index)
-	position, found = self.mapping[key]
+	current, found := self.mapping[key]
 	if !found {
-		position = uint(len(self.mapping))
-		self.mapping[key] = position
+		self.mapping[key] = value
 	}
-	return
+	return current, found
+}
+
+// Set assigns a value to an index.
+func (self *History) Set(index []uint64, value uint) {
+	self.mapping[self.Key(index)] = value
 }

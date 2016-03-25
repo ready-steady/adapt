@@ -102,7 +102,6 @@ func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *
 	next := &state{}
 	next.Lindices = self.Active.Next(self.k)
 	next.Indices, next.Counts = self.indexSet(next.Lindices, surrogate)
-
 	return next
 }
 
@@ -138,7 +137,6 @@ func (self *basicStrategy) indexSet(lindices []uint64,
 
 func (self *basicStrategy) indexOne(lindex []uint64, surrogate *external.Surrogate) []uint64 {
 	ni := self.ni
-
 	indices := []uint64(nil)
 	for i := uint(0); i < ni; i++ {
 		level := lindex[i]
@@ -169,6 +167,5 @@ func (self *basicStrategy) indexOne(lindex []uint64, surrogate *external.Surroga
 				surrogate.Indices[j*ni:(j+1)*ni], i))...)
 		}
 	}
-
 	return indices
 }

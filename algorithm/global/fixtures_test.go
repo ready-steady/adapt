@@ -27,7 +27,7 @@ var fixtureBranin = fixture{
 	surrogate: &external.Surrogate{
 		Inputs:  2,
 		Outputs: 1,
-		Nodes:   293,
+		Nodes:   377,
 	},
 
 	points: []float64{

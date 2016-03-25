@@ -65,7 +65,10 @@ func (self *basicStrategy) Done() bool {
 	if nl == 0 {
 		return false
 	}
-	δ := threshold(self.lower, self.upper, self.εa, self.εr)
+	δ := make([]float64, no)
+	for i := uint(0); i < no; i++ {
+		δ[i] = math.Max(self.εr*(self.upper[i]-self.lower[i]), self.εa)
+	}
 	for i := range self.Positions {
 		if i >= nl {
 			continue
@@ -103,7 +106,6 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) *state {
 	next := &state{}
 	next.Lindices = self.Active.Next(self.k)
 	next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
-
 	return next
 }
 
@@ -125,12 +127,4 @@ func (self *basicStrategy) consume(state *state) {
 		self.lower[j] = math.Min(self.lower[j], point)
 		self.upper[j] = math.Max(self.upper[j], point)
 	}
-}
-
-func threshold(lower, upper []float64, εa, εr float64) []float64 {
-	threshold := make([]float64, len(lower))
-	for i := range threshold {
-		threshold[i] = math.Max(εr*(upper[i]-lower[i]), εa)
-	}
-	return threshold
 }

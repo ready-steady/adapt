@@ -16,7 +16,7 @@ func (self *Unique) Distil(indices []uint64) []uint64 {
 	nn := uint(len(indices)) / ni
 	na, ne := uint(0), nn
 	for i, j := uint(0), uint(0); i < nn; i++ {
-		if _, found := self.GetSet(indices[j*ni : (j+1)*ni]); found {
+		if _, found := self.GetSet(indices[j*ni:(j+1)*ni], 0); found {
 			j++
 			continue
 		}
