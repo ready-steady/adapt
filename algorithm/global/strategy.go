@@ -25,8 +25,6 @@ type basicStrategy struct {
 
 	grid Grid
 
-	lmax uint
-
 	εa float64
 	εr float64
 
@@ -46,8 +44,6 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 		no: no,
 
 		grid: grid,
-
-		lmax: config.MaxLevel,
 
 		εa: config.AbsoluteError,
 		εr: config.RelativeError,
@@ -92,16 +88,11 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) *state {
 
 	self.consume(current)
 
-	for {
-		self.Active.Drop(self.k)
-		if len(self.Positions) == 0 {
-			return nil
-		}
-		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
-		if self.Norms[self.k] < uint64(self.lmax) {
-			break
-		}
+	self.Active.Drop(self.k)
+	if len(self.Positions) == 0 {
+		return nil
 	}
+	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
 
 	next := &state{}
 	next.Lindices = self.Active.Next(self.k)

@@ -23,8 +23,9 @@ type Target interface {
 
 // Element contains information about an interpolation element.
 type Element struct {
-	Indices   []uint64  // Indices of the grid nodes
-	Volumes   []float64 // Volumes of the basis functions
+	Lindex    []uint64  // Level index
+	Indices   []uint64  // Nodal indices
+	Volumes   []float64 // Basis-function volumes
 	Values    []float64 // Target-function values
 	Surpluses []float64 // Hierarchical surpluses
 }
@@ -37,15 +38,23 @@ type BasicTarget struct {
 
 	ni uint
 	no uint
+
+	lmin uint
+	lmax uint
 }
 
 // NewTarget creates a basic target.
-func NewTarget(inputs, outputs uint, compute func([]float64, []float64)) *BasicTarget {
+func NewTarget(inputs, outputs uint, config *Config,
+	compute func([]float64, []float64)) *BasicTarget {
+
 	return &BasicTarget{
 		ComputeHandler: compute,
 
 		ni: inputs,
 		no: outputs,
+
+		lmin: config.MinLevel,
+		lmax: config.MaxLevel,
 	}
 }
 
@@ -68,12 +77,12 @@ func (self *BasicTarget) Compute(node, value []float64) {
 func (self *BasicTarget) Score(element *Element) []float64 {
 	if self.ScoreHandler != nil {
 		return self.ScoreHandler(element)
-	} else {
-		no, local := self.no, make([]float64, len(element.Volumes))
-		for i, surplus := range element.Surpluses {
-			j := uint(i) % no
-			local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*surplus))
-		}
-		return local
 	}
+
+	no, local := self.no, make([]float64, len(element.Volumes))
+	for i, surplus := range element.Surpluses {
+		j := uint(i) % no
+		local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*surplus))
+	}
+	return local
 }

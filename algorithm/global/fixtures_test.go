@@ -284,7 +284,7 @@ func prepare(fixture *fixture) (*Interpolator, *BasicTarget) {
 
 	config := NewConfig()
 
-	target := NewTarget(ni, no, fixture.compute)
+	target := NewTarget(ni, no, config, fixture.compute)
 	interpolator := New(equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config)
 
 	return interpolator, target

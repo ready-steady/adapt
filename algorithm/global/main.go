@@ -29,7 +29,7 @@ type Grid interface {
 type Interpolator struct {
 	grid   Grid
 	basis  Basis
-	config Config
+	config *Config
 }
 
 type state struct {
@@ -50,20 +50,18 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
 		grid:   grid,
 		basis:  basis,
-		config: *config,
+		config: config,
 	}
 }
 
 // Compute constructs an interpolant for a function.
 func (self *Interpolator) Compute(target Target) *external.Surrogate {
-	config := &self.config
-
 	ni, no := target.Dimensions()
-	nw := config.Workers
+	nw := self.config.Workers
 
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
-	strategy := newStrategy(ni, no, self.grid, config)
+	strategy := newStrategy(ni, no, self.grid, self.config)
 
 	state := strategy.Next(nil, nil)
 	progress.Push(state.Indices, ni)
@@ -74,8 +72,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, state.Nodes, ni, no, nw)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
-		state.Scores = score(target, state.Indices, state.Volumes, state.Observations,
-			state.Surpluses, state.Counts, ni, no)
+		state.Scores = score(target, state, ni, no)
 
 		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
 		state = strategy.Next(state, surrogate)

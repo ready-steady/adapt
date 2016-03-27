@@ -37,19 +37,15 @@ func levelize(indices []uint64, ni uint) []uint {
 	return levels
 }
 
-func score(target Target, indices []uint64, volumes, observations, surpluses []float64,
-	ni, no uint) []float64 {
-
-	nn := uint(len(indices)) / ni
+func score(target Target, state *state, ni, no uint) []float64 {
+	nn := uint(len(state.Indices)) / ni
 	scores := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {
-		fi, fo := i*ni, i*no
-		li, lo := (i+1)*ni, (i+1)*no
 		scores[i] = target.Score(&Element{
-			Index:   indices[fi:li],
-			Volume:  volumes[i],
-			Value:   observations[fo:lo],
-			Surplus: surpluses[fo:lo],
+			Index:   state.Indices[i*ni : (i+1)*ni],
+			Volume:  state.Volumes[i],
+			Value:   state.Observations[i*no : (i+1)*no],
+			Surplus: state.Surpluses[i*no : (i+1)*no],
 		})
 	}
 	return scores

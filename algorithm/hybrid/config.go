@@ -22,7 +22,7 @@ func NewConfig() *Config {
 		MaxLevel: 10,
 
 		TotalError: 1e-6,
-		LocalError: 1e-6,
+		LocalError: 1e-3,
 
 		Workers: uint(runtime.GOMAXPROCS(0)),
 	}

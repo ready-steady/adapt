@@ -6,6 +6,10 @@ import (
 	"github.com/ready-steady/adapt/algorithm/external"
 )
 
+var (
+	infinity = math.Inf(1.0)
+)
+
 // Target is a function to be interpolated.
 type Target interface {
 	// Dimensions returns the number of inputs and outputs.
@@ -23,8 +27,9 @@ type Target interface {
 
 // Element contains information about an interpolation element.
 type Element struct {
-	Indices   []uint64  // Indices of the grid nodes
-	Volumes   []float64 // Volumes of the basis functions
+	Lindex    []uint64  // Level index
+	Indices   []uint64  // Nodal indices
+	Volumes   []float64 // Basis-function volumes
 	Values    []float64 // Target-function values
 	Surpluses []float64 // Hierarchical surpluses
 }
@@ -37,15 +42,23 @@ type BasicTarget struct {
 
 	ni uint
 	no uint
+
+	lmin uint
+	lmax uint
 }
 
 // NewTarget creates a basic target.
-func NewTarget(inputs, outputs uint, compute func([]float64, []float64)) *BasicTarget {
+func NewTarget(inputs, outputs uint, config *Config,
+	compute func([]float64, []float64)) *BasicTarget {
+
 	return &BasicTarget{
 		ComputeHandler: compute,
 
 		ni: inputs,
 		no: outputs,
+
+		lmin: config.MinLevel,
+		lmax: config.MaxLevel,
 	}
 }
 
@@ -65,14 +78,25 @@ func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *BasicTarget) Score(element *Element) (score float64) {
+func (self *BasicTarget) Score(element *Element) float64 {
 	if self.ScoreHandler != nil {
-		score = self.ScoreHandler(element)
-	} else {
-		for _, value := range element.Surpluses {
-			score += math.Abs(value)
-		}
-		score /= float64(uint(len(element.Values)) / self.no)
+		return self.ScoreHandler(element)
 	}
-	return
+
+	norm := uint64(0)
+	for _, level := range element.Lindex {
+		norm += level
+	}
+	if norm < uint64(self.lmin) {
+		return infinity
+	} else if norm >= uint64(self.lmax) {
+		return 0.0
+	}
+
+	score := 0.0
+	for _, value := range element.Surpluses {
+		score += math.Abs(value)
+	}
+	score /= float64(uint(len(element.Values)) / self.no)
+	return score
 }
