@@ -84,5 +84,6 @@ func (self *BasicTarget) Score(element *Element) []float64 {
 		j := uint(i) % no
 		local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*surplus))
 	}
+
 	return local
 }

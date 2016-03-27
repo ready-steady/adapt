@@ -71,16 +71,16 @@ func (self *BasicTarget) Compute(node, value []float64) {
 	self.ComputeHandler(node, value)
 }
 
-func (self *BasicTarget) Score(element *Element) (score float64) {
+func (self *BasicTarget) Score(element *Element) float64 {
 	if self.ScoreHandler != nil {
-		score = self.ScoreHandler(element)
-	} else {
-		for _, ε := range element.Surplus {
-			if math.Abs(ε) > self.ε {
-				score = 1.0
-				break
-			}
+		return self.ScoreHandler(element)
+	}
+
+	for _, ε := range element.Surplus {
+		if math.Abs(ε) > self.ε {
+			return 1.0
 		}
 	}
-	return
+
+	return 0.0
 }

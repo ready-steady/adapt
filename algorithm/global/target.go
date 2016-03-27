@@ -98,5 +98,6 @@ func (self *BasicTarget) Score(element *Element) float64 {
 		score += math.Abs(value)
 	}
 	score /= float64(uint(len(element.Values)) / self.no)
+
 	return score
 }
