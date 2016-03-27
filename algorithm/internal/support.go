@@ -56,7 +56,7 @@ func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 func IsAdmissible(indices []uint64, ni uint) bool {
 	nn := uint(len(indices)) / ni
 
-	indices = append([]uint64{}, indices...)
+	indices = append([]uint64(nil), indices...)
 	for i := range indices {
 		indices[i] = internal.LEVEL_MASK & indices[i]
 	}
@@ -141,6 +141,18 @@ func MaxUint64s(data []uint64) uint64 {
 		}
 	}
 	return result
+}
+
+// Levelize returns the uniform norms of the levels of a set of indices.
+func Levelize(indices []uint64, ni uint) []uint64 {
+	nn := uint(len(indices)) / ni
+	levels := make([]uint64, nn)
+	for i := uint(0); i < nn; i++ {
+		for j := uint(0); j < ni; j++ {
+			levels[i] += internal.LEVEL_MASK & indices[i*ni+j]
+		}
+	}
+	return levels
 }
 
 // Subtract returns the difference between two vectors.

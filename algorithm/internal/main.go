@@ -8,7 +8,7 @@ import (
 
 var (
 	// Workers is the number of goroutines used for interpolation.
-	Workers uint = uint(runtime.GOMAXPROCS(0))
+	Workers = uint(runtime.GOMAXPROCS(0))
 )
 
 // Computer computes the value of a basis function.

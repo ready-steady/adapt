@@ -7,6 +7,10 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
+var (
+	infinity = math.Inf(1.0)
+)
+
 // Strategy controls the interpolation process.
 type strategy interface {
 	// Done checks if the stopping criteria have been satisfied.
@@ -24,6 +28,9 @@ type basicStrategy struct {
 	no uint
 
 	grid Grid
+
+	lmin uint
+	lmax uint
 
 	εa float64
 	εr float64
@@ -44,6 +51,9 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 		no: no,
 
 		grid: grid,
+
+		lmin: config.MinLevel,
+		lmax: config.MaxLevel,
 
 		εa: config.AbsoluteError,
 		εr: config.RelativeError,
@@ -102,17 +112,37 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) *state {
 
 func (self *basicStrategy) consume(state *state) {
 	no, nn := self.no, uint(len(state.Counts))
-	local := make([]float64, nn*no)
-	for i, offset := uint(0), uint(0); i < nn; i++ {
-		ns := state.Counts[i] * no
-		for j := uint(0); j < ns; j++ {
-			k := i*no + j%no
-			local[k] = math.Max(local[k], math.Abs(state.Surpluses[offset+j]))
-		}
-		offset += state.Counts[i]
-	}
+
+	levels := internal.Levelize(state.Lindices, self.ni)
+
 	self.global = append(self.global, state.Scores...)
-	self.local = append(self.local, local...)
+	global := self.global[uint(len(self.global))-nn:]
+
+	self.local = append(self.local, make([]float64, nn*no)...)
+	local := self.local[uint(len(self.local))-nn*no:]
+
+	for i, offset := uint(0), uint(0); i < nn; i++ {
+		count := state.Counts[i]
+		if levels[i] < uint64(self.lmin) {
+			global[i] = infinity
+			for j := uint(0); j < count; j++ {
+				local[i*no+j] = infinity
+			}
+		} else if levels[i] >= uint64(self.lmax) {
+			global[i] = -infinity
+			for j := uint(0); j < count; j++ {
+				local[i*no+j] = -infinity
+			}
+		} else {
+			ns := count * no
+			for j := uint(0); j < ns; j++ {
+				k := i*no + j%no
+				local[k] = math.Max(local[k], math.Abs(state.Surpluses[offset+j]))
+			}
+		}
+		offset += count
+	}
+
 	for i, point := range state.Observations {
 		j := uint(i) % no
 		self.lower[j] = math.Min(self.lower[j], point)
