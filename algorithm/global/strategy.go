@@ -60,8 +60,8 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 
 		k: ^uint(0),
 
-		lower: internal.RepeatFloat64(math.Inf(1.0), no),
-		upper: internal.RepeatFloat64(math.Inf(-1.0), no),
+		lower: internal.RepeatFloat64(infinity, no),
+		upper: internal.RepeatFloat64(-infinity, no),
 	}
 }
 
@@ -103,6 +103,9 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) *state {
 		return nil
 	}
 	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+	if self.global[self.k] <= 0.0 {
+		return nil
+	}
 
 	next := &state{}
 	next.Lindices = self.Active.Next(self.k)
@@ -111,36 +114,36 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) *state {
 }
 
 func (self *basicStrategy) consume(state *state) {
-	no, nn := self.no, uint(len(state.Counts))
+	no, ng, nl := self.no, uint(len(self.global)), uint(len(self.local))
+	nn := uint(len(state.Counts))
 
 	levels := internal.Levelize(state.Lindices, self.ni)
 
 	self.global = append(self.global, state.Scores...)
-	global := self.global[uint(len(self.global))-nn:]
+	global := self.global[ng:]
 
 	self.local = append(self.local, make([]float64, nn*no)...)
-	local := self.local[uint(len(self.local))-nn*no:]
+	local := self.local[nl:]
 
-	for i, offset := uint(0), uint(0); i < nn; i++ {
+	for i, o := uint(0), uint(0); i < nn; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
 			global[i] = infinity
-			for j := uint(0); j < count; j++ {
+			for j := uint(0); j < no; j++ {
 				local[i*no+j] = infinity
 			}
 		} else if levels[i] >= uint64(self.lmax) {
 			global[i] = -infinity
-			for j := uint(0); j < count; j++ {
+			for j := uint(0); j < no; j++ {
 				local[i*no+j] = -infinity
 			}
 		} else {
-			ns := count * no
-			for j := uint(0); j < ns; j++ {
+			for j, m := uint(0), count*no; j < m; j++ {
 				k := i*no + j%no
-				local[k] = math.Max(local[k], math.Abs(state.Surpluses[offset+j]))
+				local[k] = math.Max(local[k], math.Abs(state.Surpluses[o+j]))
 			}
 		}
-		offset += count
+		o += count
 	}
 
 	for i, point := range state.Observations {

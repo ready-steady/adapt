@@ -1,8 +1,14 @@
 package hybrid
 
 import (
+	"math"
+
 	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
+)
+
+var (
+	infinity = math.Inf(1.0)
 )
 
 // Strategy controls the interpolation process.
@@ -88,15 +94,13 @@ func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *
 
 	self.consume(current)
 
-	for {
-		self.Active.Drop(self.k)
-		if len(self.Positions) == 0 {
-			return nil
-		}
-		self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
-		if self.Norms[self.k] < uint64(self.lmax) {
-			break
-		}
+	self.Active.Drop(self.k)
+	if len(self.Positions) == 0 {
+		return nil
+	}
+	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+	if self.global[self.k] <= 0.0 {
+		return nil
 	}
 
 	next := &state{}
@@ -108,17 +112,39 @@ func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *
 func (self *basicStrategy) consume(state *state) {
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
 	nn := uint(len(state.Counts))
-	for i, offset := uint(0), uint(0); i < nn; i++ {
-		global := 0.0
-		for _, ε := range state.Scores[offset:(offset + state.Counts[i])] {
-			global += ε
+
+	levels := internal.Levelize(state.Lindices, ni)
+
+	self.offset = append(self.offset, make([]uint, nn)...)
+	offset := self.offset[ng:]
+
+	self.global = append(self.global, make([]float64, nn)...)
+	global := self.global[ng:]
+
+	self.local = append(self.local, state.Scores...)
+	local := self.local[nl:]
+
+	for i, o := uint(0), uint(0); i < nn; i++ {
+		count := state.Counts[i]
+		offset[i] = nl + o
+		if levels[i] < uint64(self.lmin) {
+			global[i] = infinity
+			for j := uint(0); j < count; j++ {
+				local[o+j] = infinity
+			}
+		} else if levels[i] >= uint64(self.lmax) {
+			global[i] = -infinity
+			for j := uint(0); j < count; j++ {
+				local[o+j] = -infinity
+			}
+		} else {
+			for _, ε := range state.Scores[o:(o + count)] {
+				global[i] += ε
+			}
 		}
 		self.position[self.hash.Key(state.Lindices[i*ni:(i+1)*ni])] = ng + i
-		self.offset = append(self.offset, nl+offset)
-		self.global = append(self.global, global)
-		offset += state.Counts[i]
+		o += count
 	}
-	self.local = append(self.local, state.Scores...)
 }
 
 func (self *basicStrategy) index(lindices []uint64,
@@ -128,7 +154,7 @@ func (self *basicStrategy) index(lindices []uint64,
 	nn := uint(len(lindices)) / ni
 
 	indices, counts := []uint64(nil), make([]uint, nn)
-	for i, offset := uint(0), uint(0); i < nn; i++ {
+	for i, o := uint(0), uint(0); i < nn; i++ {
 		lindex := lindices[i*ni : (i+1)*ni]
 		for j := uint(0); j < ni; j++ {
 			level := lindex[j]
@@ -159,8 +185,8 @@ func (self *basicStrategy) index(lindices []uint64,
 					surrogate.Indices[k*ni:(k+1)*ni], j))...)
 			}
 		}
-		counts[i] = uint(len(indices))/ni - offset
-		offset += counts[i]
+		counts[i] = uint(len(indices))/ni - o
+		o += counts[i]
 	}
 
 	return indices, counts

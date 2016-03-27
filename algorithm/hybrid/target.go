@@ -79,10 +79,11 @@ func (self *BasicTarget) Score(element *Element) []float64 {
 		return self.ScoreHandler(element)
 	}
 
-	no, local := self.no, make([]float64, len(element.Volumes))
-	for i, surplus := range element.Surpluses {
-		j := uint(i) % no
-		local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*surplus))
+	no := self.no
+	local := make([]float64, len(element.Volumes))
+	for i, m := uint(0), uint(len(element.Surpluses)); i < m; i++ {
+		j := i % no
+		local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*element.Surpluses[i]))
 	}
 
 	return local
