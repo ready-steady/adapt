@@ -101,7 +101,7 @@ func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *
 
 	next := &state{}
 	next.Lindices = self.Active.Next(self.k)
-	next.Indices, next.Counts = self.indexSet(next.Lindices, surrogate)
+	next.Indices, next.Counts = self.index(next.Lindices, surrogate)
 	return next
 }
 
@@ -121,51 +121,47 @@ func (self *basicStrategy) consume(state *state) {
 	self.local = append(self.local, state.Scores...)
 }
 
-func (self *basicStrategy) indexSet(lindices []uint64,
+func (self *basicStrategy) index(lindices []uint64,
 	surrogate *external.Surrogate) ([]uint64, []uint) {
 
 	ni := self.ni
 	nn := uint(len(lindices)) / ni
+
 	indices, counts := []uint64(nil), make([]uint, nn)
 	for i, offset := uint(0), uint(0); i < nn; i++ {
-		indices = append(indices, self.indexOne(lindices[i*ni:(i+1)*ni], surrogate)...)
+		lindex := lindices[i*ni : (i+1)*ni]
+		for j := uint(0); j < ni; j++ {
+			level := lindex[j]
+			if level == 0 {
+				continue
+			}
+
+			lindex[j] = level - 1
+			k, ok := self.position[self.hash.Key(lindex)]
+			lindex[j] = level
+			if !ok {
+				continue
+			}
+
+			var from, till uint
+			from = self.offset[k]
+			if uint(len(self.offset)) > k+1 {
+				till = self.offset[k+1]
+			} else {
+				till = uint(len(self.local))
+			}
+
+			for k := from; k < till; k++ {
+				if self.local[k] < self.εl {
+					continue
+				}
+				indices = append(indices, self.unique.Distil(self.grid.ChildrenToward(
+					surrogate.Indices[k*ni:(k+1)*ni], j))...)
+			}
+		}
 		counts[i] = uint(len(indices))/ni - offset
 		offset += counts[i]
 	}
+
 	return indices, counts
-}
-
-func (self *basicStrategy) indexOne(lindex []uint64, surrogate *external.Surrogate) []uint64 {
-	ni := self.ni
-	indices := []uint64(nil)
-	for i := uint(0); i < ni; i++ {
-		level := lindex[i]
-		if level == 0 {
-			continue
-		}
-
-		lindex[i] = level - 1
-		k, ok := self.position[self.hash.Key(lindex)]
-		lindex[i] = level
-		if !ok {
-			continue
-		}
-
-		var from, till uint
-		from = self.offset[k]
-		if uint(len(self.offset)) > k+1 {
-			till = self.offset[k+1]
-		} else {
-			till = uint(len(self.local))
-		}
-
-		for j := from; j < till; j++ {
-			if self.local[j] < self.εl {
-				continue
-			}
-			indices = append(indices, self.unique.Distil(self.grid.ChildrenToward(
-				surrogate.Indices[j*ni:(j+1)*ni], i))...)
-		}
-	}
-	return indices
 }
