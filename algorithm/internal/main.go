@@ -21,12 +21,12 @@ type BasisIntegrator interface {
 	Integrate([]uint64) float64
 }
 
-// GridComputer returns the coordinates of a grid node.
+// GridComputer returns the coordinates of a set of grid nodes.
 type GridComputer interface {
 	Compute([]uint64) []float64
 }
 
-// GridIndexer returns the nodal indices of a level index.
+// GridIndexer returns the nodal indices of a set of level indices.
 type GridIndexer interface {
 	Index([]uint64) []uint64
 }
