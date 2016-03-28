@@ -7,7 +7,7 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-// Basis is a functional basis.
+// Basis is an interpolation basis.
 type Basis interface {
 	// Compute evaluates the value of a basis function.
 	Compute([]uint64, []float64) float64
@@ -16,7 +16,7 @@ type Basis interface {
 	Integrate([]uint64) float64
 }
 
-// Grid is a sparse grid.
+// Grid is an interpolation grid.
 type Grid interface {
 	// Compute returns the nodes corresponding to a set of indices.
 	Compute([]uint64) []float64
@@ -25,8 +25,14 @@ type Grid interface {
 	Index([]uint64) []uint64
 }
 
+// Target is a function to be interpolated.
+type Target func([]float64, []float64)
+
 // Interpolator is an instance of the algorithm.
 type Interpolator struct {
+	ni uint
+	no uint
+
 	grid   Grid
 	basis  Basis
 	config *Config
@@ -57,8 +63,11 @@ type State struct {
 }
 
 // New creates an interpolator.
-func New(grid Grid, basis Basis, config *Config) *Interpolator {
+func New(inputs, outputs uint, grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
+		ni: inputs,
+		no: outputs,
+
 		grid:   grid,
 		basis:  basis,
 		config: config,
@@ -67,7 +76,7 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 
 // Compute constructs an interpolant for a function.
 func (self *Interpolator) Compute(target Target) *external.Surrogate {
-	ni, no := target.Dimensions()
+	ni, no := self.ni, self.no
 
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
@@ -78,7 +87,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	for !strategy.Done() {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
-		state.Observations = internal.Invoke(target.Compute, state.Nodes, ni, no, internal.Workers)
+		state.Observations = internal.Invoke(target, state.Nodes, ni, no, internal.Workers)
 		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, state.Nodes, ni, no, internal.Workers)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
