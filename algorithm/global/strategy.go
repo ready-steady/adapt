@@ -34,12 +34,12 @@ type BasicStrategy struct {
 	ni uint
 	no uint
 
-	grid Grid
-
 	lmin uint
 	lmax uint
 	εa   float64
 	εr   float64
+
+	grid Grid
 
 	k uint
 
@@ -50,17 +50,19 @@ type BasicStrategy struct {
 }
 
 // NewStrategy creates a basic strategy.
-func NewStrategy(inputs, outputs uint, grid Grid, config *Config) *BasicStrategy {
+func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
+	absoluteError, relativeError float64, grid Grid) *BasicStrategy {
+
 	return &BasicStrategy{
 		ni: inputs,
 		no: outputs,
 
-		grid: grid,
+		lmin: minLevel,
+		lmax: maxLevel,
+		εa:   absoluteError,
+		εr:   relativeError,
 
-		lmin: config.MinLevel,
-		lmax: config.MaxLevel,
-		εa:   config.AbsoluteError,
-		εr:   config.RelativeError,
+		grid: grid,
 	}
 }
 

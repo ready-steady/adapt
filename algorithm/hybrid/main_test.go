@@ -8,9 +8,9 @@ import (
 
 func TestBranin(t *testing.T) {
 	fixture := &fixtureBranin
-	interpolator, target := prepare(fixture)
+	interpolator := prepare(fixture)
 
-	surrogate := interpolator.Compute(target)
+	surrogate := interpolator.Compute(fixture.target)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 100.0, t)

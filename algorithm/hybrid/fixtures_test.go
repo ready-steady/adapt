@@ -17,6 +17,24 @@ type fixture struct {
 	values []float64
 }
 
+func prepare(fixture *fixture) *Interpolator {
+	const (
+		minLevel   = 1
+		maxLevel   = 10
+		localError = 1e-3
+		totalError = 1e-6
+	)
+
+	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
+
+	grid := equidistant.NewClosed(ni)
+	basis := polynomial.NewClosed(ni, 1)
+	strategy := NewStrategy(ni, no, minLevel, maxLevel, localError, totalError, grid)
+	interpolator := New(ni, no, grid, basis, strategy)
+
+	return interpolator
+}
+
 var fixtureBranin = fixture{
 	target: func(point, value []float64) {
 		x, y := 15.0*point[0]-5.0, 15.0*point[1]
@@ -276,11 +294,4 @@ var fixtureBranin = fixture{
 		1.1213106069502115e+02,
 		1.4587219087939556e+02,
 	},
-}
-
-func prepare(fixture *fixture) (*Interpolator, Target) {
-	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
-	grid, basis := equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1)
-	interpolator := New(ni, no, grid, basis, NewConfig())
-	return interpolator, fixture.target
 }

@@ -9,17 +9,17 @@ import (
 
 func BenchmarkBranin(b *testing.B) {
 	fixture := &fixtureBranin
-	interpolator, target := prepare(fixture)
+	interpolator := prepare(fixture)
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(target)
+		interpolator.Compute(fixture.target)
 	}
 }
 
 func TestBranin(t *testing.T) {
 	fixture := &fixtureBranin
-	interpolator, target := prepare(fixture)
+	interpolator := prepare(fixture)
 
-	surrogate := interpolator.Compute(target)
+	surrogate := interpolator.Compute(fixture.target)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 	assert.Equal(internal.IsUnique(surrogate.Indices, surrogate.Inputs), true, t)
 	assert.Equal(internal.IsAdmissible(surrogate.Indices, surrogate.Inputs), true, t)

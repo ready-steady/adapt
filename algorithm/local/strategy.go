@@ -37,8 +37,8 @@ type BasicStrategy struct {
 }
 
 // NewStrategy creates a basic strategy.
-func NewStrategy(inputs, outputs, minLevel, maxLevel uint, absoluteError float64,
-	grid Grid) *BasicStrategy {
+func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
+	absoluteError float64, grid Grid) *BasicStrategy {
 
 	return &BasicStrategy{
 		ni: inputs,

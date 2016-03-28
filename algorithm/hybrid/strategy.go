@@ -33,12 +33,12 @@ type BasicStrategy struct {
 	ni uint
 	no uint
 
-	grid Grid
-
 	lmin uint
 	lmax uint
-	εt   float64
 	εl   float64
+	εt   float64
+
+	grid Grid
 
 	k uint
 
@@ -51,17 +51,19 @@ type BasicStrategy struct {
 	local  []float64
 }
 
-func NewStrategy(inputs, outputs uint, grid Grid, config *Config) *BasicStrategy {
+func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
+	localError, totalError float64, grid Grid) *BasicStrategy {
+
 	return &BasicStrategy{
 		ni: inputs,
 		no: outputs,
 
-		grid: grid,
+		lmin: minLevel,
+		lmax: maxLevel,
+		εl:   localError,
+		εt:   totalError,
 
-		lmin: config.MinLevel,
-		lmax: config.MaxLevel,
-		εt:   config.TotalError,
-		εl:   config.LocalError,
+		grid: grid,
 	}
 }
 
