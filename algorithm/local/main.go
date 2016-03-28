@@ -7,7 +7,7 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-// Basis is a functional basis.
+// Basis is an interpolation basis.
 type Basis interface {
 	// Compute evaluates the value of a basis function.
 	Compute([]uint64, []float64) float64
@@ -16,7 +16,7 @@ type Basis interface {
 	Integrate([]uint64) float64
 }
 
-// Grid is a sparse grid.
+// Grid is an interpolation grid.
 type Grid interface {
 	// Compute returns the nodes corresponding to a set of indices.
 	Compute([]uint64) []float64
