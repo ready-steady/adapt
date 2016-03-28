@@ -9,20 +9,14 @@ import (
 
 // Basis is an interpolation basis.
 type Basis interface {
-	// Compute evaluates the value of a basis function.
-	Compute([]uint64, []float64) float64
-
-	// Integrate computes the integral of a basis function.
-	Integrate([]uint64) float64
+	internal.BasisComputer
+	internal.BasisIntegrator
 }
 
 // Grid is an interpolation grid.
 type Grid interface {
-	// Compute returns the nodes corresponding to a set of indices.
-	Compute([]uint64) []float64
-
-	// Children returns the child indices corresponding to a set of indices.
-	Children([]uint64) []uint64
+	internal.GridComputer
+	internal.GridRefiner
 }
 
 // Target is a function to be interpolated.

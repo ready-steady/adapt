@@ -198,7 +198,7 @@ func (self *BasicStrategy) index(lindices []uint64,
 				if self.local[k] < self.εl {
 					continue
 				}
-				indices = append(indices, self.unique.Distil(self.grid.ChildrenToward(
+				indices = append(indices, self.unique.Distil(self.grid.RefineToward(
 					surrogate.Indices[k*ni:(k+1)*ni], j))...)
 			}
 		}

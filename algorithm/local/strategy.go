@@ -74,7 +74,7 @@ func (self *BasicStrategy) Score(element *Element) float64 {
 
 func (self *BasicStrategy) Next(state *State, _ *external.Surrogate) *State {
 	return &State{
-		Indices: self.unique.Distil(self.grid.Children(filter(
+		Indices: self.unique.Distil(self.grid.Refine(filter(
 			state.Indices, state.Scores, self.lmin, self.lmax, self.ni))),
 	}
 }

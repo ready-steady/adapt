@@ -11,24 +11,40 @@ var (
 	Workers = uint(runtime.GOMAXPROCS(0))
 )
 
-// Computer computes the value of a basis function.
-type Computer interface {
+// BasisComputer returns the value of a basis function.
+type BasisComputer interface {
 	Compute([]uint64, []float64) float64
 }
 
-// Indexer computes the indices of a set of level indices.
-type Indexer interface {
+// BasisIntegrator returns the integral of a basis function.
+type BasisIntegrator interface {
+	Integrate([]uint64) float64
+}
+
+// GridComputer returns the coordinates of a grid node.
+type GridComputer interface {
+	Compute([]uint64) []float64
+}
+
+// GridIndexer returns the nodal indices of a level index.
+type GridIndexer interface {
 	Index([]uint64) []uint64
 }
 
-// Integrator computes the integral of a basis function.
-type Integrator interface {
-	Integrate([]uint64) float64
+// GridRefiner returns the child nodal indices of a set of nodal indices.
+type GridRefiner interface {
+	Refine([]uint64) []uint64
+}
+
+// RefinerToward returns the child nodal indices of a set of nodal indices with
+// respect to a particular dimension.
+type GridRefinerToward interface {
+	RefineToward([]uint64, uint) []uint64
 }
 
 // Approximate evaluates an interpolant at multiple points using multiple
 // goroutines.
-func Approximate(computer Computer, indices []uint64, surpluses, points []float64,
+func Approximate(computer BasisComputer, indices []uint64, surpluses, points []float64,
 	ni, no, nw uint) []float64 {
 
 	nn := uint(len(indices)) / ni
@@ -70,8 +86,20 @@ func Approximate(computer Computer, indices []uint64, surpluses, points []float6
 	return values
 }
 
+// Index returns the nodal indices of a set of level indices.
+func Index(indexer GridIndexer, lindices []uint64, ni uint) ([]uint64, []uint) {
+	nn := uint(len(lindices)) / ni
+	indices, counts := []uint64(nil), make([]uint, nn)
+	for i := uint(0); i < nn; i++ {
+		newIndices := indexer.Index(lindices[i*ni : (i+1)*ni])
+		indices = append(indices, newIndices...)
+		counts[i] = uint(len(newIndices)) / ni
+	}
+	return indices, counts
+}
+
 // Measure computes the integrals of a set of basis functions.
-func Measure(integrator Integrator, indices []uint64, ni uint) []float64 {
+func Measure(integrator BasisIntegrator, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni
 	volumes := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {

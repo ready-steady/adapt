@@ -28,7 +28,7 @@ func benchmarkClosedCompute(power uint, b *testing.B) {
 	)
 
 	basis := NewClosed(nd, power)
-	indices := generateIndices(nd, ns, grid.NewClosed(nd).Children)
+	indices := generateIndices(nd, ns, grid.NewClosed(nd).Refine)
 	points := generatePoints(nd, ns, indices, closedNode)
 
 	b.ResetTimer()
