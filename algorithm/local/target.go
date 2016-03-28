@@ -21,14 +21,6 @@ type Target interface {
 	Score(*Element) float64
 }
 
-// Element contains information about an interpolation element.
-type Element struct {
-	Index   []uint64  // Nodal index
-	Volume  float64   // Basis-function volume
-	Value   []float64 // Target-function value
-	Surplus []float64 // Hierarchical surplus
-}
-
 // BasicTarget is a basic target satisfying the Target interface.
 type BasicTarget struct {
 	DoneHandler    func(*external.Progress) bool

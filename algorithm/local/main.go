@@ -27,25 +27,41 @@ type Grid interface {
 
 // Interpolator is an instance of the algorithm.
 type Interpolator struct {
+	ni uint
+	no uint
+
 	grid   Grid
 	basis  Basis
 	config *Config
 }
 
-type state struct {
-	Indices []uint64
-	Nodes   []float64
-	Volumes []float64
+// Element contains information about an interpolation element.
+type Element struct {
+	Index []uint64 // Nodal index
 
-	Observations []float64
-	Predictions  []float64
-	Surpluses    []float64
-	Scores       []float64
+	Volume      float64   // Basis-function volume
+	Observation []float64 // Target-function value
+	Surplus     []float64 // Hierarchical surplus
+}
+
+// State contains information about an interpolation iteration.
+type State struct {
+	Indices []uint64 // Nodal indices
+
+	Nodes        []float64 // Grid nodes
+	Volumes      []float64 // Basis-function volumes
+	Observations []float64 // Target-function values
+	Predictions  []float64 // Approximated values
+	Surpluses    []float64 // Hierarchical surpluses
+	Scores       []float64 // Nodal-index scores
 }
 
 // New creates an interpolator.
-func New(grid Grid, basis Basis, config *Config) *Interpolator {
+func New(inputs, outputs uint, grid Grid, basis Basis, config *Config) *Interpolator {
 	return &Interpolator{
+		ni: inputs,
+		no: outputs,
+
 		grid:   grid,
 		basis:  basis,
 		config: config,
@@ -54,13 +70,13 @@ func New(grid Grid, basis Basis, config *Config) *Interpolator {
 
 // Compute constructs an interpolant for a function.
 func (self *Interpolator) Compute(target Target) *external.Surrogate {
-	ni, no := target.Dimensions()
+	ni, no := self.ni, self.no
 
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
 	unique := internal.NewUnique(ni)
 
-	state := &state{}
+	state := &State{}
 	state.Indices = make([]uint64, 1*ni)
 	progress.Push(state.Indices, ni)
 	for !target.Done(progress) && progress.More > 0 {

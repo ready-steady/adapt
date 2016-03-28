@@ -65,13 +65,13 @@ func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target)
 		target = fixture.target()
 	}
 
-	ni, _ := target.Dimensions()
+	ni, no := target.Dimensions()
 
 	switch fixture.rule {
 	case "open":
-		return New(equidistant.NewOpen(ni), polynomial.NewOpen(ni, 1), config), target
+		return New(ni, no, equidistant.NewOpen(ni), polynomial.NewOpen(ni, 1), config), target
 	default:
-		return New(equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config), target
+		return New(ni, no, equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config), target
 	}
 }
 

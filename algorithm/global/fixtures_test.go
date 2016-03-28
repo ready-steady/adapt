@@ -281,10 +281,7 @@ var fixtureBranin = fixture{
 
 func prepare(fixture *fixture) (*Interpolator, Target) {
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
-
-	grid := equidistant.NewClosed(ni)
-	basis := polynomial.NewClosed(ni, 1)
+	grid, basis := equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1)
 	interpolator := New(ni, no, grid, basis, NewConfig())
-
 	return interpolator, fixture.target
 }
