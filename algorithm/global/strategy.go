@@ -20,7 +20,7 @@ type Strategy interface {
 	Score(*Element) float64
 
 	// Next consumes the result of the current iteration and configures the
-	// level and nodal indices for the next iteration.
+	// initial state for the next one.
 	Next(*State, *external.Surrogate) *State
 }
 
@@ -35,9 +35,8 @@ type BasicStrategy struct {
 
 	lmin uint
 	lmax uint
-
-	εa float64
-	εr float64
+	εa   float64
+	εr   float64
 
 	k uint
 
@@ -59,9 +58,8 @@ func NewStrategy(inputs, outputs uint, grid Grid, config *Config) *BasicStrategy
 
 		lmin: config.MinLevel,
 		lmax: config.MaxLevel,
-
-		εa: config.AbsoluteError,
-		εr: config.RelativeError,
+		εa:   config.AbsoluteError,
+		εr:   config.RelativeError,
 
 		k: ^uint(0),
 

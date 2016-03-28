@@ -20,10 +20,8 @@ func init() {
 type fixture struct {
 	rule string
 
-	config func() *Config
-	target func() Target
-
-	compute func([]float64, []float64)
+	adjust func(*Interpolator)
+	target Target
 
 	surrogate *external.Surrogate
 
@@ -35,58 +33,44 @@ type fixture struct {
 }
 
 func (self *fixture) initialize() {
-	self.surrogate.Indices = make([]uint64, len(self.levels))
-	for i := range self.levels {
-		self.surrogate.Indices[i] = self.levels[i] | self.orders[i]<<internal.LEVEL_SIZE
-	}
+	self.surrogate.Indices = internal.Compose(self.levels, self.orders)
 }
 
-func prepare(fixture *fixture, arguments ...interface{}) (*Interpolator, Target) {
+func prepare(fixture *fixture) *Interpolator {
 	const (
-		absolute = 1e-4
+		minLevel      = 1
+		maxLevel      = 10
+		absoluteError = 1e-4
 	)
 
-	var config *Config
-	if fixture.config == nil {
-		config = NewConfig()
-	} else {
-		config = fixture.config()
-	}
+	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
-	if len(arguments) > 0 {
-		arguments[0].(func(*Config))(config)
-	}
-
-	var target Target
-	if fixture.target == nil {
-		target = newTarget(fixture.surrogate.Inputs, fixture.surrogate.Outputs,
-			absolute, fixture.compute)
-	} else {
-		target = fixture.target()
-	}
-
-	ni, no := target.Dimensions()
-
+	var grid Grid
+	var basis Basis
 	switch fixture.rule {
 	case "open":
-		return New(ni, no, equidistant.NewOpen(ni), polynomial.NewOpen(ni, 1), config), target
+		grid = equidistant.NewOpen(ni)
+		basis = polynomial.NewOpen(ni, 1)
 	default:
-		return New(ni, no, equidistant.NewClosed(ni), polynomial.NewClosed(ni, 1), config), target
+		grid = equidistant.NewClosed(ni)
+		basis = polynomial.NewClosed(ni, 1)
 	}
-}
 
-func newTarget(ni, no uint, absolute float64, compute func([]float64, []float64)) Target {
-	return NewTarget(ni, no, absolute, compute)
+	strategy := NewStrategy(ni, no, minLevel, maxLevel, absoluteError, grid)
+	interpolator := New(ni, no, grid, basis, strategy)
+	if fixture.adjust != nil {
+		fixture.adjust(interpolator)
+	}
+
+	return interpolator
 }
 
 var fixtureStep = fixture{
-	config: func() *Config {
-		config := NewConfig()
-		config.MaxLevel = 4
-		return config
+	adjust: func(interpolator *Interpolator) {
+		interpolator.strategy.(*BasicStrategy).lmax = 4
 	},
 
-	compute: func(x, y []float64) {
+	target: func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1.0
 		} else {
@@ -111,7 +95,7 @@ var fixtureStep = fixture{
 }
 
 var fixtureHat = fixture{
-	compute: func(x, y []float64) {
+	target: func(x, y []float64) {
 		z := 5.0*x[0] - 1.0
 
 		switch {
@@ -329,23 +313,20 @@ var fixtureHat = fixture{
 }
 
 var fixtureCube = fixture{
-	config: func() *Config {
-		config := NewConfig()
-		config.MaxLevel = 9
-		return config
+	adjust: func(interpolator *Interpolator) {
+		interpolator.strategy.(*BasicStrategy).lmax = 9
+		interpolator.strategy.(*BasicStrategy).εa = 1e-2
 	},
 
-	target: func() Target {
-		return newTarget(2, 1, 1e-2, func(x, y []float64) {
-			x0, x1 := 2*x[0]-1, 2*x[1]-1
-			x02, x12 := x0*x0, x1*x1
-			x03, x13 := x02*x0, x12*x1
+	target: func(x, y []float64) {
+		x0, x1 := 2.0*x[0]-1.0, 2.0*x[1]-1.0
+		x02, x12 := x0*x0, x1*x1
+		x03, x13 := x02*x0, x12*x1
 
-			y[0] = math.Exp(-x02-x12) - x03 - x13
-			if math.Abs(x0) < 0.45 && math.Abs(x1) < 0.45 {
-				y[0] += 1
-			}
-		})
+		y[0] = math.Exp(-x02-x12) - x03 - x13
+		if math.Abs(x0) < 0.45 && math.Abs(x1) < 0.45 {
+			y[0] += 1.0
+		}
 	},
 
 	surrogate: &external.Surrogate{
@@ -585,13 +566,11 @@ var fixtureCube = fixture{
 }
 
 var fixtureBox = fixture{
-	config: func() *Config {
-		config := NewConfig()
-		config.MaxLevel = 3
-		return config
+	adjust: func(interpolator *Interpolator) {
+		interpolator.strategy.(*BasicStrategy).lmax = 3
 	},
 
-	compute: func(x, y []float64) {
+	target: func(x, y []float64) {
 		if x[0]+x[1] > 0.5 {
 			y[0] = 1.0
 		} else {
@@ -699,17 +678,11 @@ const kraichnanOrszagStepThinning = 10
 const kraichnanOrszagInputs = 3
 const kraichnanOrszagOutputs = kraichnanOrszagLargeSteps * kraichnanOrszagInputs * 2
 
-type kraichnanOrszagTarget struct{}
-
-func (_ *kraichnanOrszagTarget) Dimensions() (uint, uint) {
-	return kraichnanOrszagInputs, kraichnanOrszagOutputs
+type kraichnanOrszagStrategy struct {
+	*BasicStrategy
 }
 
-func (_ *kraichnanOrszagTarget) Done(*external.Progress) bool {
-	return false
-}
-
-func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
+func kraichnanOrszagTarget(y0, ys []float64) {
 	nt, ni, no := kraichnanOrszagStepThinning, kraichnanOrszagInputs, kraichnanOrszagOutputs
 
 	dydt := func(_ float64, y, f []float64) {
@@ -741,20 +714,20 @@ func (_ *kraichnanOrszagTarget) Compute(y0, ys []float64) {
 	}
 }
 
-func (self *kraichnanOrszagTarget) Score(element *Element) float64 {
+func (self *kraichnanOrszagStrategy) Score(element *Element) float64 {
 	const (
-		absolute = 1e-2
+		absoluteError = 1e-2
 	)
 
 	no := kraichnanOrszagOutputs
 
-	if math.Abs(element.Surplus[no-5]) > absolute {
+	if math.Abs(element.Surplus[no-5]) > absoluteError {
 		return 1.0
 	}
-	if math.Abs(element.Surplus[no-3]) > absolute {
+	if math.Abs(element.Surplus[no-3]) > absoluteError {
 		return 1.0
 	}
-	if math.Abs(element.Surplus[no-1]) > absolute {
+	if math.Abs(element.Surplus[no-1]) > absoluteError {
 		return 1.0
 	}
 
@@ -762,15 +735,13 @@ func (self *kraichnanOrszagTarget) Score(element *Element) float64 {
 }
 
 var fixtureKraichnanOrszag = fixture{
-	config: func() *Config {
-		config := NewConfig()
-		config.MaxLevel = 8
-		return config
+	adjust: func(interpolator *Interpolator) {
+		strategy := interpolator.strategy.(*BasicStrategy)
+		strategy.lmax = 8
+		interpolator.strategy = &kraichnanOrszagStrategy{strategy}
 	},
 
-	target: func() Target {
-		return &kraichnanOrszagTarget{}
-	},
+	target: kraichnanOrszagTarget,
 
 	surrogate: &external.Surrogate{
 		Inputs:  kraichnanOrszagInputs,
@@ -1996,19 +1967,18 @@ var fixtureKraichnanOrszag = fixture{
 var fixtureParabola = fixture{
 	rule: "open",
 
-	config: func() *Config {
-		config := NewConfig()
-		config.MaxLevel = 20
-		return config
+	adjust: func(interpolator *Interpolator) {
+		interpolator.strategy.(*BasicStrategy).lmax = 20
+		interpolator.strategy.(*BasicStrategy).εa = 1e-6
 	},
 
-	target: func() Target {
-		return newTarget(1, 1, 1e-6, func(x, y []float64) {
-			y[0] = (x[0] - 0.5) * (x[0] - 0.5)
-		})
+	target: func(x, y []float64) {
+		y[0] = (x[0] - 0.5) * (x[0] - 0.5)
 	},
 
 	surrogate: &external.Surrogate{
+		Inputs:   1,
+		Outputs:  1,
 		Nodes:    1027,
 		Integral: []float64{1.0 / 12.0},
 	},
