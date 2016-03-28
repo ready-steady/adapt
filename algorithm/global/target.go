@@ -41,9 +41,7 @@ type BasicTarget struct {
 }
 
 // NewTarget creates a basic target.
-func NewTarget(inputs, outputs uint, config *Config,
-	compute func([]float64, []float64)) *BasicTarget {
-
+func NewTarget(inputs, outputs uint, compute func([]float64, []float64)) *BasicTarget {
 	return &BasicTarget{
 		ComputeHandler: compute,
 

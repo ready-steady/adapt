@@ -38,23 +38,15 @@ type BasicTarget struct {
 
 	ni uint
 	no uint
-
-	lmin uint
-	lmax uint
 }
 
 // NewTarget creates a basic target.
-func NewTarget(inputs, outputs uint, config *Config,
-	compute func([]float64, []float64)) *BasicTarget {
-
+func NewTarget(inputs, outputs uint, compute func([]float64, []float64)) *BasicTarget {
 	return &BasicTarget{
 		ComputeHandler: compute,
 
 		ni: inputs,
 		no: outputs,
-
-		lmin: config.MinLevel,
-		lmax: config.MaxLevel,
 	}
 }
 
