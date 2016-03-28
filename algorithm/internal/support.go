@@ -99,9 +99,9 @@ func IsUnique(indices []uint64, ni uint) bool {
 	return before == after
 }
 
-// LocateMaxFloat64s returns the position of the maximal element among a subset
-// of a vector’s elements.
-func LocateMaxFloat64s(data []float64, set map[uint]bool) uint {
+// LocateMax returns the position of the maximal element among a subset of a
+// vector’s elements.
+func LocateMax(data []float64, set map[uint]bool) uint {
 	value, position := -infinity, ^uint(0)
 	for i := range set {
 		if data[i] > value {
@@ -109,38 +109,6 @@ func LocateMaxFloat64s(data []float64, set map[uint]bool) uint {
 		}
 	}
 	return position
-}
-
-// LocateMinUint64s returns the position of the maximal element among a subset
-// of a vector’s elements.
-func LocateMinUint64s(data []uint64, set map[uint]bool) uint {
-	value, position := ^uint64(0), ^uint(0)
-	for i := range set {
-		if data[i] < value {
-			value, position = data[i], i
-		}
-	}
-	return position
-}
-
-// MaxUint returns the maximal element among two.
-func MaxUint(one uint, other uint) uint {
-	if one > other {
-		return one
-	} else {
-		return other
-	}
-}
-
-// MaxUint64s returns the maximal element of a vector.
-func MaxUint64s(data []uint64) uint64 {
-	result := uint64(0)
-	for _, value := range data {
-		if value > result {
-			result = value
-		}
-	}
-	return result
 }
 
 // Levelize returns the uniform norms of the levels of a set of indices.
@@ -164,8 +132,8 @@ func Subtract(minuend, subtrahend []float64) []float64 {
 	return difference
 }
 
-// RepeatFloat64 returns a vector filled out with a particular value.
-func RepeatFloat64(value float64, times uint) []float64 {
+// Repeat returns a vector filled out with a particular value.
+func Repeat(value float64, times uint) []float64 {
 	data := make([]float64, times)
 	for i := uint(0); i < times; i++ {
 		data[i] = value

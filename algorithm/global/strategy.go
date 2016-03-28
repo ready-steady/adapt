@@ -60,8 +60,8 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 
 		k: ^uint(0),
 
-		lower: internal.RepeatFloat64(infinity, no),
-		upper: internal.RepeatFloat64(-infinity, no),
+		lower: internal.Repeat(infinity, no),
+		upper: internal.Repeat(-infinity, no),
 	}
 }
 
@@ -102,7 +102,7 @@ func (self *basicStrategy) Next(current *state, _ *external.Surrogate) *state {
 	if len(self.Positions) == 0 {
 		return nil
 	}
-	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+	self.k = internal.LocateMax(self.global, self.Positions)
 	if self.global[self.k] <= 0.0 {
 		return nil
 	}

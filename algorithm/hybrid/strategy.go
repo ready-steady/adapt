@@ -98,7 +98,7 @@ func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *
 	if len(self.Positions) == 0 {
 		return nil
 	}
-	self.k = internal.LocateMaxFloat64s(self.global, self.Positions)
+	self.k = internal.LocateMax(self.global, self.Positions)
 	if self.global[self.k] <= 0.0 {
 		return nil
 	}
