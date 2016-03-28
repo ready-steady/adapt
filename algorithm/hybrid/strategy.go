@@ -12,16 +12,19 @@ var (
 )
 
 // Strategy controls the interpolation process.
-type strategy interface {
+type Strategy interface {
 	// Done checks if the stopping criteria have been satisfied.
 	Done() bool
 
+	// Score assigns a score to an interpolation element.
+	Score(*Element) []float64
+
 	// Next consumes the result of the current iteration and configures the
 	// level and nodal indices for the next iteration.
-	Next(*state, *external.Surrogate) *state
+	Next(*State, *external.Surrogate) *State
 }
 
-type basicStrategy struct {
+type BasicStrategy struct {
 	internal.Active
 
 	ni uint
@@ -46,12 +49,12 @@ type basicStrategy struct {
 	local  []float64
 }
 
-func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
-	return &basicStrategy{
-		Active: *internal.NewActive(ni),
+func NewStrategy(inputs, outputs uint, grid Grid, config *Config) *BasicStrategy {
+	return &BasicStrategy{
+		Active: *internal.NewActive(inputs),
 
-		ni: ni,
-		no: no,
+		ni: inputs,
+		no: outputs,
 
 		grid: grid,
 
@@ -63,13 +66,13 @@ func newStrategy(ni, no uint, grid Grid, config *Config) *basicStrategy {
 
 		k: ^uint(0),
 
-		hash:     internal.NewHash(ni),
-		unique:   internal.NewUnique(ni),
+		hash:     internal.NewHash(inputs),
+		unique:   internal.NewUnique(inputs),
 		position: make(map[string]uint),
 	}
 }
 
-func (self *basicStrategy) Done() bool {
+func (self *BasicStrategy) Done() bool {
 	ng := uint(len(self.global))
 	if ng == 0 {
 		return false
@@ -84,9 +87,19 @@ func (self *basicStrategy) Done() bool {
 	return total <= self.εt
 }
 
-func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *state {
+func (self *BasicStrategy) Score(element *Element) []float64 {
+	no := self.no
+	local := make([]float64, len(element.Volumes))
+	for i, m := uint(0), uint(len(element.Surpluses)); i < m; i++ {
+		j := i % no
+		local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*element.Surpluses[i]))
+	}
+	return local
+}
+
+func (self *BasicStrategy) Next(current *State, surrogate *external.Surrogate) *State {
 	if current == nil {
-		next := &state{}
+		next := &State{}
 		next.Lindices = self.Active.Next(self.k)
 		next.Indices, next.Counts = internal.Index(self.grid, next.Lindices, self.ni)
 		return next
@@ -103,13 +116,13 @@ func (self *basicStrategy) Next(current *state, surrogate *external.Surrogate) *
 		return nil
 	}
 
-	next := &state{}
+	next := &State{}
 	next.Lindices = self.Active.Next(self.k)
 	next.Indices, next.Counts = self.index(next.Lindices, surrogate)
 	return next
 }
 
-func (self *basicStrategy) consume(state *state) {
+func (self *BasicStrategy) consume(state *State) {
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
 	nn := uint(len(state.Counts))
 
@@ -147,7 +160,7 @@ func (self *basicStrategy) consume(state *state) {
 	}
 }
 
-func (self *basicStrategy) index(lindices []uint64,
+func (self *BasicStrategy) index(lindices []uint64,
 	surrogate *external.Surrogate) ([]uint64, []uint) {
 
 	ni := self.ni

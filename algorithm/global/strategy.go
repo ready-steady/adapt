@@ -48,12 +48,12 @@ type BasicStrategy struct {
 }
 
 // NewStrategy creates a basic strategy.
-func NewStrategy(ni, no uint, grid Grid, config *Config) *BasicStrategy {
+func NewStrategy(inputs, outputs uint, grid Grid, config *Config) *BasicStrategy {
 	return &BasicStrategy{
-		Active: *internal.NewActive(ni),
+		Active: *internal.NewActive(inputs),
 
-		ni: ni,
-		no: no,
+		ni: inputs,
+		no: outputs,
 
 		grid: grid,
 
@@ -65,8 +65,8 @@ func NewStrategy(ni, no uint, grid Grid, config *Config) *BasicStrategy {
 
 		k: ^uint(0),
 
-		lower: internal.Repeat(infinity, no),
-		upper: internal.Repeat(-infinity, no),
+		lower: internal.Repeat(infinity, outputs),
+		upper: internal.Repeat(-infinity, outputs),
 	}
 }
 
