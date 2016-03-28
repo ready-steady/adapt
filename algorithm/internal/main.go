@@ -36,8 +36,8 @@ type GridRefiner interface {
 	Refine([]uint64) []uint64
 }
 
-// RefinerToward returns the child nodal indices of a set of nodal indices with
-// respect to a particular dimension.
+// GridRefinerToward returns the child nodal indices of a set of nodal indices
+// with respect to a particular dimension.
 type GridRefinerToward interface {
 	RefineToward([]uint64, uint) []uint64
 }
