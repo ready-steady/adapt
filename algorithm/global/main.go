@@ -32,17 +32,28 @@ type Interpolator struct {
 	config *Config
 }
 
-type state struct {
-	Lindices []uint64
-	Indices  []uint64
-	Counts   []uint
+// Element contains information about an interpolation element.
+type Element struct {
+	Lindex  []uint64 // Level index
+	Indices []uint64 // Nodal indices
 
-	Nodes        []float64
-	Volumes      []float64
-	Observations []float64
-	Predictions  []float64
-	Surpluses    []float64
-	Scores       []float64
+	Volumes      []float64 // Basis-function volumes
+	Observations []float64 // Target-function values
+	Surpluses    []float64 // Hierarchical surpluses
+}
+
+// State contains information about an interpolation iteration.
+type State struct {
+	Lindices []uint64 // Level indices
+	Indices  []uint64 // Nodal indices
+	Counts   []uint   // Number of nodal indices for each level index
+
+	Nodes        []float64 // Grid nodes
+	Volumes      []float64 // Basis-function volumes
+	Observations []float64 // Target-function values
+	Predictions  []float64 // Approximated values
+	Surpluses    []float64 // Hierarchical surpluses
+	Scores       []float64 // Level-index scores
 }
 
 // New creates an interpolator.
@@ -60,18 +71,18 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 
 	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
-	strategy := newStrategy(ni, no, self.grid, self.config)
+	strategy := NewStrategy(ni, no, self.grid, self.config)
 
 	state := strategy.Next(nil, nil)
 	progress.Push(state.Indices, ni)
-	for !target.Done(progress) && !strategy.Done() {
+	for !strategy.Done() {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
 		state.Observations = internal.Invoke(target.Compute, state.Nodes, ni, no, internal.Workers)
 		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, state.Nodes, ni, no, internal.Workers)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
-		state.Scores = score(target, state, ni, no)
+		state.Scores = score(strategy, state, ni, no)
 
 		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
 		state = strategy.Next(state, surrogate)
