@@ -3,7 +3,6 @@ package internal
 // Active is a book-keeper of active level indices.
 type Active struct {
 	Indices   []uint64      // Level indices considered so far
-	Norms     []uint64      // Manhattan norms of level indices
 	Positions map[uint]bool // Positions of active level indices
 
 	ni uint
@@ -22,21 +21,23 @@ func NewActive(ni uint) *Active {
 	}
 }
 
-// Next identifies, activates, and returns admissible level indices from the
-// forward neighborhood of a level index.
+// First returns the initial level indices.
+func (self *Active) First() []uint64 {
+	self.Indices = make([]uint64, 1*self.ni)
+	self.Positions = map[uint]bool{0: true}
+	self.history = NewHistory(self.ni)
+	self.forward, self.backward = make(reference), make(reference)
+
+	return self.Indices
+}
+
+// Next returns admissible forward neighbors of a level index.
 func (self *Active) Next(k uint) (indices []uint64) {
-	if self.Indices == nil {
-		self.Indices, self.Norms = make([]uint64, 1*self.ni), []uint64{0}
-		self.Positions = map[uint]bool{0: true}
-		self.history = NewHistory(self.ni)
-		self.forward, self.backward = make(reference), make(reference)
-		return self.Indices
-	}
+	ni := self.ni
+	no := uint(len(self.Indices)) / ni
 
-	ni, no := self.ni, uint(len(self.Norms))
 	forward, backward := self.forward, self.backward
-
-	index, norm := self.Indices[k*ni:(k+1)*ni], self.Norms[k]
+	index := self.Indices[k*ni : (k+1)*ni]
 
 outer:
 	for i, nn := uint(0), no; i < ni; i++ {
@@ -77,7 +78,6 @@ outer:
 		self.history.Set(index, 0)
 		index[i]--
 
-		self.Norms = append(self.Norms, norm+1)
 		self.Positions[nn] = true
 
 		for j, l := range newBackward {

@@ -29,7 +29,7 @@ type Strategy interface {
 
 // BasicStrategy is a basic strategy satisfying the Strategy interface.
 type BasicStrategy struct {
-	internal.Active
+	*internal.Active
 
 	ni uint
 	no uint
@@ -54,6 +54,8 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 	absoluteError, relativeError float64, grid Grid) *BasicStrategy {
 
 	return &BasicStrategy{
+		Active: internal.NewActive(inputs),
+
 		ni: inputs,
 		no: outputs,
 
@@ -67,13 +69,12 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 }
 
 func (self *BasicStrategy) First() *State {
-	self.Active = *internal.NewActive(self.ni)
 	self.k = ^uint(0)
 	self.lower = internal.Repeat(infinity, self.no)
 	self.upper = internal.Repeat(-infinity, self.no)
 
 	state := &State{}
-	state.Lindices = self.Active.Next(self.k)
+	state.Lindices = self.Active.First()
 	state.Indices, state.Counts = internal.Index(self.grid, state.Lindices, self.ni)
 
 	return state
