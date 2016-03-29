@@ -87,7 +87,7 @@ func IsUnique(indices []uint64, ni uint) bool {
 func LocateMax(data []float64, set map[uint]bool) uint {
 	position, value := ^uint(0), 0.0
 	for i := range set {
-		if position == ^uint(0) || data[i] > value {
+		if position == ^uint(0) || data[i] > value || (data[i] == value && position > i) {
 			position, value = i, data[i]
 		}
 	}
