@@ -2,9 +2,10 @@
 
 ## Subpackages
 
-The package contains four subpackages:
+The package contains the following subpackages:
 
 * algorithm/[global](algorithm/global),
+* algorithm/[hybrid](algorithm/hybrid),
 * algorithm/[local](algorithm/local),
 * basis/[polynomial](basis/polynomial), and
 * grid/[equidistant](grid/equidistant).
