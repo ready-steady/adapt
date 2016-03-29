@@ -43,9 +43,9 @@ type BasicStrategy struct {
 
 	k uint
 
-	global []float64
-	local  []float64
-	domain *internal.Domain
+	global    []float64
+	local     []float64
+	threshold *internal.Threshold
 }
 
 // NewStrategy creates a basic strategy.
@@ -69,7 +69,7 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 
 func (self *BasicStrategy) First() *State {
 	self.k = ^uint(0)
-	self.domain = internal.NewDomain(self.no)
+	self.threshold = internal.NewThreshold(self.no, self.εa, self.εr)
 
 	state := &State{}
 	state.Lindices = self.Active.First()
@@ -79,15 +79,12 @@ func (self *BasicStrategy) First() *State {
 }
 
 func (self *BasicStrategy) Continue(_ *State, _ *external.Surrogate) bool {
-	no := self.no
-	nl := uint(len(self.local)) / no
-	if nl == 0 {
+	if self.k == ^uint(0) {
 		return true
 	}
-	δ := make([]float64, no)
-	for i := uint(0); i < no; i++ {
-		δ[i] = math.Max(self.εr*self.domain.Spread[i], self.εa)
-	}
+	no := self.no
+	nl := uint(len(self.local)) / no
+	δ := self.threshold.Values
 	for i := range self.Positions {
 		if i >= nl {
 			continue
@@ -162,5 +159,5 @@ func (self *BasicStrategy) consume(state *State) {
 		o += count
 	}
 
-	self.domain.Update(state.Observations)
+	self.threshold.Update(state.Observations)
 }

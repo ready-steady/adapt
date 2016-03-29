@@ -83,10 +83,10 @@ func (self *BasicStrategy) First() *State {
 }
 
 func (self *BasicStrategy) Continue(_ *State, _ *external.Surrogate) bool {
-	ng := uint(len(self.global))
-	if ng == 0 {
+	if self.k == ^uint(0) {
 		return true
 	}
+	ng := uint(len(self.global))
 	total := 0.0
 	for i := range self.Positions {
 		if i >= ng {
