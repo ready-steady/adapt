@@ -36,8 +36,6 @@ type BasicStrategy struct {
 
 	lmin uint
 	lmax uint
-	εa   float64
-	εr   float64
 
 	grid Grid
 
@@ -60,16 +58,16 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 
 		lmin: minLevel,
 		lmax: maxLevel,
-		εa:   absoluteError,
-		εr:   relativeError,
 
 		grid: grid,
+
+		threshold: internal.NewThreshold(outputs, absoluteError, relativeError),
 	}
 }
 
 func (self *BasicStrategy) First() *State {
 	self.k = ^uint(0)
-	self.threshold = internal.NewThreshold(self.no, self.εa, self.εr)
+	self.threshold.Reset()
 
 	state := &State{}
 	state.Lindices = self.Active.First()
