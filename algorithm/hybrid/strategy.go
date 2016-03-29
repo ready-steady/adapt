@@ -16,8 +16,8 @@ type Strategy interface {
 	// First returns the initial state of the first iteration.
 	First() *State
 
-	// Check returns true if the stopping criteria have been satisfied.
-	Check(*external.Progress) bool
+	// Continue returns true if the interpolation process should continue.
+	Continue(*State, *external.Surrogate) bool
 
 	// Score assigns a score to an interpolation element.
 	Score(*Element) []float64
@@ -82,10 +82,10 @@ func (self *BasicStrategy) First() *State {
 	return state
 }
 
-func (self *BasicStrategy) Check(_ *external.Progress) bool {
+func (self *BasicStrategy) Continue(_ *State, _ *external.Surrogate) bool {
 	ng := uint(len(self.global))
 	if ng == 0 {
-		return false
+		return true
 	}
 	total := 0.0
 	for i := range self.Positions {
@@ -94,7 +94,7 @@ func (self *BasicStrategy) Check(_ *external.Progress) bool {
 		}
 		total += self.global[i]
 	}
-	return total <= self.εt
+	return total > self.εt
 }
 
 func (self *BasicStrategy) Score(element *Element) []float64 {

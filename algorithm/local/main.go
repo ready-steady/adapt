@@ -69,12 +69,10 @@ func New(inputs, outputs uint, grid Grid, basis Basis, strategy Strategy) *Inter
 func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	ni, no := self.ni, self.no
 
-	progress := external.NewProgress()
 	surrogate := external.NewSurrogate(ni, no)
 
 	state := self.strategy.First()
-	progress.Push(state.Indices, ni)
-	for !self.strategy.Check(progress) {
+	for self.strategy.Continue(state, surrogate) {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
 		state.Observations = internal.Invoke(target, state.Nodes, ni, no, internal.Workers)
@@ -82,10 +80,8 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 			surrogate.Surpluses, state.Nodes, ni, no, internal.Workers)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
 		state.Scores = score(self.strategy, state, ni, no)
-
 		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
 		state = self.strategy.Next(state, surrogate)
-		progress.Push(state.Indices, ni)
 	}
 
 	return surrogate
