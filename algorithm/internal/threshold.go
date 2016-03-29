@@ -16,7 +16,7 @@ type Threshold struct {
 	εr float64
 }
 
-// NewThreshold creates an Threshold.
+// NewThreshold creates a Threshold.
 func NewThreshold(outputs uint, absolute, relative float64) *Threshold {
 	return &Threshold{
 		Values: make([]float64, outputs),
