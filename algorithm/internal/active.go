@@ -1,6 +1,6 @@
 package internal
 
-// Active is a book-keeper of active level indices.
+// Active is a structure for keeping track of active level indices.
 type Active struct {
 	Indices   []uint64      // Level indices considered so far
 	Positions map[uint]bool // Positions of active level indices
@@ -14,7 +14,7 @@ type Active struct {
 
 type reference map[uint]uint
 
-// NewActive creates a book-keeper.
+// NewActive creates an Active.
 func NewActive(ni uint) *Active {
 	return &Active{
 		ni: ni,

@@ -45,8 +45,7 @@ type BasicStrategy struct {
 
 	global []float64
 	local  []float64
-	lower  []float64
-	upper  []float64
+	domain *internal.Domain
 }
 
 // NewStrategy creates a basic strategy.
@@ -70,8 +69,7 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 
 func (self *BasicStrategy) First() *State {
 	self.k = ^uint(0)
-	self.lower = internal.Repeat(infinity, self.no)
-	self.upper = internal.Repeat(-infinity, self.no)
+	self.domain = internal.NewDomain(self.no)
 
 	state := &State{}
 	state.Lindices = self.Active.First()
@@ -88,7 +86,7 @@ func (self *BasicStrategy) Continue(_ *State, _ *external.Surrogate) bool {
 	}
 	δ := make([]float64, no)
 	for i := uint(0); i < no; i++ {
-		δ[i] = math.Max(self.εr*(self.upper[i]-self.lower[i]), self.εa)
+		δ[i] = math.Max(self.εr*self.domain.Spread[i], self.εa)
 	}
 	for i := range self.Positions {
 		if i >= nl {
@@ -164,9 +162,5 @@ func (self *BasicStrategy) consume(state *State) {
 		o += count
 	}
 
-	for i, point := range state.Observations {
-		j := uint(i) % no
-		self.lower[j] = math.Min(self.lower[j], point)
-		self.upper[j] = math.Max(self.upper[j], point)
-	}
+	self.domain.Update(state.Observations)
 }

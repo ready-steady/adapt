@@ -16,7 +16,7 @@ type Hash struct {
 	header *reflect.SliceHeader
 }
 
-// NewHash creates a hash.
+// NewHash creates a Hash.
 func NewHash(ni uint) *Hash {
 	hash := &Hash{ni: ni, bytes: make([]byte, 0)}
 	hash.header = (*reflect.SliceHeader)(unsafe.Pointer(&hash.bytes))

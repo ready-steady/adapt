@@ -1,11 +1,11 @@
 package internal
 
-// Unique is a book-keeper of indices.
+// Unique is a structure for keeping track of indices.
 type Unique struct {
 	*History
 }
 
-// NewUnique creates a book-keeper.
+// NewUnique creates a Unique.
 func NewUnique(ni uint) *Unique {
 	return &Unique{NewHistory(ni)}
 }

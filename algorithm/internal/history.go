@@ -1,12 +1,12 @@
 package internal
 
-// History is a book-keeper of indices.
+// History is a structure for keeping track of indices.
 type History struct {
 	*Hash
 	mapping map[string]uint
 }
 
-// NewHistory creates a book-keeper.
+// NewHistory creates a History.
 func NewHistory(ni uint) *History {
 	return &History{
 		Hash:    NewHash(ni),
