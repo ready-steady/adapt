@@ -144,9 +144,9 @@ func (self *BasicStrategy) consume(state *State) {
 				local[i*no+j] = infinity
 			}
 		} else if levels[i] >= uint64(self.lmax) {
-			global[i] = -infinity
+			global[i] = 0.0
 			for j := uint(0); j < no; j++ {
-				local[i*no+j] = -infinity
+				local[i*no+j] = 0.0
 			}
 		} else {
 			for j, m := uint(0), count*no; j < m; j++ {

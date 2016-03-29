@@ -150,9 +150,9 @@ func (self *BasicStrategy) consume(state *State) {
 				local[o+j] = infinity
 			}
 		} else if levels[i] >= uint64(self.lmax) {
-			global[i] = -infinity
+			global[i] = 0.0
 			for j := uint(0); j < count; j++ {
-				local[o+j] = -infinity
+				local[o+j] = 0.0
 			}
 		} else {
 			for _, ε := range state.Scores[o:(o + count)] {
