@@ -1,6 +1,6 @@
 package internal
 
-// History is a structure for keeping track of indices.
+// History is a structure for keeping track of seen indices.
 type History struct {
 	*Hash
 	mapping map[string]uint

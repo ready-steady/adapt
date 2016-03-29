@@ -1,6 +1,6 @@
 package internal
 
-// Unique is a structure for keeping track of indices.
+// Unique is a structure for keeping track of unique indices.
 type Unique struct {
 	*History
 }
