@@ -1,14 +1,9 @@
 package internal
 
 import (
-	"math"
 	"sync"
 
 	"github.com/ready-steady/adapt/internal"
-)
-
-var (
-	infinity = math.Inf(1.0)
 )
 
 // Invoke evaluates a function at multiple nodes using multiple goroutines.
@@ -90,10 +85,10 @@ func IsUnique(indices []uint64, ni uint) bool {
 // LocateMax returns the position of the maximal element among a subset of a
 // vector’s elements.
 func LocateMax(data []float64, set map[uint]bool) uint {
-	value, position := -infinity, ^uint(0)
+	position, value := ^uint(0), 0.0
 	for i := range set {
-		if data[i] > value {
-			value, position = data[i], i
+		if position == ^uint(0) || data[i] > value {
+			position, value = i, data[i]
 		}
 	}
 	return position
