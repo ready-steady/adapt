@@ -38,9 +38,9 @@ func (self *fixture) initialize() {
 
 func prepare(fixture *fixture) *Interpolator {
 	const (
-		minLevel      = 1
-		maxLevel      = 10
-		absoluteError = 1e-4
+		minLevel   = 1
+		maxLevel   = 10
+		localError = 1e-4
 	)
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
@@ -56,7 +56,7 @@ func prepare(fixture *fixture) *Interpolator {
 		basis = polynomial.NewClosed(ni, 1)
 	}
 
-	strategy := NewStrategy(ni, no, minLevel, maxLevel, absoluteError, grid)
+	strategy := NewStrategy(ni, no, minLevel, maxLevel, localError, grid)
 	interpolator := New(ni, no, grid, basis, strategy)
 	if fixture.adjust != nil {
 		fixture.adjust(interpolator)
@@ -315,7 +315,7 @@ var fixtureHat = fixture{
 var fixtureCube = fixture{
 	adjust: func(interpolator *Interpolator) {
 		interpolator.strategy.(*BasicStrategy).lmax = 9
-		interpolator.strategy.(*BasicStrategy).εa = 1e-2
+		interpolator.strategy.(*BasicStrategy).εl = 1e-2
 	},
 
 	target: func(x, y []float64) {
@@ -716,18 +716,18 @@ func kraichnanOrszagTarget(y0, ys []float64) {
 
 func (self *kraichnanOrszagStrategy) Score(element *Element) float64 {
 	const (
-		absoluteError = 1e-2
+		localError = 1e-2
 	)
 
 	no := kraichnanOrszagOutputs
 
-	if math.Abs(element.Surplus[no-5]) > absoluteError {
+	if math.Abs(element.Surplus[no-5]) > localError {
 		return 1.0
 	}
-	if math.Abs(element.Surplus[no-3]) > absoluteError {
+	if math.Abs(element.Surplus[no-3]) > localError {
 		return 1.0
 	}
-	if math.Abs(element.Surplus[no-1]) > absoluteError {
+	if math.Abs(element.Surplus[no-1]) > localError {
 		return 1.0
 	}
 
@@ -1969,7 +1969,7 @@ var fixtureParabola = fixture{
 
 	adjust: func(interpolator *Interpolator) {
 		interpolator.strategy.(*BasicStrategy).lmax = 20
-		interpolator.strategy.(*BasicStrategy).εa = 1e-6
+		interpolator.strategy.(*BasicStrategy).εl = 1e-6
 	},
 
 	target: func(x, y []float64) {

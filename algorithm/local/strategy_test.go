@@ -7,15 +7,26 @@ import (
 )
 
 func TestFilter(t *testing.T) {
-	indices := filter([]uint64{1, 2, 3, 4, 5, 6, 7, 8}, []float64{1.0, 2.0, 3.0, 4.0}, 1, 20, 2)
+	const (
+		εl = 0.0
+		ni = 2
+	)
+
+	var indices []uint64
+
+	indices = []uint64{1, 2, 3, 4, 5, 6, 7, 8}
+	indices = filter(indices, []float64{1.0, 2.0, 3.0, 4.0}, 1, 20, εl, ni)
 	assert.Equal(indices, []uint64{1, 2, 3, 4, 5, 6, 7, 8}, t)
 
-	indices = filter([]uint64{1, 2, 3, 4, 5, 6, 7, 8}, []float64{0.0, 2.0, 3.0, 4.0}, 4, 20, 2)
+	indices = []uint64{1, 2, 3, 4, 5, 6, 7, 8}
+	indices = filter(indices, []float64{0.0, 2.0, 3.0, 4.0}, 4, 20, εl, ni)
 	assert.Equal(indices, []uint64{1, 2, 3, 4, 5, 6, 7, 8}, t)
 
-	indices = filter([]uint64{1, 2, 3, 4, 5, 6, 7, 8}, []float64{0.0, 2.0, 3.0, 4.0}, 1, 20, 2)
+	indices = []uint64{1, 2, 3, 4, 5, 6, 7, 8}
+	indices = filter(indices, []float64{0.0, 2.0, 3.0, 4.0}, 1, 20, εl, ni)
 	assert.Equal(indices, []uint64{3, 4, 5, 6, 7, 8}, t)
 
-	indices = filter([]uint64{1, 2, 3, 4, 5, 6, 7, 8}, []float64{1.0, 2.0, 3.0, 4.0}, 1, 10, 2)
+	indices = []uint64{1, 2, 3, 4, 5, 6, 7, 8}
+	indices = filter(indices, []float64{1.0, 2.0, 3.0, 4.0}, 1, 10, εl, ni)
 	assert.Equal(indices, []uint64{1, 2, 3, 4}, t)
 }

@@ -15,13 +15,13 @@ func ExampleInterpolator_step() {
 		outputs         = 1
 		minLevel        = 1
 		maxLevel        = 10
-		absoluteError   = 1e-4
+		localError      = 1e-4
 		polynomialOrder = 1
 	)
 
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
-	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, absoluteError, grid)
+	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
 	interpolator := New(inputs, outputs, grid, basis, strategy)
 
 	surrogate := interpolator.Compute(func(x, y []float64) {
@@ -45,13 +45,13 @@ func ExampleInterpolator_cube() {
 		outputs         = 1
 		minLevel        = 1
 		maxLevel        = 10
-		absoluteError   = 1e-4
+		localError      = 1e-4
 		polynomialOrder = 1
 	)
 
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
-	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, absoluteError, grid)
+	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
 	interpolator := New(inputs, outputs, grid, basis, strategy)
 
 	surrogate := interpolator.Compute(func(x, y []float64) {

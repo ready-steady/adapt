@@ -30,7 +30,7 @@ type BasicStrategy struct {
 
 	lmin uint
 	lmax uint
-	εa   float64
+	εl   float64
 
 	grid   Grid
 	unique *internal.Unique
@@ -38,7 +38,7 @@ type BasicStrategy struct {
 
 // NewStrategy creates a basic strategy.
 func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
-	absoluteError float64, grid Grid) *BasicStrategy {
+	localError float64, grid Grid) *BasicStrategy {
 
 	return &BasicStrategy{
 		ni: inputs,
@@ -46,7 +46,7 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 
 		lmin: minLevel,
 		lmax: maxLevel,
-		εa:   absoluteError,
+		εl:   localError,
 
 		grid: grid,
 	}
@@ -63,28 +63,27 @@ func (self *BasicStrategy) Continue(state *State, _ *external.Surrogate) bool {
 	return state != nil && len(state.Indices) > 0
 }
 
-func (self *BasicStrategy) Score(element *Element) float64 {
-	for _, εa := range element.Surplus {
-		if math.Abs(εa) > self.εa {
-			return 1.0
-		}
+func (self *BasicStrategy) Score(element *Element) (score float64) {
+	no := self.no
+	for i := uint(0); i < no; i++ {
+		score = math.Max(score, math.Abs(element.Surplus[i]))
 	}
-	return 0.0
+	return
 }
 
 func (self *BasicStrategy) Next(state *State, _ *external.Surrogate) *State {
 	return &State{
-		Indices: self.unique.Distil(self.grid.Refine(filter(
-			state.Indices, state.Scores, self.lmin, self.lmax, self.ni))),
+		Indices: self.unique.Distil(self.grid.Refine(filter(state.Indices,
+			state.Scores, self.lmin, self.lmax, self.εl, self.ni))),
 	}
 }
 
-func filter(indices []uint64, scores []float64, lmin, lmax, ni uint) []uint64 {
+func filter(indices []uint64, scores []float64, lmin, lmax uint, εl float64, ni uint) []uint64 {
 	nn := uint(len(scores))
 	levels := internal.Levelize(indices, ni)
 	na, ne := uint(0), nn
 	for i, j := uint(0), uint(0); i < nn; i++ {
-		if levels[i] >= uint64(lmin) && (scores[i] <= 0.0 || levels[i] >= uint64(lmax)) {
+		if levels[i] >= uint64(lmin) && (scores[i] <= εl || levels[i] >= uint64(lmax)) {
 			j++
 			continue
 		}
