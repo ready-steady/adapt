@@ -1,8 +1,6 @@
 package local
 
 import (
-	"math"
-
 	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
@@ -63,12 +61,8 @@ func (self *BasicStrategy) Continue(state *State, _ *external.Surrogate) bool {
 	return state != nil && len(state.Indices) > 0
 }
 
-func (self *BasicStrategy) Score(element *Element) (score float64) {
-	no := self.no
-	for i := uint(0); i < no; i++ {
-		score = math.Max(score, math.Abs(element.Surplus[i]))
-	}
-	return
+func (self *BasicStrategy) Score(element *Element) float64 {
+	return internal.MaxAbsolute(element.Surplus)
 }
 
 func (self *BasicStrategy) Next(state *State, _ *external.Surrogate) *State {

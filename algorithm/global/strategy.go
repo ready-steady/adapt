@@ -97,12 +97,8 @@ func (self *BasicStrategy) Continue(_ *State, _ *external.Surrogate) bool {
 }
 
 func (self *BasicStrategy) Score(element *Element) float64 {
-	score := 0.0
-	for _, value := range element.Surpluses {
-		score += math.Abs(value)
-	}
-	score /= float64(uint(len(element.Observations)) / self.no)
-	return score
+	return internal.SumAbsolute(element.Surpluses) /
+		float64(uint(len(element.Observations))/self.no)
 }
 
 func (self *BasicStrategy) Next(current *State, _ *external.Surrogate) *State {

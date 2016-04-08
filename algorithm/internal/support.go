@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"math"
 	"sync"
 
 	"github.com/ready-steady/adapt/internal"
@@ -106,6 +107,14 @@ func Levelize(indices []uint64, ni uint) []uint64 {
 	return levels
 }
 
+// MaxAbsolute returns the maximum absolute value among a vector’s elements.
+func MaxAbsolute(data []float64) (value float64) {
+	for i, n := uint(0), uint(len(data)); i < n; i++ {
+		value = math.Max(value, math.Abs(data[i]))
+	}
+	return
+}
+
 // Subtract returns the difference between two vectors.
 func Subtract(minuend, subtrahend []float64) []float64 {
 	difference := make([]float64, len(minuend))
@@ -113,4 +122,12 @@ func Subtract(minuend, subtrahend []float64) []float64 {
 		difference[i] = minuend[i] - subtrahend[i]
 	}
 	return difference
+}
+
+// SumAbsolute returns the sum of the absolute values of a vector’s elements.
+func SumAbsolute(data []float64) (value float64) {
+	for i, n := uint(0), uint(len(data)); i < n; i++ {
+		value += math.Abs(data[i])
+	}
+	return
 }
