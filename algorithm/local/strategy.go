@@ -82,7 +82,6 @@ func (self *BasicStrategy) Next(state *State, _ *external.Surrogate) *State {
 func filter(indices []uint64, scores []float64, lmin, lmax, ni uint) []uint64 {
 	nn := uint(len(scores))
 	levels := internal.Levelize(indices, ni)
-
 	na, ne := uint(0), nn
 	for i, j := uint(0), uint(0); i < nn; i++ {
 		if levels[i] >= uint64(lmin) && (scores[i] <= 0.0 || levels[i] >= uint64(lmax)) {
@@ -97,6 +96,5 @@ func filter(indices []uint64, scores []float64, lmin, lmax, ni uint) []uint64 {
 		na++
 		j++
 	}
-
 	return indices[:na*ni]
 }
