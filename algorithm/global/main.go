@@ -73,7 +73,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	ni, no := self.ni, self.no
 	surrogate := external.NewSurrogate(ni, no)
 	state := self.strategy.First()
-	for self.strategy.Continue(state, surrogate) {
+	for self.strategy.Check(state, surrogate) {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
 		state.Observations = internal.Invoke(target, state.Nodes, ni, no, internal.Workers)

@@ -10,8 +10,8 @@ type Strategy interface {
 	// First returns the initial state of the first iteration.
 	First() *State
 
-	// Continue returns true if the interpolation process should continue.
-	Continue(*State, *external.Surrogate) bool
+	// Check returns true if the interpolation process should continue.
+	Check(*State, *external.Surrogate) bool
 
 	// Score assigns a score to an interpolation element.
 	Score(*Element) float64
@@ -57,7 +57,7 @@ func (self *BasicStrategy) First() *State {
 	}
 }
 
-func (self *BasicStrategy) Continue(state *State, _ *external.Surrogate) bool {
+func (self *BasicStrategy) Check(state *State, _ *external.Surrogate) bool {
 	return state != nil && len(state.Indices) > 0
 }
 
