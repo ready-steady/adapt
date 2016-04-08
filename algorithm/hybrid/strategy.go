@@ -101,7 +101,7 @@ func (self *BasicStrategy) Score(element *Element) []float64 {
 	no := self.no
 	local := make([]float64, len(element.Volumes))
 	for i, m := uint(0), uint(len(element.Surpluses)); i < m; i++ {
-		j := i % no
+		j := i / no
 		local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*element.Surpluses[i]))
 	}
 	return local

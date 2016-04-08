@@ -22,7 +22,7 @@ func prepare(fixture *fixture) *Interpolator {
 		minLevel   = 1
 		maxLevel   = 10
 		localError = 1e-3
-		totalError = 1e-6
+		totalError = 1e-3
 	)
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
@@ -45,6 +45,7 @@ var fixtureBranin = fixture{
 	surrogate: &external.Surrogate{
 		Inputs:  2,
 		Outputs: 1,
+		Nodes:   477,
 	},
 
 	points: []float64{
