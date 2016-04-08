@@ -72,9 +72,7 @@ func New(inputs, outputs uint, grid Grid, basis Basis, strategy Strategy) *Inter
 // Compute constructs an interpolant for a function.
 func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	ni, no := self.ni, self.no
-
 	surrogate := external.NewSurrogate(ni, no)
-
 	state := self.strategy.First()
 	for self.strategy.Continue(state, surrogate) {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
@@ -87,7 +85,6 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
 		state = self.strategy.Next(state, surrogate)
 	}
-
 	return surrogate
 }
 
