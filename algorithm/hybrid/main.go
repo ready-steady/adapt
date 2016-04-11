@@ -90,10 +90,10 @@ func score(strategy Strategy, state *State, ni, no uint) []float64 {
 	for i, j := uint(0), uint(0); i < nn; i++ {
 		for m := j + state.Counts[i]; j < m; j++ {
 			scores = append(scores, strategy.Score(&external.Element{
-				Index:       state.Indices[j*ni : (j+1)*ni],
-				Volume:      state.Volumes[j],
-				Observation: state.Observations[j*no : (j+1)*no],
-				Surplus:     state.Surpluses[j*no : (j+1)*no],
+				Index:   state.Indices[j*ni : (j+1)*ni],
+				Volume:  state.Volumes[j],
+				Value:   state.Observations[j*no : (j+1)*no],
+				Surplus: state.Surpluses[j*no : (j+1)*no],
 			}))
 		}
 	}

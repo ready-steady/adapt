@@ -86,10 +86,10 @@ func score(strategy Strategy, state *State, ni, no uint) []float64 {
 	scores := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {
 		scores[i] = strategy.Score(&external.Element{
-			Index:       state.Indices[i*ni : (i+1)*ni],
-			Volume:      state.Volumes[i],
-			Observation: state.Observations[i*no : (i+1)*no],
-			Surplus:     state.Surpluses[i*no : (i+1)*no],
+			Index:   state.Indices[i*ni : (i+1)*ni],
+			Volume:  state.Volumes[i],
+			Value:   state.Observations[i*no : (i+1)*no],
+			Surplus: state.Surpluses[i*no : (i+1)*no],
 		})
 	}
 	return scores

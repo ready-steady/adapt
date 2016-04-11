@@ -4,7 +4,7 @@ package external
 type Element struct {
 	Index []uint64 // Nodal index
 
-	Volume      float64   // Basis-function volume
-	Observation []float64 // Target-function value
-	Surplus     []float64 // Hierarchical surplus
+	Volume  float64   // Basis-function volume
+	Value   []float64 // Target-function value
+	Surplus []float64 // Hierarchical surplus
 }
