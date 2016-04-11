@@ -98,6 +98,35 @@ func Index(indexer GridIndexer, lindices []uint64, ni uint) ([]uint64, []uint) {
 	return indices, counts
 }
 
+// Invoke evaluates a function at multiple nodes using multiple goroutines.
+func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
+	nn := uint(len(nodes)) / ni
+
+	values := make([]float64, nn*no)
+
+	jobs := make(chan uint, nn)
+	group := sync.WaitGroup{}
+	group.Add(int(nn))
+
+	for i := uint(0); i < nw; i++ {
+		go func() {
+			for j := range jobs {
+				compute(nodes[j*ni:(j+1)*ni], values[j*no:(j+1)*no])
+				group.Done()
+			}
+		}()
+	}
+
+	for i := uint(0); i < nn; i++ {
+		jobs <- i
+	}
+
+	group.Wait()
+	close(jobs)
+
+	return values
+}
+
 // Measure computes the integrals of a set of basis functions.
 func Measure(integrator BasisIntegrator, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni

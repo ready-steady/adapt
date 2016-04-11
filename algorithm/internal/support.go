@@ -2,7 +2,6 @@ package internal
 
 import (
 	"math"
-	"sync"
 
 	"github.com/ready-steady/adapt/internal"
 )
@@ -10,35 +9,6 @@ import (
 // Average returns the average value of a vector’s elements.
 func Average(data []float64) float64 {
 	return Sum(data) / float64(len(data))
-}
-
-// Invoke evaluates a function at multiple nodes using multiple goroutines.
-func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
-	nn := uint(len(nodes)) / ni
-
-	values := make([]float64, nn*no)
-
-	jobs := make(chan uint, nn)
-	group := sync.WaitGroup{}
-	group.Add(int(nn))
-
-	for i := uint(0); i < nw; i++ {
-		go func() {
-			for j := range jobs {
-				compute(nodes[j*ni:(j+1)*ni], values[j*no:(j+1)*no])
-				group.Done()
-			}
-		}()
-	}
-
-	for i := uint(0); i < nn; i++ {
-		jobs <- i
-	}
-
-	group.Wait()
-	close(jobs)
-
-	return values
 }
 
 // IsAdmissible checks if a set of indices is admissible.
