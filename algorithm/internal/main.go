@@ -45,7 +45,7 @@ type GridRefinerToward interface {
 // Approximate evaluates an interpolant at multiple points using multiple
 // goroutines.
 func Approximate(computer BasisComputer, indices []uint64, surpluses, points []float64,
-	ni, no, nw uint) []float64 {
+	ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
 	np := uint(len(points)) / ni
@@ -55,7 +55,7 @@ func Approximate(computer BasisComputer, indices []uint64, surpluses, points []f
 	group := sync.WaitGroup{}
 	group.Add(int(np))
 
-	for i := uint(0); i < nw; i++ {
+	for i := uint(0); i < Workers; i++ {
 		go func() {
 			for j := range jobs {
 				point := points[j*ni : (j+1)*ni]
@@ -99,7 +99,7 @@ func Index(indexer GridIndexer, lindices []uint64, ni uint) ([]uint64, []uint) {
 }
 
 // Invoke evaluates a function at multiple nodes using multiple goroutines.
-func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
+func Invoke(compute func([]float64, []float64), nodes []float64, ni, no uint) []float64 {
 	nn := uint(len(nodes)) / ni
 
 	values := make([]float64, nn*no)
@@ -108,7 +108,7 @@ func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint
 	group := sync.WaitGroup{}
 	group.Add(int(nn))
 
-	for i := uint(0); i < nw; i++ {
+	for i := uint(0); i < Workers; i++ {
 		go func() {
 			for j := range jobs {
 				compute(nodes[j*ni:(j+1)*ni], values[j*no:(j+1)*no])

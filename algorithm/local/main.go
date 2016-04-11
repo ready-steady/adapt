@@ -52,9 +52,9 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 	for self.strategy.Check(state, surrogate) {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
-		state.Observations = internal.Invoke(target, state.Nodes, ni, no, internal.Workers)
+		state.Observations = internal.Invoke(target, state.Nodes, ni, no)
 		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
-			surrogate.Surpluses, state.Nodes, ni, no, internal.Workers)
+			surrogate.Surpluses, state.Nodes, ni, no)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
 		state.Scores = score(self.strategy, state, ni, no)
 		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
@@ -66,7 +66,7 @@ func (self *Interpolator) Compute(target Target) *external.Surrogate {
 // Evaluate computes the values of an interpolant at a set of points.
 func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
-		surrogate.Inputs, surrogate.Outputs, internal.Workers)
+		surrogate.Inputs, surrogate.Outputs)
 }
 
 func score(strategy external.Strategy, state *external.State, ni, no uint) []float64 {
