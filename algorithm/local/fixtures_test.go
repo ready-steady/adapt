@@ -714,7 +714,7 @@ func kraichnanOrszagTarget(y0, ys []float64) {
 	}
 }
 
-func (self *kraichnanOrszagStrategy) Score(element *Element) float64 {
+func (self *kraichnanOrszagStrategy) Score(element *external.Element) float64 {
 	const (
 		localError = 1e-2
 	)

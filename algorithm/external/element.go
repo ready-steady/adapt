@@ -1,0 +1,10 @@
+package external
+
+// Element contains information about an interpolation element.
+type Element struct {
+	Index []uint64 // Nodal index
+
+	Volume      float64   // Basis-function volume
+	Observation []float64 // Target-function value
+	Surplus     []float64 // Hierarchical surplus
+}

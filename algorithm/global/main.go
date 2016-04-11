@@ -32,16 +32,6 @@ type Interpolator struct {
 	strategy Strategy
 }
 
-// Element contains information about an interpolation element.
-type Element struct {
-	Lindex  []uint64 // Level index
-	Indices []uint64 // Nodal indices
-
-	Volumes      []float64 // Basis-function volumes
-	Observations []float64 // Target-function values
-	Surpluses    []float64 // Hierarchical surpluses
-}
-
 // State contains information about an interpolation iteration.
 type State struct {
 	Lindices []uint64 // Level indices
@@ -96,17 +86,17 @@ func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float
 func score(strategy Strategy, state *State, ni, no uint) []float64 {
 	nn := uint(len(state.Counts))
 	scores := make([]float64, nn)
-	for i, o := uint(0), uint(0); i < nn; i++ {
-		count := state.Counts[i]
-		element := Element{
-			Lindex:       state.Lindices[i*ni : (i+1)*ni],
-			Indices:      state.Indices[o*ni : (o+count)*ni],
-			Volumes:      state.Volumes[o:(o + count)],
-			Observations: state.Observations[o*no : (o+count)*no],
-			Surpluses:    state.Surpluses[o*no : (o+count)*no],
+	for i, j := uint(0), uint(0); i < nn; i++ {
+		count, score := state.Counts[i], 0.0
+		for m := j + count; j < m; j++ {
+			score += strategy.Score(&external.Element{
+				Index:       state.Indices[j*ni : (j+1)*ni],
+				Volume:      state.Volumes[j],
+				Observation: state.Observations[j*no : (j+1)*no],
+				Surplus:     state.Surpluses[j*no : (j+1)*no],
+			})
 		}
-		scores[i] = strategy.Score(&element)
-		o += count
+		scores[i] = score / float64(count)
 	}
 	return scores
 }

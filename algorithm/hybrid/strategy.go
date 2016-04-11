@@ -20,7 +20,7 @@ type Strategy interface {
 	Check(*State, *external.Surrogate) bool
 
 	// Score assigns a score to an interpolation element.
-	Score(*Element) []float64
+	Score(*external.Element) float64
 
 	// Next consumes the result of the current iteration and returns the initial
 	// state of the next one.
@@ -98,14 +98,8 @@ func (self *BasicStrategy) Check(_ *State, _ *external.Surrogate) bool {
 	return total > self.εt
 }
 
-func (self *BasicStrategy) Score(element *Element) []float64 {
-	no := self.no
-	local := make([]float64, len(element.Volumes))
-	for i, m := uint(0), uint(len(element.Surpluses)); i < m; i++ {
-		j := i / no
-		local[j] = math.Max(local[j], math.Abs(element.Volumes[j]*element.Surpluses[i]))
-	}
-	return local
+func (self *BasicStrategy) Score(element *external.Element) float64 {
+	return internal.MaxAbsolute(element.Surplus) * element.Volume
 }
 
 func (self *BasicStrategy) Next(current *State, surrogate *external.Surrogate) *State {

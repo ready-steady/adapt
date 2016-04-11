@@ -32,15 +32,6 @@ type Interpolator struct {
 	strategy Strategy
 }
 
-// Element contains information about an interpolation element.
-type Element struct {
-	Index []uint64 // Nodal index
-
-	Volume      float64   // Basis-function volume
-	Observation []float64 // Target-function value
-	Surplus     []float64 // Hierarchical surplus
-}
-
 // State contains information about an interpolation iteration.
 type State struct {
 	Indices []uint64 // Nodal indices
@@ -94,7 +85,7 @@ func score(strategy Strategy, state *State, ni, no uint) []float64 {
 	nn := uint(len(state.Indices)) / ni
 	scores := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {
-		scores[i] = strategy.Score(&Element{
+		scores[i] = strategy.Score(&external.Element{
 			Index:       state.Indices[i*ni : (i+1)*ni],
 			Volume:      state.Volumes[i],
 			Observation: state.Observations[i*no : (i+1)*no],
