@@ -67,7 +67,7 @@ func prepare(fixture *fixture) *Interpolator {
 
 var fixtureStep = fixture{
 	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*BasicStrategy).lmax = 4
+		interpolator.strategy.(*Strategy).lmax = 4
 	},
 
 	target: func(x, y []float64) {
@@ -314,8 +314,8 @@ var fixtureHat = fixture{
 
 var fixtureCube = fixture{
 	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*BasicStrategy).lmax = 9
-		interpolator.strategy.(*BasicStrategy).εl = 1e-2
+		interpolator.strategy.(*Strategy).lmax = 9
+		interpolator.strategy.(*Strategy).εl = 1e-2
 	},
 
 	target: func(x, y []float64) {
@@ -567,7 +567,7 @@ var fixtureCube = fixture{
 
 var fixtureBox = fixture{
 	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*BasicStrategy).lmax = 3
+		interpolator.strategy.(*Strategy).lmax = 3
 	},
 
 	target: func(x, y []float64) {
@@ -679,7 +679,7 @@ const kraichnanOrszagInputs = 3
 const kraichnanOrszagOutputs = kraichnanOrszagLargeSteps * kraichnanOrszagInputs * 2
 
 type kraichnanOrszagStrategy struct {
-	*BasicStrategy
+	*Strategy
 }
 
 func kraichnanOrszagTarget(y0, ys []float64) {
@@ -736,7 +736,7 @@ func (self *kraichnanOrszagStrategy) Score(element *external.Element) float64 {
 
 var fixtureKraichnanOrszag = fixture{
 	adjust: func(interpolator *Interpolator) {
-		strategy := interpolator.strategy.(*BasicStrategy)
+		strategy := interpolator.strategy.(*Strategy)
 		strategy.lmax = 8
 		interpolator.strategy = &kraichnanOrszagStrategy{strategy}
 	},
@@ -1968,8 +1968,8 @@ var fixtureParabola = fixture{
 	rule: "open",
 
 	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*BasicStrategy).lmax = 20
-		interpolator.strategy.(*BasicStrategy).εl = 1e-6
+		interpolator.strategy.(*Strategy).lmax = 20
+		interpolator.strategy.(*Strategy).εl = 1e-6
 	},
 
 	target: func(x, y []float64) {

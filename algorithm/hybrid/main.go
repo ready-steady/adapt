@@ -3,6 +3,7 @@
 package hybrid
 
 import (
+	"github.com/ready-steady/adapt/algorithm/external"
 	"github.com/ready-steady/adapt/algorithm/global"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
@@ -24,6 +25,6 @@ type Interpolator struct {
 }
 
 // New creates an interpolator.
-func New(inputs, outputs uint, grid Grid, basis Basis, strategy Strategy) *Interpolator {
+func New(inputs, outputs uint, grid Grid, basis Basis, strategy external.Strategy) *Interpolator {
 	return &Interpolator{*global.New(inputs, outputs, grid, basis, strategy)}
 }

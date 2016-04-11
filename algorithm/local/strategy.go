@@ -5,24 +5,8 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
-// Strategy controls the interpolation process.
-type Strategy interface {
-	// First returns the initial state of the first iteration.
-	First() *external.State
-
-	// Check returns true if the interpolation process should continue.
-	Check(*external.State, *external.Surrogate) bool
-
-	// Score assigns a score to an interpolation element.
-	Score(*external.Element) float64
-
-	// Next consumes the result of the current iteration and returns the initial
-	// state of the next one.
-	Next(*external.State, *external.Surrogate) *external.State
-}
-
-// BasicStrategy is a basic strategy satisfying the Strategy interface.
-type BasicStrategy struct {
+// Strategy is a basic strategy.
+type Strategy struct {
 	ni uint
 	no uint
 
@@ -36,9 +20,9 @@ type BasicStrategy struct {
 
 // NewStrategy creates a basic strategy.
 func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
-	localError float64, grid Grid) *BasicStrategy {
+	localError float64, grid Grid) *Strategy {
 
-	return &BasicStrategy{
+	return &Strategy{
 		ni: inputs,
 		no: outputs,
 
@@ -50,22 +34,22 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 	}
 }
 
-func (self *BasicStrategy) First() *external.State {
+func (self *Strategy) First() *external.State {
 	self.unique = internal.NewUnique(self.ni)
 	return &external.State{
 		Indices: make([]uint64, 1*self.ni),
 	}
 }
 
-func (self *BasicStrategy) Check(state *external.State, _ *external.Surrogate) bool {
+func (self *Strategy) Check(state *external.State, _ *external.Surrogate) bool {
 	return state != nil && len(state.Indices) > 0
 }
 
-func (self *BasicStrategy) Score(element *external.Element) float64 {
+func (self *Strategy) Score(element *external.Element) float64 {
 	return internal.MaxAbsolute(element.Surplus)
 }
 
-func (self *BasicStrategy) Next(state *external.State, _ *external.Surrogate) *external.State {
+func (self *Strategy) Next(state *external.State, _ *external.Surrogate) *external.State {
 	return &external.State{
 		Indices: self.unique.Distil(self.grid.Refine(filter(state.Indices,
 			state.Scores, self.lmin, self.lmax, self.εl, self.ni))),

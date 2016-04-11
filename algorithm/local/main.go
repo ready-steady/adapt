@@ -29,11 +29,11 @@ type Interpolator struct {
 
 	grid     Grid
 	basis    Basis
-	strategy Strategy
+	strategy external.Strategy
 }
 
 // New creates an interpolator.
-func New(inputs, outputs uint, grid Grid, basis Basis, strategy Strategy) *Interpolator {
+func New(inputs, outputs uint, grid Grid, basis Basis, strategy external.Strategy) *Interpolator {
 	return &Interpolator{
 		ni: inputs,
 		no: outputs,
@@ -69,7 +69,7 @@ func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float
 		surrogate.Inputs, surrogate.Outputs, internal.Workers)
 }
 
-func score(strategy Strategy, state *external.State, ni, no uint) []float64 {
+func score(strategy external.Strategy, state *external.State, ni, no uint) []float64 {
 	nn := uint(len(state.Indices)) / ni
 	scores := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {

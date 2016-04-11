@@ -28,7 +28,7 @@ func BenchmarkComputeCube(b *testing.B) {
 func BenchmarkComputeBox(b *testing.B) {
 	fixture := &fixtureBox
 	interpolator := prepare(fixture)
-	interpolator.strategy.(*BasicStrategy).lmax = 9
+	interpolator.strategy.(*Strategy).lmax = 9
 
 	for i := 0; i < b.N; i++ {
 		interpolator.Compute(fixture.target)
@@ -71,7 +71,7 @@ func BenchmarkEvaluateHat(b *testing.B) {
 func BenchmarkEvaluateCube(b *testing.B) {
 	fixture := &fixtureCube
 	interpolator := prepare(fixture)
-	interpolator.strategy.(*BasicStrategy).lmax = 9
+	interpolator.strategy.(*Strategy).lmax = 9
 	surrogate := interpolator.Compute(fixture.target)
 	points := generate(surrogate)
 
@@ -85,7 +85,7 @@ func BenchmarkEvaluateCube(b *testing.B) {
 func BenchmarkEvaluateBox(b *testing.B) {
 	fixture := &fixtureBox
 	interpolator := prepare(fixture)
-	interpolator.strategy.(*BasicStrategy).lmax = 9
+	interpolator.strategy.(*Strategy).lmax = 9
 	surrogate := interpolator.Compute(fixture.target)
 	points := generate(surrogate)
 
