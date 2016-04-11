@@ -7,6 +7,11 @@ import (
 	"github.com/ready-steady/adapt/internal"
 )
 
+// Average returns the average value of a vector’s elements.
+func Average(data []float64) float64 {
+	return Sum(data) / float64(len(data))
+}
+
 // Invoke evaluates a function at multiple nodes using multiple goroutines.
 func Invoke(compute func([]float64, []float64), nodes []float64, ni, no, nw uint) []float64 {
 	nn := uint(len(nodes)) / ni
@@ -83,7 +88,7 @@ func IsUnique(indices []uint64, ni uint) bool {
 	return before == after
 }
 
-// LocateMax returns the position of the maximal element among a subset of a
+// LocateMax returns the position of the maximal element across a subset of a
 // vector’s elements.
 func LocateMax(data []float64, set map[uint]bool) uint {
 	position, value := ^uint(0), 0.0
@@ -107,7 +112,7 @@ func Levelize(indices []uint64, ni uint) []uint64 {
 	return levels
 }
 
-// MaxAbsolute returns the maximum absolute value among a vector’s elements.
+// MaxAbsolute returns the maximum absolute value across a vector’s elements.
 func MaxAbsolute(data []float64) (value float64) {
 	for i, n := uint(0), uint(len(data)); i < n; i++ {
 		value = math.Max(value, math.Abs(data[i]))
@@ -124,10 +129,18 @@ func Subtract(minuend, subtrahend []float64) []float64 {
 	return difference
 }
 
+// Sum returns the sum of a vector’s elements.
+func Sum(data []float64) (result float64) {
+	for _, value := range data {
+		result += value
+	}
+	return
+}
+
 // SumAbsolute returns the sum of the absolute values of a vector’s elements.
-func SumAbsolute(data []float64) (value float64) {
-	for i, n := uint(0), uint(len(data)); i < n; i++ {
-		value += math.Abs(data[i])
+func SumAbsolute(data []float64) (result float64) {
+	for _, value := range data {
+		result += math.Abs(value)
 	}
 	return
 }

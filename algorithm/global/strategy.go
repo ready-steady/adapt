@@ -125,7 +125,7 @@ func (self *BasicStrategy) consume(state *State) {
 
 	levels := internal.Levelize(state.Lindices, self.ni)
 
-	self.global = append(self.global, state.Scores...)
+	self.global = append(self.global, make([]float64, nn)...)
 	global := self.global[ng:]
 
 	self.local = append(self.local, make([]float64, nn*no)...)
@@ -144,6 +144,7 @@ func (self *BasicStrategy) consume(state *State) {
 				local[i*no+j] = 0.0
 			}
 		} else {
+			global[i] = internal.Average(state.Scores[o:(o + count)])
 			for j, m := uint(0), count*no; j < m; j++ {
 				k := i*no + j%no
 				local[k] = math.Max(local[k], math.Abs(state.Surpluses[o+j]))

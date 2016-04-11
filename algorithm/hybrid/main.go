@@ -86,7 +86,7 @@ func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float
 
 func score(strategy Strategy, state *State, ni, no uint) []float64 {
 	nn := uint(len(state.Counts))
-	scores := make([]float64, 0, no)
+	scores := make([]float64, 0, nn)
 	for i, j := uint(0), uint(0); i < nn; i++ {
 		for m := j + state.Counts[i]; j < m; j++ {
 			scores = append(scores, strategy.Score(&external.Element{
