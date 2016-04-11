@@ -87,8 +87,8 @@ func score(strategy Strategy, state *State, ni, no uint) []float64 {
 	nn := uint(len(state.Counts))
 	scores := make([]float64, nn)
 	for i, j := uint(0), uint(0); i < nn; i++ {
-		count, score := state.Counts[i], 0.0
-		for m := j + count; j < m; j++ {
+		score := 0.0
+		for m := j + state.Counts[i]; j < m; j++ {
 			score += strategy.Score(&external.Element{
 				Index:       state.Indices[j*ni : (j+1)*ni],
 				Volume:      state.Volumes[j],
@@ -96,7 +96,7 @@ func score(strategy Strategy, state *State, ni, no uint) []float64 {
 				Surplus:     state.Surpluses[j*no : (j+1)*no],
 			})
 		}
-		scores[i] = score / float64(count)
+		scores[i] = score / float64(state.Counts[i])
 	}
 	return scores
 }
