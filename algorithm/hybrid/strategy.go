@@ -36,6 +36,7 @@ type Strategy struct {
 	local  []float64
 }
 
+// NewStrategy creates a basic strategy.
 func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 	localError, totalError float64, grid Grid) *Strategy {
 
