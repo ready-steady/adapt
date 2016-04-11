@@ -21,7 +21,7 @@ type Strategy interface {
 	Next(*State, *external.Surrogate) *State
 }
 
-// BasicStrategy is a basic target satisfying the Target interface.
+// BasicStrategy is a basic strategy satisfying the Strategy interface.
 type BasicStrategy struct {
 	ni uint
 	no uint

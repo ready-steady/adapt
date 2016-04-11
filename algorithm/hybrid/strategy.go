@@ -27,6 +27,7 @@ type Strategy interface {
 	Next(*State, *external.Surrogate) *State
 }
 
+// BasicStrategy is a basic strategy satisfying the Strategy interface.
 type BasicStrategy struct {
 	*internal.Active
 
