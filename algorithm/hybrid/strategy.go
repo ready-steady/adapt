@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/ready-steady/adapt/algorithm/external"
+	"github.com/ready-steady/adapt/algorithm/global"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -13,18 +14,7 @@ var (
 
 // Strategy controls the interpolation process.
 type Strategy interface {
-	// First returns the initial state of the first iteration.
-	First() *State
-
-	// Check returns true if the interpolation process should continue.
-	Check(*State, *external.Surrogate) bool
-
-	// Score assigns a score to an interpolation element.
-	Score(*external.Element) float64
-
-	// Next consumes the result of the current iteration and returns the initial
-	// state of the next one.
-	Next(*State, *external.Surrogate) *State
+	global.Strategy
 }
 
 // BasicStrategy is a basic strategy satisfying the Strategy interface.
@@ -70,20 +60,20 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 	}
 }
 
-func (self *BasicStrategy) First() *State {
+func (self *BasicStrategy) First() *external.FineState {
 	self.k = ^uint(0)
 	self.hash = internal.NewHash(self.ni)
 	self.unique = internal.NewUnique(self.ni)
 	self.position = make(map[string]uint)
 
-	state := &State{}
+	state := &external.FineState{}
 	state.Lindices = self.Active.First()
 	state.Indices, state.Counts = internal.Index(self.grid, state.Lindices, self.ni)
 
 	return state
 }
 
-func (self *BasicStrategy) Check(_ *State, _ *external.Surrogate) bool {
+func (self *BasicStrategy) Check(_ *external.FineState, _ *external.Surrogate) bool {
 	if self.k == ^uint(0) {
 		return true
 	}
@@ -102,7 +92,9 @@ func (self *BasicStrategy) Score(element *external.Element) float64 {
 	return internal.MaxAbsolute(element.Surplus) * element.Volume
 }
 
-func (self *BasicStrategy) Next(current *State, surrogate *external.Surrogate) *State {
+func (self *BasicStrategy) Next(current *external.FineState,
+	surrogate *external.Surrogate) *external.FineState {
+
 	self.consume(current)
 
 	self.Active.Drop(self.k)
@@ -114,14 +106,14 @@ func (self *BasicStrategy) Next(current *State, surrogate *external.Surrogate) *
 		return nil
 	}
 
-	state := &State{}
+	state := &external.FineState{}
 	state.Lindices = self.Active.Next(self.k)
 	state.Indices, state.Counts = self.index(state.Lindices, surrogate)
 
 	return state
 }
 
-func (self *BasicStrategy) consume(state *State) {
+func (self *BasicStrategy) consume(state *external.FineState) {
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
 	nn := uint(len(state.Counts))
 

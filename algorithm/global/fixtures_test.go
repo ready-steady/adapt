@@ -9,7 +9,7 @@ import (
 )
 
 type fixture struct {
-	target Target
+	target external.Target
 
 	surrogate *external.Surrogate
 

@@ -19,9 +19,6 @@ type Grid interface {
 	internal.GridIndexer
 }
 
-// Target is a function to be interpolated.
-type Target func([]float64, []float64)
-
 // Interpolator is an instance of the algorithm.
 type Interpolator struct {
 	ni uint
@@ -30,20 +27,6 @@ type Interpolator struct {
 	grid     Grid
 	basis    Basis
 	strategy Strategy
-}
-
-// State contains information about an interpolation iteration.
-type State struct {
-	Lindices []uint64 // Level indices
-	Indices  []uint64 // Nodal indices
-	Counts   []uint   // Number of nodal indices for each level index
-
-	Nodes        []float64 // Grid nodes
-	Volumes      []float64 // Basis-function volumes
-	Observations []float64 // Target-function values
-	Predictions  []float64 // Approximated values
-	Surpluses    []float64 // Hierarchical surpluses
-	Scores       []float64 // Level-index scores
 }
 
 // New creates an interpolator.
@@ -59,7 +42,7 @@ func New(inputs, outputs uint, grid Grid, basis Basis, strategy Strategy) *Inter
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target Target) *external.Surrogate {
+func (self *Interpolator) Compute(target external.Target) *external.Surrogate {
 	ni, no := self.ni, self.no
 	surrogate := external.NewSurrogate(ni, no)
 	state := self.strategy.First()
@@ -83,7 +66,7 @@ func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float
 		surrogate.Inputs, surrogate.Outputs, internal.Workers)
 }
 
-func score(strategy Strategy, state *State, ni, no uint) []float64 {
+func score(strategy Strategy, state *external.FineState, ni, no uint) []float64 {
 	nn := uint(len(state.Counts))
 	scores := make([]float64, 0, nn)
 	for i, j := uint(0), uint(0); i < nn; i++ {

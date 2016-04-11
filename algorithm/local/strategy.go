@@ -8,17 +8,17 @@ import (
 // Strategy controls the interpolation process.
 type Strategy interface {
 	// First returns the initial state of the first iteration.
-	First() *State
+	First() *external.State
 
 	// Check returns true if the interpolation process should continue.
-	Check(*State, *external.Surrogate) bool
+	Check(*external.State, *external.Surrogate) bool
 
 	// Score assigns a score to an interpolation element.
 	Score(*external.Element) float64
 
 	// Next consumes the result of the current iteration and returns the initial
 	// state of the next one.
-	Next(*State, *external.Surrogate) *State
+	Next(*external.State, *external.Surrogate) *external.State
 }
 
 // BasicStrategy is a basic strategy satisfying the Strategy interface.
@@ -50,14 +50,14 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 	}
 }
 
-func (self *BasicStrategy) First() *State {
+func (self *BasicStrategy) First() *external.State {
 	self.unique = internal.NewUnique(self.ni)
-	return &State{
+	return &external.State{
 		Indices: make([]uint64, 1*self.ni),
 	}
 }
 
-func (self *BasicStrategy) Check(state *State, _ *external.Surrogate) bool {
+func (self *BasicStrategy) Check(state *external.State, _ *external.Surrogate) bool {
 	return state != nil && len(state.Indices) > 0
 }
 
@@ -65,8 +65,8 @@ func (self *BasicStrategy) Score(element *external.Element) float64 {
 	return internal.MaxAbsolute(element.Surplus)
 }
 
-func (self *BasicStrategy) Next(state *State, _ *external.Surrogate) *State {
-	return &State{
+func (self *BasicStrategy) Next(state *external.State, _ *external.Surrogate) *external.State {
+	return &external.State{
 		Indices: self.unique.Distil(self.grid.Refine(filter(state.Indices,
 			state.Scores, self.lmin, self.lmax, self.εl, self.ni))),
 	}

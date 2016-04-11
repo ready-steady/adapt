@@ -32,18 +32,6 @@ type Interpolator struct {
 	strategy Strategy
 }
 
-// State contains information about an interpolation iteration.
-type State struct {
-	Indices []uint64 // Nodal indices
-
-	Nodes        []float64 // Grid nodes
-	Volumes      []float64 // Basis-function volumes
-	Observations []float64 // Target-function values
-	Predictions  []float64 // Approximated values
-	Surpluses    []float64 // Hierarchical surpluses
-	Scores       []float64 // Nodal-index scores
-}
-
 // New creates an interpolator.
 func New(inputs, outputs uint, grid Grid, basis Basis, strategy Strategy) *Interpolator {
 	return &Interpolator{
@@ -81,7 +69,7 @@ func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float
 		surrogate.Inputs, surrogate.Outputs, internal.Workers)
 }
 
-func score(strategy Strategy, state *State, ni, no uint) []float64 {
+func score(strategy Strategy, state *external.State, ni, no uint) []float64 {
 	nn := uint(len(state.Indices)) / ni
 	scores := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {
