@@ -2,13 +2,9 @@
 package internal
 
 import (
-	"runtime"
 	"sync"
-)
 
-var (
-	// Workers is the number of goroutines used for interpolation.
-	Workers = uint(runtime.GOMAXPROCS(0))
+	"github.com/ready-steady/adapt/algorithm/external"
 )
 
 // BasisComputer returns the value of a basis function.
@@ -55,7 +51,7 @@ func Approximate(computer BasisComputer, indices []uint64, surpluses, points []f
 	group := sync.WaitGroup{}
 	group.Add(int(np))
 
-	for i := uint(0); i < Workers; i++ {
+	for i := uint(0); i < external.Workers; i++ {
 		go func() {
 			for j := range jobs {
 				point := points[j*ni : (j+1)*ni]
@@ -96,35 +92,6 @@ func Index(indexer GridIndexer, lindices []uint64, ni uint) ([]uint64, []uint) {
 		counts[i] = uint(len(newIndices)) / ni
 	}
 	return indices, counts
-}
-
-// Invoke evaluates a function at multiple points using multiple goroutines.
-func Invoke(compute func([]float64, []float64), points []float64, ni, no uint) []float64 {
-	np := uint(len(points)) / ni
-
-	values := make([]float64, np*no)
-
-	jobs := make(chan uint, np)
-	group := sync.WaitGroup{}
-	group.Add(int(np))
-
-	for i := uint(0); i < Workers; i++ {
-		go func() {
-			for j := range jobs {
-				compute(points[j*ni:(j+1)*ni], values[j*no:(j+1)*no])
-				group.Done()
-			}
-		}()
-	}
-
-	for i := uint(0); i < np; i++ {
-		jobs <- i
-	}
-
-	group.Wait()
-	close(jobs)
-
-	return values
 }
 
 // Measure computes the integrals of a set of basis functions.

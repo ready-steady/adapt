@@ -49,7 +49,7 @@ func (self *Interpolator) Compute(target external.Target) *external.Surrogate {
 	for self.strategy.Check(state, surrogate) {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
-		state.Observations = internal.Invoke(target, state.Nodes, ni, no)
+		state.Observations = external.Invoke(target, state.Nodes, ni, no)
 		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, state.Nodes, ni, no)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)

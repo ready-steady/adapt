@@ -21,7 +21,7 @@ type fixture struct {
 	rule string
 
 	adjust func(*Interpolator)
-	target Target
+	target external.Target
 
 	surrogate *external.Surrogate
 

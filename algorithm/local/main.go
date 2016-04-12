@@ -19,9 +19,6 @@ type Grid interface {
 	internal.GridRefiner
 }
 
-// Target is a function to be interpolated.
-type Target func([]float64, []float64)
-
 // Interpolator is an instance of the algorithm.
 type Interpolator struct {
 	ni uint
@@ -45,14 +42,14 @@ func New(inputs, outputs uint, grid Grid, basis Basis, strategy external.Strateg
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target Target) *external.Surrogate {
+func (self *Interpolator) Compute(target external.Target) *external.Surrogate {
 	ni, no := self.ni, self.no
 	surrogate := external.NewSurrogate(ni, no)
 	state := self.strategy.First()
 	for self.strategy.Check(state, surrogate) {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
-		state.Observations = internal.Invoke(target, state.Nodes, ni, no)
+		state.Observations = external.Invoke(target, state.Nodes, ni, no)
 		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, state.Nodes, ni, no)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
