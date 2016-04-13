@@ -21,8 +21,8 @@ func ExampleInterpolator_step() {
 
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
+	interpolator := New(inputs, outputs, grid, basis)
 	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
-	interpolator := New(inputs, outputs, grid, basis, strategy)
 
 	surrogate := interpolator.Compute(func(x, y []float64) {
 		if x[0] <= 0.5 {
@@ -30,7 +30,7 @@ func ExampleInterpolator_step() {
 		} else {
 			y[0] = 0.0
 		}
-	})
+	}, strategy)
 
 	fmt.Println(surrogate)
 
@@ -51,8 +51,8 @@ func ExampleInterpolator_cube() {
 
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
+	interpolator := New(inputs, outputs, grid, basis)
 	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
-	interpolator := New(inputs, outputs, grid, basis, strategy)
 
 	surrogate := interpolator.Compute(func(x, y []float64) {
 		if math.Abs(2.0*x[0]-1.0) < 0.45 && math.Abs(2.0*x[1]-1.0) < 0.45 {
@@ -60,7 +60,7 @@ func ExampleInterpolator_cube() {
 		} else {
 			y[0] = 0.0
 		}
-	})
+	}, strategy)
 
 	fmt.Println(surrogate)
 

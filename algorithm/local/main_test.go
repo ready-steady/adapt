@@ -8,9 +8,9 @@ import (
 
 func TestStep(t *testing.T) {
 	fixture := &fixtureStep
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	assert.Equal(surrogate, fixture.surrogate, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
@@ -19,9 +19,9 @@ func TestStep(t *testing.T) {
 
 func TestHat(t *testing.T) {
 	fixture := &fixtureHat
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	assert.Equal(surrogate, fixture.surrogate, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
@@ -30,9 +30,9 @@ func TestHat(t *testing.T) {
 
 func TestCube(t *testing.T) {
 	fixture := &fixtureCube
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 	assert.Equal(surrogate.Integral, fixture.surrogate.Integral, t)
 
@@ -42,9 +42,9 @@ func TestCube(t *testing.T) {
 
 func TestBox(t *testing.T) {
 	fixture := &fixtureBox
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	assert.Equal(surrogate, fixture.surrogate, t)
 
 	values := interpolator.Evaluate(surrogate, fixture.points)
@@ -53,9 +53,9 @@ func TestBox(t *testing.T) {
 
 func TestKraichnanOrszag(t *testing.T) {
 	fixture := &fixtureKraichnanOrszag
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 	assert.EqualWithin(surrogate.Integral, fixture.surrogate.Integral, 2e-14, t)
 
@@ -65,9 +65,9 @@ func TestKraichnanOrszag(t *testing.T) {
 
 func TestParabola(t *testing.T) {
 	fixture := &fixtureParabola
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
-	surrogate := interpolator.Compute(fixture.target)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 	assert.EqualWithin(surrogate.Integral, fixture.surrogate.Integral, 1e-6, t)
 

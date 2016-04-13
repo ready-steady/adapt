@@ -9,29 +9,29 @@ import (
 
 func BenchmarkComputeHat(b *testing.B) {
 	fixture := &fixtureHat
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target)
+		interpolator.Compute(fixture.target, strategy)
 	}
 }
 
 func BenchmarkComputeCube(b *testing.B) {
 	fixture := &fixtureCube
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target)
+		interpolator.Compute(fixture.target, strategy)
 	}
 }
 
 func BenchmarkComputeBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator := prepare(fixture)
-	interpolator.strategy.(*Strategy).lmax = 9
+	interpolator, strategy := prepare(fixture)
+	strategy.(*Strategy).lmax = 9
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target)
+		interpolator.Compute(fixture.target, strategy)
 	}
 }
 
@@ -48,17 +48,17 @@ func BenchmarkComputeMany(b *testing.B) {
 			Outputs: outputs,
 		},
 	}
-	interpolator := prepare(fixture)
+	interpolator, strategy := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target)
+		interpolator.Compute(fixture.target, strategy)
 	}
 }
 
 func BenchmarkEvaluateHat(b *testing.B) {
 	fixture := &fixtureHat
-	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(fixture.target)
+	interpolator, strategy := prepare(fixture)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()
@@ -70,9 +70,9 @@ func BenchmarkEvaluateHat(b *testing.B) {
 
 func BenchmarkEvaluateCube(b *testing.B) {
 	fixture := &fixtureCube
-	interpolator := prepare(fixture)
-	interpolator.strategy.(*Strategy).lmax = 9
-	surrogate := interpolator.Compute(fixture.target)
+	interpolator, strategy := prepare(fixture)
+	strategy.(*Strategy).lmax = 9
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()
@@ -84,9 +84,9 @@ func BenchmarkEvaluateCube(b *testing.B) {
 
 func BenchmarkEvaluateBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator := prepare(fixture)
-	interpolator.strategy.(*Strategy).lmax = 9
-	surrogate := interpolator.Compute(fixture.target)
+	interpolator, strategy := prepare(fixture)
+	strategy.(*Strategy).lmax = 9
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()
@@ -110,8 +110,8 @@ func BenchmarkEvaluateMany(b *testing.B) {
 		},
 	}
 
-	interpolator := prepare(fixture)
-	surrogate := interpolator.Compute(fixture.target)
+	interpolator, strategy := prepare(fixture)
+	surrogate := interpolator.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()

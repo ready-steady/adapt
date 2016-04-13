@@ -24,38 +24,38 @@ type Interpolator struct {
 	ni uint
 	no uint
 
-	grid     Grid
-	basis    Basis
-	strategy external.Strategy
+	grid  Grid
+	basis Basis
 }
 
 // New creates an interpolator.
-func New(inputs, outputs uint, grid Grid, basis Basis, strategy external.Strategy) *Interpolator {
+func New(inputs, outputs uint, grid Grid, basis Basis) *Interpolator {
 	return &Interpolator{
 		ni: inputs,
 		no: outputs,
 
-		grid:     grid,
-		basis:    basis,
-		strategy: strategy,
+		grid:  grid,
+		basis: basis,
 	}
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target external.Target) *external.Surrogate {
+func (self *Interpolator) Compute(target external.Target,
+	strategy external.Strategy) *external.Surrogate {
+
 	ni, no := self.ni, self.no
 	surrogate := external.NewSurrogate(ni, no)
-	state := self.strategy.First()
-	for self.strategy.Check(state, surrogate) {
+	state := strategy.First()
+	for strategy.Check(state, surrogate) {
 		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
 		state.Nodes = self.grid.Compute(state.Indices)
 		state.Observations = external.Invoke(target, state.Nodes, ni, no)
 		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
 			surrogate.Surpluses, state.Nodes, ni, no)
 		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
-		state.Scores = score(self.strategy, state, ni, no)
+		state.Scores = score(strategy, state, ni, no)
 		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
-		state = self.strategy.Next(state, surrogate)
+		state = strategy.Next(state, surrogate)
 	}
 	return surrogate
 }

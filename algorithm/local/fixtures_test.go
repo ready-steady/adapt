@@ -20,8 +20,8 @@ func init() {
 type fixture struct {
 	rule string
 
-	adjust func(*Interpolator)
-	target external.Target
+	target   external.Target
+	strategy func(external.Strategy) external.Strategy
 
 	surrogate *external.Surrogate
 
@@ -36,7 +36,7 @@ func (self *fixture) initialize() {
 	self.surrogate.Indices = internal.Compose(self.levels, self.orders)
 }
 
-func prepare(fixture *fixture) *Interpolator {
+func prepare(fixture *fixture) (*Interpolator, external.Strategy) {
 	const (
 		minLevel   = 1
 		maxLevel   = 10
@@ -56,26 +56,28 @@ func prepare(fixture *fixture) *Interpolator {
 		basis = polynomial.NewClosed(ni, 1)
 	}
 
+	interpolator := New(ni, no, grid, basis)
 	strategy := NewStrategy(ni, no, minLevel, maxLevel, localError, grid)
-	interpolator := New(ni, no, grid, basis, strategy)
-	if fixture.adjust != nil {
-		fixture.adjust(interpolator)
-	}
 
-	return interpolator
+	if fixture.strategy == nil {
+		return interpolator, strategy
+	} else {
+		return interpolator, fixture.strategy(strategy)
+	}
 }
 
 var fixtureStep = fixture{
-	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*Strategy).lmax = 4
-	},
-
 	target: func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1.0
 		} else {
 			y[0] = 0.0
 		}
+	},
+
+	strategy: func(strategy external.Strategy) external.Strategy {
+		strategy.(*Strategy).lmax = 4
+		return strategy
 	},
 
 	surrogate: &external.Surrogate{
@@ -313,11 +315,6 @@ var fixtureHat = fixture{
 }
 
 var fixtureCube = fixture{
-	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*Strategy).lmax = 9
-		interpolator.strategy.(*Strategy).εl = 1e-2
-	},
-
 	target: func(x, y []float64) {
 		x0, x1 := 2.0*x[0]-1.0, 2.0*x[1]-1.0
 		x02, x12 := x0*x0, x1*x1
@@ -327,6 +324,12 @@ var fixtureCube = fixture{
 		if math.Abs(x0) < 0.45 && math.Abs(x1) < 0.45 {
 			y[0] += 1.0
 		}
+	},
+
+	strategy: func(strategy external.Strategy) external.Strategy {
+		strategy.(*Strategy).lmax = 9
+		strategy.(*Strategy).εl = 1e-2
+		return strategy
 	},
 
 	surrogate: &external.Surrogate{
@@ -566,10 +569,6 @@ var fixtureCube = fixture{
 }
 
 var fixtureBox = fixture{
-	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*Strategy).lmax = 3
-	},
-
 	target: func(x, y []float64) {
 		if x[0]+x[1] > 0.5 {
 			y[0] = 1.0
@@ -588,6 +587,11 @@ var fixtureBox = fixture{
 		} else {
 			y[2] = 0.0
 		}
+	},
+
+	strategy: func(strategy external.Strategy) external.Strategy {
+		strategy.(*Strategy).lmax = 3
+		return strategy
 	},
 
 	surrogate: &external.Surrogate{
@@ -679,7 +683,7 @@ const kraichnanOrszagInputs = 3
 const kraichnanOrszagOutputs = kraichnanOrszagLargeSteps * kraichnanOrszagInputs * 2
 
 type kraichnanOrszagStrategy struct {
-	*Strategy
+	external.Strategy
 }
 
 func kraichnanOrszagTarget(y0, ys []float64) {
@@ -735,13 +739,12 @@ func (self *kraichnanOrszagStrategy) Score(element *external.Element) float64 {
 }
 
 var fixtureKraichnanOrszag = fixture{
-	adjust: func(interpolator *Interpolator) {
-		strategy := interpolator.strategy.(*Strategy)
-		strategy.lmax = 8
-		interpolator.strategy = &kraichnanOrszagStrategy{strategy}
-	},
-
 	target: kraichnanOrszagTarget,
+
+	strategy: func(strategy external.Strategy) external.Strategy {
+		strategy.(*Strategy).lmax = 8
+		return &kraichnanOrszagStrategy{strategy}
+	},
 
 	surrogate: &external.Surrogate{
 		Inputs:  kraichnanOrszagInputs,
@@ -1967,13 +1970,14 @@ var fixtureKraichnanOrszag = fixture{
 var fixtureParabola = fixture{
 	rule: "open",
 
-	adjust: func(interpolator *Interpolator) {
-		interpolator.strategy.(*Strategy).lmax = 20
-		interpolator.strategy.(*Strategy).εl = 1e-6
-	},
-
 	target: func(x, y []float64) {
 		y[0] = (x[0] - 0.5) * (x[0] - 0.5)
+	},
+
+	strategy: func(strategy external.Strategy) external.Strategy {
+		strategy.(*Strategy).lmax = 20
+		strategy.(*Strategy).εl = 1e-6
+		return strategy
 	},
 
 	surrogate: &external.Surrogate{
