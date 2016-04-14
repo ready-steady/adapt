@@ -52,19 +52,19 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 		εt:   totalError,
 
 		grid: grid,
+
+		k: ^uint(0),
+
+		hash:     internal.NewHash(inputs),
+		unique:   internal.NewUnique(inputs),
+		position: make(map[string]uint),
 	}
 }
 
 func (self *Strategy) First() *external.State {
-	self.k = ^uint(0)
-	self.hash = internal.NewHash(self.ni)
-	self.unique = internal.NewUnique(self.ni)
-	self.position = make(map[string]uint)
-
 	state := &external.State{}
 	state.Lindices = self.Active.First()
 	state.Indices, state.Counts = internal.Index(self.grid, state.Lindices, self.ni)
-
 	return state
 }
 

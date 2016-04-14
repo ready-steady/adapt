@@ -30,11 +30,6 @@ func NewThreshold(outputs uint, absolute, relative float64) *Threshold {
 	}
 }
 
-// Reset resets the threshold.
-func (self *Threshold) Reset() {
-	*self = *NewThreshold(self.no, self.εa, self.εr)
-}
-
 // Update updates the threshold.
 func (self *Threshold) Update(values []float64) {
 	no := self.no

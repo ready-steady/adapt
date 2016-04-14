@@ -25,8 +25,9 @@ type Strategy struct {
 
 	k uint
 
-	global    []float64
-	local     []float64
+	global []float64
+	local  []float64
+
 	threshold *internal.Threshold
 }
 
@@ -45,18 +46,16 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 
 		grid: grid,
 
+		k: ^uint(0),
+
 		threshold: internal.NewThreshold(outputs, absoluteError, relativeError),
 	}
 }
 
 func (self *Strategy) First() *external.State {
-	self.k = ^uint(0)
-	self.threshold.Reset()
-
 	state := &external.State{}
 	state.Lindices = self.Active.First()
 	state.Indices, state.Counts = internal.Index(self.grid, state.Lindices, self.ni)
-
 	return state
 }
 

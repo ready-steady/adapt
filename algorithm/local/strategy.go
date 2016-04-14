@@ -31,11 +31,12 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 		εl:   localError,
 
 		grid: grid,
+
+		unique: internal.NewUnique(inputs),
 	}
 }
 
 func (self *Strategy) First() *external.State {
-	self.unique = internal.NewUnique(self.ni)
 	return &external.State{
 		Indices: make([]uint64, 1*self.ni),
 	}
