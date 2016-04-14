@@ -32,6 +32,12 @@ func (self *Open) Refine(indices []uint64) []uint64 {
 	return openRefine(indices, self.nd, 0, self.nd)
 }
 
+// RefineToward returns the child indices of a set of indices with respect to a
+// particular dimension.
+func (self *Open) RefineToward(indices []uint64, i uint) []uint64 {
+	return openRefine(indices, self.nd, i, i+1)
+}
+
 func openRefine(indices []uint64, nd, fd, ld uint) []uint64 {
 	nn := uint(len(indices)) / nd
 
