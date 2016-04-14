@@ -48,9 +48,9 @@ func (self *Interpolator) Compute(target external.Target,
 	for s := strategy.First(); strategy.Check(s, surrogate); s = strategy.Next(s, surrogate) {
 		s.Volumes = internal.Measure(self.basis, s.Indices, ni)
 		s.Nodes = self.grid.Compute(s.Indices)
-		s.Observations = external.Invoke(target, s.Nodes, ni, no)
-		s.Predictions = internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, s.Nodes, ni, no)
-		s.Surpluses = internal.Subtract(s.Observations, s.Predictions)
+		s.Values = external.Invoke(target, s.Nodes, ni, no)
+		s.Estimates = internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, s.Nodes, ni, no)
+		s.Surpluses = internal.Subtract(s.Values, s.Estimates)
 		s.Scores = score(strategy, s, ni, no)
 		surrogate.Push(s.Indices, s.Surpluses, s.Volumes)
 	}
@@ -71,7 +71,7 @@ func score(strategy external.Strategy, state *external.State, ni, no uint) []flo
 			scores = append(scores, strategy.Score(&external.Element{
 				Index:   state.Indices[j*ni : (j+1)*ni],
 				Volume:  state.Volumes[j],
-				Value:   state.Observations[j*no : (j+1)*no],
+				Value:   state.Values[j*no : (j+1)*no],
 				Surplus: state.Surpluses[j*no : (j+1)*no],
 			}))
 		}

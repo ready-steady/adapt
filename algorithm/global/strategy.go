@@ -138,5 +138,5 @@ func (self *Strategy) consume(state *external.State) {
 		o += count
 	}
 
-	self.threshold.Update(state.Observations)
+	self.threshold.Update(state.Values)
 }
