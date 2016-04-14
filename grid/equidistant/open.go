@@ -29,10 +29,13 @@ func (_ *Open) Compute(indices []uint64) []float64 {
 
 // Refine returns the child indices of a set of indices.
 func (self *Open) Refine(indices []uint64) []uint64 {
-	nd := self.nd
+	return openRefine(indices, self.nd, 0, self.nd)
+}
+
+func openRefine(indices []uint64, nd, fd, ld uint) []uint64 {
 	nn := uint(len(indices)) / nd
 
-	children := make([]uint64, 2*nn*nd*nd)
+	children := make([]uint64, 2*nn*nd*(ld-fd))
 
 	nc := uint(0)
 	push := func(p, d uint, level, order uint64) {
@@ -45,7 +48,7 @@ func (self *Open) Refine(indices []uint64) []uint64 {
 	}
 
 	for i := uint(0); i < nn; i++ {
-		for j := uint(0); j < nd; j++ {
+		for j := fd; j < ld; j++ {
 			level := internal.LEVEL_MASK & indices[i*nd+j]
 			order := indices[i*nd+j] >> internal.LEVEL_SIZE
 			push(i, j, level+1, 2*order)
@@ -53,5 +56,5 @@ func (self *Open) Refine(indices []uint64) []uint64 {
 		}
 	}
 
-	return children
+	return children[:nc*nd]
 }
