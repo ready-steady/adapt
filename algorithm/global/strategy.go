@@ -83,25 +83,24 @@ func (self *Strategy) Score(element *external.Element) float64 {
 	return internal.SumAbsolute(element.Surplus)
 }
 
-func (self *Strategy) Next(current *external.State,
-	_ *external.Surrogate) *external.State {
-
-	self.consume(current)
-
-	self.Active.Drop(self.k)
-	if len(self.Positions) == 0 {
-		return nil
+func (self *Strategy) Next(state *external.State, _ *external.Surrogate) *external.State {
+	for {
+		self.consume(state)
+		self.Active.Drop(self.k)
+		if len(self.Positions) == 0 {
+			return nil
+		}
+		self.k = internal.LocateMax(self.global, self.Positions)
+		if self.global[self.k] <= 0.0 {
+			return nil
+		}
+		state = &external.State{}
+		state.Lindices = self.Active.Next(self.k)
+		state.Indices, state.Counts = internal.Index(self.grid, state.Lindices, self.ni)
+		if len(state.Indices) > 0 {
+			return state
+		}
 	}
-	self.k = internal.LocateMax(self.global, self.Positions)
-	if self.global[self.k] <= 0.0 {
-		return nil
-	}
-
-	state := &external.State{}
-	state.Lindices = self.Active.Next(self.k)
-	state.Indices, state.Counts = internal.Index(self.grid, state.Lindices, self.ni)
-
-	return state
 }
 
 func (self *Strategy) consume(state *external.State) {
