@@ -27,6 +27,11 @@ func (_ *Open) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
+// Index returns the nodal indices of a set of level indices.
+func (self *Open) Index(lindices []uint64) []uint64 {
+	return index(lindices, openIndex, self.nd)
+}
+
 // Refine returns the child indices of a set of indices.
 func (self *Open) Refine(indices []uint64) []uint64 {
 	return openRefine(indices, self.nd, 0, self.nd)
@@ -63,4 +68,21 @@ func openRefine(indices []uint64, nd, fd, ld uint) []uint64 {
 	}
 
 	return children[:nc*nd]
+}
+
+func openIndex(level uint64) []uint64 {
+	if level>>internal.LEVEL_MASK != 0 {
+		panic(fmt.Sprintf("the level %d is too large", level))
+	}
+	switch level {
+	case 0:
+		return []uint64{0 | 0<<internal.LEVEL_SIZE}
+	default:
+		nn := uint(2) << uint(level-1)
+		indices := make([]uint64, nn)
+		for i := uint(0); i < nn; i++ {
+			indices[i] = level | uint64(2*i+1)<<internal.LEVEL_SIZE
+		}
+		return indices
+	}
 }

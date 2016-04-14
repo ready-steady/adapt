@@ -204,6 +204,39 @@ func TestOpenCompute2D(t *testing.T) {
 	assert.Equal(grid.Compute(internal.Compose(levels, orders)), nodes, t)
 }
 
+func TestOpenIndex1D(t *testing.T) {
+	cases := []struct {
+		level  uint64
+		levels []uint64
+		orders []uint64
+	}{
+		{
+			level:  0,
+			levels: []uint64{0},
+			orders: []uint64{0},
+		},
+		{
+			level:  1,
+			levels: []uint64{1, 1},
+			orders: []uint64{1, 3},
+		},
+		{
+			level:  2,
+			levels: []uint64{2, 2, 2, 2},
+			orders: []uint64{1, 3, 5, 7},
+		},
+		{
+			level:  3,
+			levels: []uint64{3, 3, 3, 3, 3, 3, 3, 3},
+			orders: []uint64{1, 3, 5, 7, 9, 11, 13, 15},
+		},
+	}
+
+	for _, c := range cases {
+		assert.Equal(openIndex(c.level), internal.Compose(c.levels, c.orders), t)
+	}
+}
+
 func TestOpenRefine1D(t *testing.T) {
 	grid := NewOpen(1)
 

@@ -31,6 +31,11 @@ func (_ *Closed) Compute(indices []uint64) []float64 {
 	return nodes
 }
 
+// Index returns the nodal indices of a set of level indices.
+func (self *Closed) Index(lindices []uint64) []uint64 {
+	return index(lindices, closedIndex, self.nd)
+}
+
 // Refine returns the child indices of a set of indices.
 func (self *Closed) Refine(indices []uint64) []uint64 {
 	return closedRefine(indices, self.nd, 0, self.nd)
@@ -40,11 +45,6 @@ func (self *Closed) Refine(indices []uint64) []uint64 {
 // particular dimension.
 func (self *Closed) RefineToward(indices []uint64, i uint) []uint64 {
 	return closedRefine(indices, self.nd, i, i+1)
-}
-
-// Index returns the nodal indices of a set of level indices.
-func (self *Closed) Index(lindices []uint64) []uint64 {
-	return index(lindices, closedIndex, self.nd)
 }
 
 func closedRefine(indices []uint64, nd, fd, ld uint) []uint64 {
