@@ -45,17 +45,14 @@ func (self *Interpolator) Compute(target external.Target,
 
 	ni, no := self.ni, self.no
 	surrogate := external.NewSurrogate(ni, no)
-	state := strategy.First()
-	for strategy.Check(state, surrogate) {
-		state.Volumes = internal.Measure(self.basis, state.Indices, ni)
-		state.Nodes = self.grid.Compute(state.Indices)
-		state.Observations = external.Invoke(target, state.Nodes, ni, no)
-		state.Predictions = internal.Approximate(self.basis, surrogate.Indices,
-			surrogate.Surpluses, state.Nodes, ni, no)
-		state.Surpluses = internal.Subtract(state.Observations, state.Predictions)
-		state.Scores = score(strategy, state, ni, no)
-		surrogate.Push(state.Indices, state.Surpluses, state.Volumes)
-		state = strategy.Next(state, surrogate)
+	for s := strategy.First(); strategy.Check(s, surrogate); s = strategy.Next(s, surrogate) {
+		s.Volumes = internal.Measure(self.basis, s.Indices, ni)
+		s.Nodes = self.grid.Compute(s.Indices)
+		s.Observations = external.Invoke(target, s.Nodes, ni, no)
+		s.Predictions = internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, s.Nodes, ni, no)
+		s.Surpluses = internal.Subtract(s.Observations, s.Predictions)
+		s.Scores = score(strategy, s, ni, no)
+		surrogate.Push(s.Indices, s.Surpluses, s.Volumes)
 	}
 	return surrogate
 }
