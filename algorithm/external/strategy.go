@@ -28,8 +28,8 @@ type Strategy interface {
 	// First returns the initial state of the first iteration.
 	First() *State
 
-	// Check returns true if the interpolation process should continue.
-	Check(*State, *Surrogate) bool
+	// Done returns true if the interpolation process should stop.
+	Done(*State, *Surrogate) bool
 
 	// Score assigns a score to an interpolation element.
 	Score(*Element) float64

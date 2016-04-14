@@ -68,9 +68,9 @@ func (self *Strategy) First() *external.State {
 	return state
 }
 
-func (self *Strategy) Check(_ *external.State, _ *external.Surrogate) bool {
+func (self *Strategy) Done(_ *external.State, _ *external.Surrogate) bool {
 	if self.k == ^uint(0) {
-		return true
+		return false
 	}
 	ng := uint(len(self.global))
 	total := 0.0
@@ -80,7 +80,7 @@ func (self *Strategy) Check(_ *external.State, _ *external.Surrogate) bool {
 		}
 		total += self.global[i]
 	}
-	return total > self.εt
+	return total <= self.εt
 }
 
 func (self *Strategy) Score(element *external.Element) float64 {

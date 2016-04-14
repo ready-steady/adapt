@@ -59,9 +59,9 @@ func (self *Strategy) First() *external.State {
 	return state
 }
 
-func (self *Strategy) Check(_ *external.State, _ *external.Surrogate) bool {
+func (self *Strategy) Done(_ *external.State, _ *external.Surrogate) bool {
 	if self.k == ^uint(0) {
-		return true
+		return false
 	}
 	no := self.no
 	nl := uint(len(self.local)) / no
@@ -72,11 +72,11 @@ func (self *Strategy) Check(_ *external.State, _ *external.Surrogate) bool {
 		}
 		for j := uint(0); j < no; j++ {
 			if self.local[i*no+j] > δ[j] {
-				return true
+				return false
 			}
 		}
 	}
-	return false
+	return true
 }
 
 func (self *Strategy) Score(element *external.Element) float64 {

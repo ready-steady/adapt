@@ -42,8 +42,8 @@ func (self *Strategy) First() *external.State {
 	}
 }
 
-func (self *Strategy) Check(state *external.State, _ *external.Surrogate) bool {
-	return state != nil && len(state.Indices) > 0
+func (self *Strategy) Done(state *external.State, _ *external.Surrogate) bool {
+	return state == nil || len(state.Indices) == 0
 }
 
 func (self *Strategy) Score(element *external.Element) float64 {
