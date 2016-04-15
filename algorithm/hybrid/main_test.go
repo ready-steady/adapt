@@ -9,13 +9,13 @@ import (
 
 func TestBranin(t *testing.T) {
 	fixture := &fixtureBranin
-	interpolator, strategy := prepare(fixture)
+	algorithm, strategy := prepare(fixture)
 
-	surrogate := interpolator.Compute(fixture.target, strategy)
+	surrogate := algorithm.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 	assert.Equal(internal.IsUnique(surrogate.Indices, surrogate.Inputs), true, t)
 	assert.Equal(internal.IsAdmissible(surrogate.Indices, surrogate.Inputs), true, t)
 
-	values := interpolator.Evaluate(surrogate, fixture.points)
+	values := algorithm.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 0.1, t)
 }

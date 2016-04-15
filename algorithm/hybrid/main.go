@@ -7,6 +7,11 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
+// Algorithm is the interpolation algorithm.
+type Algorithm struct {
+	global.Algorithm
+}
+
 // Basis is an interpolation basis.
 type Basis interface {
 	global.Basis
@@ -18,12 +23,7 @@ type Grid interface {
 	internal.GridRefinerToward
 }
 
-// Interpolator is an instance of the algorithm.
-type Interpolator struct {
-	global.Interpolator
-}
-
 // New creates an interpolator.
-func New(inputs, outputs uint, grid Grid, basis Basis) *Interpolator {
-	return &Interpolator{*global.New(inputs, outputs, grid, basis)}
+func New(inputs, outputs uint, grid Grid, basis Basis) *Algorithm {
+	return &Algorithm{*global.New(inputs, outputs, grid, basis)}
 }

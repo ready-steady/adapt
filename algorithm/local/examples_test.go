@@ -9,7 +9,7 @@ import (
 )
 
 // Interpolation in one dimension.
-func ExampleInterpolator_step() {
+func ExampleAlgorithm_step() {
 	const (
 		inputs          = 1
 		outputs         = 1
@@ -21,10 +21,10 @@ func ExampleInterpolator_step() {
 
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
-	interpolator := New(inputs, outputs, grid, basis)
+	algorithm := New(inputs, outputs, grid, basis)
 	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
 
-	surrogate := interpolator.Compute(func(x, y []float64) {
+	surrogate := algorithm.Compute(func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1.0
 		} else {
@@ -39,7 +39,7 @@ func ExampleInterpolator_step() {
 }
 
 // Interpolation in two dimensions.
-func ExampleInterpolator_cube() {
+func ExampleAlgorithm_cube() {
 	const (
 		inputs          = 2
 		outputs         = 1
@@ -51,10 +51,10 @@ func ExampleInterpolator_cube() {
 
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
-	interpolator := New(inputs, outputs, grid, basis)
+	algorithm := New(inputs, outputs, grid, basis)
 	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
 
-	surrogate := interpolator.Compute(func(x, y []float64) {
+	surrogate := algorithm.Compute(func(x, y []float64) {
 		if math.Abs(2.0*x[0]-1.0) < 0.45 && math.Abs(2.0*x[1]-1.0) < 0.45 {
 			y[0] = 1.0
 		} else {

@@ -7,6 +7,15 @@ import (
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
+// Algorithm is the interpolation algorithm.
+type Algorithm struct {
+	ni uint
+	no uint
+
+	grid  Grid
+	basis Basis
+}
+
 // Basis is an interpolation basis.
 type Basis interface {
 	internal.BasisComputer
@@ -19,18 +28,9 @@ type Grid interface {
 	internal.GridRefiner
 }
 
-// Interpolator is an instance of the algorithm.
-type Interpolator struct {
-	ni uint
-	no uint
-
-	grid  Grid
-	basis Basis
-}
-
 // New creates an interpolator.
-func New(inputs, outputs uint, grid Grid, basis Basis) *Interpolator {
-	return &Interpolator{
+func New(inputs, outputs uint, grid Grid, basis Basis) *Algorithm {
+	return &Algorithm{
 		ni: inputs,
 		no: outputs,
 
@@ -40,7 +40,7 @@ func New(inputs, outputs uint, grid Grid, basis Basis) *Interpolator {
 }
 
 // Compute constructs an interpolant for a function.
-func (self *Interpolator) Compute(target external.Target,
+func (self *Algorithm) Compute(target external.Target,
 	strategy external.Strategy) *external.Surrogate {
 
 	ni, no := self.ni, self.no
@@ -58,7 +58,7 @@ func (self *Interpolator) Compute(target external.Target,
 }
 
 // Evaluate computes the values of an interpolant at a set of points.
-func (self *Interpolator) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
+func (self *Algorithm) Evaluate(surrogate *external.Surrogate, points []float64) []float64 {
 	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
 		surrogate.Inputs, surrogate.Outputs)
 }

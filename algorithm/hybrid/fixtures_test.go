@@ -17,7 +17,7 @@ type fixture struct {
 	values []float64
 }
 
-func prepare(fixture *fixture) (*Interpolator, external.Strategy) {
+func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 	const (
 		minLevel   = 1
 		maxLevel   = 10
@@ -29,10 +29,10 @@ func prepare(fixture *fixture) (*Interpolator, external.Strategy) {
 
 	grid := equidistant.NewClosed(ni)
 	basis := polynomial.NewClosed(ni, 1)
-	interpolator := New(ni, no, grid, basis)
+	algorithm := New(ni, no, grid, basis)
 	strategy := NewStrategy(ni, no, minLevel, maxLevel, localError, totalError, grid)
 
-	return interpolator, strategy
+	return algorithm, strategy
 }
 
 var fixtureBranin = fixture{

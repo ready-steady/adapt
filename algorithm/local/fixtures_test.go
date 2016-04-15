@@ -36,7 +36,7 @@ func (self *fixture) initialize() {
 	self.surrogate.Indices = internal.Compose(self.levels, self.orders)
 }
 
-func prepare(fixture *fixture) (*Interpolator, external.Strategy) {
+func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 	const (
 		minLevel   = 1
 		maxLevel   = 10
@@ -56,13 +56,13 @@ func prepare(fixture *fixture) (*Interpolator, external.Strategy) {
 		basis = polynomial.NewClosed(ni, 1)
 	}
 
-	interpolator := New(ni, no, grid, basis)
+	algorithm := New(ni, no, grid, basis)
 	strategy := NewStrategy(ni, no, minLevel, maxLevel, localError, grid)
 
 	if fixture.strategy == nil {
-		return interpolator, strategy
+		return algorithm, strategy
 	} else {
-		return interpolator, fixture.strategy(strategy)
+		return algorithm, fixture.strategy(strategy)
 	}
 }
 

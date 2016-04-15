@@ -9,29 +9,29 @@ import (
 
 func BenchmarkComputeHat(b *testing.B) {
 	fixture := &fixtureHat
-	interpolator, strategy := prepare(fixture)
+	algorithm, strategy := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target, strategy)
+		algorithm.Compute(fixture.target, strategy)
 	}
 }
 
 func BenchmarkComputeCube(b *testing.B) {
 	fixture := &fixtureCube
-	interpolator, strategy := prepare(fixture)
+	algorithm, strategy := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target, strategy)
+		algorithm.Compute(fixture.target, strategy)
 	}
 }
 
 func BenchmarkComputeBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator, strategy := prepare(fixture)
+	algorithm, strategy := prepare(fixture)
 	strategy.(*Strategy).lmax = 9
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target, strategy)
+		algorithm.Compute(fixture.target, strategy)
 	}
 }
 
@@ -48,51 +48,51 @@ func BenchmarkComputeMany(b *testing.B) {
 			Outputs: outputs,
 		},
 	}
-	interpolator, strategy := prepare(fixture)
+	algorithm, strategy := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Compute(fixture.target, strategy)
+		algorithm.Compute(fixture.target, strategy)
 	}
 }
 
 func BenchmarkEvaluateHat(b *testing.B) {
 	fixture := &fixtureHat
-	interpolator, strategy := prepare(fixture)
-	surrogate := interpolator.Compute(fixture.target, strategy)
+	algorithm, strategy := prepare(fixture)
+	surrogate := algorithm.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Evaluate(surrogate, points)
+		algorithm.Evaluate(surrogate, points)
 	}
 }
 
 func BenchmarkEvaluateCube(b *testing.B) {
 	fixture := &fixtureCube
-	interpolator, strategy := prepare(fixture)
+	algorithm, strategy := prepare(fixture)
 	strategy.(*Strategy).lmax = 9
-	surrogate := interpolator.Compute(fixture.target, strategy)
+	surrogate := algorithm.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Evaluate(surrogate, points)
+		algorithm.Evaluate(surrogate, points)
 	}
 }
 
 func BenchmarkEvaluateBox(b *testing.B) {
 	fixture := &fixtureBox
-	interpolator, strategy := prepare(fixture)
+	algorithm, strategy := prepare(fixture)
 	strategy.(*Strategy).lmax = 9
-	surrogate := interpolator.Compute(fixture.target, strategy)
+	surrogate := algorithm.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Evaluate(surrogate, points)
+		algorithm.Evaluate(surrogate, points)
 	}
 }
 
@@ -110,14 +110,14 @@ func BenchmarkEvaluateMany(b *testing.B) {
 		},
 	}
 
-	interpolator, strategy := prepare(fixture)
-	surrogate := interpolator.Compute(fixture.target, strategy)
+	algorithm, strategy := prepare(fixture)
+	surrogate := algorithm.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		interpolator.Evaluate(surrogate, points)
+		algorithm.Evaluate(surrogate, points)
 	}
 }
 
