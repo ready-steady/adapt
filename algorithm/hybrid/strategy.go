@@ -146,7 +146,7 @@ func (self *Strategy) consume(state *external.State) {
 }
 
 func (self *Strategy) index(lindices []uint64, surrogate *external.Surrogate) ([]uint64, []uint) {
-	ni := self.ni
+	ni, nl := self.ni, uint(len(self.local))
 	nn := uint(len(lindices)) / ni
 
 	indices, counts := []uint64(nil), make([]uint, nn)
@@ -165,12 +165,9 @@ func (self *Strategy) index(lindices []uint64, surrogate *external.Surrogate) ([
 				continue
 			}
 
-			var from, till uint
-			from = self.offset[k]
+			from, till := self.offset[k], nl
 			if uint(len(self.offset)) > k+1 {
 				till = self.offset[k+1]
-			} else {
-				till = uint(len(self.local))
 			}
 
 			for k := from; k < till; k++ {
