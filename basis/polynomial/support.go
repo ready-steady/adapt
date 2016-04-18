@@ -1,6 +1,8 @@
 package polynomial
 
 import (
+	"math"
+
 	"github.com/ready-steady/quadrature"
 )
 
@@ -9,6 +11,11 @@ var ruleCache map[uint]*rule = make(map[uint]*rule)
 type rule struct {
 	x []float64
 	w []float64
+}
+
+func equal(one, two float64) bool {
+	const ε = 1e-14 // ~= 2^(-46)
+	return one == two || math.Abs(one-two) < ε
 }
 
 func getRule(order uint) *rule {
