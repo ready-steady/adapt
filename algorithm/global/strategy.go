@@ -18,10 +18,10 @@ type Strategy struct {
 	ni uint
 	no uint
 
+	grid Grid
+
 	lmin uint
 	lmax uint
-
-	grid Grid
 
 	k uint
 
@@ -32,8 +32,8 @@ type Strategy struct {
 }
 
 // NewStrategy creates a basic strategy.
-func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
-	absoluteError, relativeError float64, grid Grid) *Strategy {
+func NewStrategy(inputs, outputs uint, grid Grid, minLevel, maxLevel uint,
+	absoluteError, relativeError float64) *Strategy {
 
 	return &Strategy{
 		Active: internal.NewActive(inputs),
@@ -41,10 +41,10 @@ func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
 		ni: inputs,
 		no: outputs,
 
+		grid: grid,
+
 		lmin: minLevel,
 		lmax: maxLevel,
-
-		grid: grid,
 
 		k: ^uint(0),
 

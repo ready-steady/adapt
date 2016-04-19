@@ -10,27 +10,28 @@ type Strategy struct {
 	ni uint
 	no uint
 
+	grid Grid
+
 	lmin uint
 	lmax uint
 	εl   float64
 
-	grid   Grid
 	unique *internal.Unique
 }
 
 // NewStrategy creates a basic strategy.
-func NewStrategy(inputs, outputs, minLevel, maxLevel uint,
-	localError float64, grid Grid) *Strategy {
+func NewStrategy(inputs, outputs uint, grid Grid, minLevel, maxLevel uint,
+	localError float64) *Strategy {
 
 	return &Strategy{
 		ni: inputs,
 		no: outputs,
 
+		grid: grid,
+
 		lmin: minLevel,
 		lmax: maxLevel,
 		εl:   localError,
-
-		grid: grid,
 
 		unique: internal.NewUnique(inputs),
 	}

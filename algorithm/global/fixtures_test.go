@@ -30,7 +30,7 @@ func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 	grid := equidistant.NewClosed(ni)
 	basis := polynomial.NewClosed(ni, 1)
 	algorithm := New(ni, no, grid, basis)
-	strategy := NewStrategy(ni, no, minLevel, maxLevel, absoluteError, relativeError, grid)
+	strategy := NewStrategy(ni, no, grid, minLevel, maxLevel, absoluteError, relativeError)
 
 	return algorithm, strategy
 }

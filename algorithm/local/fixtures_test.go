@@ -57,7 +57,7 @@ func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 	}
 
 	algorithm := New(ni, no, grid, basis)
-	strategy := NewStrategy(ni, no, minLevel, maxLevel, localError, grid)
+	strategy := NewStrategy(ni, no, grid, minLevel, maxLevel, localError)
 
 	if fixture.strategy == nil {
 		return algorithm, strategy

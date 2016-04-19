@@ -22,7 +22,7 @@ func ExampleAlgorithm_step() {
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
 	algorithm := New(inputs, outputs, grid, basis)
-	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
+	strategy := NewStrategy(inputs, outputs, grid, minLevel, maxLevel, localError)
 
 	surrogate := algorithm.Compute(func(x, y []float64) {
 		if x[0] <= 0.5 {
@@ -52,7 +52,7 @@ func ExampleAlgorithm_cube() {
 	grid := equidistant.NewClosed(inputs)
 	basis := polynomial.NewClosed(inputs, polynomialOrder)
 	algorithm := New(inputs, outputs, grid, basis)
-	strategy := NewStrategy(inputs, outputs, minLevel, maxLevel, localError, grid)
+	strategy := NewStrategy(inputs, outputs, grid, minLevel, maxLevel, localError)
 
 	surrogate := algorithm.Compute(func(x, y []float64) {
 		if math.Abs(2.0*x[0]-1.0) < 0.45 && math.Abs(2.0*x[1]-1.0) < 0.45 {
