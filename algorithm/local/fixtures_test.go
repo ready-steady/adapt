@@ -45,7 +45,10 @@ func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
-	var grid Grid
+	var grid interface {
+		Grid
+		Guide
+	}
 	var basis Basis
 	switch fixture.rule {
 	case "open":

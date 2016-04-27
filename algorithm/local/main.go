@@ -25,7 +25,6 @@ type Basis interface {
 // Grid is an interpolation grid.
 type Grid interface {
 	internal.GridComputer
-	internal.GridRefiner
 }
 
 // New creates an interpolator.

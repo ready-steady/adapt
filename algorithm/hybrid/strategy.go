@@ -18,7 +18,7 @@ type Strategy struct {
 	ni uint
 	no uint
 
-	grid Grid
+	guide Guide
 
 	lmin uint
 	lmax uint
@@ -36,8 +36,14 @@ type Strategy struct {
 	local  []float64
 }
 
+// Guide is a grid-refinement tool of a basic strategy.
+type Guide interface {
+	internal.GridIndexer
+	internal.GridRefinerToward
+}
+
 // NewStrategy creates a basic strategy.
-func NewStrategy(inputs, outputs uint, grid Grid, minLevel, maxLevel uint,
+func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	localError, totalError float64) *Strategy {
 
 	return &Strategy{
@@ -46,7 +52,7 @@ func NewStrategy(inputs, outputs uint, grid Grid, minLevel, maxLevel uint,
 		ni: inputs,
 		no: outputs,
 
-		grid: grid,
+		guide: guide,
 
 		lmin: minLevel,
 		lmax: maxLevel,
@@ -64,7 +70,7 @@ func NewStrategy(inputs, outputs uint, grid Grid, minLevel, maxLevel uint,
 func (self *Strategy) First() *external.State {
 	state := &external.State{}
 	state.Lindices = self.Active.First()
-	state.Indices, state.Counts = internal.Index(self.grid, state.Lindices, self.ni)
+	state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
 	return state
 }
 
@@ -174,7 +180,7 @@ func (self *Strategy) index(lindices []uint64, surrogate *external.Surrogate) ([
 				if self.local[k] < self.εl {
 					continue
 				}
-				indices = append(indices, self.unique.Distil(self.grid.RefineToward(
+				indices = append(indices, self.unique.Distil(self.guide.RefineToward(
 					surrogate.Indices[k*ni:(k+1)*ni], j))...)
 			}
 		}

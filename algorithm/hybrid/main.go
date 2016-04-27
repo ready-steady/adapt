@@ -4,7 +4,6 @@ package hybrid
 
 import (
 	"github.com/ready-steady/adapt/algorithm/global"
-	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
 // Algorithm is the interpolation algorithm.
@@ -20,7 +19,6 @@ type Basis interface {
 // Grid is an interpolation grid.
 type Grid interface {
 	global.Grid
-	internal.GridRefinerToward
 }
 
 // New creates an interpolator.

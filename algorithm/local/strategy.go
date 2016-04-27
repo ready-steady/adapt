@@ -10,7 +10,7 @@ type Strategy struct {
 	ni uint
 	no uint
 
-	grid Grid
+	guide Guide
 
 	lmin uint
 	lmax uint
@@ -19,15 +19,20 @@ type Strategy struct {
 	unique *internal.Unique
 }
 
+// Guide is a grid-refinement tool of a basic strategy.
+type Guide interface {
+	internal.GridRefiner
+}
+
 // NewStrategy creates a basic strategy.
-func NewStrategy(inputs, outputs uint, grid Grid, minLevel, maxLevel uint,
+func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	localError float64) *Strategy {
 
 	return &Strategy{
 		ni: inputs,
 		no: outputs,
 
-		grid: grid,
+		guide: guide,
 
 		lmin: minLevel,
 		lmax: maxLevel,
@@ -53,7 +58,7 @@ func (self *Strategy) Score(element *external.Element) float64 {
 
 func (self *Strategy) Next(state *external.State, _ *external.Surrogate) *external.State {
 	return &external.State{
-		Indices: self.unique.Distil(self.grid.Refine(filter(state.Indices,
+		Indices: self.unique.Distil(self.guide.Refine(filter(state.Indices,
 			state.Scores, self.lmin, self.lmax, self.εl, self.ni))),
 	}
 }
