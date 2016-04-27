@@ -27,7 +27,6 @@ func (self *Active) First() []uint64 {
 	self.Positions = map[uint]bool{0: true}
 	self.history = NewHistory(self.ni)
 	self.forward, self.backward = make(reference), make(reference)
-
 	return self.Indices
 }
 

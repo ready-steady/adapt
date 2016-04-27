@@ -142,9 +142,7 @@ func (self *Strategy) consume(state *external.State) {
 				local[o+j] = 0.0
 			}
 		} else {
-			for _, ε := range state.Scores[o:(o + count)] {
-				global[i] += ε
-			}
+			global[i] = internal.Max(state.Scores[o:(o + count)])
 		}
 		self.position[self.hash.Key(state.Lindices[i*ni:(i+1)*ni])] = ng + i
 		o += count

@@ -6,6 +6,10 @@ import (
 	"github.com/ready-steady/adapt/internal"
 )
 
+var (
+	infinity = math.Inf(1.0)
+)
+
 // Average returns the average value of a vector’s elements.
 func Average(data []float64) float64 {
 	return Sum(data) / float64(len(data))
@@ -71,32 +75,41 @@ func LocateMax(data []float64, set map[uint]bool) uint {
 }
 
 // Levelize returns the uniform norms of the levels of a set of indices.
-func Levelize(indices []uint64, ni uint) []uint64 {
+func Levelize(indices []uint64, ni uint) (result []uint64) {
 	nn := uint(len(indices)) / ni
-	levels := make([]uint64, nn)
+	result = make([]uint64, nn)
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < ni; j++ {
-			levels[i] += internal.LEVEL_MASK & indices[i*ni+j]
+			result[i] += internal.LEVEL_MASK & indices[i*ni+j]
 		}
 	}
-	return levels
+	return
+}
+
+// Max returns the maximum value across a vector’s elements.
+func Max(data []float64) (result float64) {
+	result = -infinity
+	for i, n := uint(0), uint(len(data)); i < n; i++ {
+		result = math.Max(result, data[i])
+	}
+	return
 }
 
 // MaxAbsolute returns the maximum absolute value across a vector’s elements.
-func MaxAbsolute(data []float64) (value float64) {
+func MaxAbsolute(data []float64) (result float64) {
 	for i, n := uint(0), uint(len(data)); i < n; i++ {
-		value = math.Max(value, math.Abs(data[i]))
+		result = math.Max(result, math.Abs(data[i]))
 	}
 	return
 }
 
 // Subtract returns the difference between two vectors.
-func Subtract(minuend, subtrahend []float64) []float64 {
-	difference := make([]float64, len(minuend))
+func Subtract(minuend, subtrahend []float64) (result []float64) {
+	result = make([]float64, len(minuend))
 	for i := range minuend {
-		difference[i] = minuend[i] - subtrahend[i]
+		result[i] = minuend[i] - subtrahend[i]
 	}
-	return difference
+	return
 }
 
 // Sum returns the sum of a vector’s elements.
