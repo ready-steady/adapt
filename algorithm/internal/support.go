@@ -53,7 +53,7 @@ func IsAdmissible(indices []uint64, ni uint) bool {
 func IsUnique(indices []uint64, ni uint) bool {
 	unique := NewUnique(ni)
 
-	indices = append([]uint64{}, indices...)
+	indices = append([]uint64(nil), indices...)
 	before := uint(len(indices)) / ni
 
 	indices = unique.Distil(indices)
