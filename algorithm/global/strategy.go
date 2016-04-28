@@ -72,12 +72,11 @@ func (self *Strategy) Done(_ *external.State, _ *external.Surrogate) bool {
 	nl := uint(len(self.local)) / no
 	δ := self.threshold.Values
 	for i := range self.Positions {
-		if i >= nl {
-			continue
-		}
-		for j := uint(0); j < no; j++ {
-			if self.local[i*no+j] > δ[j] {
-				return false
+		if i < nl {
+			for j := uint(0); j < no; j++ {
+				if self.local[i*no+j] > δ[j] {
+					return false
+				}
 			}
 		}
 	}

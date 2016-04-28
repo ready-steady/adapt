@@ -78,15 +78,16 @@ func (self *Strategy) Done(_ *external.State, _ *external.Surrogate) bool {
 	if self.k == ^uint(0) {
 		return false
 	}
-	ng := uint(len(self.global))
-	total := 0.0
+	total, ng := 0.0, uint(len(self.global))
 	for i := range self.Positions {
-		if i >= ng {
-			continue
+		if i < ng {
+			total += self.global[i]
+			if total > self.εt {
+				return false
+			}
 		}
-		total += self.global[i]
 	}
-	return total <= self.εt
+	return true
 }
 
 func (self *Strategy) Score(element *external.Element) float64 {
