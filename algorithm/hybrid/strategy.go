@@ -176,11 +176,10 @@ func (self *Strategy) index(lindices []uint64, surrogate *external.Surrogate) ([
 			}
 
 			for k := from; k < till; k++ {
-				if self.local[k] < self.εl {
-					continue
+				if self.local[k] >= self.εl {
+					indices = append(indices, self.unique.Distil(self.guide.RefineToward(
+						surrogate.Indices[k*ni:(k+1)*ni], j))...)
 				}
-				indices = append(indices, self.unique.Distil(self.guide.RefineToward(
-					surrogate.Indices[k*ni:(k+1)*ni], j))...)
 			}
 		}
 		counts[i] = uint(len(indices))/ni - o
