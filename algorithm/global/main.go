@@ -69,6 +69,7 @@ func score(strategy external.Strategy, state *external.State, ni, no uint) []flo
 		for m := j + state.Counts[i]; j < m; j++ {
 			scores = append(scores, strategy.Score(&external.Element{
 				Index:   state.Indices[j*ni : (j+1)*ni],
+				Node:    state.Nodes[j*ni : (j+1)*ni],
 				Volume:  state.Volumes[j],
 				Value:   state.Values[j*no : (j+1)*no],
 				Surplus: state.Surpluses[j*no : (j+1)*no],
