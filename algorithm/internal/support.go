@@ -16,13 +16,8 @@ func Average(data []float64) float64 {
 }
 
 // IsAdmissible checks if a set of indices is admissible.
-func IsAdmissible(indices []uint64, ni uint) bool {
+func IsAdmissible(indices []uint64, ni uint, parent func(uint64, uint64) (uint64, uint64)) bool {
 	nn := uint(len(indices)) / ni
-
-	indices = append([]uint64(nil), indices...)
-	for i := range indices {
-		indices[i] = internal.LEVEL_MASK & indices[i]
-	}
 
 	hash := NewHash(ni)
 	mapping := make(map[string]bool)
@@ -32,17 +27,25 @@ func IsAdmissible(indices []uint64, ni uint) bool {
 	}
 
 	for i := uint(0); i < nn; i++ {
+		root, found := true, false
 		index := indices[i*ni : (i+1)*ni]
-		for j := uint(0); j < ni; j++ {
-			if index[j] == 0 {
+		for j := uint(0); !found && j < ni; j++ {
+			level := internal.LEVEL_MASK & index[j]
+			if level == 0 {
 				continue
+			} else {
+				root = false
 			}
-			index[j] -= 1
-			_, ok := mapping[hash.Key(index)]
-			index[j] += 1
-			if !ok {
-				return false
-			}
+
+			order := index[j] >> internal.LEVEL_SIZE
+			plevel, porder := parent(level, order)
+
+			index[j] = porder<<internal.LEVEL_SIZE | plevel
+			_, found = mapping[hash.Key(index)]
+			index[j] = order<<internal.LEVEL_SIZE | level
+		}
+		if !found && !root {
+			return false
 		}
 	}
 

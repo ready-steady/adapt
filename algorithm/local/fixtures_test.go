@@ -18,7 +18,8 @@ func init() {
 }
 
 type fixture struct {
-	rule string
+	rule   string
+	parent func(uint64, uint64) (uint64, uint64)
 
 	target   external.Target
 	strategy func(external.Strategy) external.Strategy
@@ -34,6 +35,15 @@ type fixture struct {
 
 func (self *fixture) initialize() {
 	self.surrogate.Indices = internal.Compose(self.levels, self.orders)
+
+	switch self.rule {
+	case "closed":
+		self.parent = equidistant.ClosedParent
+	case "open":
+		self.parent = equidistant.OpenParent
+	default:
+		panic("the rule is unknown")
+	}
 }
 
 func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
@@ -51,12 +61,14 @@ func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 	}
 	var basis Basis
 	switch fixture.rule {
+	case "closed":
+		grid = equidistant.NewClosed(ni)
+		basis = polynomial.NewClosed(ni, 1)
 	case "open":
 		grid = equidistant.NewOpen(ni)
 		basis = polynomial.NewOpen(ni, 1)
 	default:
-		grid = equidistant.NewClosed(ni)
-		basis = polynomial.NewClosed(ni, 1)
+		panic("the rule is unknown")
 	}
 
 	algorithm := New(ni, no, grid, basis)
@@ -70,6 +82,8 @@ func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 }
 
 var fixtureStep = fixture{
+	rule: "closed",
+
 	target: func(x, y []float64) {
 		if x[0] <= 0.5 {
 			y[0] = 1.0
@@ -100,6 +114,8 @@ var fixtureStep = fixture{
 }
 
 var fixtureHat = fixture{
+	rule: "closed",
+
 	target: func(x, y []float64) {
 		z := 5.0*x[0] - 1.0
 
@@ -318,6 +334,8 @@ var fixtureHat = fixture{
 }
 
 var fixtureCube = fixture{
+	rule: "closed",
+
 	target: func(x, y []float64) {
 		x0, x1 := 2.0*x[0]-1.0, 2.0*x[1]-1.0
 		x02, x12 := x0*x0, x1*x1
@@ -572,6 +590,8 @@ var fixtureCube = fixture{
 }
 
 var fixtureBox = fixture{
+	rule: "closed",
+
 	target: func(x, y []float64) {
 		if x[0]+x[1] > 0.5 {
 			y[0] = 1.0
@@ -742,6 +762,8 @@ func (self *kraichnanOrszagStrategy) Score(element *external.Element) float64 {
 }
 
 var fixtureKraichnanOrszag = fixture{
+	rule: "closed",
+
 	target: kraichnanOrszagTarget,
 
 	strategy: func(strategy external.Strategy) external.Strategy {

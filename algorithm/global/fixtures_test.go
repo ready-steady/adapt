@@ -8,13 +8,29 @@ import (
 	"github.com/ready-steady/adapt/grid/equidistant"
 )
 
+func init() {
+	fixtureBranin.initialize()
+}
+
 type fixture struct {
+	rule   string
+	parent func(uint64, uint64) (uint64, uint64)
+
 	target external.Target
 
 	surrogate *external.Surrogate
 
 	points []float64
 	values []float64
+}
+
+func (self *fixture) initialize() {
+	switch self.rule {
+	case "closed":
+		self.parent = equidistant.ClosedParent
+	default:
+		panic("the rule is unknown")
+	}
 }
 
 func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
@@ -27,8 +43,19 @@ func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
-	grid := equidistant.NewClosed(ni)
-	basis := polynomial.NewClosed(ni, 1)
+	var grid interface {
+		Grid
+		Guide
+	}
+	var basis Basis
+	switch fixture.rule {
+	case "closed":
+		grid = equidistant.NewClosed(ni)
+		basis = polynomial.NewClosed(ni, 1)
+	default:
+		panic("the rule is unknown")
+	}
+
 	algorithm := New(ni, no, grid, basis)
 	strategy := NewStrategy(ni, no, grid, minLevel, maxLevel, absoluteError, relativeError)
 
@@ -36,6 +63,8 @@ func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
 }
 
 var fixtureBranin = fixture{
+	rule: "closed",
+
 	target: func(point, value []float64) {
 		x, y := 15.0*point[0]-5.0, 15.0*point[1]
 		z := 5.0/math.Pi*x - 5.1/(4.0*math.Pi*math.Pi)*x*x + y - 6.0
