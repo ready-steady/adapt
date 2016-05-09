@@ -47,8 +47,8 @@ func (self *Closed) RefineToward(indices []uint64, i uint) []uint64 {
 	return closedRefine(indices, self.nd, i, i+1)
 }
 
-// ClosedNode returns the node corresponding to a one-dimensional index.
-func ClosedNode(level, order uint64) (x, h float64) {
+// ClosedCompute returns the node corresponding to a one-dimensional index.
+func ClosedCompute(level, order uint64) (x, h float64) {
 	if level == 0 {
 		x, h = 0.5, 0.5
 	} else {

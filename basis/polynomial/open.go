@@ -61,7 +61,7 @@ func openCompute(level, order uint64, x float64) float64 {
 		}
 		return x/h - left
 	default:
-		xi, h := equidistant.OpenNode(level, order)
+		xi, h := equidistant.OpenCompute(level, order)
 		Δ := math.Abs(x - xi)
 		if Δ >= h {
 			return 0.0
