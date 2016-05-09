@@ -1,11 +1,11 @@
-language: go
 sudo: false
 
-branches:
-  only:
-    - master
+language: go
+go:
+  - 1.6
 
-install: go get -t ./...
+install:
+  - go get -t ./...
 
 script:
   - go test -v ./...
