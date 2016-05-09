@@ -20,7 +20,7 @@ func NewOpen(dimensions uint) *Open {
 func (_ *Open) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		level := internal.LEVEL_MASK & indices[i]
+		level := indices[i] & internal.LEVEL_MASK
 		order := indices[i] >> internal.LEVEL_SIZE
 		nodes[i] = float64(order+1) / float64(uint64(2)<<level)
 	}
@@ -84,7 +84,7 @@ func openRefine(indices []uint64, nd, fd, ld uint) []uint64 {
 
 	for i := uint(0); i < nn; i++ {
 		for j := fd; j < ld; j++ {
-			level := internal.LEVEL_MASK & indices[i*nd+j]
+			level := indices[i*nd+j] & internal.LEVEL_MASK
 			order := indices[i*nd+j] >> internal.LEVEL_SIZE
 			push(i, j, level+1, 2*order)
 			push(i, j, level+1, 2*order+2)

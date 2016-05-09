@@ -22,7 +22,7 @@ func NewClosed(dimensions uint, power uint) *Closed {
 func (self *Closed) Compute(index []uint64, point []float64) float64 {
 	nd, np, value := self.nd, self.np, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= closedCompute(internal.LEVEL_MASK&index[i],
+		value *= closedCompute(index[i]&internal.LEVEL_MASK,
 			index[i]>>internal.LEVEL_SIZE, np, point[i])
 	}
 	return value
@@ -32,7 +32,7 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 func (self *Closed) Integrate(index []uint64) float64 {
 	nd, np, value := self.nd, self.np, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= closedIntegrate(internal.LEVEL_MASK&index[i],
+		value *= closedIntegrate(index[i]&internal.LEVEL_MASK,
 			index[i]>>internal.LEVEL_SIZE, np)
 	}
 	return value

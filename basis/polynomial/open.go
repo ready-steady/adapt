@@ -24,7 +24,7 @@ func NewOpen(dimensions, power uint) *Open {
 func (self *Open) Compute(index []uint64, point []float64) float64 {
 	nd, value := self.nd, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= openCompute(internal.LEVEL_MASK&index[i],
+		value *= openCompute(index[i]&internal.LEVEL_MASK,
 			index[i]>>internal.LEVEL_SIZE, point[i])
 	}
 	return value
@@ -34,7 +34,7 @@ func (self *Open) Compute(index []uint64, point []float64) float64 {
 func (self *Open) Integrate(index []uint64) float64 {
 	nd, value := self.nd, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= openIntegrate(internal.LEVEL_MASK&index[i],
+		value *= openIntegrate(index[i]&internal.LEVEL_MASK,
 			index[i]>>internal.LEVEL_SIZE)
 	}
 	return value

@@ -20,7 +20,7 @@ func NewClosed(dimensions uint) *Closed {
 func (_ *Closed) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
-		level := internal.LEVEL_MASK & indices[i]
+		level := indices[i] & internal.LEVEL_MASK
 		if level == 0 {
 			nodes[i] = 0.5
 		} else {
@@ -116,7 +116,7 @@ func closedRefine(indices []uint64, nd, fd, ld uint) []uint64 {
 
 	for i := uint(0); i < nn; i++ {
 		for j := fd; j < ld; j++ {
-			level := internal.LEVEL_MASK & indices[i*nd+j]
+			level := indices[i*nd+j] & internal.LEVEL_MASK
 
 			if level == 0 {
 				push(i, j, 1, 0)

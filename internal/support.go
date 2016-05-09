@@ -13,7 +13,7 @@ func Compose(levels []uint64, orders []uint64) (indices []uint64) {
 func Decompose(indices []uint64) (levels []uint64, orders []uint64) {
 	levels, orders = make([]uint64, len(indices)), make([]uint64, len(indices))
 	for i := range indices {
-		levels[i], orders[i] = LEVEL_MASK&indices[i], indices[i]>>LEVEL_SIZE
+		levels[i], orders[i] = indices[i]&LEVEL_MASK, indices[i]>>LEVEL_SIZE
 	}
 	return
 }
