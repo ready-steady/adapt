@@ -47,6 +47,28 @@ func (self *Closed) RefineToward(indices []uint64, i uint) []uint64 {
 	return closedRefine(indices, self.nd, i, i+1)
 }
 
+// ClosedParent returns the parent index of a one-dimensional index.
+func ClosedParent(level, order uint64) (uint64, uint64) {
+	switch level {
+	case 0:
+		panic("the root does not have a parent")
+	case 1:
+		level = 0
+		order = 0
+	case 2:
+		level = 1
+		order -= 1
+	default:
+		level -= 1
+		if ((order-1)/2)%2 == 0 {
+			order = (order + 1) / 2
+		} else {
+			order = (order - 1) / 2
+		}
+	}
+	return level, order
+}
+
 func closedIndex(level uint64) []uint64 {
 	if level>>internal.LEVEL_SIZE != 0 {
 		panic(fmt.Sprintf("the level %d is too large", level))

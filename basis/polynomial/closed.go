@@ -3,6 +3,7 @@ package polynomial
 import (
 	"math"
 
+	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/adapt/internal"
 )
 
@@ -74,7 +75,7 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 
 	// Find the rest of the needed ancestors.
 	for power > 0 {
-		level, order = closedParent(level, order)
+		level, order = equidistant.ClosedParent(level, order)
 		xj, _ := closedNode(level, order)
 		if equal(xj, xl) || equal(xj, xr) {
 			continue
@@ -122,25 +123,4 @@ func closedNode(level, order uint64) (x, h float64) {
 		x = float64(order) * h
 	}
 	return
-}
-
-func closedParent(level, order uint64) (uint64, uint64) {
-	switch level {
-	case 0:
-		panic("the root does not have a parent")
-	case 1:
-		level = 0
-		order = 0
-	case 2:
-		level = 1
-		order -= 1
-	default:
-		level -= 1
-		if ((order-1)/2)%2 == 0 {
-			order = (order + 1) / 2
-		} else {
-			order = (order - 1) / 2
-		}
-	}
-	return level, order
 }

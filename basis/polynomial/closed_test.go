@@ -21,25 +21,6 @@ func BenchmarkClosedCompute3(b *testing.B) {
 	benchmarkClosedCompute(3, b)
 }
 
-func benchmarkClosedCompute(power uint, b *testing.B) {
-	const (
-		nd = 10
-		ns = 100000
-	)
-
-	basis := NewClosed(nd, power)
-	indices := generateIndices(nd, ns, grid.NewClosed(nd).Refine)
-	points := generatePoints(nd, ns, indices, closedNode)
-
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		for j := 0; j < ns; j++ {
-			basis.Compute(indices[j*nd:(j+1)*nd], points[j*nd:(j+1)*nd])
-		}
-	}
-}
-
 func TestClosedCompute1D1P(t *testing.T) {
 	basis := NewClosed(1, 1)
 
@@ -148,16 +129,21 @@ func TestClosedIntegrate(t *testing.T) {
 	}
 }
 
-func TestClosedParent(t *testing.T) {
-	childLevels := []uint64{1, 1, 2, 2, 3, 3, 3, 3}
-	childOrders := []uint64{0, 2, 1, 3, 1, 3, 5, 7}
+func benchmarkClosedCompute(power uint, b *testing.B) {
+	const (
+		nd = 10
+		ns = 100000
+	)
 
-	parentLevels := []uint64{0, 0, 1, 1, 2, 2, 2, 2}
-	parentOrders := []uint64{0, 0, 0, 2, 1, 1, 3, 3}
+	basis := NewClosed(nd, power)
+	indices := generateIndices(nd, ns, grid.NewClosed(nd).Refine)
+	points := generatePoints(nd, ns, indices, closedNode)
 
-	for i := range childLevels {
-		level, order := closedParent(childLevels[i], childOrders[i])
-		assert.Equal(level, parentLevels[i], t)
-		assert.Equal(order, parentOrders[i], t)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < ns; j++ {
+			basis.Compute(indices[j*nd:(j+1)*nd], points[j*nd:(j+1)*nd])
+		}
 	}
 }
