@@ -42,6 +42,7 @@ func BenchmarkComputeMany(b *testing.B) {
 	)
 
 	fixture := &fixture{
+		rule:   "closed",
 		target: many(inputs, outputs),
 		surrogate: &external.Surrogate{
 			Inputs:  inputs,
@@ -103,6 +104,7 @@ func BenchmarkEvaluateMany(b *testing.B) {
 	)
 
 	fixture := &fixture{
+		rule:   "closed",
 		target: many(inputs, outputs),
 		surrogate: &external.Surrogate{
 			Inputs:  inputs,
