@@ -50,6 +50,22 @@ func OpenCompute(level, order uint64) (x, h float64) {
 	return
 }
 
+// OpenParent returns the parent index of a one-dimensional index.
+func OpenParent(level, order uint64) (uint64, uint64) {
+	switch level {
+	case 0:
+		panic("the root does not have a parent")
+	default:
+		level -= 1
+		if order%4 == 0 {
+			order = order / 2
+		} else {
+			order = (order - 2) / 2
+		}
+	}
+	return level, order
+}
+
 func openIndex(level uint64) []uint64 {
 	if level>>internal.LEVEL_SIZE != 0 {
 		panic(fmt.Sprintf("the level %d is too large", level))

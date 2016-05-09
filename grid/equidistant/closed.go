@@ -71,7 +71,7 @@ func ClosedParent(level, order uint64) (uint64, uint64) {
 		order -= 1
 	default:
 		level -= 1
-		if ((order-1)/2)%2 == 0 {
+		if (order-1)%4 == 0 {
 			order = (order + 1) / 2
 		} else {
 			order = (order - 1) / 2
