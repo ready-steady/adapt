@@ -44,7 +44,7 @@ func (self *Open) RefineToward(indices []uint64, i uint) []uint64 {
 }
 
 func openIndex(level uint64) []uint64 {
-	if level>>internal.LEVEL_MASK != 0 {
+	if level>>internal.LEVEL_SIZE != 0 {
 		panic(fmt.Sprintf("the level %d is too large", level))
 	}
 	switch level {
