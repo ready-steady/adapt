@@ -47,6 +47,25 @@ func (self *Closed) RefineToward(indices []uint64, i uint) []uint64 {
 	return closedRefine(indices, self.nd, i, i+1)
 }
 
+func closedIndex(level uint64) []uint64 {
+	if level>>internal.LEVEL_MASK != 0 {
+		panic(fmt.Sprintf("the level %d is too large", level))
+	}
+	switch level {
+	case 0:
+		return []uint64{0 | 0<<internal.LEVEL_SIZE}
+	case 1:
+		return []uint64{1 | 0<<internal.LEVEL_SIZE, 1 | 2<<internal.LEVEL_SIZE}
+	default:
+		nn := uint(2) << uint(level-2)
+		indices := make([]uint64, nn)
+		for i := uint(0); i < nn; i++ {
+			indices[i] = level | uint64(2*i+1)<<internal.LEVEL_SIZE
+		}
+		return indices
+	}
+}
+
 func closedRefine(indices []uint64, nd, fd, ld uint) []uint64 {
 	nn := uint(len(indices)) / nd
 
@@ -84,23 +103,4 @@ func closedRefine(indices []uint64, nd, fd, ld uint) []uint64 {
 	}
 
 	return children[:nc*nd]
-}
-
-func closedIndex(level uint64) []uint64 {
-	if level>>internal.LEVEL_MASK != 0 {
-		panic(fmt.Sprintf("the level %d is too large", level))
-	}
-	switch level {
-	case 0:
-		return []uint64{0 | 0<<internal.LEVEL_SIZE}
-	case 1:
-		return []uint64{1 | 0<<internal.LEVEL_SIZE, 1 | 2<<internal.LEVEL_SIZE}
-	default:
-		nn := uint(2) << uint(level-2)
-		indices := make([]uint64, nn)
-		for i := uint(0); i < nn; i++ {
-			indices[i] = level | uint64(2*i+1)<<internal.LEVEL_SIZE
-		}
-		return indices
-	}
 }
