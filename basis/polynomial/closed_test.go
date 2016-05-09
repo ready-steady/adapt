@@ -3,10 +3,9 @@ package polynomial
 import (
 	"testing"
 
+	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/assert"
-
-	grid "github.com/ready-steady/adapt/grid/equidistant"
 )
 
 func BenchmarkClosedCompute1(b *testing.B) {
@@ -136,8 +135,8 @@ func benchmarkClosedCompute(power uint, b *testing.B) {
 	)
 
 	basis := NewClosed(nd, power)
-	indices := generateIndices(nd, ns, grid.NewClosed(nd).Refine)
-	points := generatePoints(nd, ns, indices, closedNode)
+	indices := generateIndices(nd, ns, equidistant.NewClosed(nd).Refine)
+	points := generatePoints(nd, ns, indices, equidistant.ClosedNode)
 
 	b.ResetTimer()
 

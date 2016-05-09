@@ -46,7 +46,7 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 		return 1.0
 	}
 
-	xi, h := closedNode(level, order)
+	xi, h := equidistant.ClosedNode(level, order)
 
 	Δ := math.Abs(x - xi)
 	if Δ >= h {
@@ -76,7 +76,7 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 	// Find the rest of the needed ancestors.
 	for power > 0 {
 		level, order = equidistant.ClosedParent(level, order)
-		xj, _ := closedNode(level, order)
+		xj, _ := equidistant.ClosedNode(level, order)
 		if equal(xj, xl) || equal(xj, xr) {
 			continue
 		}
@@ -95,7 +95,7 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 		return 1.0
 	}
 
-	x, h := closedNode(level, order)
+	x, h := equidistant.ClosedNode(level, order)
 
 	if power == 1 {
 		// Use two liner segments. See the corresponding comment in
@@ -113,14 +113,4 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 	return integrate(x-h, x+h, nodes, func(x float64) float64 {
 		return closedCompute(level, order, power, x)
 	})
-}
-
-func closedNode(level, order uint64) (x, h float64) {
-	if level == 0 {
-		x, h = 0.5, 0.5
-	} else {
-		h = 1.0 / float64(uint64(2)<<(level-1))
-		x = float64(order) * h
-	}
-	return
 }

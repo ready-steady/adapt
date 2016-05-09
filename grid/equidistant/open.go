@@ -43,6 +43,13 @@ func (self *Open) RefineToward(indices []uint64, i uint) []uint64 {
 	return openRefine(indices, self.nd, i, i+1)
 }
 
+// OpenNode returns the node corresponding to a one-dimensional index.
+func OpenNode(level, order uint64) (x, h float64) {
+	h = 1.0 / float64(uint64(2)<<level)
+	x = float64(order+1) * h
+	return
+}
+
 func openIndex(level uint64) []uint64 {
 	if level>>internal.LEVEL_SIZE != 0 {
 		panic(fmt.Sprintf("the level %d is too large", level))

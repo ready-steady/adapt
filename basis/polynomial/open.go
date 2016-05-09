@@ -3,6 +3,7 @@ package polynomial
 import (
 	"math"
 
+	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/adapt/internal"
 )
 
@@ -60,7 +61,7 @@ func openCompute(level, order uint64, x float64) float64 {
 		}
 		return x/h - left
 	default:
-		xi, h := openNode(level, order)
+		xi, h := equidistant.OpenNode(level, order)
 		Δ := math.Abs(x - xi)
 		if Δ >= h {
 			return 0.0
@@ -82,10 +83,4 @@ func openIntegrate(level, order uint64) float64 {
 	default:
 		return 1.0 / float64(count+1)
 	}
-}
-
-func openNode(level, order uint64) (x, h float64) {
-	h = 1.0 / float64(uint64(2)<<level)
-	x = float64(order+1) * h
-	return
 }

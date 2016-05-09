@@ -3,10 +3,9 @@ package polynomial
 import (
 	"testing"
 
+	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/assert"
-
-	grid "github.com/ready-steady/adapt/grid/equidistant"
 )
 
 func BenchmarkOpenCompute1(b *testing.B) {
@@ -20,8 +19,8 @@ func benchmarkOpenCompute(power uint, b *testing.B) {
 	)
 
 	basis := NewOpen(nd, power)
-	indices := generateIndices(nd, ns, grid.NewOpen(nd).Refine)
-	points := generatePoints(nd, ns, indices, openNode)
+	indices := generateIndices(nd, ns, equidistant.NewOpen(nd).Refine)
+	points := generatePoints(nd, ns, indices, equidistant.OpenNode)
 
 	b.ResetTimer()
 
