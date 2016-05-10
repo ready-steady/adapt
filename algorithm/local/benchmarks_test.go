@@ -7,9 +7,10 @@ import (
 	"github.com/ready-steady/adapt/algorithm"
 )
 
-func BenchmarkComputeHat(b *testing.B) {
-	fixture := &fixtureHat
+func BenchmarkComputeBox(b *testing.B) {
+	fixture := &fixtureBox
 	algorithm, strategy := prepare(fixture)
+	strategy.(*Strategy).lmax = 9
 
 	for i := 0; i < b.N; i++ {
 		algorithm.Compute(fixture.target, strategy)
@@ -25,10 +26,9 @@ func BenchmarkComputeCube(b *testing.B) {
 	}
 }
 
-func BenchmarkComputeBox(b *testing.B) {
-	fixture := &fixtureBox
+func BenchmarkComputeHat(b *testing.B) {
+	fixture := &fixtureHat
 	algorithm, strategy := prepare(fixture)
-	strategy.(*Strategy).lmax = 9
 
 	for i := 0; i < b.N; i++ {
 		algorithm.Compute(fixture.target, strategy)
@@ -56,9 +56,10 @@ func BenchmarkComputeMany(b *testing.B) {
 	}
 }
 
-func BenchmarkEvaluateHat(b *testing.B) {
-	fixture := &fixtureHat
+func BenchmarkEvaluateBox(b *testing.B) {
+	fixture := &fixtureBox
 	algorithm, strategy := prepare(fixture)
+	strategy.(*Strategy).lmax = 9
 	surrogate := algorithm.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
@@ -83,10 +84,9 @@ func BenchmarkEvaluateCube(b *testing.B) {
 	}
 }
 
-func BenchmarkEvaluateBox(b *testing.B) {
-	fixture := &fixtureBox
+func BenchmarkEvaluateHat(b *testing.B) {
+	fixture := &fixtureHat
 	algorithm, strategy := prepare(fixture)
-	strategy.(*Strategy).lmax = 9
 	surrogate := algorithm.Compute(fixture.target, strategy)
 	points := generate(surrogate)
 
@@ -123,6 +123,20 @@ func BenchmarkEvaluateMany(b *testing.B) {
 	}
 }
 
+func generate(surrogate *algorithm.Surrogate) []float64 {
+	const (
+		count = 10000
+	)
+
+	generator := rand.New(rand.NewSource(0))
+	points := make([]float64, count*surrogate.Inputs)
+	for i := range points {
+		points[i] = generator.Float64()
+	}
+
+	return points
+}
+
 func many(ni, no int) func([]float64, []float64) {
 	return func(x, y []float64) {
 		sum, value := 0.0, 0.0
@@ -139,18 +153,4 @@ func many(ni, no int) func([]float64, []float64) {
 			y[i] = value
 		}
 	}
-}
-
-func generate(surrogate *algorithm.Surrogate) []float64 {
-	const (
-		count = 10000
-	)
-
-	generator := rand.New(rand.NewSource(0))
-	points := make([]float64, count*surrogate.Inputs)
-	for i := range points {
-		points[i] = generator.Float64()
-	}
-
-	return points
 }

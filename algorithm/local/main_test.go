@@ -8,19 +8,8 @@ import (
 	interpolation "github.com/ready-steady/adapt/algorithm"
 )
 
-func TestStep(t *testing.T) {
-	fixture := &fixtureStep
-	algorithm, strategy := prepare(fixture)
-
-	surrogate := algorithm.Compute(fixture.target, strategy)
-	assert.Equal(surrogate, fixture.surrogate, t)
-
-	values := algorithm.Evaluate(surrogate, fixture.points)
-	assert.Equal(values, fixture.values, t)
-}
-
-func TestHat(t *testing.T) {
-	fixture := &fixtureHat
+func TestBox(t *testing.T) {
+	fixture := &fixtureBox
 	algorithm, strategy := prepare(fixture)
 
 	surrogate := algorithm.Compute(fixture.target, strategy)
@@ -44,8 +33,8 @@ func TestCube(t *testing.T) {
 	assert.EqualWithin(values, fixture.values, 2e-15, t)
 }
 
-func TestBox(t *testing.T) {
-	fixture := &fixtureBox
+func TestHat(t *testing.T) {
+	fixture := &fixtureHat
 	algorithm, strategy := prepare(fixture)
 
 	surrogate := algorithm.Compute(fixture.target, strategy)
@@ -81,4 +70,15 @@ func TestParabola(t *testing.T) {
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 1e-6, t)
+}
+
+func TestStep(t *testing.T) {
+	fixture := &fixtureStep
+	algorithm, strategy := prepare(fixture)
+
+	surrogate := algorithm.Compute(fixture.target, strategy)
+	assert.Equal(surrogate, fixture.surrogate, t)
+
+	values := algorithm.Evaluate(surrogate, fixture.points)
+	assert.Equal(values, fixture.values, t)
 }
