@@ -3,6 +3,7 @@ package local
 import (
 	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/algorithm/internal"
+	"github.com/ready-steady/adapt/grid"
 )
 
 // Strategy is a basic strategy.
@@ -21,7 +22,7 @@ type Strategy struct {
 
 // Guide is a grid-refinement tool of a basic strategy.
 type Guide interface {
-	internal.GridRefiner
+	grid.Refiner
 }
 
 // NewStrategy creates a basic strategy.

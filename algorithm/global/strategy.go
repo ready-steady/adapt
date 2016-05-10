@@ -5,6 +5,7 @@ import (
 
 	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/algorithm/internal"
+	"github.com/ready-steady/adapt/grid"
 )
 
 var (
@@ -33,7 +34,7 @@ type Strategy struct {
 
 // Guide is a grid-refinement tool of a basic strategy.
 type Guide interface {
-	internal.GridIndexer
+	grid.Indexer
 }
 
 // NewStrategy creates a basic strategy.

@@ -5,11 +5,10 @@ import (
 
 	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/basis/polynomial"
+	"github.com/ready-steady/adapt/grid"
 	"github.com/ready-steady/adapt/grid/equidistant"
+	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/ode/rk4"
-
-	ainternal "github.com/ready-steady/adapt/algorithm/internal"
-	rinternal "github.com/ready-steady/adapt/internal"
 )
 
 func init() {
@@ -26,7 +25,7 @@ type fixture struct {
 	grid interface {
 		Grid
 		Guide
-		ainternal.GridParenter
+		grid.Parenter
 	}
 	basis Basis
 
@@ -43,7 +42,7 @@ type fixture struct {
 }
 
 func (self *fixture) initialize() {
-	self.surrogate.Indices = rinternal.Compose(self.levels, self.orders)
+	self.surrogate.Indices = internal.Compose(self.levels, self.orders)
 
 	ni := self.surrogate.Inputs
 

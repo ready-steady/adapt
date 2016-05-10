@@ -1,12 +1,14 @@
 package algorithm
 
 import (
+	"github.com/ready-steady/adapt/grid"
+
 	ainternal "github.com/ready-steady/adapt/algorithm/internal"
 	rinternal "github.com/ready-steady/adapt/internal"
 )
 
 // Validate checks if an index set is admissible and contains no repetitions.
-func Validate(indices []uint64, ni uint, parent ainternal.GridParenter) bool {
+func Validate(indices []uint64, ni uint, parent grid.Parenter) bool {
 	nn := uint(len(indices)) / ni
 
 	hash := ainternal.NewHash(ni)

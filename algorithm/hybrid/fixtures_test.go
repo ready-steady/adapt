@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/ready-steady/adapt/algorithm"
-	"github.com/ready-steady/adapt/algorithm/internal"
 	"github.com/ready-steady/adapt/basis/polynomial"
+	"github.com/ready-steady/adapt/grid"
 	"github.com/ready-steady/adapt/grid/equidistant"
 )
 
@@ -18,7 +18,7 @@ type fixture struct {
 	grid interface {
 		Grid
 		Guide
-		internal.GridParenter
+		grid.Parenter
 	}
 	basis Basis
 

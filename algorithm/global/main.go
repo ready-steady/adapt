@@ -5,6 +5,8 @@ package global
 import (
 	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/algorithm/internal"
+	"github.com/ready-steady/adapt/basis"
+	"github.com/ready-steady/adapt/grid"
 )
 
 // Algorithm is the interpolation algorithm.
@@ -18,13 +20,13 @@ type Algorithm struct {
 
 // Basis is an interpolation basis.
 type Basis interface {
-	internal.BasisComputer
-	internal.BasisIntegrator
+	basis.Computer
+	basis.Integrator
 }
 
 // Grid is an interpolation grid.
 type Grid interface {
-	internal.GridComputer
+	grid.Computer
 }
 
 // New creates an interpolator.

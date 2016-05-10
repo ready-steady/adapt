@@ -4,6 +4,9 @@ package internal
 import (
 	"runtime"
 	"sync"
+
+	"github.com/ready-steady/adapt/basis"
+	"github.com/ready-steady/adapt/grid"
 )
 
 var (
@@ -11,45 +14,9 @@ var (
 	Workers = uint(runtime.GOMAXPROCS(0))
 )
 
-// BasisComputer returns the value of a basis function.
-type BasisComputer interface {
-	Compute([]uint64, []float64) float64
-}
-
-// BasisIntegrator returns the integral of a basis function.
-type BasisIntegrator interface {
-	Integrate([]uint64) float64
-}
-
-// GridComputer returns the nodes corresponding to a set of indices.
-type GridComputer interface {
-	Compute([]uint64) []float64
-}
-
-// GridIndexer returns the nodal indices of a set of level indices.
-type GridIndexer interface {
-	Index([]uint64) []uint64
-}
-
-// GridParenter returns the parent index of an index in one dimension.
-type GridParenter interface {
-	Parent(uint64, uint64) (uint64, uint64)
-}
-
-// GridRefiner returns the child indices of a set of indices.
-type GridRefiner interface {
-	Refine([]uint64) []uint64
-}
-
-// GridRefinerToward returns the child indices of a set of indices with respect
-// to a particular dimension.
-type GridRefinerToward interface {
-	RefineToward([]uint64, uint) []uint64
-}
-
 // Approximate evaluates an interpolant at multiple points using multiple
 // goroutines.
-func Approximate(computer BasisComputer, indices []uint64, surpluses, points []float64,
+func Approximate(computer basis.Computer, indices []uint64, surpluses, points []float64,
 	ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
@@ -92,7 +59,7 @@ func Approximate(computer BasisComputer, indices []uint64, surpluses, points []f
 }
 
 // Index returns the nodal indices of a set of level indices.
-func Index(indexer GridIndexer, lindices []uint64, ni uint) ([]uint64, []uint) {
+func Index(indexer grid.Indexer, lindices []uint64, ni uint) ([]uint64, []uint) {
 	nn := uint(len(lindices)) / ni
 	indices, counts := []uint64(nil), make([]uint, nn)
 	for i := uint(0); i < nn; i++ {
@@ -104,7 +71,7 @@ func Index(indexer GridIndexer, lindices []uint64, ni uint) ([]uint64, []uint) {
 }
 
 // Measure computes the integrals of a set of basis functions.
-func Measure(integrator BasisIntegrator, indices []uint64, ni uint) []float64 {
+func Measure(integrator basis.Integrator, indices []uint64, ni uint) []float64 {
 	nn := uint(len(indices)) / ni
 	volumes := make([]float64, nn)
 	for i := uint(0); i < nn; i++ {
