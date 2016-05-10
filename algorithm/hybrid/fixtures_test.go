@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/ready-steady/adapt/algorithm"
+	"github.com/ready-steady/adapt/algorithm/internal"
 	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 )
@@ -13,8 +14,13 @@ func init() {
 }
 
 type fixture struct {
-	rule   string
-	parent func(uint64, uint64) (uint64, uint64)
+	rule string
+	grid interface {
+		Grid
+		Guide
+		internal.GridParenter
+	}
+	basis Basis
 
 	target algorithm.Target
 
@@ -25,9 +31,12 @@ type fixture struct {
 }
 
 func (self *fixture) initialize() {
+	ni := self.surrogate.Inputs
+
 	switch self.rule {
 	case "closed":
-		self.parent = equidistant.ClosedParent
+		self.grid = equidistant.NewClosed(ni)
+		self.basis = polynomial.NewClosed(ni, 1)
 	default:
 		panic("the rule is unknown")
 	}
@@ -43,10 +52,8 @@ func prepare(fixture *fixture) (*Algorithm, algorithm.Strategy) {
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
-	grid := equidistant.NewClosed(ni)
-	basis := polynomial.NewClosed(ni, 1)
-	algorithm := New(ni, no, grid, basis)
-	strategy := NewStrategy(ni, no, grid, minLevel, maxLevel, localError, totalError)
+	algorithm := New(ni, no, fixture.grid, fixture.basis)
+	strategy := NewStrategy(ni, no, fixture.grid, minLevel, maxLevel, localError, totalError)
 
 	return algorithm, strategy
 }

@@ -17,16 +17,12 @@ func NewClosed(dimensions uint) *Closed {
 }
 
 // Compute returns the nodes corresponding to a set of indices.
-func (_ *Closed) Compute(indices []uint64) []float64 {
+func (self *Closed) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
 		level := indices[i] & internal.LEVEL_MASK
-		if level == 0 {
-			nodes[i] = 0.5
-		} else {
-			order := indices[i] >> internal.LEVEL_SIZE
-			nodes[i] = float64(order) / float64(uint64(2)<<(level-1))
-		}
+		order := indices[i] >> internal.LEVEL_SIZE
+		nodes[i], _ = self.Node(level, order)
 	}
 	return nodes
 }
@@ -36,30 +32,20 @@ func (self *Closed) Index(lindices []uint64) []uint64 {
 	return index(lindices, closedIndex, self.nd)
 }
 
-// Refine returns the child indices of a set of indices.
-func (self *Closed) Refine(indices []uint64) []uint64 {
-	return closedRefine(indices, self.nd, 0, self.nd)
-}
-
-// RefineToward returns the child indices of a set of indices with respect to a
-// particular dimension.
-func (self *Closed) RefineToward(indices []uint64, i uint) []uint64 {
-	return closedRefine(indices, self.nd, i, i+1)
-}
-
-// ClosedCompute returns the node corresponding to a one-dimensional index.
-func ClosedCompute(level, order uint64) (x, h float64) {
+// Node returns the node corresponding to an index in one dimension.
+func (_ *Closed) Node(level, order uint64) (node, step float64) {
 	if level == 0 {
-		x, h = 0.5, 0.5
+		node = 0.5
+		step = 0.5
 	} else {
-		h = 1.0 / float64(uint64(2)<<(level-1))
-		x = float64(order) * h
+		step = 1.0 / float64(uint64(2)<<(level-1))
+		node = float64(order) * step
 	}
 	return
 }
 
-// ClosedParent returns the parent index of a one-dimensional index.
-func ClosedParent(level, order uint64) (uint64, uint64) {
+// Parent returns the parent index of an index in one dimension.
+func (_ *Closed) Parent(level, order uint64) (uint64, uint64) {
 	switch level {
 	case 0:
 		panic("the root does not have a parent")
@@ -78,6 +64,17 @@ func ClosedParent(level, order uint64) (uint64, uint64) {
 		}
 	}
 	return level, order
+}
+
+// Refine returns the child indices of a set of indices.
+func (self *Closed) Refine(indices []uint64) []uint64 {
+	return closedRefine(indices, self.nd, 0, self.nd)
+}
+
+// RefineToward returns the child indices of a set of indices with respect to a
+// particular dimension.
+func (self *Closed) RefineToward(indices []uint64, i uint) []uint64 {
+	return closedRefine(indices, self.nd, i, i+1)
 }
 
 func closedIndex(level uint64) []uint64 {

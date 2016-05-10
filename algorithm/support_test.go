@@ -13,6 +13,8 @@ func TestValidate(t *testing.T) {
 		ni = 2
 	)
 
+	grid := equidistant.NewClosed(1)
+
 	cases := []struct {
 		levels []uint64
 		orders []uint64
@@ -92,6 +94,6 @@ func TestValidate(t *testing.T) {
 
 	for _, c := range cases {
 		indices := internal.Compose(c.levels, c.orders)
-		assert.Equal(Validate(indices, ni, equidistant.ClosedParent), c.result, t)
+		assert.Equal(Validate(indices, ni, grid), c.result, t)
 	}
 }

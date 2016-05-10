@@ -6,8 +6,10 @@ import (
 	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
-	"github.com/ready-steady/adapt/internal"
 	"github.com/ready-steady/ode/rk4"
+
+	ainternal "github.com/ready-steady/adapt/algorithm/internal"
+	rinternal "github.com/ready-steady/adapt/internal"
 )
 
 func init() {
@@ -20,8 +22,13 @@ func init() {
 }
 
 type fixture struct {
-	rule   string
-	parent func(uint64, uint64) (uint64, uint64)
+	rule string
+	grid interface {
+		Grid
+		Guide
+		ainternal.GridParenter
+	}
+	basis Basis
 
 	target   algorithm.Target
 	strategy func(algorithm.Strategy) algorithm.Strategy
@@ -36,13 +43,17 @@ type fixture struct {
 }
 
 func (self *fixture) initialize() {
-	self.surrogate.Indices = internal.Compose(self.levels, self.orders)
+	self.surrogate.Indices = rinternal.Compose(self.levels, self.orders)
+
+	ni := self.surrogate.Inputs
 
 	switch self.rule {
 	case "closed":
-		self.parent = equidistant.ClosedParent
+		self.grid = equidistant.NewClosed(ni)
+		self.basis = polynomial.NewClosed(ni, 1)
 	case "open":
-		self.parent = equidistant.OpenParent
+		self.grid = equidistant.NewOpen(ni)
+		self.basis = polynomial.NewOpen(ni, 1)
 	default:
 		panic("the rule is unknown")
 	}
@@ -57,24 +68,8 @@ func prepare(fixture *fixture) (*Algorithm, algorithm.Strategy) {
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
-	var grid interface {
-		Grid
-		Guide
-	}
-	var basis Basis
-	switch fixture.rule {
-	case "closed":
-		grid = equidistant.NewClosed(ni)
-		basis = polynomial.NewClosed(ni, 1)
-	case "open":
-		grid = equidistant.NewOpen(ni)
-		basis = polynomial.NewOpen(ni, 1)
-	default:
-		panic("the rule is unknown")
-	}
-
-	algorithm := New(ni, no, grid, basis)
-	strategy := NewStrategy(ni, no, grid, minLevel, maxLevel, localError)
+	algorithm := New(ni, no, fixture.grid, fixture.basis)
+	strategy := NewStrategy(ni, no, fixture.grid, minLevel, maxLevel, localError)
 
 	if fixture.strategy == nil {
 		return algorithm, strategy

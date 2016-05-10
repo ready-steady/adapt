@@ -238,6 +238,8 @@ func TestOpenIndex1D(t *testing.T) {
 }
 
 func TestOpenParent(t *testing.T) {
+	grid := NewOpen(1)
+
 	childLevels := []uint64{1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3}
 	childOrders := []uint64{0, 2, 0, 2, 4, 6, 0, 2, 4, 6, 8, 10, 12, 14}
 
@@ -245,7 +247,7 @@ func TestOpenParent(t *testing.T) {
 	parentOrders := []uint64{0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 4, 4, 6, 6}
 
 	for i := range childLevels {
-		level, order := OpenParent(childLevels[i], childOrders[i])
+		level, order := grid.Parent(childLevels[i], childOrders[i])
 		assert.Equal(level, parentLevels[i], t)
 		assert.Equal(order, parentOrders[i], t)
 	}

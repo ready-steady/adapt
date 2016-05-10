@@ -9,20 +9,25 @@ import (
 
 // Closed is a basis in [0, 1]^n.
 type Closed struct {
-	nd uint
-	np uint
+	nd   uint
+	np   uint
+	grid equidistant.Closed
 }
 
 // NewClosed creates a basis.
 func NewClosed(dimensions uint, power uint) *Closed {
-	return &Closed{dimensions, power}
+	return &Closed{
+		nd:   dimensions,
+		np:   power,
+		grid: *equidistant.NewClosed(1),
+	}
 }
 
 // Compute evaluates a basis function.
 func (self *Closed) Compute(index []uint64, point []float64) float64 {
 	nd, np, value := self.nd, self.np, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= closedCompute(index[i]&internal.LEVEL_MASK,
+		value *= self.compute(index[i]&internal.LEVEL_MASK,
 			index[i]>>internal.LEVEL_SIZE, np, point[i])
 	}
 	return value
@@ -32,13 +37,13 @@ func (self *Closed) Compute(index []uint64, point []float64) float64 {
 func (self *Closed) Integrate(index []uint64) float64 {
 	nd, np, value := self.nd, self.np, 1.0
 	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= closedIntegrate(index[i]&internal.LEVEL_MASK,
+		value *= self.integrate(index[i]&internal.LEVEL_MASK,
 			index[i]>>internal.LEVEL_SIZE, np)
 	}
 	return value
 }
 
-func closedCompute(level, order uint64, power uint, x float64) float64 {
+func (self *Closed) compute(level, order uint64, power uint, x float64) float64 {
 	if level < uint64(power) {
 		power = uint(level)
 	}
@@ -46,7 +51,7 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 		return 1.0
 	}
 
-	xi, h := equidistant.ClosedCompute(level, order)
+	xi, h := self.grid.Node(level, order)
 
 	Δ := math.Abs(x - xi)
 	if Δ >= h {
@@ -75,8 +80,8 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 
 	// Find the rest of the needed ancestors.
 	for power > 0 {
-		level, order = equidistant.ClosedParent(level, order)
-		xj, _ := equidistant.ClosedCompute(level, order)
+		level, order = self.grid.Parent(level, order)
+		xj, _ := self.grid.Node(level, order)
 		if equal(xj, xl) || equal(xj, xr) {
 			continue
 		}
@@ -87,7 +92,7 @@ func closedCompute(level, order uint64, power uint, x float64) float64 {
 	return value
 }
 
-func closedIntegrate(level, order uint64, power uint) float64 {
+func (self *Closed) integrate(level, order uint64, power uint) float64 {
 	if level < uint64(power) {
 		power = uint(level)
 	}
@@ -95,7 +100,7 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 		return 1.0
 	}
 
-	x, h := equidistant.ClosedCompute(level, order)
+	x, h := self.grid.Node(level, order)
 
 	if power == 1 {
 		// Use two liner segments. See the corresponding comment in
@@ -111,6 +116,6 @@ func closedIntegrate(level, order uint64, power uint) float64 {
 	// nodes integrates exactly polynomials up to order 2*n - 1.
 	nodes := uint(math.Ceil((float64(power) + 1.0) / 2.0))
 	return integrate(x-h, x+h, nodes, func(x float64) float64 {
-		return closedCompute(level, order, power, x)
+		return self.compute(level, order, power, x)
 	})
 }

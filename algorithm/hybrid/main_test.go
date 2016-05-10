@@ -15,7 +15,7 @@ func TestBranin(t *testing.T) {
 	surrogate := algorithm.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
 	assert.Equal(interpolation.Validate(surrogate.Indices, surrogate.Inputs,
-		fixture.parent), true, t)
+		fixture.grid), true, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
 	assert.EqualWithin(values, fixture.values, 0.1, t)

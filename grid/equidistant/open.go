@@ -17,12 +17,12 @@ func NewOpen(dimensions uint) *Open {
 }
 
 // Compute returns the nodes corresponding to a set of indices.
-func (_ *Open) Compute(indices []uint64) []float64 {
+func (self *Open) Compute(indices []uint64) []float64 {
 	nodes := make([]float64, len(indices))
 	for i := range nodes {
 		level := indices[i] & internal.LEVEL_MASK
 		order := indices[i] >> internal.LEVEL_SIZE
-		nodes[i] = float64(order+1) / float64(uint64(2)<<level)
+		nodes[i], _ = self.Node(level, order)
 	}
 	return nodes
 }
@@ -32,26 +32,15 @@ func (self *Open) Index(lindices []uint64) []uint64 {
 	return index(lindices, openIndex, self.nd)
 }
 
-// Refine returns the child indices of a set of indices.
-func (self *Open) Refine(indices []uint64) []uint64 {
-	return openRefine(indices, self.nd, 0, self.nd)
-}
-
-// RefineToward returns the child indices of a set of indices with respect to a
-// particular dimension.
-func (self *Open) RefineToward(indices []uint64, i uint) []uint64 {
-	return openRefine(indices, self.nd, i, i+1)
-}
-
-// OpenCompute returns the node corresponding to a one-dimensional index.
-func OpenCompute(level, order uint64) (x, h float64) {
-	h = 1.0 / float64(uint64(2)<<level)
-	x = float64(order+1) * h
+// Node returns the node corresponding to an index in one dimension.
+func (_ *Open) Node(level, order uint64) (node, step float64) {
+	step = 1.0 / float64(uint64(2)<<level)
+	node = float64(order+1) * step
 	return
 }
 
-// OpenParent returns the parent index of a one-dimensional index.
-func OpenParent(level, order uint64) (uint64, uint64) {
+// Parent returns the parent index of an index in one dimension.
+func (_ *Open) Parent(level, order uint64) (uint64, uint64) {
 	switch level {
 	case 0:
 		panic("the root does not have a parent")
@@ -64,6 +53,17 @@ func OpenParent(level, order uint64) (uint64, uint64) {
 		}
 	}
 	return level, order
+}
+
+// Refine returns the child indices of a set of indices.
+func (self *Open) Refine(indices []uint64) []uint64 {
+	return openRefine(indices, self.nd, 0, self.nd)
+}
+
+// RefineToward returns the child indices of a set of indices with respect to a
+// particular dimension.
+func (self *Open) RefineToward(indices []uint64, i uint) []uint64 {
+	return openRefine(indices, self.nd, i, i+1)
 }
 
 func openIndex(level uint64) []uint64 {

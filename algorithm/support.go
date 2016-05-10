@@ -6,7 +6,7 @@ import (
 )
 
 // Validate checks if an index set is admissible and contains no repetitions.
-func Validate(indices []uint64, ni uint, parent func(uint64, uint64) (uint64, uint64)) bool {
+func Validate(indices []uint64, ni uint, parent ainternal.GridParenter) bool {
 	nn := uint(len(indices)) / ni
 
 	hash := ainternal.NewHash(ni)
@@ -31,7 +31,7 @@ func Validate(indices []uint64, ni uint, parent func(uint64, uint64) (uint64, ui
 			}
 
 			order := index[j] >> rinternal.LEVEL_SIZE
-			plevel, porder := parent(level, order)
+			plevel, porder := parent.Parent(level, order)
 
 			index[j] = porder<<rinternal.LEVEL_SIZE | plevel
 			_, found = mapping[hash.Key(index)]

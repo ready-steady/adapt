@@ -21,7 +21,7 @@ type BasisIntegrator interface {
 	Integrate([]uint64) float64
 }
 
-// GridComputer returns the coordinates of a set of grid nodes.
+// GridComputer returns the nodes corresponding to a set of indices.
 type GridComputer interface {
 	Compute([]uint64) []float64
 }
@@ -31,13 +31,18 @@ type GridIndexer interface {
 	Index([]uint64) []uint64
 }
 
-// GridRefiner returns the child nodal indices of a set of nodal indices.
+// GridParenter returns the parent index of an index in one dimension.
+type GridParenter interface {
+	Parent(uint64, uint64) (uint64, uint64)
+}
+
+// GridRefiner returns the child indices of a set of indices.
 type GridRefiner interface {
 	Refine([]uint64) []uint64
 }
 
-// GridRefinerToward returns the child nodal indices of a set of nodal indices
-// with respect to a particular dimension.
+// GridRefinerToward returns the child indices of a set of indices with respect
+// to a particular dimension.
 type GridRefinerToward interface {
 	RefineToward([]uint64, uint) []uint64
 }

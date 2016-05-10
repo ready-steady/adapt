@@ -20,7 +20,7 @@ func benchmarkOpenCompute(power uint, b *testing.B) {
 
 	basis := NewOpen(nd, power)
 	indices := generateIndices(nd, ns, equidistant.NewOpen(nd).Refine)
-	points := generatePoints(nd, ns, indices, equidistant.OpenCompute)
+	points := generatePoints(nd, ns, indices, basis.grid.Node)
 
 	b.ResetTimer()
 
