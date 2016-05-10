@@ -5,15 +5,18 @@ import (
 	rinternal "github.com/ready-steady/adapt/internal"
 )
 
-// IsAdmissible checks if a set of indices is admissible.
-func IsAdmissible(indices []uint64, ni uint, parent func(uint64, uint64) (uint64, uint64)) bool {
+// Validate checks if an index set is admissible and contains no repetitions.
+func Validate(indices []uint64, ni uint, parent func(uint64, uint64) (uint64, uint64)) bool {
 	nn := uint(len(indices)) / ni
 
 	hash := ainternal.NewHash(ni)
 	mapping := make(map[string]bool)
 	for i := uint(0); i < nn; i++ {
-		index := indices[i*ni : (i+1)*ni]
-		mapping[hash.Key(index)] = true
+		key := hash.Key(indices[i*ni : (i+1)*ni])
+		if _, ok := mapping[key]; ok {
+			return false
+		}
+		mapping[key] = true
 	}
 
 	for i := uint(0); i < nn; i++ {
@@ -40,17 +43,4 @@ func IsAdmissible(indices []uint64, ni uint, parent func(uint64, uint64) (uint64
 	}
 
 	return true
-}
-
-// IsUnique checks if a set of indices has no repetitions.
-func IsUnique(indices []uint64, ni uint) bool {
-	unique := ainternal.NewUnique(ni)
-
-	indices = append([]uint64(nil), indices...)
-	before := uint(len(indices)) / ni
-
-	indices = unique.Distil(indices)
-	after := uint(len(indices)) / ni
-
-	return before == after
 }
