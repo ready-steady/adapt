@@ -15,6 +15,8 @@ func init() {
 	fixtureHat.initialize()
 	fixtureCube.initialize()
 	fixtureBox.initialize()
+	fixtureKraichnanOrszag.initialize()
+	fixtureParabola.initialize()
 }
 
 type fixture struct {
