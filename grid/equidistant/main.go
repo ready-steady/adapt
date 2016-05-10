@@ -1,2 +1,2 @@
-// Package equidistant provides means for working with the Newton–Cotes grid.
+// Package equidistant provides Newton–Cotes interpolation grids.
 package equidistant

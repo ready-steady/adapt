@@ -1,7 +1,6 @@
-# Newton–Cotes Grid
+# Equidistant
 
-The package provides means for working with the Newton–Cotes grid on the unit
-hypercube.
+The package provides Newton–Cotes interpolation grids.
 
 ## [Documentation][doc]
 

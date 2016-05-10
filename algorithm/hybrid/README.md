@@ -1,4 +1,4 @@
-# Interpolation with Hybrid Adaptation
+# Hybrid
 
 The package provides an algorithm for hierarchical interpolation with hybrid
 adaptation.

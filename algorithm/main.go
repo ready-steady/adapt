@@ -1,2 +1,2 @@
-// Package algorithm contains code shared by the subpackages.
+// Package algorithm contains code shared by the interpolation algorithms.
 package algorithm

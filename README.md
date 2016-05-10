@@ -1,16 +1,12 @@
-# Adaptive Interpolation [![][status-img]][status-url]
+# Adapt [![Build Status][status-img]][status-url]
 
-## Subpackages
+## Packages
 
-The package contains the following subpackages:
+* [algorithm](algorithm)
+* [basis](basis)
+* [grid](grid)
 
-* algorithm/[global](algorithm/global),
-* algorithm/[hybrid](algorithm/hybrid),
-* algorithm/[local](algorithm/local),
-* basis/[polynomial](basis/polynomial), and
-* grid/[equidistant](grid/equidistant).
-
-## Contributing
+## Contribution
 
 1. Fork the project.
 2. Implement your idea.

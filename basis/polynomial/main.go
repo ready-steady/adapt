@@ -1,3 +1,2 @@
-// Package polynomial provides functions for working with the basis formed by
-// piecewise polynomial functions.
+// Package polynomial provides piecewise polynomial interpolation bases.
 package polynomial

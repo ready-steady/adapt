@@ -1,7 +1,6 @@
-# Piecewise Polynomial Basis
+# Polynomial
 
-The package provides functions for working with the basis formed by the
-piecewise polynomial functions.
+The package provides piecewise polynomial interpolation bases.
 
 ## [Documentation][doc]
 
