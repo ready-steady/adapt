@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ready-steady/adapt/algorithm/external"
+	"github.com/ready-steady/adapt/algorithm"
 )
 
 func BenchmarkComputeHat(b *testing.B) {
@@ -44,7 +44,7 @@ func BenchmarkComputeMany(b *testing.B) {
 	fixture := &fixture{
 		rule:   "closed",
 		target: many(inputs, outputs),
-		surrogate: &external.Surrogate{
+		surrogate: &algorithm.Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
@@ -106,7 +106,7 @@ func BenchmarkEvaluateMany(b *testing.B) {
 	fixture := &fixture{
 		rule:   "closed",
 		target: many(inputs, outputs),
-		surrogate: &external.Surrogate{
+		surrogate: &algorithm.Surrogate{
 			Inputs:  inputs,
 			Outputs: outputs,
 		},
@@ -141,7 +141,7 @@ func many(ni, no int) func([]float64, []float64) {
 	}
 }
 
-func generate(surrogate *external.Surrogate) []float64 {
+func generate(surrogate *algorithm.Surrogate) []float64 {
 	const (
 		count = 10000
 	)

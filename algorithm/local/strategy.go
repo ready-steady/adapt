@@ -1,7 +1,7 @@
 package local
 
 import (
-	"github.com/ready-steady/adapt/algorithm/external"
+	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -42,22 +42,22 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	}
 }
 
-func (self *Strategy) First() *external.State {
-	return &external.State{
+func (self *Strategy) First() *algorithm.State {
+	return &algorithm.State{
 		Indices: make([]uint64, 1*self.ni),
 	}
 }
 
-func (self *Strategy) Done(state *external.State, _ *external.Surrogate) bool {
+func (self *Strategy) Done(state *algorithm.State, _ *algorithm.Surrogate) bool {
 	return state == nil || len(state.Indices) == 0
 }
 
-func (self *Strategy) Score(element *external.Element) float64 {
+func (self *Strategy) Score(element *algorithm.Element) float64 {
 	return internal.MaxAbsolute(element.Surplus)
 }
 
-func (self *Strategy) Next(state *external.State, _ *external.Surrogate) *external.State {
-	return &external.State{
+func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
+	return &algorithm.State{
 		Indices: self.unique.Distil(self.guide.Refine(filter(state.Indices,
 			state.Scores, self.lmin, self.lmax, self.εl, self.ni))),
 	}

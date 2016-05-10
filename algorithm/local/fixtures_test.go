@@ -3,7 +3,7 @@ package local
 import (
 	"math"
 
-	"github.com/ready-steady/adapt/algorithm/external"
+	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 	"github.com/ready-steady/adapt/internal"
@@ -21,10 +21,10 @@ type fixture struct {
 	rule   string
 	parent func(uint64, uint64) (uint64, uint64)
 
-	target   external.Target
-	strategy func(external.Strategy) external.Strategy
+	target   algorithm.Target
+	strategy func(algorithm.Strategy) algorithm.Strategy
 
-	surrogate *external.Surrogate
+	surrogate *algorithm.Surrogate
 
 	levels []uint64
 	orders []uint64
@@ -46,7 +46,7 @@ func (self *fixture) initialize() {
 	}
 }
 
-func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
+func prepare(fixture *fixture) (*Algorithm, algorithm.Strategy) {
 	const (
 		minLevel   = 1
 		maxLevel   = 10
@@ -92,12 +92,12 @@ var fixtureStep = fixture{
 		}
 	},
 
-	strategy: func(strategy external.Strategy) external.Strategy {
+	strategy: func(strategy algorithm.Strategy) algorithm.Strategy {
 		strategy.(*Strategy).lmax = 4
 		return strategy
 	},
 
-	surrogate: &external.Surrogate{
+	surrogate: &algorithm.Surrogate{
 		Inputs:  1,
 		Outputs: 1,
 		Nodes:   8,
@@ -131,7 +131,7 @@ var fixtureHat = fixture{
 		}
 	},
 
-	surrogate: &external.Surrogate{
+	surrogate: &algorithm.Surrogate{
 		Inputs:  1,
 		Outputs: 1,
 		Nodes:   305,
@@ -347,13 +347,13 @@ var fixtureCube = fixture{
 		}
 	},
 
-	strategy: func(strategy external.Strategy) external.Strategy {
+	strategy: func(strategy algorithm.Strategy) algorithm.Strategy {
 		strategy.(*Strategy).lmax = 9
 		strategy.(*Strategy).εl = 1e-2
 		return strategy
 	},
 
-	surrogate: &external.Surrogate{
+	surrogate: &algorithm.Surrogate{
 		Inputs:  2,
 		Outputs: 1,
 		Nodes:   437,
@@ -612,12 +612,12 @@ var fixtureBox = fixture{
 		}
 	},
 
-	strategy: func(strategy external.Strategy) external.Strategy {
+	strategy: func(strategy algorithm.Strategy) algorithm.Strategy {
 		strategy.(*Strategy).lmax = 3
 		return strategy
 	},
 
-	surrogate: &external.Surrogate{
+	surrogate: &algorithm.Surrogate{
 		Inputs:  2,
 		Outputs: 3,
 		Nodes:   20,
@@ -706,7 +706,7 @@ const kraichnanOrszagInputs = 3
 const kraichnanOrszagOutputs = kraichnanOrszagLargeSteps * kraichnanOrszagInputs * 2
 
 type kraichnanOrszagStrategy struct {
-	external.Strategy
+	algorithm.Strategy
 }
 
 func kraichnanOrszagTarget(y0, ys []float64) {
@@ -741,7 +741,7 @@ func kraichnanOrszagTarget(y0, ys []float64) {
 	}
 }
 
-func (self *kraichnanOrszagStrategy) Score(element *external.Element) float64 {
+func (self *kraichnanOrszagStrategy) Score(element *algorithm.Element) float64 {
 	const (
 		localError = 1e-2
 	)
@@ -766,12 +766,12 @@ var fixtureKraichnanOrszag = fixture{
 
 	target: kraichnanOrszagTarget,
 
-	strategy: func(strategy external.Strategy) external.Strategy {
+	strategy: func(strategy algorithm.Strategy) algorithm.Strategy {
 		strategy.(*Strategy).lmax = 8
 		return &kraichnanOrszagStrategy{strategy}
 	},
 
-	surrogate: &external.Surrogate{
+	surrogate: &algorithm.Surrogate{
 		Inputs:  kraichnanOrszagInputs,
 		Outputs: kraichnanOrszagOutputs,
 		Nodes:   3381,
@@ -1999,13 +1999,13 @@ var fixtureParabola = fixture{
 		y[0] = (x[0] - 0.5) * (x[0] - 0.5)
 	},
 
-	strategy: func(strategy external.Strategy) external.Strategy {
+	strategy: func(strategy algorithm.Strategy) algorithm.Strategy {
 		strategy.(*Strategy).lmax = 20
 		strategy.(*Strategy).εl = 1e-6
 		return strategy
 	},
 
-	surrogate: &external.Surrogate{
+	surrogate: &algorithm.Surrogate{
 		Inputs:   1,
 		Outputs:  1,
 		Nodes:    1027,

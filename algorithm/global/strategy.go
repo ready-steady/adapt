@@ -3,7 +3,7 @@ package global
 import (
 	"math"
 
-	"github.com/ready-steady/adapt/algorithm/external"
+	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/algorithm/internal"
 )
 
@@ -57,14 +57,14 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	}
 }
 
-func (self *Strategy) First() *external.State {
-	state := &external.State{}
+func (self *Strategy) First() *algorithm.State {
+	state := &algorithm.State{}
 	state.Lindices = self.Active.First()
 	state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
 	return state
 }
 
-func (self *Strategy) Done(_ *external.State, _ *external.Surrogate) bool {
+func (self *Strategy) Done(_ *algorithm.State, _ *algorithm.Surrogate) bool {
 	if self.k == ^uint(0) {
 		return false
 	}
@@ -83,11 +83,11 @@ func (self *Strategy) Done(_ *external.State, _ *external.Surrogate) bool {
 	return true
 }
 
-func (self *Strategy) Score(element *external.Element) float64 {
+func (self *Strategy) Score(element *algorithm.Element) float64 {
 	return internal.SumAbsolute(element.Surplus)
 }
 
-func (self *Strategy) Next(state *external.State, _ *external.Surrogate) *external.State {
+func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
 	for {
 		self.consume(state)
 		self.Active.Drop(self.k)
@@ -98,7 +98,7 @@ func (self *Strategy) Next(state *external.State, _ *external.Surrogate) *extern
 		if self.global[self.k] <= 0.0 {
 			return nil
 		}
-		state = &external.State{}
+		state = &algorithm.State{}
 		state.Lindices = self.Active.Next(self.k)
 		state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
 		if len(state.Indices) > 0 {
@@ -107,7 +107,7 @@ func (self *Strategy) Next(state *external.State, _ *external.Surrogate) *extern
 	}
 }
 
-func (self *Strategy) consume(state *external.State) {
+func (self *Strategy) consume(state *algorithm.State) {
 	no, ng, nl := self.no, uint(len(self.global)), uint(len(self.local))
 	nn := uint(len(state.Counts))
 

@@ -1,4 +1,4 @@
-package external
+package algorithm
 
 import (
 	"fmt"

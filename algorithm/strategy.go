@@ -1,4 +1,4 @@
-package external
+package algorithm
 
 // Element contains information about an interpolation element.
 type Element struct {

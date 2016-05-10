@@ -3,7 +3,7 @@ package hybrid
 import (
 	"math"
 
-	"github.com/ready-steady/adapt/algorithm/external"
+	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/basis/polynomial"
 	"github.com/ready-steady/adapt/grid/equidistant"
 )
@@ -16,9 +16,9 @@ type fixture struct {
 	rule   string
 	parent func(uint64, uint64) (uint64, uint64)
 
-	target external.Target
+	target algorithm.Target
 
-	surrogate *external.Surrogate
+	surrogate *algorithm.Surrogate
 
 	points []float64
 	values []float64
@@ -33,7 +33,7 @@ func (self *fixture) initialize() {
 	}
 }
 
-func prepare(fixture *fixture) (*Algorithm, external.Strategy) {
+func prepare(fixture *fixture) (*Algorithm, algorithm.Strategy) {
 	const (
 		minLevel   = 1
 		maxLevel   = 10
@@ -60,7 +60,7 @@ var fixtureBranin = fixture{
 		value[0] = z*z + 10.0*(1.0-1.0/(8.0*math.Pi))*math.Cos(x) + 10.0
 	},
 
-	surrogate: &external.Surrogate{
+	surrogate: &algorithm.Surrogate{
 		Inputs:  2,
 		Outputs: 1,
 		Nodes:   477,
