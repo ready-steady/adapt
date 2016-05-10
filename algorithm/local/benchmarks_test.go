@@ -49,6 +49,8 @@ func BenchmarkComputeMany(b *testing.B) {
 			Outputs: outputs,
 		},
 	}
+	fixture.initialize()
+
 	algorithm, strategy := prepare(fixture)
 
 	for i := 0; i < b.N; i++ {
@@ -111,6 +113,7 @@ func BenchmarkEvaluateMany(b *testing.B) {
 			Outputs: outputs,
 		},
 	}
+	fixture.initialize()
 
 	algorithm, strategy := prepare(fixture)
 	surrogate := algorithm.Compute(fixture.target, strategy)
