@@ -3,8 +3,9 @@ package global
 import (
 	"testing"
 
-	"github.com/ready-steady/adapt/algorithm/internal"
 	"github.com/ready-steady/assert"
+
+	interpolation "github.com/ready-steady/adapt/algorithm"
 )
 
 func BenchmarkBranin(b *testing.B) {
@@ -21,8 +22,8 @@ func TestBranin(t *testing.T) {
 
 	surrogate := algorithm.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
-	assert.Equal(internal.IsUnique(surrogate.Indices, surrogate.Inputs), true, t)
-	assert.Equal(internal.IsAdmissible(surrogate.Indices, surrogate.Inputs,
+	assert.Equal(interpolation.IsUnique(surrogate.Indices, surrogate.Inputs), true, t)
+	assert.Equal(interpolation.IsAdmissible(surrogate.Indices, surrogate.Inputs,
 		fixture.parent), true, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
