@@ -1,5 +1,8 @@
 # Adapt [![Build Status][status-img]][status-url]
 
+The repository provides algorithms for adaptive hierarchical interpolation on
+sparse grids.
+
 ## Packages
 
 * [algorithm](algorithm)

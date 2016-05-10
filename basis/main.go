@@ -1,2 +1,2 @@
-// Package basis contains code shared by interpolation bases.
+// Package basis contains code shared by the interpolation bases.
 package basis

@@ -1,6 +1,6 @@
 # Grid
 
-The package contains code shared by interpolation grids.
+The package contains code shared by the interpolation grids.
 
 ## Packages
 
