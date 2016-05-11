@@ -12,7 +12,7 @@ type Element struct {
 
 // State contains information about an interpolation iteration.
 type State struct {
-	Ildices []uint64 // Level indices
+	Lndices []uint64 // Level indices
 	Indices []uint64 // Nodal indices
 	Counts  []uint   // Number of nodal indices for each level index
 

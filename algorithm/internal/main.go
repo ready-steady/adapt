@@ -59,11 +59,11 @@ func Approximate(computer basis.Computer, indices []uint64, surpluses, points []
 }
 
 // Index returns the nodal indices of a set of level indices.
-func Index(indexer grid.Indexer, ildices []uint64, ni uint) ([]uint64, []uint) {
-	nn := uint(len(ildices)) / ni
+func Index(indexer grid.Indexer, lndices []uint64, ni uint) ([]uint64, []uint) {
+	nn := uint(len(lndices)) / ni
 	indices, counts := []uint64(nil), make([]uint, nn)
 	for i := uint(0); i < nn; i++ {
-		more := indexer.Index(ildices[i*ni : (i+1)*ni])
+		more := indexer.Index(lndices[i*ni : (i+1)*ni])
 		indices = append(indices, more...)
 		counts[i] = uint(len(more)) / ni
 	}
