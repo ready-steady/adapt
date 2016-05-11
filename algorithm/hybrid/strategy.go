@@ -175,7 +175,7 @@ func (self *Strategy) index(lindices []uint64, surrogate *algorithm.Surrogate) (
 			k, ok := self.position[self.hash.Key(lindex)]
 			lindex[j] = level
 			if !ok {
-				continue
+				panic("the index set is not admissible")
 			}
 
 			from, till := self.offset[k], nl
