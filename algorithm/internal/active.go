@@ -37,6 +37,7 @@ func (self *Active) Next(k uint) (indices []uint64) {
 
 	forward, backward := self.forward, self.backward
 	index := self.Indices[k*ni : (k+1)*ni]
+	delete(self.Positions, k)
 
 outer:
 	for i, nn := uint(0), no; i < ni; i++ {
@@ -89,9 +90,4 @@ outer:
 
 	indices = self.Indices[no*ni:]
 	return
-}
-
-// Drop deactivates a level index.
-func (self *Active) Drop(k uint) {
-	delete(self.Positions, k)
 }

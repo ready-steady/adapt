@@ -8,14 +8,16 @@ import (
 	"github.com/ready-steady/adapt/grid"
 )
 
+const (
+	none = ^uint(0)
+)
+
 var (
 	infinity = math.Inf(1.0)
 )
 
 // Strategy is a basic strategy.
 type Strategy struct {
-	*internal.Active
-
 	ni uint
 	no uint
 
@@ -28,6 +30,7 @@ type Strategy struct {
 
 	k uint
 
+	active   *internal.Active
 	hash     *internal.Hash
 	unique   *internal.Unique
 	position map[string]uint
@@ -48,8 +51,6 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	localError, totalError float64) *Strategy {
 
 	return &Strategy{
-		Active: internal.NewActive(inputs),
-
 		ni: inputs,
 		no: outputs,
 
@@ -60,8 +61,7 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 		εl:   localError,
 		εt:   totalError,
 
-		k: ^uint(0),
-
+		active:   internal.NewActive(inputs),
 		hash:     internal.NewHash(inputs),
 		unique:   internal.NewUnique(inputs),
 		position: make(map[string]uint),
@@ -70,29 +70,9 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 
 func (self *Strategy) First() *algorithm.State {
 	state := &algorithm.State{}
-	state.Lindices = self.Active.First()
+	state.Lindices = self.active.First()
 	state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
 	return state
-}
-
-func (self *Strategy) Done(_ *algorithm.State, _ *algorithm.Surrogate) bool {
-	if self.k == ^uint(0) {
-		return false
-	}
-	total, ng := 0.0, uint(len(self.global))
-	for i := range self.Positions {
-		if i < ng {
-			total += self.global[i]
-			if total > self.εt {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func (self *Strategy) Score(element *algorithm.Element) float64 {
-	return internal.MaxAbsolute(element.Surplus) * element.Volume
 }
 
 func (self *Strategy) Next(state *algorithm.State,
@@ -100,21 +80,46 @@ func (self *Strategy) Next(state *algorithm.State,
 
 	for {
 		self.consume(state)
-		self.Active.Drop(self.k)
-		if len(self.Positions) == 0 {
+		if self.check() {
 			return nil
 		}
-		self.k = internal.LocateMax(self.global, self.Positions)
-		if self.global[self.k] <= 0.0 {
+		k := self.choose()
+		if k == none {
 			return nil
 		}
 		state = &algorithm.State{}
-		state.Lindices = self.Active.Next(self.k)
+		state.Lindices = self.active.Next(k)
 		state.Indices, state.Counts = self.index(state.Lindices, surrogate)
 		if len(state.Indices) > 0 {
 			return state
 		}
 	}
+}
+
+func (self *Strategy) Score(element *algorithm.Element) float64 {
+	return internal.MaxAbsolute(element.Surplus) * element.Volume
+}
+
+func (self *Strategy) check() bool {
+	total := 0.0
+	for i := range self.active.Positions {
+		total += self.global[i]
+		if total > self.εt {
+			return false
+		}
+	}
+	return true
+}
+
+func (self *Strategy) choose() uint {
+	if len(self.active.Positions) == 0 {
+		return none
+	}
+	k := internal.LocateMax(self.global, self.active.Positions)
+	if self.global[k] <= 0.0 {
+		return none
+	}
+	return k
 }
 
 func (self *Strategy) consume(state *algorithm.State) {

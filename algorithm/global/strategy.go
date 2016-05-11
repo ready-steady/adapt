@@ -8,14 +8,16 @@ import (
 	"github.com/ready-steady/adapt/grid"
 )
 
+const (
+	none = ^uint(0)
+)
+
 var (
 	infinity = math.Inf(1.0)
 )
 
 // Strategy is a basic strategy.
 type Strategy struct {
-	*internal.Active
-
 	ni uint
 	no uint
 
@@ -24,11 +26,10 @@ type Strategy struct {
 	lmin uint
 	lmax uint
 
-	k uint
-
 	global []float64
 	local  []float64
 
+	active    *internal.Active
 	threshold *internal.Threshold
 }
 
@@ -42,8 +43,6 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	absoluteError, relativeError float64) *Strategy {
 
 	return &Strategy{
-		Active: internal.NewActive(inputs),
-
 		ni: inputs,
 		no: outputs,
 
@@ -52,60 +51,62 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 		lmin: minLevel,
 		lmax: maxLevel,
 
-		k: ^uint(0),
-
+		active:    internal.NewActive(inputs),
 		threshold: internal.NewThreshold(outputs, absoluteError, relativeError),
 	}
 }
 
 func (self *Strategy) First() *algorithm.State {
 	state := &algorithm.State{}
-	state.Lindices = self.Active.First()
+	state.Lindices = self.active.First()
 	state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
 	return state
 }
 
-func (self *Strategy) Done(_ *algorithm.State, _ *algorithm.Surrogate) bool {
-	if self.k == ^uint(0) {
-		return false
-	}
-	no := self.no
-	nl := uint(len(self.local)) / no
-	δ := self.threshold.Values
-	for i := range self.Positions {
-		if i < nl {
-			for j := uint(0); j < no; j++ {
-				if self.local[i*no+j] > δ[j] {
-					return false
-				}
-			}
+func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
+	for {
+		self.consume(state)
+		if self.check() {
+			return nil
+		}
+		k := self.choose()
+		if k == none {
+			return nil
+		}
+		state = &algorithm.State{}
+		state.Lindices = self.active.Next(k)
+		state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
+		if len(state.Indices) > 0 {
+			return state
 		}
 	}
-	return true
 }
 
 func (self *Strategy) Score(element *algorithm.Element) float64 {
 	return internal.SumAbsolute(element.Surplus)
 }
 
-func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
-	for {
-		self.consume(state)
-		self.Active.Drop(self.k)
-		if len(self.Positions) == 0 {
-			return nil
-		}
-		self.k = internal.LocateMax(self.global, self.Positions)
-		if self.global[self.k] <= 0.0 {
-			return nil
-		}
-		state = &algorithm.State{}
-		state.Lindices = self.Active.Next(self.k)
-		state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
-		if len(state.Indices) > 0 {
-			return state
+func (self *Strategy) check() bool {
+	no, δ := self.no, self.threshold.Values
+	for i := range self.active.Positions {
+		for j := uint(0); j < no; j++ {
+			if self.local[i*no+j] > δ[j] {
+				return false
+			}
 		}
 	}
+	return true
+}
+
+func (self *Strategy) choose() uint {
+	if len(self.active.Positions) == 0 {
+		return none
+	}
+	k := internal.LocateMax(self.global, self.active.Positions)
+	if self.global[k] <= 0.0 {
+		return none
+	}
+	return k
 }
 
 func (self *Strategy) consume(state *algorithm.State) {

@@ -46,7 +46,7 @@ func (self *Algorithm) Compute(target algorithm.Target,
 
 	ni, no := self.ni, self.no
 	surrogate := algorithm.NewSurrogate(ni, no)
-	for s := strategy.First(); !strategy.Done(s, surrogate); s = strategy.Next(s, surrogate) {
+	for s := strategy.First(); s != nil; s = strategy.Next(s, surrogate) {
 		s.Volumes = internal.Measure(self.basis, s.Indices, ni)
 		s.Nodes = self.grid.Compute(s.Indices)
 		s.Values = algorithm.Invoke(target, s.Nodes, ni, no)

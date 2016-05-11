@@ -49,19 +49,19 @@ func (self *Strategy) First() *algorithm.State {
 	}
 }
 
-func (self *Strategy) Done(state *algorithm.State, _ *algorithm.Surrogate) bool {
-	return state == nil || len(state.Indices) == 0
+func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
+	indices := self.unique.Distil(self.guide.Refine(filter(state.Indices,
+		state.Scores, self.lmin, self.lmax, self.εl, self.ni)))
+	if len(indices) == 0 {
+		return nil
+	}
+	return &algorithm.State{
+		Indices: indices,
+	}
 }
 
 func (self *Strategy) Score(element *algorithm.Element) float64 {
 	return internal.MaxAbsolute(element.Surplus)
-}
-
-func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
-	return &algorithm.State{
-		Indices: self.unique.Distil(self.guide.Refine(filter(state.Indices,
-			state.Scores, self.lmin, self.lmax, self.εl, self.ni))),
-	}
 }
 
 func filter(indices []uint64, scores []float64, lmin, lmax uint, εl float64, ni uint) []uint64 {
