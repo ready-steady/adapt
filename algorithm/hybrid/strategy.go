@@ -70,8 +70,8 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 
 func (self *Strategy) First() *algorithm.State {
 	state := &algorithm.State{}
-	state.Lindices = self.active.First()
-	state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
+	state.Ildices = self.active.First()
+	state.Indices, state.Counts = internal.Index(self.guide, state.Ildices, self.ni)
 	return state
 }
 
@@ -88,8 +88,8 @@ func (self *Strategy) Next(state *algorithm.State,
 			return nil
 		}
 		state = &algorithm.State{}
-		state.Lindices = self.active.Next(k)
-		state.Indices, state.Counts = self.index(state.Lindices, surrogate)
+		state.Ildices = self.active.Next(k)
+		state.Indices, state.Counts = self.index(state.Ildices, surrogate)
 		if len(state.Indices) > 0 {
 			return state
 		}
@@ -126,7 +126,7 @@ func (self *Strategy) consume(state *algorithm.State) {
 	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
 	nn := uint(len(state.Counts))
 
-	levels := internal.Levelize(state.Lindices, ni)
+	levels := internal.Levelize(state.Ildices, ni)
 
 	self.offset = append(self.offset, make([]uint, nn)...)
 	offset := self.offset[ng:]
@@ -153,27 +153,27 @@ func (self *Strategy) consume(state *algorithm.State) {
 		} else {
 			global[i] = internal.Max(state.Scores[o:(o + count)])
 		}
-		self.position[self.hash.Key(state.Lindices[i*ni:(i+1)*ni])] = ng + i
+		self.position[self.hash.Key(state.Ildices[i*ni:(i+1)*ni])] = ng + i
 		o += count
 	}
 }
 
-func (self *Strategy) index(lindices []uint64, surrogate *algorithm.Surrogate) ([]uint64, []uint) {
+func (self *Strategy) index(Ildices []uint64, surrogate *algorithm.Surrogate) ([]uint64, []uint) {
 	ni, nl := self.ni, uint(len(self.local))
-	nn := uint(len(lindices)) / ni
+	nn := uint(len(Ildices)) / ni
 
 	indices, counts := []uint64(nil), make([]uint, nn)
 	for i, o := uint(0), uint(0); i < nn; i++ {
-		lindex := lindices[i*ni : (i+1)*ni]
+		ildex := Ildices[i*ni : (i+1)*ni]
 		for j := uint(0); j < ni; j++ {
-			level := lindex[j]
+			level := ildex[j]
 			if level == 0 {
 				continue
 			}
 
-			lindex[j] = level - 1
-			k, ok := self.position[self.hash.Key(lindex)]
-			lindex[j] = level
+			ildex[j] = level - 1
+			k, ok := self.position[self.hash.Key(ildex)]
+			ildex[j] = level
 			if !ok {
 				panic("the index set is not admissible")
 			}

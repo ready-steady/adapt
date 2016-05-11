@@ -58,8 +58,8 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 
 func (self *Strategy) First() *algorithm.State {
 	state := &algorithm.State{}
-	state.Lindices = self.active.First()
-	state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
+	state.Ildices = self.active.First()
+	state.Indices, state.Counts = internal.Index(self.guide, state.Ildices, self.ni)
 	return state
 }
 
@@ -74,8 +74,8 @@ func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algo
 			return nil
 		}
 		state = &algorithm.State{}
-		state.Lindices = self.active.Next(k)
-		state.Indices, state.Counts = internal.Index(self.guide, state.Lindices, self.ni)
+		state.Ildices = self.active.Next(k)
+		state.Indices, state.Counts = internal.Index(self.guide, state.Ildices, self.ni)
 		if len(state.Indices) > 0 {
 			return state
 		}
@@ -113,7 +113,7 @@ func (self *Strategy) consume(state *algorithm.State) {
 	no, ng, nl := self.no, uint(len(self.global)), uint(len(self.local))
 	nn := uint(len(state.Counts))
 
-	levels := internal.Levelize(state.Lindices, self.ni)
+	levels := internal.Levelize(state.Ildices, self.ni)
 
 	self.global = append(self.global, make([]float64, nn)...)
 	global := self.global[ng:]
