@@ -66,7 +66,7 @@ func (self *Algorithm) Evaluate(surrogate *algorithm.Surrogate, points []float64
 
 func score(strategy algorithm.Strategy, state *algorithm.State, ni, no uint) []float64 {
 	nn := uint(len(state.Counts))
-	scores := make([]float64, 0, nn)
+	scores := []float64(nil)
 	for i, j := uint(0), uint(0); i < nn; i++ {
 		for m := j + state.Counts[i]; j < m; j++ {
 			scores = append(scores, strategy.Score(&algorithm.Element{
