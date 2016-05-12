@@ -33,7 +33,7 @@ type Strategy struct {
 	unique *internal.Unique
 
 	lndices []lndex
-	indices []index
+	scores  []float64
 
 	lcursor map[string]uint
 	icursor map[string]uint
@@ -48,10 +48,6 @@ type Guide interface {
 type lndex struct {
 	score float64
 	scope []uint
-}
-
-type index struct {
-	score float64
 }
 
 // NewStrategy creates a basic strategy.
@@ -135,38 +131,39 @@ func (self *Strategy) choose() uint {
 
 func (self *Strategy) consume(state *algorithm.State) {
 	ni := self.ni
-	nol, noi := uint(len(self.lndices)), uint(len(self.indices))
-	nnl, nni := uint(len(state.Counts)), uint(len(state.Scores))
+	nl := uint(len(self.lndices))
+	nn := uint(len(state.Counts))
+	ns := uint(len(self.scores))
 
 	levels := internal.Levelize(state.Lndices, ni)
 
 	groups := state.Data.([][]uint64)
 
-	self.lndices = append(self.lndices, make([]lndex, nnl)...)
-	lndices := self.lndices[nol:]
+	self.lndices = append(self.lndices, make([]lndex, nn)...)
+	lndices := self.lndices[nl:]
 
-	self.indices = append(self.indices, make([]index, nni)...)
-	indices := self.indices[noi:]
+	self.scores = append(self.scores, state.Scores...)
+	scores := self.scores[ns:]
 
-	for i, offset := uint(0), uint(0); i < nnl; i++ {
+	for i, offset := uint(0), uint(0); i < nn; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
 			for j := uint(0); j < count; j++ {
-				indices[offset+j].score = infinity
+				scores[offset+j] = infinity
 			}
-		} else if levels[i] < uint64(self.lmax) {
+		} else if levels[i] >= uint64(self.lmax) {
 			for j := uint(0); j < count; j++ {
-				indices[offset+j].score = state.Scores[offset+j]
+				scores[offset+j] = 0.0
 			}
 		}
 		for j := uint(0); j < count; j++ {
 			index := state.Indices[(offset+j)*ni : (offset+j+1)*ni]
-			self.icursor[self.hash.Key(index)] = noi + offset + j
+			self.icursor[self.hash.Key(index)] = ns + offset + j
 		}
 		offset += count
 	}
 
-	for i := uint(0); i < nnl; i++ {
+	for i := uint(0); i < nn; i++ {
 		count := uint(len(groups[i])) / ni
 		scope := make([]uint, count)
 		for j := uint(0); j < count; j++ {
@@ -179,10 +176,10 @@ func (self *Strategy) consume(state *algorithm.State) {
 		}
 		lndices[i].scope = scope
 		for _, j := range scope {
-			lndices[i].score = math.Max(lndices[i].score, self.indices[j].score)
+			lndices[i].score = math.Max(lndices[i].score, self.scores[j])
 		}
 		lndex := state.Lndices[i*ni : (i+1)*ni]
-		self.lcursor[self.hash.Key(lndex)] = nol + i
+		self.lcursor[self.hash.Key(lndex)] = nl + i
 	}
 }
 
@@ -204,7 +201,7 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 				panic("something went wrong")
 			}
 			for _, l := range self.lndices[k].scope {
-				if self.indices[l].score >= self.εl {
+				if self.scores[l] >= self.εl {
 					index := surrogate.Indices[l*ni : (l+1)*ni]
 					groups[i] = append(groups[i], self.guide.RefineToward(index, j)...)
 				}
