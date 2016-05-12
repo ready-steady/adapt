@@ -44,7 +44,7 @@ func (self *Threshold) Compress(error, errors []float64) {
 	no := self.no
 	for i, m := uint(0), uint(len(errors)); i < m; i++ {
 		j := i % no
-		error[j] = math.Max(error[j], math.Abs(errors[i*no+j]))
+		error[j] = math.Max(error[j], math.Abs(errors[i]))
 	}
 }
 
