@@ -41,8 +41,7 @@ func (self *Threshold) Check(error []float64) bool {
 // Compress compresses multiple errors into a single one so that it can later on
 // be tested against the threshold.
 func (self *Threshold) Compress(error, errors []float64) {
-	no := self.no
-	for i, m := uint(0), uint(len(errors)); i < m; i++ {
+	for i, m, no := uint(0), uint(len(errors)), self.no; i < m; i++ {
 		j := i % no
 		error[j] = math.Max(error[j], math.Abs(errors[i]))
 	}
