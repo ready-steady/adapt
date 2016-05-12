@@ -133,10 +133,8 @@ func (self *Strategy) consume(state *algorithm.State) {
 			}
 		} else if levels[i] < uint64(self.lmax) {
 			priority[i] = internal.Average(state.Scores[offset:(offset + count)])
-			for j, m := uint(0), count*no; j < m; j++ {
-				k := i*no + j%no
-				accuracy[k] = math.Max(accuracy[k], math.Abs(state.Surpluses[offset+j]))
-			}
+			self.threshold.Compress(accuracy[i*no:(i+1)*no],
+				state.Surpluses[offset*no:(offset+count)*no])
 		}
 		offset += count
 	}
