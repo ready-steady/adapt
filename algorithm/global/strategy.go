@@ -26,8 +26,8 @@ type Strategy struct {
 	lmin uint
 	lmax uint
 
-	coarse []float64
-	fine   []float64
+	accuracy []float64
+	priority []float64
 
 	active    *internal.Active
 	threshold *internal.Threshold
@@ -87,7 +87,7 @@ func (self *Strategy) check() bool {
 	no, δ := self.no, self.threshold.Values
 	for i := range self.active.Positions {
 		for j := uint(0); j < no; j++ {
-			if self.fine[i*no+j] > δ[j] {
+			if self.accuracy[i*no+j] > δ[j] {
 				return false
 			}
 		}
@@ -101,8 +101,8 @@ func (self *Strategy) choose() uint {
 	}
 	k, max := none, 0.0
 	for i := range self.active.Positions {
-		if score := self.coarse[i]; score > max {
-			k, max = i, score
+		if priority := self.priority[i]; priority > max {
+			k, max = i, priority
 		}
 	}
 	if max <= 0.0 {
@@ -112,30 +112,30 @@ func (self *Strategy) choose() uint {
 }
 
 func (self *Strategy) consume(state *algorithm.State) {
-	no, nc, nf := self.no, uint(len(self.coarse)), uint(len(self.fine))
+	no, nc, nf := self.no, uint(len(self.priority)), uint(len(self.accuracy))
 	nnc := uint(len(state.Counts))
 	nnf := nnc * no
 
 	levels := internal.Levelize(state.Lndices, self.ni)
 
-	self.coarse = append(self.coarse, make([]float64, nnc)...)
-	coarse := self.coarse[nc:]
+	self.priority = append(self.priority, make([]float64, nnc)...)
+	priority := self.priority[nc:]
 
-	self.fine = append(self.fine, make([]float64, nnf)...)
-	fine := self.fine[nf:]
+	self.accuracy = append(self.accuracy, make([]float64, nnf)...)
+	accuracy := self.accuracy[nf:]
 
 	for i, offset := uint(0), uint(0); i < nnc; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
-			coarse[i] = infinity
+			priority[i] = infinity
 			for j := uint(0); j < no; j++ {
-				fine[i*no+j] = infinity
+				accuracy[i*no+j] = infinity
 			}
 		} else if levels[i] < uint64(self.lmax) {
-			coarse[i] = internal.Average(state.Scores[offset:(offset + count)])
+			priority[i] = internal.Average(state.Scores[offset:(offset + count)])
 			for j, m := uint(0), count*no; j < m; j++ {
 				k := i*no + j%no
-				fine[k] = math.Max(fine[k], math.Abs(state.Surpluses[offset+j]))
+				accuracy[k] = math.Max(accuracy[k], math.Abs(state.Surpluses[offset+j]))
 			}
 		}
 		offset += count
