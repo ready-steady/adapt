@@ -177,7 +177,7 @@ func (self *Strategy) consume(state *algorithm.State) {
 func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) [][]uint64 {
 	ni := self.ni
 	nn := uint(len(lndices)) / ni
-	indices := make([][]uint64, nn)
+	groups := make([][]uint64, nn)
 	for i := uint(0); i < nn; i++ {
 		root, lndex := true, lndices[i*ni:(i+1)*ni]
 		for j := uint(0); j < ni; j++ {
@@ -197,15 +197,15 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 			for k, m := self.lndices[k].from, self.lndices[k].till; k < m; k++ {
 				if self.indices[k].score >= self.εl {
 					index := surrogate.Indices[k*ni : (k+1)*ni]
-					indices[i] = append(indices[i], self.guide.RefineToward(index, j)...)
+					groups[i] = append(groups[i], self.guide.RefineToward(index, j)...)
 				}
 			}
 		}
 		if root {
-			indices[i] = append(indices[i], self.guide.Index(lndex)...)
+			groups[i] = append(groups[i], self.guide.Index(lndex)...)
 		}
 	}
-	return indices
+	return groups
 }
 
 func (self *Strategy) initiate(lndices []uint64,
