@@ -26,8 +26,8 @@ type Strategy struct {
 	lmin uint
 	lmax uint
 
-	global []float64
-	local  []float64
+	coarse []float64
+	fine   []float64
 
 	active    *internal.Active
 	threshold *internal.Threshold
@@ -90,7 +90,7 @@ func (self *Strategy) check() bool {
 	no, δ := self.no, self.threshold.Values
 	for i := range self.active.Positions {
 		for j := uint(0); j < no; j++ {
-			if self.local[i*no+j] > δ[j] {
+			if self.fine[i*no+j] > δ[j] {
 				return false
 			}
 		}
@@ -102,45 +102,46 @@ func (self *Strategy) choose() uint {
 	if len(self.active.Positions) == 0 {
 		return none
 	}
-	k := internal.LocateMax(self.global, self.active.Positions)
-	if self.global[k] <= 0.0 {
+	k, max := none, 0.0
+	for i := range self.active.Positions {
+		if score := self.coarse[i]; score > max {
+			k, max = i, score
+		}
+	}
+	if max <= 0.0 {
 		return none
 	}
 	return k
 }
 
 func (self *Strategy) consume(state *algorithm.State) {
-	no, ng, nl := self.no, uint(len(self.global)), uint(len(self.local))
-	nn := uint(len(state.Counts))
+	no, nc, nf := self.no, uint(len(self.coarse)), uint(len(self.fine))
+	nnc := uint(len(state.Counts))
+	nnf := nnc * no
 
 	levels := internal.Levelize(state.Lndices, self.ni)
 
-	self.global = append(self.global, make([]float64, nn)...)
-	global := self.global[ng:]
+	self.coarse = append(self.coarse, make([]float64, nnc)...)
+	coarse := self.coarse[nc:]
 
-	self.local = append(self.local, make([]float64, nn*no)...)
-	local := self.local[nl:]
+	self.fine = append(self.fine, make([]float64, nnf)...)
+	fine := self.fine[nf:]
 
-	for i, o := uint(0), uint(0); i < nn; i++ {
+	for i, offset := uint(0), uint(0); i < nnc; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
-			global[i] = infinity
+			coarse[i] = infinity
 			for j := uint(0); j < no; j++ {
-				local[i*no+j] = infinity
+				fine[i*no+j] = infinity
 			}
-		} else if levels[i] >= uint64(self.lmax) {
-			global[i] = 0.0
-			for j := uint(0); j < no; j++ {
-				local[i*no+j] = 0.0
-			}
-		} else {
-			global[i] = internal.Average(state.Scores[o:(o + count)])
+		} else if levels[i] < uint64(self.lmax) {
+			coarse[i] = internal.Average(state.Scores[offset:(offset + count)])
 			for j, m := uint(0), count*no; j < m; j++ {
 				k := i*no + j%no
-				local[k] = math.Max(local[k], math.Abs(state.Surpluses[o+j]))
+				fine[k] = math.Max(fine[k], math.Abs(state.Surpluses[offset+j]))
 			}
 		}
-		o += count
+		offset += count
 	}
 
 	self.threshold.Update(state.Values)
