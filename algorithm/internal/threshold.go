@@ -6,10 +6,9 @@ import (
 
 // Threshold is an adaptive error threshold.
 type Threshold struct {
-	Values []float64 // Threshold
-
-	lower []float64
-	upper []float64
+	values []float64
+	lower  []float64
+	upper  []float64
 
 	no uint
 	εa float64
@@ -19,10 +18,9 @@ type Threshold struct {
 // NewThreshold creates a Threshold.
 func NewThreshold(outputs uint, absolute, relative float64) *Threshold {
 	return &Threshold{
-		Values: make([]float64, outputs),
-
-		lower: repeat(math.Inf(1.0), outputs),
-		upper: repeat(math.Inf(-1.0), outputs),
+		values: make([]float64, outputs),
+		lower:  repeat(math.Inf(1.0), outputs),
+		upper:  repeat(math.Inf(-1.0), outputs),
 
 		no: outputs,
 		εa: absolute,
@@ -30,14 +28,24 @@ func NewThreshold(outputs uint, absolute, relative float64) *Threshold {
 	}
 }
 
-// Compress compresses multiple points into a single one so that it can later on
+// Check checks if the threshold is satisfied.
+func (self *Threshold) Check(error []float64) bool {
+	for i, no := uint(0), self.no; i < no; i++ {
+		if error[i] > self.values[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// Compress compresses multiple errors into a single one so that it can later on
 // be tested against the threshold.
-func (self *Threshold) Compress(destination, source []float64) {
+func (self *Threshold) Compress(error, errors []float64) {
 	no := self.no
-	nn := uint(len(source)) / no
+	nn := uint(len(errors)) / no
 	for i := uint(0); i < nn; i++ {
 		for j := uint(0); j < no; j++ {
-			destination[j] = math.Max(destination[j], math.Abs(source[i*no+j]))
+			error[j] = math.Max(error[j], math.Abs(errors[i*no+j]))
 		}
 	}
 }
@@ -51,7 +59,7 @@ func (self *Threshold) Update(values []float64) {
 		self.upper[j] = math.Max(self.upper[j], values[i])
 	}
 	for i := uint(0); i < no; i++ {
-		self.Values[i] = math.Max(self.εa, self.εr*(self.upper[i]-self.lower[i]))
+		self.values[i] = math.Max(self.εa, self.εr*(self.upper[i]-self.lower[i]))
 	}
 }
 

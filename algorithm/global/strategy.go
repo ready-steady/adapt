@@ -84,12 +84,10 @@ func (self *Strategy) Score(element *algorithm.Element) float64 {
 }
 
 func (self *Strategy) check() bool {
-	no, δ := self.no, self.threshold.Values
+	no := self.no
 	for i := range self.active.Positions {
-		for j := uint(0); j < no; j++ {
-			if self.accuracy[i*no+j] > δ[j] {
-				return false
-			}
+		if !self.threshold.Check(self.accuracy[i*no : (i+1)*no]) {
+			return false
 		}
 	}
 	return true
