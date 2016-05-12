@@ -42,11 +42,9 @@ func (self *Threshold) Check(error []float64) bool {
 // be tested against the threshold.
 func (self *Threshold) Compress(error, errors []float64) {
 	no := self.no
-	nn := uint(len(errors)) / no
-	for i := uint(0); i < nn; i++ {
-		for j := uint(0); j < no; j++ {
-			error[j] = math.Max(error[j], math.Abs(errors[i*no+j]))
-		}
+	for i, m := uint(0), uint(len(errors)); i < m; i++ {
+		j := i % no
+		error[j] = math.Max(error[j], math.Abs(errors[i*no+j]))
 	}
 }
 
