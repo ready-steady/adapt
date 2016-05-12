@@ -11,20 +11,12 @@ var (
 )
 
 // Average returns the average value of a vector’s elements.
-func Average(data []float64) float64 {
-	return Sum(data) / float64(len(data))
-}
-
-// LocateMax returns the position of the maximal element across a subset of a
-// vector’s elements.
-func LocateMax(data []float64, set map[uint]bool) uint {
-	position, value := ^uint(0), 0.0
-	for i := range set {
-		if position == ^uint(0) || data[i] > value || (data[i] == value && position > i) {
-			position, value = i, data[i]
-		}
+func Average(data []float64) (result float64) {
+	for _, value := range data {
+		result += value
 	}
-	return position
+	result /= float64(len(data))
+	return
 }
 
 // Levelize returns the uniform norms of the levels of a set of indices.
@@ -35,15 +27,6 @@ func Levelize(indices []uint64, ni uint) (result []uint64) {
 		for j := uint(0); j < ni; j++ {
 			result[i] += internal.LEVEL_MASK & indices[i*ni+j]
 		}
-	}
-	return
-}
-
-// Max returns the maximum value across a vector’s elements.
-func Max(data []float64) (result float64) {
-	result = -infinity
-	for i, n := uint(0), uint(len(data)); i < n; i++ {
-		result = math.Max(result, data[i])
 	}
 	return
 }
@@ -61,14 +44,6 @@ func Subtract(minuend, subtrahend []float64) (result []float64) {
 	result = make([]float64, len(minuend))
 	for i := range minuend {
 		result[i] = minuend[i] - subtrahend[i]
-	}
-	return
-}
-
-// Sum returns the sum of a vector’s elements.
-func Sum(data []float64) (result float64) {
-	for _, value := range data {
-		result += value
 	}
 	return
 }

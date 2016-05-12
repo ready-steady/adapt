@@ -28,22 +28,31 @@ type Strategy struct {
 	εl   float64
 	εt   float64
 
-	k uint
+	active *internal.Active
+	hash   *internal.Hash
+	unique *internal.Unique
 
-	active   *internal.Active
-	hash     *internal.Hash
-	unique   *internal.Unique
-	position map[string]uint
+	lndices []lndex
+	indices []index
 
-	offset []uint
-	global []float64
-	local  []float64
+	lcursor map[string]uint
+	icursor map[string]uint
 }
 
 // Guide is a grid-refinement tool of a basic strategy.
 type Guide interface {
 	grid.Indexer
 	grid.RefinerToward
+}
+
+type lndex struct {
+	score float64
+	from  uint
+	till  uint
+}
+
+type index struct {
+	score float64
 }
 
 // NewStrategy creates a basic strategy.
@@ -61,10 +70,12 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 		εl:   localError,
 		εt:   totalError,
 
-		active:   internal.NewActive(inputs),
-		hash:     internal.NewHash(inputs),
-		unique:   internal.NewUnique(inputs),
-		position: make(map[string]uint),
+		active: internal.NewActive(inputs),
+		hash:   internal.NewHash(inputs),
+		unique: internal.NewUnique(inputs),
+
+		lcursor: make(map[string]uint),
+		icursor: make(map[string]uint),
 	}
 }
 
@@ -103,7 +114,7 @@ func (self *Strategy) Score(element *algorithm.Element) float64 {
 func (self *Strategy) check() bool {
 	total := 0.0
 	for i := range self.active.Positions {
-		total += self.global[i]
+		total += self.lndices[i].score
 		if total > self.εt {
 			return false
 		}
@@ -115,56 +126,65 @@ func (self *Strategy) choose() uint {
 	if len(self.active.Positions) == 0 {
 		return none
 	}
-	k := internal.LocateMax(self.global, self.active.Positions)
-	if self.global[k] <= 0.0 {
+	k, max := none, 0.0
+	for i := range self.active.Positions {
+		if score := self.lndices[i].score; score > max {
+			k, max = i, score
+		}
+	}
+	if max <= 0.0 {
 		return none
 	}
 	return k
 }
 
 func (self *Strategy) consume(state *algorithm.State) {
-	ni, ng, nl := self.ni, uint(len(self.global)), uint(len(self.local))
-	nn := uint(len(state.Counts))
+	ni := self.ni
+	nol, noi := uint(len(self.lndices)), uint(len(self.indices))
+	nnl, nni := uint(len(state.Counts)), uint(len(state.Scores))
 
 	levels := internal.Levelize(state.Lndices, ni)
 
-	self.offset = append(self.offset, make([]uint, nn)...)
-	offset := self.offset[ng:]
+	self.lndices = append(self.lndices, make([]lndex, nnl)...)
+	lndices := self.lndices[nol:]
 
-	self.global = append(self.global, make([]float64, nn)...)
-	global := self.global[ng:]
+	self.indices = append(self.indices, make([]index, nni)...)
+	indices := self.indices[noi:]
 
-	self.local = append(self.local, state.Scores...)
-	local := self.local[nl:]
-
-	for i, o := uint(0), uint(0); i < nn; i++ {
+	for i, offset := uint(0), uint(0); i < nnl; i++ {
 		count := state.Counts[i]
-		offset[i] = nl + o
+
 		if levels[i] < uint64(self.lmin) {
-			global[i] = infinity
+			lndices[i].score = infinity
 			for j := uint(0); j < count; j++ {
-				local[o+j] = infinity
+				indices[offset+j].score = infinity
 			}
-		} else if levels[i] >= uint64(self.lmax) {
-			global[i] = 0.0
+		} else if levels[i] < uint64(self.lmax) {
 			for j := uint(0); j < count; j++ {
-				local[o+j] = 0.0
+				lndices[i].score = math.Max(lndices[i].score, state.Scores[offset+j])
+				indices[offset+j].score = state.Scores[offset+j]
 			}
-		} else {
-			global[i] = internal.Max(state.Scores[o:(o + count)])
 		}
-		self.position[self.hash.Key(state.Lndices[i*ni:(i+1)*ni])] = ng + i
-		o += count
+		lndices[i].from = noi + offset
+		lndices[i].till = noi + offset + count
+
+		lndex := state.Lndices[i*ni : (i+1)*ni]
+		self.lcursor[self.hash.Key(lndex)] = nol + i
+		for j := uint(0); j < count; j++ {
+			index := state.Indices[(offset+j)*ni : (offset+j+1)*ni]
+			self.icursor[self.hash.Key(index)] = noi + offset + j
+		}
+
+		offset += count
 	}
 }
 
-func (self *Strategy) index(Lndices []uint64, surrogate *algorithm.Surrogate) ([]uint64, []uint) {
-	ni, nl := self.ni, uint(len(self.local))
-	nn := uint(len(Lndices)) / ni
-
+func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) ([]uint64, []uint) {
+	ni := self.ni
+	nn := uint(len(lndices)) / ni
 	indices, counts := []uint64(nil), make([]uint, nn)
-	for i, o := uint(0), uint(0); i < nn; i++ {
-		lndex := Lndices[i*ni : (i+1)*ni]
+	for i, offset := uint(0), uint(0); i < nn; i++ {
+		lndex := lndices[i*ni : (i+1)*ni]
 		for j := uint(0); j < ni; j++ {
 			level := lndex[j]
 			if level == 0 {
@@ -172,27 +192,22 @@ func (self *Strategy) index(Lndices []uint64, surrogate *algorithm.Surrogate) ([
 			}
 
 			lndex[j] = level - 1
-			k, ok := self.position[self.hash.Key(lndex)]
+			k, ok := self.lcursor[self.hash.Key(lndex)]
 			lndex[j] = level
 			if !ok {
 				panic("the index set is not admissible")
 			}
 
-			from, till := self.offset[k], nl
-			if uint(len(self.offset)) > k+1 {
-				till = self.offset[k+1]
-			}
-
-			for k := from; k < till; k++ {
-				if self.local[k] >= self.εl {
-					indices = append(indices, self.unique.Distil(self.guide.RefineToward(
-						surrogate.Indices[k*ni:(k+1)*ni], j))...)
+			for k, m := self.lndices[k].from, self.lndices[k].till; k < m; k++ {
+				if self.indices[k].score >= self.εl {
+					index := surrogate.Indices[k*ni : (k+1)*ni]
+					indices = append(indices, self.unique.Distil(
+						self.guide.RefineToward(index, j))...)
 				}
 			}
 		}
-		counts[i] = uint(len(indices))/ni - o
-		o += counts[i]
+		counts[i] = uint(len(indices))/ni - offset
+		offset += counts[i]
 	}
-
 	return indices, counts
 }
