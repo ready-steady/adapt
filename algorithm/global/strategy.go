@@ -112,20 +112,19 @@ func (self *Strategy) choose() uint {
 
 func (self *Strategy) consume(state *algorithm.State) {
 	ni, no := self.ni, self.no
-	nop := uint(len(self.priority))
-	noa := uint(len(self.accuracy))
-	nnp := uint(len(state.Counts))
-	nna := nnp * no
+	np := uint(len(self.priority))
+	na := uint(len(self.accuracy))
+	nn := uint(len(state.Counts))
 
 	levels := internal.Levelize(state.Lndices, ni)
 
-	self.priority = append(self.priority, make([]float64, nnp)...)
-	priority := self.priority[nop:]
+	self.priority = append(self.priority, make([]float64, nn)...)
+	priority := self.priority[np:]
 
-	self.accuracy = append(self.accuracy, make([]float64, nna)...)
-	accuracy := self.accuracy[noa:]
+	self.accuracy = append(self.accuracy, make([]float64, nn*no)...)
+	accuracy := self.accuracy[na:]
 
-	for i, offset := uint(0), uint(0); i < nnp; i++ {
+	for i, offset := uint(0), uint(0); i < nn; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
 			priority[i] = infinity
