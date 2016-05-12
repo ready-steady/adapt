@@ -22,6 +22,7 @@ type Strategy struct {
 
 // Guide is a grid-refinement tool of a basic strategy.
 type Guide interface {
+	grid.Indexer
 	grid.Refiner
 }
 
@@ -43,10 +44,9 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	}
 }
 
-func (self *Strategy) First() *algorithm.State {
-	return &algorithm.State{
-		Indices: make([]uint64, 1*self.ni),
-	}
+func (self *Strategy) First(_ *algorithm.Surrogate) *algorithm.State {
+	lndex := make([]uint64, self.ni)
+	return &algorithm.State{Indices: self.guide.Index(lndex)}
 }
 
 func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {

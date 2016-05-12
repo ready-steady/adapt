@@ -22,12 +22,14 @@ type State struct {
 	Estimates []float64 // Approximated values
 	Surpluses []float64 // Hierarchical surpluses
 	Scores    []float64 // Nodal-index scores
+
+	Data interface{} // Auxiliary data
 }
 
 // Strategy controls the interpolation process.
 type Strategy interface {
 	// First returns the initial state of the first iteration.
-	First() *State
+	First(*Surrogate) *State
 
 	// Next returns the initial state of the next iteration.
 	Next(*State, *Surrogate) *State

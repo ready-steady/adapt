@@ -56,14 +56,13 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	}
 }
 
-func (self *Strategy) First() *algorithm.State {
-	state := &algorithm.State{}
-	state.Lndices = self.active.First()
-	state.Indices, state.Counts = internal.Index(self.guide, state.Lndices, self.ni)
-	return state
+func (self *Strategy) First(surrogate *algorithm.Surrogate) *algorithm.State {
+	return self.initiate(self.active.First(), surrogate)
 }
 
-func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
+func (self *Strategy) Next(state *algorithm.State,
+	surrogate *algorithm.Surrogate) *algorithm.State {
+
 	for {
 		self.consume(state)
 		if self.check() {
@@ -73,9 +72,7 @@ func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algo
 		if k == none {
 			return nil
 		}
-		state = &algorithm.State{}
-		state.Lndices = self.active.Next(k)
-		state.Indices, state.Counts = internal.Index(self.guide, state.Lndices, self.ni)
+		state = self.initiate(self.active.Next(k), surrogate)
 		if len(state.Indices) > 0 {
 			return state
 		}
@@ -145,4 +142,10 @@ func (self *Strategy) consume(state *algorithm.State) {
 	}
 
 	self.threshold.Update(state.Values)
+}
+
+func (self *Strategy) initiate(lndices []uint64, _ *algorithm.Surrogate) (state *algorithm.State) {
+	state = &algorithm.State{Lndices: lndices}
+	state.Indices, state.Counts = internal.Index(self.guide, lndices, self.ni)
+	return
 }

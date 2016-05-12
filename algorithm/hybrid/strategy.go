@@ -79,11 +79,8 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 	}
 }
 
-func (self *Strategy) First() *algorithm.State {
-	state := &algorithm.State{}
-	state.Lndices = self.active.First()
-	state.Indices, state.Counts = internal.Index(self.guide, state.Lndices, self.ni)
-	return state
+func (self *Strategy) First(surrogate *algorithm.Surrogate) *algorithm.State {
+	return self.initiate(self.active.First(), surrogate)
 }
 
 func (self *Strategy) Next(state *algorithm.State,
@@ -98,20 +95,7 @@ func (self *Strategy) Next(state *algorithm.State,
 		if k == none {
 			return nil
 		}
-
-		state = &algorithm.State{}
-		state.Lndices = self.active.Next(k)
-
-		indices := self.index(state.Lndices, surrogate)
-		nn := uint(len(indices))
-
-		state.Counts = make([]uint, nn)
-		for i := uint(0); i < nn; i++ {
-			indices := self.unique.Distil(indices[i])
-			state.Indices = append(state.Indices, indices...)
-			state.Counts[i] = uint(len(indices)) / self.ni
-		}
-
+		state = self.initiate(self.active.Next(k), surrogate)
 		if len(state.Indices) > 0 {
 			return state
 		}
@@ -195,12 +179,13 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 	nn := uint(len(lndices)) / ni
 	indices := make([][]uint64, nn)
 	for i := uint(0); i < nn; i++ {
-		lndex := lndices[i*ni : (i+1)*ni]
+		root, lndex := true, lndices[i*ni:(i+1)*ni]
 		for j := uint(0); j < ni; j++ {
 			level := lndex[j]
 			if level == 0 {
 				continue
 			}
+			root = false
 
 			lndex[j] = level - 1
 			k, ok := self.lcursor[self.hash.Key(lndex)]
@@ -216,6 +201,27 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 				}
 			}
 		}
+		if root {
+			indices[i] = append(indices[i], self.guide.Index(lndex)...)
+		}
 	}
 	return indices
+}
+
+func (self *Strategy) initiate(lndices []uint64,
+	surrogate *algorithm.Surrogate) (state *algorithm.State) {
+
+	groups := self.index(lndices, surrogate)
+	nn := uint(len(groups))
+	state = &algorithm.State{
+		Lndices: lndices,
+		Counts:  make([]uint, nn),
+		Data:    groups,
+	}
+	for i := uint(0); i < nn; i++ {
+		indices := self.unique.Distil(groups[i])
+		state.Indices = append(state.Indices, indices...)
+		state.Counts[i] = uint(len(indices)) / self.ni
+	}
+	return
 }
