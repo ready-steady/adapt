@@ -172,7 +172,7 @@ func (self *Strategy) consume(state *algorithm.State) {
 			index := groups[i][j*ni : (j+1)*ni]
 			k, ok := self.icursor[self.hash.Key(index)]
 			if !ok {
-				panic("something when wrong")
+				panic("something went wrong")
 			}
 			scope[j] = k
 		}
@@ -200,7 +200,7 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 			k, ok := self.lcursor[self.hash.Key(lndex)]
 			lndex[j] = level
 			if !ok {
-				panic("something when wrong")
+				panic("something went wrong")
 			}
 			for _, l := range self.lndices[k].scope {
 				if self.indices[l].score >= self.εl {
