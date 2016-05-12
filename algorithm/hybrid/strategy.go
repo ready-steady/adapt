@@ -47,8 +47,7 @@ type Guide interface {
 
 type lndex struct {
 	score float64
-	from  uint
-	till  uint
+	scope []uint
 }
 
 type index struct {
@@ -140,6 +139,8 @@ func (self *Strategy) consume(state *algorithm.State) {
 
 	levels := internal.Levelize(state.Lndices, ni)
 
+	groups := state.Data.([][]uint64)
+
 	self.lndices = append(self.lndices, make([]lndex, nnl)...)
 	lndices := self.lndices[nol:]
 
@@ -148,29 +149,39 @@ func (self *Strategy) consume(state *algorithm.State) {
 
 	for i, offset := uint(0), uint(0); i < nnl; i++ {
 		count := state.Counts[i]
-
 		if levels[i] < uint64(self.lmin) {
-			lndices[i].score = infinity
 			for j := uint(0); j < count; j++ {
 				indices[offset+j].score = infinity
 			}
 		} else if levels[i] < uint64(self.lmax) {
 			for j := uint(0); j < count; j++ {
-				lndices[i].score = math.Max(lndices[i].score, state.Scores[offset+j])
 				indices[offset+j].score = state.Scores[offset+j]
 			}
 		}
-		lndices[i].from = noi + offset
-		lndices[i].till = noi + offset + count
-
-		lndex := state.Lndices[i*ni : (i+1)*ni]
-		self.lcursor[self.hash.Key(lndex)] = nol + i
 		for j := uint(0); j < count; j++ {
 			index := state.Indices[(offset+j)*ni : (offset+j+1)*ni]
 			self.icursor[self.hash.Key(index)] = noi + offset + j
 		}
-
 		offset += count
+	}
+
+	for i := uint(0); i < nnl; i++ {
+		count := uint(len(groups[i])) / ni
+		scope := make([]uint, count)
+		for j := uint(0); j < count; j++ {
+			index := groups[i][j*ni : (j+1)*ni]
+			k, ok := self.icursor[self.hash.Key(index)]
+			if !ok {
+				panic("something when wrong")
+			}
+			scope[j] = k
+		}
+		lndices[i].scope = scope
+		for _, j := range scope {
+			lndices[i].score = math.Max(lndices[i].score, self.indices[j].score)
+		}
+		lndex := state.Lndices[i*ni : (i+1)*ni]
+		self.lcursor[self.hash.Key(lndex)] = nol + i
 	}
 }
 
@@ -185,21 +196,19 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 			if level == 0 {
 				continue
 			}
-			root = false
-
 			lndex[j] = level - 1
 			k, ok := self.lcursor[self.hash.Key(lndex)]
 			lndex[j] = level
 			if !ok {
-				panic("the index set is not admissible")
+				panic("something when wrong")
 			}
-
-			for k, m := self.lndices[k].from, self.lndices[k].till; k < m; k++ {
-				if self.indices[k].score >= self.εl {
-					index := surrogate.Indices[k*ni : (k+1)*ni]
+			for _, l := range self.lndices[k].scope {
+				if self.indices[l].score >= self.εl {
+					index := surrogate.Indices[l*ni : (l+1)*ni]
 					groups[i] = append(groups[i], self.guide.RefineToward(index, j)...)
 				}
 			}
+			root = false
 		}
 		if root {
 			groups[i] = append(groups[i], self.guide.Index(lndex)...)
