@@ -98,9 +98,20 @@ func (self *Strategy) Next(state *algorithm.State,
 		if k == none {
 			return nil
 		}
+
 		state = &algorithm.State{}
 		state.Lndices = self.active.Next(k)
-		state.Indices, state.Counts = self.index(state.Lndices, surrogate)
+
+		indices := self.index(state.Lndices, surrogate)
+		nn := uint(len(indices))
+
+		state.Counts = make([]uint, nn)
+		for i := uint(0); i < nn; i++ {
+			indices := self.unique.Distil(indices[i])
+			state.Indices = append(state.Indices, indices...)
+			state.Counts[i] = uint(len(indices)) / self.ni
+		}
+
 		if len(state.Indices) > 0 {
 			return state
 		}
@@ -179,11 +190,11 @@ func (self *Strategy) consume(state *algorithm.State) {
 	}
 }
 
-func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) ([]uint64, []uint) {
+func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) [][]uint64 {
 	ni := self.ni
 	nn := uint(len(lndices)) / ni
-	indices, counts := []uint64(nil), make([]uint, nn)
-	for i, offset := uint(0), uint(0); i < nn; i++ {
+	indices := make([][]uint64, nn)
+	for i := uint(0); i < nn; i++ {
 		lndex := lndices[i*ni : (i+1)*ni]
 		for j := uint(0); j < ni; j++ {
 			level := lndex[j]
@@ -201,13 +212,10 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) ([
 			for k, m := self.lndices[k].from, self.lndices[k].till; k < m; k++ {
 				if self.indices[k].score >= self.εl {
 					index := surrogate.Indices[k*ni : (k+1)*ni]
-					indices = append(indices, self.unique.Distil(
-						self.guide.RefineToward(index, j))...)
+					indices[i] = append(indices[i], self.guide.RefineToward(index, j)...)
 				}
 			}
 		}
-		counts[i] = uint(len(indices))/ni - offset
-		offset += counts[i]
 	}
-	return indices, counts
+	return indices
 }
