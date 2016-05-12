@@ -33,6 +33,44 @@ func BenchmarkUniqueDistil(b *testing.B) {
 func TestUniqueDistil(t *testing.T) {
 	unique := NewUnique(2)
 
+	test := func(input, output []uint64) {
+		assert.Equal(unique.Distil(input), output, t)
+	}
+
+	test(
+		[]uint64{1, 2, 3, 4, 5, 6, 7, 8},
+		[]uint64{1, 2, 3, 4, 5, 6, 7, 8},
+	)
+
+	test(
+		[]uint64{1, 2, 3, 4, 5, 6, 7, 8},
+		[]uint64{},
+	)
+
+	test(
+		[]uint64{1, 2, 9, 10, 11, 12},
+		[]uint64{9, 10, 11, 12},
+	)
+
+	test(
+		[]uint64{13, 14, 15, 16, 1, 2},
+		[]uint64{13, 14, 15, 16},
+	)
+
+	test(
+		[]uint64{17, 18, 1, 2, 19, 20},
+		[]uint64{17, 18, 19, 20},
+	)
+
+	test(
+		[]uint64{21, 22, 1, 2, 23, 24, 1, 2, 25, 26},
+		[]uint64{21, 22, 23, 24, 25, 26},
+	)
+}
+
+func TestUniqueMapping(t *testing.T) {
+	unique := NewUnique(2)
+
 	assert.Equal(unique.Distil([]uint64{4, 2}), []uint64{4, 2}, t)
 	assert.Equal(unique.Distil([]uint64{6, 9}), []uint64{6, 9}, t)
 	assert.Equal(unique.Distil([]uint64{4, 2}), []uint64{}, t)
@@ -58,17 +96,17 @@ func TestUniqueDistil(t *testing.T) {
 	}
 }
 
-func TestUniqueDistilRewrite(t *testing.T) {
+func TestUniqueRewrite(t *testing.T) {
 	unique := NewUnique(2)
 
-	key := []uint64{4, 2}
-	assert.Equal(unique.Distil(key), []uint64{4, 2}, t)
+	index := []uint64{4, 2}
+	assert.Equal(unique.Distil(index), []uint64{4, 2}, t)
 
-	key[0], key[1] = 6, 9
+	index[0], index[1] = 6, 9
 	assert.Equal(unique.Distil([]uint64{4, 2}), []uint64{}, t)
 }
 
 func isLittleEndian() bool {
-	var x uint32 = 0x01020304
+	x := uint32(0x01020304)
 	return *(*byte)(unsafe.Pointer(&x)) == 0x04
 }
