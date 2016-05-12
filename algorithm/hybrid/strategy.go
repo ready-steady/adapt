@@ -122,8 +122,9 @@ func (self *Strategy) choose() uint {
 	}
 	k, max := none, 0.0
 	for i := range self.active.Positions {
-		if score := self.lndices[i].score; score > max {
-			k, max = i, score
+		value := self.lndices[i].score
+		if k == none || value > max || (value == max && k > i) {
+			k, max = i, value
 		}
 	}
 	if max <= 0.0 {

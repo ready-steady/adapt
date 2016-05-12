@@ -99,8 +99,9 @@ func (self *Strategy) choose() uint {
 	}
 	k, max := none, 0.0
 	for i := range self.active.Positions {
-		if priority := self.priority[i]; priority > max {
-			k, max = i, priority
+		value := self.priority[i]
+		if k == none || value > max || (value == max && k > i) {
+			k, max = i, value
 		}
 	}
 	if max <= 0.0 {
