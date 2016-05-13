@@ -8,10 +8,6 @@ import (
 	"github.com/ready-steady/adapt/grid"
 )
 
-const (
-	none = ^uint(0)
-)
-
 var (
 	infinity = math.Inf(1.0)
 )
@@ -26,8 +22,8 @@ type Strategy struct {
 	lmin uint
 	lmax uint
 
-	accuracy []float64
 	priority []float64
+	accuracy []float64
 
 	active    *internal.Active
 	threshold *internal.Threshold
@@ -69,7 +65,7 @@ func (self *Strategy) Next(state *algorithm.State,
 			return nil
 		}
 		k := self.choose()
-		if k == none {
+		if k == internal.None {
 			return nil
 		}
 		state = self.initiate(self.active.Next(k), surrogate)
@@ -84,9 +80,8 @@ func (self *Strategy) Score(element *algorithm.Element) float64 {
 }
 
 func (self *Strategy) check() bool {
-	no := self.no
 	for i := range self.active.Positions {
-		if !self.threshold.Check(self.accuracy[i*no : (i+1)*no]) {
+		if !self.threshold.Check(self.accuracy[i*self.no : (i+1)*self.no]) {
 			return false
 		}
 	}
@@ -94,20 +89,7 @@ func (self *Strategy) check() bool {
 }
 
 func (self *Strategy) choose() uint {
-	if len(self.active.Positions) == 0 {
-		return none
-	}
-	k, max := none, 0.0
-	for i := range self.active.Positions {
-		value := self.priority[i]
-		if k == none || value > max || (value == max && k > i) {
-			k, max = i, value
-		}
-	}
-	if max <= 0.0 {
-		return none
-	}
-	return k
+	return internal.Choose(self.priority, self.active.Positions)
 }
 
 func (self *Strategy) consume(state *algorithm.State) {
@@ -116,27 +98,25 @@ func (self *Strategy) consume(state *algorithm.State) {
 	na := uint(len(self.accuracy))
 	nn := uint(len(state.Counts))
 
-	levels := internal.Levelize(state.Lndices, ni)
-
 	self.priority = append(self.priority, make([]float64, nn)...)
 	priority := self.priority[np:]
 
 	self.accuracy = append(self.accuracy, make([]float64, nn*no)...)
 	accuracy := self.accuracy[na:]
 
-	for i, offset := uint(0), uint(0); i < nn; i++ {
+	levels := internal.Levelize(state.Lndices, ni)
+
+	for i, o := uint(0), uint(0); i < nn; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
 			priority[i] = infinity
-			for j := uint(0); j < no; j++ {
-				accuracy[i*no+j] = infinity
-			}
+			internal.Set(accuracy[i*no:(i+1)*no], infinity)
 		} else if levels[i] < uint64(self.lmax) {
-			priority[i] = internal.Average(state.Scores[offset:(offset + count)])
+			priority[i] = internal.Average(state.Scores[o:(o + count)])
 			self.threshold.Compress(accuracy[i*no:(i+1)*no],
-				state.Surpluses[offset*no:(offset+count)*no])
+				state.Surpluses[o*no:(o+count)*no])
 		}
-		offset += count
+		o += count
 	}
 
 	self.threshold.Update(state.Values)
