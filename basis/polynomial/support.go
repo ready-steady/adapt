@@ -3,14 +3,18 @@ package polynomial
 import (
 	"math"
 
-	"github.com/ready-steady/quadrature"
+	"github.com/ready-steady/adapt/internal"
 )
 
-var ruleCache map[uint]*rule = make(map[uint]*rule)
+func compute(index []uint64, point []float64, nd uint,
+	compute func(uint64, uint64, float64) float64) float64 {
 
-type rule struct {
-	x []float64
-	w []float64
+	value := 1.0
+	for i := uint(0); i < nd && value != 0.0; i++ {
+		value *= compute(index[i]&internal.LEVEL_MASK,
+			index[i]>>internal.LEVEL_SIZE, point[i])
+	}
+	return value
 }
 
 func equal(one, two float64) bool {
@@ -18,22 +22,13 @@ func equal(one, two float64) bool {
 	return one == two || math.Abs(one-two) < ε
 }
 
-func getRule(order uint) *rule {
-	if rule, ok := ruleCache[order]; ok {
-		return rule
-	}
-	x, w := quadrature.Legendre(order, 0.0, 1.0)
-	rule := &rule{x, w}
-	ruleCache[order] = rule
-	return rule
-}
+func integrate(index []uint64, nd uint,
+	integrate func(uint64, uint64) float64) float64 {
 
-func integrate(a, b float64, order uint, target func(float64) float64) float64 {
-	value, rule := 0.0, getRule(order)
-	for i := uint(0); i < order; i++ {
-		x := a + (b-a)*rule.x[i]
-		w := (b - a) * rule.w[i]
-		value += w * target(x)
+	value := 1.0
+	for i := uint(0); i < nd && value != 0.0; i++ {
+		value *= integrate(index[i]&internal.LEVEL_MASK,
+			index[i]>>internal.LEVEL_SIZE)
 	}
 	return value
 }

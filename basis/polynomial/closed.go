@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/ready-steady/adapt/grid/equidistant"
-	"github.com/ready-steady/adapt/internal"
 )
 
 // Closed is a basis in [0, 1]^n.
@@ -25,22 +24,12 @@ func NewClosed(dimensions uint, power uint) *Closed {
 
 // Compute evaluates a basis function.
 func (self *Closed) Compute(index []uint64, point []float64) float64 {
-	nd, value := self.nd, 1.0
-	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= self.compute(index[i]&internal.LEVEL_MASK,
-			index[i]>>internal.LEVEL_SIZE, point[i])
-	}
-	return value
+	return compute(index, point, self.nd, self.compute)
 }
 
 // Integrate computes the integral of a basis function.
 func (self *Closed) Integrate(index []uint64) float64 {
-	nd, value := self.nd, 1.0
-	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= self.integrate(index[i]&internal.LEVEL_MASK,
-			index[i]>>internal.LEVEL_SIZE)
-	}
-	return value
+	return integrate(index, self.nd, self.integrate)
 }
 
 func (self *Closed) compute(level, order uint64, x float64) float64 {
@@ -117,7 +106,7 @@ func (self *Closed) integrate(level, order uint64) float64 {
 	// Use a Gauss–Legendre quadrature rule to integrate. Such a rule with n
 	// nodes integrates exactly polynomials up to order 2*n - 1.
 	nodes := uint(math.Ceil((float64(np) + 1.0) / 2.0))
-	return integrate(x-h, x+h, nodes, func(x float64) float64 {
+	return quadrature(x-h, x+h, nodes, func(x float64) float64 {
 		return self.compute(level, order, x)
 	})
 }

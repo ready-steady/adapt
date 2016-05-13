@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/ready-steady/adapt/grid/equidistant"
-	"github.com/ready-steady/adapt/internal"
 )
 
 // Open is a basis in (0, 1)^n.
@@ -26,22 +25,12 @@ func NewOpen(dimensions, power uint) *Open {
 
 // Compute evaluates a basis function.
 func (self *Open) Compute(index []uint64, point []float64) float64 {
-	nd, value := self.nd, 1.0
-	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= self.compute(index[i]&internal.LEVEL_MASK,
-			index[i]>>internal.LEVEL_SIZE, point[i])
-	}
-	return value
+	return compute(index, point, self.nd, self.compute)
 }
 
 // Integrate computes the integral of a basis function.
 func (self *Open) Integrate(index []uint64) float64 {
-	nd, value := self.nd, 1.0
-	for i := uint(0); i < nd && value != 0.0; i++ {
-		value *= self.integrate(index[i]&internal.LEVEL_MASK,
-			index[i]>>internal.LEVEL_SIZE)
-	}
-	return value
+	return integrate(index, self.nd, self.integrate)
 }
 
 func (self *Open) compute(level, order uint64, x float64) float64 {

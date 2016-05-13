@@ -17,14 +17,14 @@ func F(x float64) float64 {
 	return x*x*x*x - x*x*x + x
 }
 
-func TestIntegrate(t *testing.T) {
+func TestQuadrature(t *testing.T) {
 	const (
 		a = -6.0
 		b = +6.0
 	)
 
 	nodes := uint(math.Ceil((float64(3) + 1.0) / 2.0))
-	value := integrate(a, b, nodes, f)
+	value := quadrature(a, b, nodes, f)
 
 	assert.EqualWithin(value, F(b)-F(a), 1e-12, t)
 }
