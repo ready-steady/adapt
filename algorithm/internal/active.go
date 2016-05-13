@@ -21,6 +21,11 @@ func NewActive(ni uint) *Active {
 	}
 }
 
+// Drop deactivates a level index.
+func (self *Active) Drop(k uint) {
+	delete(self.Positions, k)
+}
+
 // First returns the initial level indices.
 func (self *Active) First() []uint64 {
 	self.Lndices = make([]uint64, 1*self.ni)
@@ -37,7 +42,6 @@ func (self *Active) Next(k uint) []uint64 {
 
 	forward, backward := self.forward, self.backward
 	lndex := self.Lndices[k*ni : (k+1)*ni]
-	delete(self.Positions, k)
 
 outer:
 	for i, nn := uint(0), no; i < ni; i++ {

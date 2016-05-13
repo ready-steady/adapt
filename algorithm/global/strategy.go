@@ -53,16 +53,23 @@ func (self *Strategy) First(surrogate *algorithm.Surrogate) *algorithm.State {
 func (self *Strategy) Next(state *algorithm.State,
 	surrogate *algorithm.Surrogate) *algorithm.State {
 
+	exclude := make(map[uint]bool)
 	for {
 		self.consume(state)
 		if self.threshold.Check(self.accuracy, self.active.Positions) {
 			return nil
 		}
-		k := internal.Choose(self.priority, self.active.Positions)
+		k := internal.Choose(self.priority, self.active.Positions, exclude)
 		if k == internal.None {
 			return nil
 		}
-		state = self.initiate(self.active.Next(k), surrogate)
+		lndices := self.active.Next(k)
+		if len(lndices) > 0 {
+			self.active.Drop(k)
+		} else {
+			exclude[k] = true
+		}
+		state = self.initiate(lndices, surrogate)
 		if len(state.Indices) > 0 {
 			return state
 		}

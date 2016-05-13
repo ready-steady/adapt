@@ -26,13 +26,16 @@ func Average(data []float64) (result float64) {
 }
 
 // Choose selects an element with the highest positive priority.
-func Choose(priority []float64, scope map[uint]bool) uint {
-	if len(scope) == 0 {
+func Choose(priority []float64, include map[uint]bool, exclude map[uint]bool) uint {
+	if len(include) == 0 {
 		return None
 	}
 	k, max := None, 0.0
-	for i := range scope {
-		if k == None || priority[i] > max || (priority[i] == max && k > i) {
+	for i := range include {
+		if exclude[i] {
+			continue
+		}
+		if priority[i] > max || (priority[i] == max && k > i) {
 			k, max = i, priority[i]
 		}
 	}
