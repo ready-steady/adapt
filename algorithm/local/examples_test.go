@@ -11,18 +11,18 @@ import (
 // Interpolation in one dimension.
 func ExampleAlgorithm_step() {
 	const (
-		inputs          = 1
-		outputs         = 1
-		minLevel        = 1
-		maxLevel        = 10
-		localError      = 1e-4
-		polynomialOrder = 1
+		inputs   = 1
+		outputs  = 1
+		minLevel = 1
+		maxLevel = 10
+		accuracy = 1e-4
+		order    = 1
 	)
 
 	grid := equidistant.NewClosed(inputs)
-	basis := polynomial.NewClosed(inputs, polynomialOrder)
+	basis := polynomial.NewClosed(inputs, order)
 	algorithm := New(inputs, outputs, grid, basis)
-	strategy := NewStrategy(inputs, outputs, grid, minLevel, maxLevel, localError)
+	strategy := NewStrategy(inputs, outputs, grid, minLevel, maxLevel, accuracy)
 
 	surrogate := algorithm.Compute(func(x, y []float64) {
 		if x[0] <= 0.5 {
@@ -41,18 +41,18 @@ func ExampleAlgorithm_step() {
 // Interpolation in two dimensions.
 func ExampleAlgorithm_cube() {
 	const (
-		inputs          = 2
-		outputs         = 1
-		minLevel        = 1
-		maxLevel        = 10
-		localError      = 1e-4
-		polynomialOrder = 1
+		inputs   = 2
+		outputs  = 1
+		minLevel = 1
+		maxLevel = 10
+		accuracy = 1e-4
+		order    = 1
 	)
 
 	grid := equidistant.NewClosed(inputs)
-	basis := polynomial.NewClosed(inputs, polynomialOrder)
+	basis := polynomial.NewClosed(inputs, order)
 	algorithm := New(inputs, outputs, grid, basis)
-	strategy := NewStrategy(inputs, outputs, grid, minLevel, maxLevel, localError)
+	strategy := NewStrategy(inputs, outputs, grid, minLevel, maxLevel, accuracy)
 
 	surrogate := algorithm.Compute(func(x, y []float64) {
 		if math.Abs(2.0*x[0]-1.0) < 0.45 && math.Abs(2.0*x[1]-1.0) < 0.45 {

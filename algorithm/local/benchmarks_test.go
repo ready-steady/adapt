@@ -37,16 +37,16 @@ func BenchmarkComputeHat(b *testing.B) {
 
 func BenchmarkComputeMany(b *testing.B) {
 	const (
-		inputs  = 2
-		outputs = 1000
+		ni = 2
+		no = 1000
 	)
 
 	fixture := &fixture{
 		rule:   "closed",
-		target: many(inputs, outputs),
+		target: many(ni, no),
 		surrogate: &algorithm.Surrogate{
-			Inputs:  inputs,
-			Outputs: outputs,
+			Inputs:  ni,
+			Outputs: no,
 		},
 	}
 	fixture.initialize()
@@ -101,16 +101,16 @@ func BenchmarkEvaluateHat(b *testing.B) {
 
 func BenchmarkEvaluateMany(b *testing.B) {
 	const (
-		inputs  = 2
-		outputs = 1000
+		ni = 2
+		no = 1000
 	)
 
 	fixture := &fixture{
 		rule:   "closed",
-		target: many(inputs, outputs),
+		target: many(ni, no),
 		surrogate: &algorithm.Surrogate{
-			Inputs:  inputs,
-			Outputs: outputs,
+			Inputs:  ni,
+			Outputs: no,
 		},
 	}
 	fixture.initialize()
