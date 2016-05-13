@@ -37,15 +37,15 @@ func (self *Open) compute(level, order uint64, x float64) float64 {
 	if level == 0 {
 		return 1.0
 	}
-	xi, h, count := self.grid.Node(level, order)
+	xi, h, n := self.grid.Node(level, order)
 	switch order {
 	case 0:
 		if x >= 2.0*h {
 			return 0.0
 		}
 		return 2.0 - x/h
-	case count - 1:
-		left := float64(count - 1)
+	case n - 1:
+		left := float64(n - 1)
 		if x <= left*h {
 			return 0.0
 		}
@@ -63,9 +63,9 @@ func (self *Open) integrate(level, order uint64) float64 {
 	if level == 0 {
 		return 1.0
 	}
-	_, h, count := self.grid.Node(level, order)
+	_, h, n := self.grid.Node(level, order)
 	switch order {
-	case 0, count - 1:
+	case 0, n - 1:
 		return 2.0 * h
 	default:
 		return 1.0 * h
