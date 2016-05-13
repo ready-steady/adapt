@@ -2,7 +2,7 @@ package internal
 
 // Active is a structure for keeping track of active level indices.
 type Active struct {
-	Indices   []uint64      // Level indices considered so far
+	Lndices   []uint64      // Level indices considered so far
 	Positions map[uint]bool // Positions of active level indices
 
 	ni uint
@@ -23,27 +23,27 @@ func NewActive(ni uint) *Active {
 
 // First returns the initial level indices.
 func (self *Active) First() []uint64 {
-	self.Indices = make([]uint64, 1*self.ni)
+	self.Lndices = make([]uint64, 1*self.ni)
 	self.Positions = map[uint]bool{0: true}
 	self.history = NewHistory(self.ni)
 	self.forward, self.backward = make(reference), make(reference)
-	return self.Indices
+	return self.Lndices
 }
 
 // Next returns admissible forward neighbors of a level index.
-func (self *Active) Next(k uint) (indices []uint64) {
+func (self *Active) Next(k uint) []uint64 {
 	ni := self.ni
-	no := uint(len(self.Indices)) / ni
+	no := uint(len(self.Lndices)) / ni
 
 	forward, backward := self.forward, self.backward
-	index := self.Indices[k*ni : (k+1)*ni]
+	lndex := self.Lndices[k*ni : (k+1)*ni]
 	delete(self.Positions, k)
 
 outer:
 	for i, nn := uint(0), no; i < ni; i++ {
-		index[i]++
-		_, found := self.history.Get(index)
-		index[i]--
+		lndex[i]++
+		_, found := self.history.Get(lndex)
+		lndex[i]--
 
 		if found {
 			// The forward neighbor in dimension i has already been considered.
@@ -52,7 +52,7 @@ outer:
 
 		newBackward := make(reference)
 		for j := uint(0); j < ni; j++ {
-			if index[j] == 0 {
+			if lndex[j] == 0 {
 				// The level of dimension j is the lowest possible, so there is
 				// no backward neighbor.
 				continue
@@ -73,10 +73,10 @@ outer:
 		}
 		newBackward[i] = k
 
-		index[i]++
-		self.Indices = append(self.Indices, index...)
-		self.history.Set(index, 0)
-		index[i]--
+		lndex[i]++
+		self.Lndices = append(self.Lndices, lndex...)
+		self.history.Set(lndex, 0)
+		lndex[i]--
 
 		self.Positions[nn] = true
 
@@ -88,6 +88,5 @@ outer:
 		nn++
 	}
 
-	indices = self.Indices[no*ni:]
-	return
+	return self.Lndices[no*ni:]
 }
