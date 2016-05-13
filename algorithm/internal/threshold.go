@@ -19,8 +19,8 @@ type Threshold struct {
 func NewThreshold(outputs uint, absolute, relative float64) *Threshold {
 	return &Threshold{
 		values: make([]float64, outputs),
-		lower:  repeat(math.Inf(1.0), outputs),
-		upper:  repeat(math.Inf(-1.0), outputs),
+		lower:  repeat(Infinity, outputs),
+		upper:  repeat(-Infinity, outputs),
 
 		no: outputs,
 		εa: absolute,
