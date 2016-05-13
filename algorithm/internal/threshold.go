@@ -29,9 +29,9 @@ func NewThreshold(outputs uint, absolute, relative float64) *Threshold {
 }
 
 // Check checks if the threshold is satisfied.
-func (self *Threshold) Check(errors []float64, scope map[uint]bool) bool {
+func (self *Threshold) Check(errors []float64, include map[uint]bool) bool {
 	no := self.no
-	for i := range scope {
+	for i := range include {
 		for j := uint(0); j < no; j++ {
 			if errors[i*no+j] > self.values[j] {
 				return false
