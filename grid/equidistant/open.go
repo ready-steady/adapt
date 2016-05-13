@@ -22,7 +22,7 @@ func (self *Open) Compute(indices []uint64) []float64 {
 	for i := range nodes {
 		level := indices[i] & internal.LEVEL_MASK
 		order := indices[i] >> internal.LEVEL_SIZE
-		nodes[i], _ = self.Node(level, order)
+		nodes[i], _, _ = self.Node(level, order)
 	}
 	return nodes
 }
@@ -33,8 +33,9 @@ func (self *Open) Index(lindices []uint64) []uint64 {
 }
 
 // Node returns the node corresponding to an index in one dimension.
-func (_ *Open) Node(level, order uint64) (node, step float64) {
-	step = 1.0 / float64(uint64(2)<<level)
+func (_ *Open) Node(level, order uint64) (node, step float64, count uint64) {
+	count = uint64(2)<<level - 1
+	step = 1.0 / float64(count+1)
 	node = float64(order+1) * step
 	return
 }

@@ -41,7 +41,7 @@ func (self *Closed) compute(level, order uint64, x float64) float64 {
 		return 1.0
 	}
 
-	xi, h := self.grid.Node(level, order)
+	xi, h, _ := self.grid.Node(level, order)
 
 	Δ := math.Abs(x - xi)
 	if Δ >= h {
@@ -71,7 +71,7 @@ func (self *Closed) compute(level, order uint64, x float64) float64 {
 	// Find the rest of the needed ancestors.
 	for np > 0 {
 		level, order = self.grid.Parent(level, order)
-		xj, _ := self.grid.Node(level, order)
+		xj, _, _ := self.grid.Node(level, order)
 		if equal(xj, xl) || equal(xj, xr) {
 			continue
 		}
@@ -91,7 +91,7 @@ func (self *Closed) integrate(level, order uint64) float64 {
 		return 1.0
 	}
 
-	x, h := self.grid.Node(level, order)
+	x, h, _ := self.grid.Node(level, order)
 
 	if np == 1 {
 		// Use two liner segments. See the corresponding comment in
