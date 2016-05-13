@@ -1,15 +1,9 @@
 package hybrid
 
 import (
-	"math"
-
 	"github.com/ready-steady/adapt/algorithm"
 	"github.com/ready-steady/adapt/algorithm/internal"
 	"github.com/ready-steady/adapt/grid"
-)
-
-var (
-	infinity = math.Inf(1.0)
 )
 
 // Strategy is a basic strategy.
@@ -120,8 +114,8 @@ func (self *Strategy) consume(state *algorithm.State) {
 	for i, o := uint(0), uint(0); i < nn; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
-			internal.Set(accuracy[i*no:(i+1)*no], infinity)
-			internal.Set(scores[o:(o+count)], infinity)
+			internal.Set(accuracy[i*no:(i+1)*no], internal.Infinity)
+			internal.Set(scores[o:(o+count)], internal.Infinity)
 		} else if levels[i] < uint64(self.lmax) {
 			self.threshold.Compress(accuracy[i*no:(i+1)*no],
 				state.Surpluses[o*no:(o+count)*no])
@@ -147,7 +141,7 @@ func (self *Strategy) consume(state *algorithm.State) {
 		}
 		scopes[i] = scope
 		if levels[i] < uint64(self.lmin) {
-			priority[i] = infinity
+			priority[i] = internal.Infinity
 		} else if levels[i] < uint64(self.lmax) {
 			for _, j := range scope {
 				priority[i] += self.scores[j]

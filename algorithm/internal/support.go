@@ -12,7 +12,8 @@ const (
 )
 
 var (
-	infinity = math.Inf(1.0)
+	// Infinity is +∞.
+	Infinity = math.Inf(1.0)
 )
 
 // Average returns the average value of a vector.
