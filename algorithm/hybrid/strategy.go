@@ -8,10 +8,6 @@ import (
 	"github.com/ready-steady/adapt/grid"
 )
 
-const (
-	none = ^uint(0)
-)
-
 var (
 	infinity = math.Inf(1.0)
 )
@@ -25,18 +21,21 @@ type Strategy struct {
 
 	lmin uint
 	lmax uint
-	εl   float64
-	εt   float64
+	ε    float64
 
-	active *internal.Active
-	hash   *internal.Hash
-	unique *internal.Unique
+	active    *internal.Active
+	threshold *internal.Threshold
+	hash      *internal.Hash
+	unique    *internal.Unique
 
-	lndices []lndex
-	scores  []float64
+	priority []float64
+	accuracy []float64
 
-	lcursor map[string]uint
-	icursor map[string]uint
+	scopes [][]uint
+	scores []float64
+
+	lndexer map[string]uint
+	indexer map[string]uint
 }
 
 // Guide is a grid-refinement tool of a basic strategy.
@@ -45,14 +44,9 @@ type Guide interface {
 	grid.RefinerToward
 }
 
-type lndex struct {
-	score float64
-	scope []uint
-}
-
 // NewStrategy creates a basic strategy.
 func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
-	localError, totalError float64) *Strategy {
+	absoluteError, relativeError, scoreError float64) *Strategy {
 
 	return &Strategy{
 		ni: inputs,
@@ -62,15 +56,15 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 
 		lmin: minLevel,
 		lmax: maxLevel,
-		εl:   localError,
-		εt:   totalError,
+		ε:    scoreError,
 
-		active: internal.NewActive(inputs),
-		hash:   internal.NewHash(inputs),
-		unique: internal.NewUnique(inputs),
+		active:    internal.NewActive(inputs),
+		threshold: internal.NewThreshold(outputs, absoluteError, relativeError),
+		hash:      internal.NewHash(inputs),
+		unique:    internal.NewUnique(inputs),
 
-		lcursor: make(map[string]uint),
-		icursor: make(map[string]uint),
+		lndexer: make(map[string]uint),
+		indexer: make(map[string]uint),
 	}
 }
 
@@ -83,11 +77,11 @@ func (self *Strategy) Next(state *algorithm.State,
 
 	for {
 		self.consume(state)
-		if self.check() {
+		if self.threshold.Check(self.accuracy, self.active.Positions) {
 			return nil
 		}
-		k := self.choose()
-		if k == none {
+		k := internal.Choose(self.priority, self.active.Positions)
+		if k == internal.None {
 			return nil
 		}
 		state = self.initiate(self.active.Next(k), surrogate)
@@ -101,66 +95,43 @@ func (self *Strategy) Score(element *algorithm.Element) float64 {
 	return internal.MaxAbsolute(element.Surplus) * element.Volume
 }
 
-func (self *Strategy) check() bool {
-	total := 0.0
-	for i := range self.active.Positions {
-		total += self.lndices[i].score
-		if total > self.εt {
-			return false
-		}
-	}
-	return true
-}
-
-func (self *Strategy) choose() uint {
-	if len(self.active.Positions) == 0 {
-		return none
-	}
-	k, max := none, 0.0
-	for i := range self.active.Positions {
-		value := self.lndices[i].score
-		if k == none || value > max || (value == max && k > i) {
-			k, max = i, value
-		}
-	}
-	if max <= 0.0 {
-		return none
-	}
-	return k
-}
-
 func (self *Strategy) consume(state *algorithm.State) {
-	ni := self.ni
-	nl := uint(len(self.lndices))
-	nn := uint(len(state.Counts))
+	ni, no := self.ni, self.no
+	np := uint(len(self.priority))
+	na := uint(len(self.accuracy))
 	ns := uint(len(self.scores))
+	nn := uint(len(state.Counts))
 
-	levels := internal.Levelize(state.Lndices, ni)
+	self.priority = append(self.priority, make([]float64, nn)...)
+	priority := self.priority[np:]
 
-	groups := state.Data.([][]uint64)
+	self.accuracy = append(self.accuracy, make([]float64, nn*no)...)
+	accuracy := self.accuracy[na:]
 
-	self.lndices = append(self.lndices, make([]lndex, nn)...)
-	lndices := self.lndices[nl:]
+	self.scopes = append(self.scopes, make([][]uint, nn)...)
+	scopes := self.scopes[np:]
 
-	self.scores = append(self.scores, state.Scores...)
+	self.scores = append(self.scores, make([]float64, len(state.Scores))...)
 	scores := self.scores[ns:]
 
-	for i, offset := uint(0), uint(0); i < nn; i++ {
+	groups := state.Data.([][]uint64)
+	levels := internal.Levelize(state.Lndices, ni)
+
+	for i, o := uint(0), uint(0); i < nn; i++ {
 		count := state.Counts[i]
 		if levels[i] < uint64(self.lmin) {
-			for j := uint(0); j < count; j++ {
-				scores[offset+j] = infinity
-			}
-		} else if levels[i] >= uint64(self.lmax) {
-			for j := uint(0); j < count; j++ {
-				scores[offset+j] = 0.0
-			}
+			internal.Set(accuracy[i*no:(i+1)*no], infinity)
+			internal.Set(scores[o:(o+count)], infinity)
+		} else if levels[i] < uint64(self.lmax) {
+			self.threshold.Compress(accuracy[i*no:(i+1)*no],
+				state.Surpluses[o*no:(o+count)*no])
+			copy(scores[o:(o+count)], state.Scores[o:(o+count)])
 		}
 		for j := uint(0); j < count; j++ {
-			index := state.Indices[(offset+j)*ni : (offset+j+1)*ni]
-			self.icursor[self.hash.Key(index)] = ns + offset + j
+			index := state.Indices[(o+j)*ni : (o+j+1)*ni]
+			self.indexer[self.hash.Key(index)] = ns + o + j
 		}
-		offset += count
+		o += count
 	}
 
 	for i := uint(0); i < nn; i++ {
@@ -168,19 +139,26 @@ func (self *Strategy) consume(state *algorithm.State) {
 		scope := make([]uint, count)
 		for j := uint(0); j < count; j++ {
 			index := groups[i][j*ni : (j+1)*ni]
-			k, ok := self.icursor[self.hash.Key(index)]
+			k, ok := self.indexer[self.hash.Key(index)]
 			if !ok {
 				panic("something went wrong")
 			}
 			scope[j] = k
 		}
-		lndices[i].scope = scope
-		for _, j := range scope {
-			lndices[i].score = math.Max(lndices[i].score, self.scores[j])
+		scopes[i] = scope
+		if levels[i] < uint64(self.lmin) {
+			priority[i] = infinity
+		} else if levels[i] < uint64(self.lmax) {
+			for _, j := range scope {
+				priority[i] += self.scores[j]
+			}
+			priority[i] /= float64(count)
 		}
 		lndex := state.Lndices[i*ni : (i+1)*ni]
-		self.lcursor[self.hash.Key(lndex)] = nl + i
+		self.lndexer[self.hash.Key(lndex)] = np + i
 	}
+
+	self.threshold.Update(state.Values)
 }
 
 func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) [][]uint64 {
@@ -195,13 +173,13 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 				continue
 			}
 			lndex[j] = level - 1
-			k, ok := self.lcursor[self.hash.Key(lndex)]
+			k, ok := self.lndexer[self.hash.Key(lndex)]
 			lndex[j] = level
 			if !ok {
 				panic("something went wrong")
 			}
-			for _, l := range self.lndices[k].scope {
-				if self.scores[l] >= self.εl {
+			for _, l := range self.scopes[k] {
+				if self.scores[l] >= self.ε {
 					index := surrogate.Indices[l*ni : (l+1)*ni]
 					groups[i] = append(groups[i], self.guide.RefineToward(index, j)...)
 				}

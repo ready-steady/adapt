@@ -44,16 +44,18 @@ func (self *fixture) initialize() {
 
 func prepare(fixture *fixture) (*Algorithm, algorithm.Strategy) {
 	const (
-		minLevel   = 1
-		maxLevel   = 10
-		localError = 1e-3
-		totalError = 1e-3
+		minLevel      = 1
+		maxLevel      = 10
+		absoluteError = 1e-3
+		relativeError = 1e-3
+		scoreError    = 1e-3
 	)
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
 	algorithm := New(ni, no, fixture.grid, fixture.basis)
-	strategy := NewStrategy(ni, no, fixture.grid, minLevel, maxLevel, localError, totalError)
+	strategy := NewStrategy(ni, no, fixture.grid, minLevel, maxLevel,
+		absoluteError, relativeError, scoreError)
 
 	return algorithm, strategy
 }
@@ -70,7 +72,7 @@ var fixtureBranin = fixture{
 	surrogate: &algorithm.Surrogate{
 		Inputs:  2,
 		Outputs: 1,
-		Nodes:   477,
+		Nodes:   433,
 	},
 
 	points: []float64{
