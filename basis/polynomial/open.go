@@ -63,11 +63,11 @@ func (self *Open) integrate(level, order uint64) float64 {
 	if level == 0 {
 		return 1.0
 	}
-	_, _, count := self.grid.Node(level, order)
+	_, h, count := self.grid.Node(level, order)
 	switch order {
 	case 0, count - 1:
-		return 2.0 / float64(count+1)
+		return 2.0 * h
 	default:
-		return 1.0 / float64(count+1)
+		return 1.0 * h
 	}
 }
