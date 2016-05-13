@@ -61,10 +61,10 @@ func (self *Strategy) Next(state *algorithm.State,
 
 	for {
 		self.consume(state)
-		if self.check() {
+		if self.threshold.Check(self.accuracy, self.active.Positions) {
 			return nil
 		}
-		k := self.choose()
+		k := internal.Choose(self.priority, self.active.Positions)
 		if k == internal.None {
 			return nil
 		}
@@ -77,19 +77,6 @@ func (self *Strategy) Next(state *algorithm.State,
 
 func (self *Strategy) Score(element *algorithm.Element) float64 {
 	return internal.SumAbsolute(element.Surplus)
-}
-
-func (self *Strategy) check() bool {
-	for i := range self.active.Positions {
-		if !self.threshold.Check(self.accuracy[i*self.no : (i+1)*self.no]) {
-			return false
-		}
-	}
-	return true
-}
-
-func (self *Strategy) choose() uint {
-	return internal.Choose(self.priority, self.active.Positions)
 }
 
 func (self *Strategy) consume(state *algorithm.State) {
