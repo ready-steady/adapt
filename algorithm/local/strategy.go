@@ -15,7 +15,7 @@ type Strategy struct {
 
 	lmin uint
 	lmax uint
-	ε    float64
+	εs   float64
 
 	unique *internal.Unique
 }
@@ -38,7 +38,7 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 
 		lmin: minLevel,
 		lmax: maxLevel,
-		ε:    scoreError,
+		εs:   scoreError,
 
 		unique: internal.NewUnique(inputs),
 	}
@@ -51,7 +51,7 @@ func (self *Strategy) First(_ *algorithm.Surrogate) *algorithm.State {
 
 func (self *Strategy) Next(state *algorithm.State, _ *algorithm.Surrogate) *algorithm.State {
 	indices := self.unique.Distil(self.guide.Refine(filter(state.Indices,
-		state.Scores, self.lmin, self.lmax, self.ε, self.ni)))
+		state.Scores, self.lmin, self.lmax, self.εs, self.ni)))
 	if len(indices) == 0 {
 		return nil
 	}
@@ -64,12 +64,12 @@ func (self *Strategy) Score(element *algorithm.Element) float64 {
 	return internal.MaxAbsolute(element.Surplus)
 }
 
-func filter(indices []uint64, scores []float64, lmin, lmax uint, ε float64, ni uint) []uint64 {
+func filter(indices []uint64, scores []float64, lmin, lmax uint, εs float64, ni uint) []uint64 {
 	nn := uint(len(scores))
 	levels := internal.Levelize(indices, ni)
 	na, ne := uint(0), nn
 	for i, j := uint(0), uint(0); i < nn; i++ {
-		if levels[i] >= uint64(lmin) && (scores[i] <= ε || levels[i] >= uint64(lmax)) {
+		if levels[i] >= uint64(lmin) && (scores[i] <= εs || levels[i] >= uint64(lmax)) {
 			j++
 			continue
 		}

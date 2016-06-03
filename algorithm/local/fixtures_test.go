@@ -62,13 +62,13 @@ func prepare(fixture *fixture) (*Algorithm, algorithm.Strategy) {
 	const (
 		lmin = 1
 		lmax = 10
-		ε    = 1e-4
+		εs   = 1e-4
 	)
 
 	ni, no := fixture.surrogate.Inputs, fixture.surrogate.Outputs
 
 	algorithm := New(ni, no, fixture.grid, fixture.basis)
-	strategy := NewStrategy(ni, no, fixture.grid, lmin, lmax, ε)
+	strategy := NewStrategy(ni, no, fixture.grid, lmin, lmax, εs)
 
 	if fixture.strategy == nil {
 		return algorithm, strategy
@@ -202,7 +202,7 @@ var fixtureCube = fixture{
 
 	strategy: func(strategy algorithm.Strategy) algorithm.Strategy {
 		strategy.(*Strategy).lmax = 9
-		strategy.(*Strategy).ε = 1e-2
+		strategy.(*Strategy).εs = 1e-2
 		return strategy
 	},
 
@@ -707,18 +707,18 @@ func kraichnanOrszagTarget(y0, ys []float64) {
 
 func (self *kraichnanOrszagStrategy) Score(element *algorithm.Element) float64 {
 	const (
-		ε = 1e-2
+		εs = 1e-2
 	)
 
 	no := kraichnanOrszagOutputs
 
-	if math.Abs(element.Surplus[no-5]) > ε {
+	if math.Abs(element.Surplus[no-5]) > εs {
 		return 1.0
 	}
-	if math.Abs(element.Surplus[no-3]) > ε {
+	if math.Abs(element.Surplus[no-3]) > εs {
 		return 1.0
 	}
-	if math.Abs(element.Surplus[no-1]) > ε {
+	if math.Abs(element.Surplus[no-1]) > εs {
 		return 1.0
 	}
 
@@ -1965,7 +1965,7 @@ var fixtureParabola = fixture{
 
 	strategy: func(strategy algorithm.Strategy) algorithm.Strategy {
 		strategy.(*Strategy).lmax = 20
-		strategy.(*Strategy).ε = 1e-6
+		strategy.(*Strategy).εs = 1e-6
 		return strategy
 	},
 

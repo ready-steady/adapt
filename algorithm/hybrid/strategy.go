@@ -15,7 +15,7 @@ type Strategy struct {
 
 	lmin uint
 	lmax uint
-	ε    float64
+	εs   float64
 
 	active    *internal.Active
 	threshold *internal.Threshold
@@ -50,7 +50,7 @@ func NewStrategy(inputs, outputs uint, guide Guide, minLevel, maxLevel uint,
 
 		lmin: minLevel,
 		lmax: maxLevel,
-		ε:    scoreError,
+		εs:   scoreError,
 
 		active:    internal.NewActive(inputs),
 		threshold: internal.NewThreshold(outputs, absoluteError, relativeError),
@@ -180,7 +180,7 @@ func (self *Strategy) index(lndices []uint64, surrogate *algorithm.Surrogate) []
 				panic("something went wrong")
 			}
 			for _, l := range self.scopes[k] {
-				if self.scores[l] >= self.ε {
+				if self.scores[l] >= self.εs {
 					index := surrogate.Indices[l*ni : (l+1)*ni]
 					groups[i] = append(groups[i], self.guide.RefineToward(index, j)...)
 				}
