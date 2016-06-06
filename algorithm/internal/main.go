@@ -14,10 +14,10 @@ var (
 	Workers = uint(runtime.GOMAXPROCS(0))
 )
 
-// Approximate evaluates an interpolant at multiple points using multiple
+// Estimate evaluates an interpolant at multiple points using multiple
 // goroutines.
-func Approximate(computer basis.Computer, indices []uint64, surpluses, points []float64,
-	ni, no uint) []float64 {
+func Estimate(computer basis.Computer, indices []uint64, surpluses,
+	points []float64, ni, no uint) []float64 {
 
 	nn := uint(len(indices)) / ni
 	np := uint(len(points)) / ni

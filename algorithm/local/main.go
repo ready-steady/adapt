@@ -50,7 +50,8 @@ func (self *Algorithm) Compute(target algorithm.Target,
 		s.Volumes = internal.Measure(self.basis, s.Indices, ni)
 		s.Nodes = self.grid.Compute(s.Indices)
 		s.Values = algorithm.Invoke(target, s.Nodes, ni, no)
-		s.Estimates = internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, s.Nodes, ni, no)
+		s.Estimates = internal.Estimate(self.basis, surrogate.Indices,
+			surrogate.Surpluses, s.Nodes, ni, no)
 		s.Surpluses = internal.Subtract(s.Values, s.Estimates)
 		s.Scores = score(strategy, s, ni, no)
 		surrogate.Push(s.Indices, s.Surpluses, s.Volumes)
@@ -60,8 +61,8 @@ func (self *Algorithm) Compute(target algorithm.Target,
 
 // Evaluate computes the values of an interpolant at a set of points.
 func (self *Algorithm) Evaluate(surrogate *algorithm.Surrogate, points []float64) []float64 {
-	return internal.Approximate(self.basis, surrogate.Indices, surrogate.Surpluses, points,
-		surrogate.Inputs, surrogate.Outputs)
+	return internal.Estimate(self.basis, surrogate.Indices, surrogate.Surpluses,
+		points, surrogate.Inputs, surrogate.Outputs)
 }
 
 func score(strategy algorithm.Strategy, state *algorithm.State, ni, no uint) []float64 {
