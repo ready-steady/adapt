@@ -116,7 +116,7 @@ func TestOpenCompute(t *testing.T) {
 		for j := range values {
 			values[j] = compute(cases[i].level, cases[i].order, points[j])
 		}
-		assert.EqualWithin(values, cases[i].values, 1e-15, t)
+		assert.Close(values, cases[i].values, 1e-15, t)
 	}
 }
 

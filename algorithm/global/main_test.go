@@ -26,5 +26,5 @@ func TestBranin(t *testing.T) {
 		fixture.grid), true, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
-	assert.EqualWithin(values, fixture.values, 0.1, t)
+	assert.Close(values, fixture.values, 0.1, t)
 }

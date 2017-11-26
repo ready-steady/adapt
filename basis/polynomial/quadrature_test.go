@@ -24,5 +24,5 @@ func TestQuadrature(t *testing.T) {
 	nodes := uint(math.Ceil((float64(3) + 1.0) / 2.0))
 	value := quadrature(a, b, nodes, f)
 
-	assert.EqualWithin(value, F(b)-F(a), 1e-12, t)
+	assert.Close(value, F(b)-F(a), 1e-12, t)
 }

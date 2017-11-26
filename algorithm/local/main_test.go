@@ -16,7 +16,7 @@ func TestBox(t *testing.T) {
 	assert.Equal(surrogate, fixture.surrogate, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
-	assert.EqualWithin(values, fixture.values, 1e-15, t)
+	assert.Close(values, fixture.values, 1e-15, t)
 }
 
 func TestCube(t *testing.T) {
@@ -30,7 +30,7 @@ func TestCube(t *testing.T) {
 		fixture.grid), true, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
-	assert.EqualWithin(values, fixture.values, 2e-15, t)
+	assert.Close(values, fixture.values, 2e-15, t)
 }
 
 func TestHat(t *testing.T) {
@@ -41,7 +41,7 @@ func TestHat(t *testing.T) {
 	assert.Equal(surrogate, fixture.surrogate, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
-	assert.EqualWithin(values, fixture.values, 1e-15, t)
+	assert.Close(values, fixture.values, 1e-15, t)
 }
 
 func TestKraichnanOrszag(t *testing.T) {
@@ -50,12 +50,12 @@ func TestKraichnanOrszag(t *testing.T) {
 
 	surrogate := algorithm.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
-	assert.EqualWithin(surrogate.Integral, fixture.surrogate.Integral, 2e-14, t)
+	assert.Close(surrogate.Integral, fixture.surrogate.Integral, 2e-14, t)
 	assert.Equal(interpolation.Validate(surrogate.Indices, surrogate.Inputs,
 		fixture.grid), true, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
-	assert.EqualWithin(values, fixture.values, 6e-14, t)
+	assert.Close(values, fixture.values, 6e-14, t)
 }
 
 func TestParabola(t *testing.T) {
@@ -64,12 +64,12 @@ func TestParabola(t *testing.T) {
 
 	surrogate := algorithm.Compute(fixture.target, strategy)
 	assert.Equal(surrogate.Nodes, fixture.surrogate.Nodes, t)
-	assert.EqualWithin(surrogate.Integral, fixture.surrogate.Integral, 1e-6, t)
+	assert.Close(surrogate.Integral, fixture.surrogate.Integral, 1e-6, t)
 	assert.Equal(interpolation.Validate(surrogate.Indices, surrogate.Inputs,
 		fixture.grid), true, t)
 
 	values := algorithm.Evaluate(surrogate, fixture.points)
-	assert.EqualWithin(values, fixture.values, 1e-6, t)
+	assert.Close(values, fixture.values, 1e-6, t)
 }
 
 func TestStep(t *testing.T) {
